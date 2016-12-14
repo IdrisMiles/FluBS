@@ -166,7 +166,7 @@ void Fluid::InitParticles()
     cudaGraphicsMapResources(1, &m_velBO_CUDA, 0);
     cudaGraphicsResourceGetMappedPointer((void **)&d_velocities_ptr, &numBytesVel, m_velBO_CUDA);
 
-    m_solver->InitParticleAsCube(d_positions_ptr, d_velocities_ptr, m_fluidProperty->numParticles, ceil(cbrt(m_fluidProperty->numParticles)), 0.1f*m_fluidProperty->gridCellWidth);
+    m_solver->InitParticleAsCube(d_positions_ptr, d_velocities_ptr, m_fluidProperty->numParticles, ceil(cbrt(m_fluidProperty->numParticles)), 0.5f*m_fluidProperty->gridCellWidth);
     cudaThreadSynchronize();
 
     cudaGraphicsUnmapResources(1, &m_posBO_CUDA, 0);
