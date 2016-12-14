@@ -10,6 +10,7 @@ FluidProperty::FluidProperty(unsigned int _numParticles, float _particleMass, fl
     gridResolution(_gridResolution),
     gridCellWidth(_gridCellWidth)
 {
+    smoothingLength = 2.0f * gridCellWidth;
 
 }
 

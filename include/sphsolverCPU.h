@@ -11,11 +11,11 @@ public:
     SPHSolverCPU(FluidProperty* _fluidProperty);
     virtual ~SPHSolverCPU();
 
-    void Init(std::vector<glm::vec3> &_d_particles);
+    void Init();
     void Solve(float _dt, glm::vec3 *_d_p, glm::vec3 *_d_v);
 
     void ParticleHash(unsigned int *hash, unsigned int *cellOcc, glm::vec3 *particles, const unsigned int N, const unsigned int gridRes, const float cellWidth);
-    void ComputePressure(const uint maxCellOcc, float *pressure, float *density, const float restDensity, const uint *cellOcc, const uint *cellPartIdx, const glm::vec3 *particles, const uint numPoints, const float smoothingLength);
+    void ComputePressure(float *pressure, float *density, const float restDensity, const uint *cellOcc, const uint *cellPartIdx, const glm::vec3 *particles, const uint numPoints, const float smoothingLength);
     void ComputePressureForce(const uint maxCellOcc, glm::vec3 *pressureForce, const float *pressure, const float *density, const float *mass, const glm::vec3 *particles, const uint *cellOcc, const uint *cellPartIdx, const uint numPoints, const float smoothingLength);
     void ComputeTotalForce(const uint maxCellOcc, glm::vec3 *force, const glm::vec3 *externalForce, const glm::vec3 *pressureForce, const float *mass, const glm::vec3 *particles, const glm::vec3 *velocities, const uint *cellOcc, const uint *cellPartIdx, const uint numPoints, const float smoothingLength);
     void Integrate(const uint maxCellOcc, glm::vec3 *force, glm::vec3 *particles, glm::vec3 *velocities, const float _dt, const uint numPoints);

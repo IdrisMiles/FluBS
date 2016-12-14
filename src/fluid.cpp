@@ -28,7 +28,12 @@ void Fluid::Init()
 {
     cudaSetDevice(0);
 
-    AppendSphereVerts(glm::vec3(0.0f,0.0f,0.0f), 0.5f);
+
+    float rad = 0.5f;
+    float dia = 2.0f * rad;
+    float mass = m_fluidProperty->particleMass = m_fluidProperty->restDensity * (dia * dia * dia);
+    std::cout<<"particle mass: "<<mass<<"\n";
+    AppendSphereVerts(glm::vec3(0.0f,0.0f,0.0f), rad);
     InitGL();
     InitParticles();
 
@@ -55,7 +60,7 @@ void Fluid::Simulate()
 
 
     // Simulate here
-    m_solver->Solve(0.0016f, d_positions_ptr, d_velocities_ptr);
+    m_solver->Solve(0.01f, d_positions_ptr, d_velocities_ptr);
     cudaThreadSynchronize();
 
 
@@ -91,13 +96,13 @@ void Fluid::InitGL()
     projMatrixUniformLoc = m_shaderProg->uniformLocation("projMatrix");
     viewMatrixUniformLoc = m_shaderProg->uniformLocation("viewMatrix");
 
-    std::cout<<"vertex attr loc:\t"<<m_vertexAttrLoc<<"\n";
-    std::cout<<"normal attr loc:\t"<<m_normalAttrLoc<<"\n";
-    std::cout<<"pos attr loc:\t"<<m_posAttrLoc<<"\n";
-    std::cout<<"vel attr loc:\t"<<m_velAttrLoc<<"\n";
+//    std::cout<<"vertex attr loc:\t"<<m_vertexAttrLoc<<"\n";
+//    std::cout<<"normal attr loc:\t"<<m_normalAttrLoc<<"\n";
+//    std::cout<<"pos attr loc:\t"<<m_posAttrLoc<<"\n";
+//    std::cout<<"vel attr loc:\t"<<m_velAttrLoc<<"\n";
 
-    std::cout<<"num verts:\t"<<m_meshVerts.size()<<"\n";
-    std::cout<<"num norms:\t"<<m_meshNorms.size()<<"\n";
+//    std::cout<<"num verts:\t"<<m_meshVerts.size()<<"\n";
+//    std::cout<<"num norms:\t"<<m_meshNorms.size()<<"\n";
 
     // Set up the VAO
     m_vao.create();
@@ -166,7 +171,7 @@ void Fluid::InitParticles()
     cudaGraphicsMapResources(1, &m_velBO_CUDA, 0);
     cudaGraphicsResourceGetMappedPointer((void **)&d_velocities_ptr, &numBytesVel, m_velBO_CUDA);
 
-    m_solver->InitParticleAsCube(d_positions_ptr, d_velocities_ptr, m_fluidProperty->numParticles, ceil(cbrt(m_fluidProperty->numParticles)), 0.5f*m_fluidProperty->gridCellWidth);
+    m_solver->InitParticleAsCube(d_positions_ptr, d_velocities_ptr, m_fluidProperty->numParticles, ceil(cbrt(m_fluidProperty->numParticles)), m_fluidProperty->gridCellWidth);
     cudaThreadSynchronize();
 
     cudaGraphicsUnmapResources(1, &m_posBO_CUDA, 0);

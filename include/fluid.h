@@ -1,7 +1,7 @@
 #ifndef FLUID_H
 #define FLUID_H
 
-#include "include/sphsolver.h"
+#include "include/sphsolverGPU.h"
 #include "include/fluidproperty.h"
 
 // OpenGL includes
@@ -25,6 +25,12 @@
 
 #include <glm/glm.hpp>
 
+//struct Particle
+//{
+//    float pos[3];
+//    float vel[3];
+//    float density;
+//};
 
 class Fluid
 {

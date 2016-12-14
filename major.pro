@@ -41,10 +41,10 @@ GENCODE_FLAGS += -arch=sm_50
 NVCC_OPTIONS = --use_fast_math
 
 # include paths
-INCLUDEPATH += $(CUDA_PATH)/include
+INCLUDEPATH += $(CUDA_PATH)/include $(CUDA_PATH)/include/cuda #$(CUDA_PATH)/share/doc/cuda-samples-7.5.18/common/inc
 
 # library directories
-QMAKE_LIBDIR += $$CUDA_PATH/lib/x86_64-linux-gnu
+QMAKE_LIBDIR += $$CUDA_PATH/lib/x86_64-linux-gnu $(CUDA_PATH)/include/cuda
 
 CUDA_OBJECTS_DIR = $$PWD/cuda_obj
 

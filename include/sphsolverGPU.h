@@ -25,14 +25,16 @@ public:
     SPHSolverGPU(FluidProperty* _fluidProperty);
     virtual ~SPHSolverGPU();
 
-    void Init(thrust::device_vector<float3> &_d_particles);
+    void Init();
     void Solve(float _dt, float3 *_d_p, float3 *_d_v);
 
     void ParticleHash(unsigned int *hash, unsigned int *cellOcc, float3 *particles, const unsigned int N, const unsigned int gridRes, const float cellWidth);
     void ComputePressure(const uint maxCellOcc, float *pressure, float *density, const float restDensity, const uint *cellOcc, const uint *cellPartIdx, const float3 *particles, const uint numPoints, const float smoothingLength);
     void ComputePressureForce(const uint maxCellOcc, float3 *pressureForce, const float *pressure, const float *density, const float *mass, const float3 *particles, const uint *cellOcc, const uint *cellPartIdx, const uint numPoints, const float smoothingLength);
-    void ComputeTotalForce(const uint maxCellOcc, float3 *force, const float3 *externalForce, const float3 *pressureForce, const float *mass, const float3 *particles, const float3 *velocities, const uint *cellOcc, const uint *cellPartIdx, const uint numPoints, const float smoothingLength);
+    void ComputeViscForce(const uint maxCellOcc, float3 *viscForce, const float viscCoeff, const float3 *velocity, const float *density, const float *mass, const float3 *particles, const uint *cellOcc, const uint *cellPartIdx, const uint numPoints, const float smoothingLength);
+    void ComputeTotalForce(const uint maxCellOcc, float3 *force, const float3 *externalForce, const float3 *pressureForce, const float3 *viscForce, const float *mass, const float3 *particles, const float3 *velocities, const uint *cellOcc, const uint *cellPartIdx, const uint numPoints, const float smoothingLength);
     void Integrate(const uint maxCellOcc, float3 *force, float3 *particles, float3 *velocities, const float _dt, const uint numPoints);
+    void HandleBoundaries(const uint maxCellOcc, float3 *particles, float3 *velocities, const float _gridDim, const uint numPoints);
 
     void SPHSolve(const unsigned int maxCellOcc, const unsigned int *cellOcc, const unsigned int *cellIds, float3 *particles, float3 *velocities, const unsigned int numPoints, const unsigned int gridRes, const float smoothingLength, const float dt);
 
@@ -45,6 +47,7 @@ private:
     thrust::device_vector<float3> d_positions;
     thrust::device_vector<float3> d_velocities;
     thrust::device_vector<float3> d_pressureForces;
+    thrust::device_vector<float3> d_viscousForces;
     thrust::device_vector<float3> d_externalForces;
     thrust::device_vector<float3> d_totalForces;
     thrust::device_vector<float> d_densities;
@@ -57,6 +60,7 @@ private:
     float3* d_positions_ptr;
     float3* d_velocities_ptr;
     float3* d_pressureForces_ptr;
+    float3* d_viscousForces_ptr;
     float3* d_externalForces_ptr;
     float3* d_totalForces_ptr;
     float* d_densities_ptr;
