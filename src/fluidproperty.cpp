@@ -1,8 +1,9 @@
 #include "include/fluidproperty.h"
 
-FluidProperty::FluidProperty(unsigned int _numParticles, float _particleMass, float _restDensity, float _smoothingLength, float _deltaTime, unsigned int _solveIterations, unsigned int _gridResolution, float _gridCellWidth):
+FluidProperty::FluidProperty(unsigned int _numParticles, float _particleMass, float _particleRadius, float _restDensity, float _smoothingLength, float _deltaTime, unsigned int _solveIterations, unsigned int _gridResolution, float _gridCellWidth):
     numParticles(_numParticles),
     particleMass(_particleMass),
+    particleRadius(_particleRadius),
     restDensity(_restDensity),
     smoothingLength(_smoothingLength),
     deltaTime(_deltaTime),
@@ -10,7 +11,7 @@ FluidProperty::FluidProperty(unsigned int _numParticles, float _particleMass, fl
     gridResolution(_gridResolution),
     gridCellWidth(_gridCellWidth)
 {
-    smoothingLength = 2.0f * gridCellWidth;
+//    smoothingLength = 2.0f * gridCellWidth;
 
 }
 
