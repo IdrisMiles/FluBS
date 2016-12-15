@@ -31,6 +31,6 @@
 # Qt files
 *.pro.user
 *.qmake.stash
-Makefilie
+Makefile
 bin/*
 moc*
