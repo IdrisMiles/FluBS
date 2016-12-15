@@ -80,7 +80,7 @@ __device__ float3 normalize(const float3 vec)
 
 __device__ float SpikyKernel_Kernel(const float &_r, const float &_h)
 {
-    if(fabs(_r) > _h || fabs(_r) < FLT_EPSILON)
+    if(fabs(_r) > _h || _r < 0.0f)
     {
         return 0;
     }
@@ -92,7 +92,7 @@ __device__ float SpikyKernel_Kernel(const float &_r, const float &_h)
 
 __device__ float SpikyKernelGradient_Kernel(const float &_r, const float &_h)
 {
-    if(fabs(_r) > /*2.0f**/_h || fabs(_r) < FLT_EPSILON)
+    if(fabs(_r) > _h || fabs(_r) <= FLT_EPSILON)
     {
         return 0;
     }
@@ -100,15 +100,14 @@ __device__ float SpikyKernelGradient_Kernel(const float &_r, const float &_h)
     {
         float coeff = - (45.0f/(CUDART_PI_F*pow(_h,6)));
         return coeff * pow((_h-_r), 2);
-        //return (-1.0f/_h) * (45.0f/(CUDART_PI_F * pow(4.0f*_h, 3))) * (pow(2.0f - (_r/_h), 2));
     }
 }
 
 __device__ float3 SpikyKernelGradient_Kernel(const float3 _a, const float3 _b, const float _h)
 {
     float3 dir = _a - _b;
-    float distance = length(dir)/* dist(_a, _b)*/;
-    if(fabs(distance) < FLT_EPSILON)
+    float distance = length(dir);
+    if(fabs(distance) <= FLT_EPSILON)
     {
         return make_float3(0.f, 0.f, 0.f);
     }
@@ -116,26 +115,27 @@ __device__ float3 SpikyKernelGradient_Kernel(const float3 _a, const float3 _b, c
     {
         float c = SpikyKernelGradient_Kernel(distance, _h);
 
-        return (c * normalize(dir));
+        return (c * dir/distance);
     }
 }
 
 
 __device__ float ViscosityKernel(const float &_r, const float &_h)
 {
-    if(_r >= 0.0f && _r <= /*2.0f**/_h)
-    {
-        ( 15.0f/(2.0f*CUDART_PI_F*pow(_h,3)) ) * ( -(pow(_r,3)/(2.0f*pow(_h,2))) + (pow(_r,2)/pow(_h,2)) + (_h/(2.0f*_r)) - 1 );
-    }
-    else
+    if (fabs(_r) > _h || _r < 0.0f)
     {
         return 0;
     }
+    else
+    {
+        return ( 15.0f/(2.0f*CUDART_PI_F*pow(_h,3)) ) * ( -(pow(_r,3)/(2.0f*pow(_h,2))) + (pow(_r,2)/pow(_h,2)) + (_h/(2.0f*_r)) - 1 );
+    }
+
 }
 
 __device__ float Poly6Kernel_Kernel(const float &_r, const float &_h)
 {
-    if (fabs(_r) > /*2.0f**/_h || _r < 0.0f)
+    if (fabs(_r) > _h || _r < 0.0f)
     {
         return 0;
     }
@@ -145,16 +145,16 @@ __device__ float Poly6Kernel_Kernel(const float &_r, const float &_h)
 
 __device__ float Poly6Laplacian_Kernel(const float &_r, const float &_h)
 {
-    if(_r <= /*2.0f**/_h && _r >= 0.0f)
+    if(_r > _h && _r < 0.0f)
+    {
+        return 0;
+    }
+    else
     {
         float a = -945.0 / (32.0*CUDART_PI_F*pow(_h, 9));
         float b = (_h*_h) - (_r*_r);
         float c = 3.0f * (_h*_h) - 7 * (_r*_r);
         return a * b * c;
-    }
-    else
-    {
-        return 0;
     }
 }
 
@@ -271,7 +271,7 @@ __global__ void ComputePressure_kernel(float *pressure, float *density, const fl
         }
 
         //accPressure = (1.0f * ((float)pow((accDensity/restDensity), 7.0f) - 1.0f));
-        float k = 0.0035f;
+        float k = 0.000035f;
         //float y = 7.0f;
         accPressure = k * ((accDensity/restDensity) - 1.0f);
         //accPressure = k * (accDensity - restDensity);
@@ -279,12 +279,12 @@ __global__ void ComputePressure_kernel(float *pressure, float *density, const fl
 
         if(isnan(accDensity))
         {
-            printf("nan density \n");
+            //printf("nan density \n");
         }
 
         if(isnan(accPressure))
         {
-            printf("nan pressure \n");
+            //printf("nan pressure \n");
         }
         //printf("num neigjhs: %u\n", numNeighs);
 
@@ -342,7 +342,7 @@ __global__ void ComputePressureForce_kernel(float3 *pressureForce, const float *
                             float neighMass = mass[neighParticleGlobalIdx];
 
 
-                            float pressOverDens = (fabs(neighDensity)<FLT_EPSILON ? /*(thisPressure + neighPressure) / (2000.0f)*/ 0.0f: (thisPressure + neighPressure) / (2.0f* neighDensity));
+                            float pressOverDens = (fabs(neighDensity)<FLT_EPSILON ? /*(thisPressure + neighPressure) / (2000.0f)*/ 1.0f: (thisPressure + neighPressure) / (2.0f* neighDensity));
 
                             accPressureForce = accPressureForce + (neighMass * pressOverDens * SpikyKernelGradient_Kernel(thisParticle, neighParticle, smoothingLength));
                         }
@@ -415,7 +415,7 @@ __global__ void ComputeViscousForce_kernel(float3 *viscForce, const float viscCo
            // printf("nan accVisc\n");
         }
 
-        viscForce[thisParticleGlobalIdx] = viscCoeff * accViscForce;
+        viscForce[thisParticleGlobalIdx] = -1.0f*viscCoeff * accViscForce;
     }
 }
 
