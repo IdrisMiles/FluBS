@@ -490,7 +490,7 @@ __global__ void ComputeForces_kernel(float3 *force, const float3 *externalForce,
         }
         else
         {
-            accForce = accForce + viscForce;
+            //accForce = accForce + viscForce;
         }
 
 
