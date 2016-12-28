@@ -152,7 +152,7 @@ void OpenGLScene::initializeGL()
     // initialise view and projection matrices
     m_viewMat = glm::mat4(1);
     m_viewMat = glm::lookAt(glm::vec3(0,0,0),glm::vec3(0,0,-1),glm::vec3(0,1,0));
-    m_projMat = glm::perspective(45.0f, GLfloat(width()) / height(), 0.01f, 1000.0f);
+    m_projMat = glm::perspective(45.0f, GLfloat(width()) / height(), 0.01f, 2000.0f);
 
     // Light position is fixed.
     m_lightPos = glm::vec3(0, 0, 70);
@@ -262,7 +262,7 @@ void OpenGLScene::UpdateSim()
 
 void OpenGLScene::resizeGL(int w, int h)
 {
-    m_projMat = glm::perspective(45.0f, GLfloat(w) / h, 0.01f, 100.0f);
+    m_projMat = glm::perspective(45.0f, GLfloat(w) / h, 0.01f, 2000.0f);
 }
 
 void OpenGLScene::mousePressEvent(QMouseEvent *event)

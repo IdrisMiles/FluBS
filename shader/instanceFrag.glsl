@@ -20,7 +20,7 @@ void main()
     float velMag = clamp(0.001f*length(vVel), 0.0, 1.0);
     vec3 L = normalize(lightPos - vert);
     float NL = max(dot(normalize(vertNormal), L), 0.0);
-    vec3 col = clamp((vec3(0.0, velMag, 0.0) * 0.2) + (colour * 0.4) + (colour * 0.6 * NL), 0.0, 1.0);
+    vec3 col = clamp((vVel * 0.2) + (vVel * 0.4) + (vVel * 0.6 * NL), 0.0, 1.0);
     fragColor = vec4(col, 1.0);
 
 }

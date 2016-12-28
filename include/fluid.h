@@ -54,6 +54,7 @@ private:
     FluidProperty* m_fluidProperty;
     float3 *d_positions_ptr;
     float3 *d_velocities_ptr;
+    float *d_densities_ptr;
 
 
     // Rendering stuff
@@ -62,6 +63,7 @@ private:
     GLuint m_normalAttrLoc;
     GLuint m_posAttrLoc; // instance
     GLuint m_velAttrLoc; // instance
+    GLuint m_denAttrLoc; // instance
     GLuint projMatrixUniformLoc;
     GLuint viewMatrixUniformLoc;
 
@@ -71,9 +73,11 @@ private:
     QOpenGLBuffer m_meshIBO;
     QOpenGLBuffer m_posBO;
     QOpenGLBuffer m_velBO;
+    QOpenGLBuffer m_denBO;
 
     cudaGraphicsResource *m_posBO_CUDA;
     cudaGraphicsResource *m_velBO_CUDA;
+    cudaGraphicsResource *m_denBO_CUDA;
 
     std::vector<glm::vec3> m_meshVerts;
     std::vector<glm::vec3> m_meshNorms;

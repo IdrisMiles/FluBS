@@ -23,6 +23,9 @@ Fluid::~Fluid()
     cudaGraphicsUnregisterResource(m_velBO_CUDA);
     m_velBO.destroy();
 
+    cudaGraphicsUnregisterResource(m_denBO_CUDA);
+    m_denBO.destroy();
+
     m_meshIBO.destroy();
     m_meshVBO.destroy();
     m_meshNBO.destroy();
@@ -35,7 +38,7 @@ void Fluid::Init()
     cudaSetDevice(0);
 
 
-    m_fluidProperty->particleRadius = 0.1f;
+    //m_fluidProperty->particleRadius = 0.3f;
     float dia = 2.0f * m_fluidProperty->particleRadius;
     m_fluidProperty->particleMass = m_fluidProperty->restDensity * (dia * dia * dia);
     std::cout<<"particle mass: "<<m_fluidProperty->particleMass<<"\n";
@@ -64,15 +67,20 @@ void Fluid::Simulate()
     size_t numBytesVel;
     cudaGraphicsResourceGetMappedPointer((void **)&d_velocities_ptr, &numBytesVel, m_velBO_CUDA);
 
+    cudaGraphicsMapResources(1, &m_denBO_CUDA, 0);
+    size_t numBytesDen;
+    cudaGraphicsResourceGetMappedPointer((void **)&d_densities_ptr, &numBytesDen, m_denBO_CUDA);
+
 
     // Simulate here
-    m_solver->Solve(0.01f, d_positions_ptr, d_velocities_ptr);
+    m_solver->Solve(0.001f, d_positions_ptr, d_velocities_ptr, d_densities_ptr);
     cudaThreadSynchronize();
 
 
     // Clean up
     cudaGraphicsUnmapResources(1, &m_posBO_CUDA, 0);
     cudaGraphicsUnmapResources(1, &m_velBO_CUDA, 0);
+    cudaGraphicsUnmapResources(1, &m_denBO_CUDA, 0);
 
 
     gettimeofday(&tim, NULL);
@@ -99,6 +107,7 @@ void Fluid::InitGL()
     m_normalAttrLoc = m_shaderProg->attributeLocation("normal");
     m_posAttrLoc = m_shaderProg->attributeLocation("pos");
     m_velAttrLoc = m_shaderProg->attributeLocation("vel");
+    m_denAttrLoc = m_shaderProg->attributeLocation("den");
     projMatrixUniformLoc = m_shaderProg->uniformLocation("projMatrix");
     viewMatrixUniformLoc = m_shaderProg->uniformLocation("viewMatrix");
 
@@ -163,6 +172,17 @@ void Fluid::InitGL()
     cudaGraphicsGLRegisterBuffer(&m_velBO_CUDA, m_velBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
 
 
+    // Set up density buffer object
+    m_denBO.create();
+    m_denBO.bind();
+    m_denBO.allocate(m_fluidProperty->numParticles * sizeof(float));
+    glEnableVertexAttribArray(m_denAttrLoc);
+    glVertexAttribPointer(m_denAttrLoc, 1, GL_FLOAT, GL_FALSE, sizeof(GLfloat), 0);
+    glVertexAttribDivisor(m_denAttrLoc, 1);
+    m_denBO.release();
+    cudaGraphicsGLRegisterBuffer(&m_denBO_CUDA, m_denBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
+
+
     glPointSize(5);
     m_vao.release();
 }
@@ -177,11 +197,16 @@ void Fluid::InitParticles()
     cudaGraphicsMapResources(1, &m_velBO_CUDA, 0);
     cudaGraphicsResourceGetMappedPointer((void **)&d_velocities_ptr, &numBytesVel, m_velBO_CUDA);
 
-    m_solver->InitParticleAsCube(d_positions_ptr, d_velocities_ptr, m_fluidProperty->numParticles, ceil(cbrt(m_fluidProperty->numParticles)), m_fluidProperty->particleRadius/**m_fluidProperty->gridCellWidth*/);
+    size_t numBytesDen;
+    cudaGraphicsMapResources(1, &m_denBO_CUDA, 0);
+    cudaGraphicsResourceGetMappedPointer((void **)&d_densities_ptr, &numBytesDen, m_denBO_CUDA);
+
+    m_solver->InitParticleAsCube(d_positions_ptr, d_velocities_ptr, d_densities_ptr, m_fluidProperty->restDensity, m_fluidProperty->numParticles, ceil(cbrt(m_fluidProperty->numParticles)), 2.0f*m_fluidProperty->particleRadius);
     cudaThreadSynchronize();
 
     cudaGraphicsUnmapResources(1, &m_posBO_CUDA, 0);
     cudaGraphicsUnmapResources(1, &m_velBO_CUDA, 0);
+    cudaGraphicsUnmapResources(1, &m_denBO_CUDA, 0);
 }
 
 

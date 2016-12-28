@@ -26,7 +26,7 @@ public:
     virtual ~SPHSolverGPU();
 
     void Init();
-    void Solve(float _dt, float3 *_d_p, float3 *_d_v);
+    void Solve(float _dt, float3 *_d_p, float3 *_d_v, float *_d_d);
 
     void ParticleHash(unsigned int *hash, unsigned int *cellOcc, float3 *particles, const unsigned int N, const unsigned int gridRes, const float cellWidth);
     void ComputePressure(const uint maxCellOcc, float *pressure, float *density, const float restDensity, const float *mass, const uint *cellOcc, const uint *cellPartIdx, const float3 *particles, const uint numPoints, const float smoothingLength);
@@ -38,7 +38,7 @@ public:
 
     void SPHSolve(const unsigned int maxCellOcc, const unsigned int *cellOcc, const unsigned int *cellIds, float3 *particles, float3 *velocities, const unsigned int numPoints, const unsigned int gridRes, const float smoothingLength, const float dt);
 
-    void InitParticleAsCube(float3 *particles, float3 *velocities, const unsigned int numParticles, const unsigned int numPartsPerAxis, const float scale);
+    void InitParticleAsCube(float3 *particles, float3 *velocities, float *densities, const float restDensity, const unsigned int numParticles, const unsigned int numPartsPerAxis, const float scale);
 
 
 private:
