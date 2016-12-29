@@ -25,7 +25,7 @@ void main()
    }
    else
    {
-       vVel = mix(vec3(0,1,0), vec3(1,1,1), 1.0-d);
+       vVel = mix(vec3(0,1,0), vec3(1,1,1), d-1.0);
    }
    gl_Position = projMatrix * mvMatrix * vec4(vertex + pos,1.0);
 }

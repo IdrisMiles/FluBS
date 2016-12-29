@@ -38,7 +38,6 @@ void Fluid::Init()
     cudaSetDevice(0);
 
 
-    //m_fluidProperty->particleRadius = 0.3f;
     float dia = 2.0f * m_fluidProperty->particleRadius;
     m_fluidProperty->particleMass = m_fluidProperty->restDensity * (dia * dia * dia);
     std::cout<<"particle mass: "<<m_fluidProperty->particleMass<<"\n";
