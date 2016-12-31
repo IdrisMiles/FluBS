@@ -7,8 +7,7 @@ OpenGLScene::OpenGLScene(QWidget *parent) : QOpenGLWidget(parent),
     m_xRot(0),
     m_yRot(0),
     m_zRot(0),
-    m_zDis(400),
-    m_shaderProg(0)
+    m_zDis(400)
 {
     QSurfaceFormat format;
     format.setVersion(4, 3);
@@ -113,17 +112,9 @@ void OpenGLScene::setZRotation(int angle)
 void OpenGLScene::cleanup()
 {
     makeCurrent();
-    cleanDemoTriangle();
-    delete m_shaderProg;
-    m_shaderProg = 0;
     doneCurrent();
 }
 
-void OpenGLScene::cleanDemoTriangle()
-{
-    m_vbo.destroy();
-    m_vao.destroy();
-}
 
 
 void OpenGLScene::initializeGL()
@@ -135,88 +126,25 @@ void OpenGLScene::initializeGL()
     //initializeOpenGLFunctions();
     glClearColor(0.4, 0.4, 0.4, 1);
 
-    // setup shaders
-    m_shaderProg = new QOpenGLShaderProgram;
-    m_shaderProg->addShaderFromSourceFile(QOpenGLShader::Vertex, "../shader/instanceVert.glsl");
-    m_shaderProg->addShaderFromSourceFile(QOpenGLShader::Fragment, "../shader/instanceFrag.glsl");
-    m_shaderProg->bindAttributeLocation("vertex", 0);
-    m_shaderProg->bindAttributeLocation("normal", 1);
-    m_shaderProg->link();
-
-    m_shaderProg->bind();
-    m_projMatrixLoc = m_shaderProg->uniformLocation("projMatrix");
-    m_mvMatrixLoc = m_shaderProg->uniformLocation("mvMatrix");
-    m_normalMatrixLoc = m_shaderProg->uniformLocation("normalMatrix");
-    m_lightPosLoc = m_shaderProg->uniformLocation("lightPos");
-
     // initialise view and projection matrices
     m_viewMat = glm::mat4(1);
     m_viewMat = glm::lookAt(glm::vec3(0,0,0),glm::vec3(0,0,-1),glm::vec3(0,1,0));
     m_projMat = glm::perspective(45.0f, GLfloat(width()) / height(), 0.01f, 2000.0f);
 
     // Light position is fixed.
-    m_lightPos = glm::vec3(0, 0, 70);
-    glUniform3fv(m_lightPosLoc, 1, &m_lightPos[0]);
+    m_lightPos = glm::vec3(0, 0, 70);;
 
 
     //---------------------------------------------------------------------------------------
-    // Demo triangle - replace this per project
-    initializeDemoTriangle();
 
-    m_fluids.push_back(new Fluid(new FluidProperty(), m_shaderProg));
+    m_fluids.push_back(new Fluid(new FluidProperty()));
 
     //---------------------------------------------------------------------------------------
 
-
-    m_shaderProg->release();
 
     m_drawTimer->start(16);
     m_simTimer->start(16);
 
-}
-
-void OpenGLScene::initializeDemoTriangle()
-{
-    m_colour = glm::vec3(0.8f, 0.4f, 0.4f);
-    m_colourLoc = m_shaderProg->uniformLocation("colour");
-    glUniform3fv(m_colourLoc, 1, &m_colour[0]);
-
-    m_vao.create();
-    m_vao.bind();
-
-
-    GLfloat const triangleVertices[] = {
-        -5.0f, -5.0f, -0.0f,
-        0.0f, 0.0f, 1.0f,
-        5.0f, -5.0f, -0.0f,
-        0.0f, 0.0f, 1.0f,
-        0.0f, 5.0f, -0.0f,
-        0.0f, 0.0f, 1.0f
-    };
-
-    // Setup our vertex buffer object.
-    m_vbo.create();
-    m_vbo.bind();
-    m_vbo.allocate(triangleVertices, 18 * sizeof(GLfloat));
-
-    glEnableVertexAttribArray( 0);
-    glEnableVertexAttribArray(1);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<void *>(3 * sizeof(GLfloat)));
-
-
-    m_vbo.release();
-    m_vao.release();
-}
-
-void OpenGLScene::renderDemoTriangle()
-{
-    m_vao.bind();
-
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-
-    m_vao.release();
 }
 
 void OpenGLScene::paintGL()
@@ -231,24 +159,15 @@ void OpenGLScene::paintGL()
     m_modelMat = glm::translate(m_modelMat, glm::vec3(0,0, -0.1f*m_zDis));// m_zDis));
     m_modelMat = glm::rotate(m_modelMat, glm::radians(m_xRot/16.0f), glm::vec3(1,0,0));
     m_modelMat = glm::rotate(m_modelMat, glm::radians(m_yRot/16.0f), glm::vec3(0,1,0));
-
-
-    // Set shader params
-    m_shaderProg->bind();
-
-    glUniformMatrix4fv(m_projMatrixLoc, 1, false, &m_projMat[0][0]);
-    glUniformMatrix4fv(m_mvMatrixLoc, 1, false, &(m_modelMat*m_viewMat)[0][0]);
     glm::mat3 normalMatrix =  glm::inverse(glm::mat3(m_modelMat));
-    glUniformMatrix3fv(m_normalMatrixLoc, 1, true, &normalMatrix[0][0]);
 
 
     //---------------------------------------------------------------------------------------
     // Draw code - replace this with project specific draw stuff
+    m_fluids.back()->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, normalMatrix, m_lightPos);
     m_fluids.back()->Draw();
     //---------------------------------------------------------------------------------------
 
-
-    m_shaderProg->release();
 }
 
 

@@ -89,7 +89,7 @@ __device__ float SpikyKernel_Kernel(const float &_r, const float &_h)
 {
     if(fabs(_r) > _h || _r < 0.0f)
     {
-        return 0;
+        return 0.0f;
     }
     else
     {
@@ -101,7 +101,7 @@ __device__ float SpikyKernelGradient_Kernel(const float &_r, const float &_h)
 {
     if(fabs(_r) > _h || fabs(_r) <= FLT_EPSILON)
     {
-        return 0;
+        return 0.0f;
     }
     else
     {
@@ -131,7 +131,7 @@ __device__ float ViscosityKernel(const float &_r, const float &_h)
 {
     if (fabs(_r) > _h || _r < 0.0f)
     {
-        return 0;
+        return 0.0f;
     }
     else
     {
@@ -144,7 +144,7 @@ __device__ float Poly6Kernel_Kernel(const float &_r, const float &_h)
 {
     if (fabs(_r) > _h)
     {
-        return 0;
+        return 0.0f;
     }
 
     return (315.0f / (64.0f*CUDART_PI_F*pow(_h,9.0f))) * pow((_h*_h)-(_r*_r), 3.0f);
@@ -154,7 +154,7 @@ __device__ float Poly6Laplacian_Kernel(const float &_r, const float &_h)
 {
     if(_r > _h && _r < 0.0f)
     {
-        return 0;
+        return 0.0f;
     }
     else
     {
@@ -169,7 +169,7 @@ __device__ float SplineGaussianKernel_Kernel(const float &_r, const float &_h)
 {
     if(fabs(_r) > /*2.0f**/_h || _r < 0.0f)
     {
-        return 0;
+        return 0.0f;
     }
     else if(fabs(_r) > _h)
     {
@@ -228,10 +228,10 @@ __global__ void ParticleHash_Kernel(uint *hash, uint *cellOcc, const float3 *par
 
         hashID = hashX + (hashY * gridRes) + (hashZ * gridRes * gridRes);
 
-        if(hashID >= 1000u)
+        if(hashID >= gridRes * gridRes * gridRes)
         {
-            printf("daaaang\n");
-            printf("%u, %u, %u\n", hashX, hashY, hashZ);
+            //printf("daaaang\n");
+            //printf("%u, %u, %u\n", hashX, hashY, hashZ);
         }
 //    }
 
@@ -260,6 +260,13 @@ __global__ void ComputePressure_kernel(float *pressure, float *density, const fl
         int neighParticleGlobalIdx;
 
         int x, y, z;
+        int xMin = ((blockIdx.x==0)?0:-1);
+        int yMin = ((blockIdx.y==0)?0:-1);
+        int zMin = ((blockIdx.z==0)?0:-1);
+        int xMax = ((blockIdx.x==gridDim.x-1)?0:1);
+        int yMax = ((blockIdx.y==gridDim.y-1)?0:1);
+        int zMax = ((blockIdx.z==gridDim.z-1)?0:1);
+
         int neighLocalIdx;
         float accPressure = 0.0f;
         float accDensity = 0.0f;
@@ -267,13 +274,14 @@ __global__ void ComputePressure_kernel(float *pressure, float *density, const fl
         float3 thisParticle = particles[thisParticleGlobalIdx];
 
         unsigned int numNeighs = 0;
-
-        for(z = ((blockIdx.z==0)?0:-1); z < ((blockIdx.z==gridDim.z-1)?0:1); z++)
+        uint numNeighCells = 0;
+        for(z = zMin; z <= zMax; z++)
         {
-            for(y = ((blockIdx.y==0)?0:-1); y < ((blockIdx.y==gridDim.y-1)?0:1); y++)
+            for(y = yMin; y <= yMax; y++)
             {
-                for(x = ((blockIdx.x==0)?0:-1); x < ((blockIdx.x==gridDim.x-1)?0:1); x++)
+                for(x = xMin; x <= xMax; x++)
                 {
+                    numNeighCells++;
                     neighCellIdx = thisCellIdx + x + (y*gridDim.x) + (z*gridDim.x*gridDim.y);
                     neighCellOcc = cellOcc[neighCellIdx];
                     neighCellPartIdx = cellPartIdx[neighCellIdx];
@@ -283,7 +291,7 @@ __global__ void ComputePressure_kernel(float *pressure, float *density, const fl
 
                         float3 neighParticle = particles[neighParticleGlobalIdx];
 
-                        thisDensity = mass[neighParticleGlobalIdx] * Poly6Kernel_Kernel(length(thisParticle - neighParticle), smoothingLength);
+                        thisDensity = mass[neighParticleGlobalIdx] * fabs(Poly6Kernel_Kernel(length(thisParticle - neighParticle), smoothingLength));
 
                         accDensity += thisDensity;
 
@@ -297,7 +305,7 @@ __global__ void ComputePressure_kernel(float *pressure, float *density, const fl
         {
             thisDensity = mass[thisParticleGlobalIdx] * Poly6Kernel_Kernel(0.0f, smoothingLength);
             accDensity += thisDensity;
-            //printf("FUCK\n");
+            printf("FUCK\n");
         }
 
         if(fabs(accDensity) < FLT_EPSILON)
@@ -305,7 +313,7 @@ __global__ void ComputePressure_kernel(float *pressure, float *density, const fl
             printf("FUCKing hell\n");
         }
 
-//        printf("num neigh: %u\n", numNeighs);
+//        printf("coord: %u, %u, %u \nnum neigh: %u %u\n", xMin, xMax, blockIdx.x, numNeighs, numNeighCells);
 
 //        float beta = 0.35;
 //        float gamma = 7.0f;
@@ -352,6 +360,13 @@ __global__ void ComputePressureForce_kernel(float3 *pressureForce, const float *
         int neighParticleGlobalIdx;
 
         int x, y, z;
+        int xMin = ((blockIdx.x==0)?0:-1);
+        int yMin = ((blockIdx.y==0)?0:-1);
+        int zMin = ((blockIdx.z==0)?0:-1);
+        int xMax = ((blockIdx.x==gridDim.x-1)?0:1);
+        int yMax = ((blockIdx.y==gridDim.y-1)?0:1);
+        int zMax = ((blockIdx.z==gridDim.z-1)?0:1);
+
         int neighLocalIdx;
         float3 accPressureForce = make_float3(0.0f, 0.0f, 0.0f);
 
@@ -359,11 +374,11 @@ __global__ void ComputePressureForce_kernel(float3 *pressureForce, const float *
         float thisPressure = pressure[thisParticleGlobalIdx];
         float3 thisParticle = particles[thisParticleGlobalIdx];
 
-        for(z = ((blockIdx.z==0)?0:-1); z < ((blockIdx.z==gridDim.z-1)?0:1); z++)
+        for(z = zMin; z <= zMax; z++)
         {
-            for(y = ((blockIdx.y==0)?0:-1); y < ((blockIdx.y==gridDim.y-1)?0:1); y++)
+            for(y = yMin; y <= yMax; y++)
             {
-                for(x = ((blockIdx.x==0)?0:-1); x < ((blockIdx.x==gridDim.x-1)?0:1); x++)
+                for(x = xMin; x <= xMax; x++)
                 {
 
                     neighCellIdx = (blockIdx.x + x) + ((blockIdx.y + y) * gridDim.x) + ((blockIdx.z + z) * gridDim.x * gridDim.y);
@@ -408,6 +423,13 @@ __global__ void ComputeViscousForce_kernel(float3 *viscForce, const float viscCo
         int neighParticleGlobalIdx;
 
         int x, y, z;
+        int xMin = ((blockIdx.x==0)?0:-1);
+        int yMin = ((blockIdx.y==0)?0:-1);
+        int zMin = ((blockIdx.z==0)?0:-1);
+        int xMax = ((blockIdx.x==gridDim.x-1)?0:1);
+        int yMax = ((blockIdx.y==gridDim.y-1)?0:1);
+        int zMax = ((blockIdx.z==gridDim.z-1)?0:1);
+
         int neighLocalIdx;
         float3 accViscForce = make_float3(0.0f, 0.0f, 0.0f);
 
@@ -415,11 +437,11 @@ __global__ void ComputeViscousForce_kernel(float3 *viscForce, const float viscCo
         float3 thisPos = position[thisParticleGlobalIdx];
         float3 thisVel = velocity[thisParticleGlobalIdx];
 
-        for(z = ((blockIdx.z==0)?0:-1); z < ((blockIdx.z==gridDim.z-1)?0:1); z++)
+        for(z = zMin; z <= zMax; z++)
         {
-            for(y = ((blockIdx.y==0)?0:-1); y < ((blockIdx.y==gridDim.y-1)?0:1); y++)
+            for(y = yMin; y <= yMax; y++)
             {
-                for(x = ((blockIdx.x==0)?0:-1); x < ((blockIdx.x==gridDim.x-1)?0:1); x++)
+                for(x = xMin; x <= xMax; x++)
                 {
 
                     neighCellIdx = (blockIdx.x + x) + ((blockIdx.y + y) * gridDim.x) + ((blockIdx.z + z) * gridDim.x * gridDim.y);
@@ -462,6 +484,13 @@ __global__ void ComputeSurfaceTensionForce_kernel(float3 *surfaceTensionForce, c
         int neighParticleGlobalIdx;
 
         int x, y, z;
+        int xMin = ((blockIdx.x==0)?0:-1);
+        int yMin = ((blockIdx.y==0)?0:-1);
+        int zMin = ((blockIdx.z==0)?0:-1);
+        int xMax = ((blockIdx.x==gridDim.x-1)?0:1);
+        int yMax = ((blockIdx.y==gridDim.y-1)?0:1);
+        int zMax = ((blockIdx.z==gridDim.z-1)?0:1);
+
         int neighLocalIdx;
 
 
@@ -469,11 +498,11 @@ __global__ void ComputeSurfaceTensionForce_kernel(float3 *surfaceTensionForce, c
         float3 accColourFieldGrad = make_float3(0.0f, 0.0f, 0.0f);
         float accCurvature = 0.0f;
 
-        for(z = ((blockIdx.z==0)?0:-1); z < ((blockIdx.z==gridDim.z-1)?0:1); z++)
+        for(z = zMin; z <= zMax; z++)
         {
-            for(y = ((blockIdx.y==0)?0:-1); y < ((blockIdx.y==gridDim.y-1)?0:1); y++)
+            for(y = yMin; y <= yMax; y++)
             {
-                for(x = ((blockIdx.x==0)?0:-1); x < ((blockIdx.x==gridDim.x-1)?0:1); x++)
+                for(x = xMin; x <= xMax; x++)
                 {
 
                     neighCellIdx = (blockIdx.x + x) + ((blockIdx.y + y) * gridDim.x) + ((blockIdx.z + z) * gridDim.x * gridDim.y);
@@ -564,7 +593,7 @@ __global__ void ComputeForces_kernel(float3 *force, const float3 *externalForce,
         float3 acceleration = accForce / mass[thisParticleGlobalIdx];
 
         // Add gravity acceleration
-        //acceleration = acceleration + make_float3(0.0f, -9.81f, 0.0f);
+        acceleration = acceleration + make_float3(0.0f, -9.81f, 0.0f);
 
         // Set particle force
         force[thisParticleGlobalIdx] = acceleration;
@@ -618,7 +647,7 @@ __global__ void HandleBoundaries_Kernel(float3 *particles, float3 *velocities, c
         float3 pos = particles[idx];
         float3 vel = velocities[idx];
 
-        float boundaryDamper = 0.8f;
+        float boundaryDamper = 0.4f;
 
         if(pos.x < -boundary)
         {

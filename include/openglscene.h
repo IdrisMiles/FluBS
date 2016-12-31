@@ -55,9 +55,6 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
 
 private:
-    void initializeDemoTriangle();
-    void renderDemoTriangle();
-    void cleanDemoTriangle();
 
     int m_xRot;
     int m_yRot;
@@ -66,24 +63,12 @@ private:
     int m_yDis;
     int m_zDis;
 
-    int m_projMatrixLoc;
-    int m_mvMatrixLoc;
-    int m_normalMatrixLoc;
-    int m_lightPosLoc;
-    QOpenGLShaderProgram *m_shaderProg;
 
     glm::mat4 m_projMat;
     glm::mat4 m_viewMat;
     glm::mat4 m_modelMat;
     QPoint m_lastPos;
     glm::vec3 m_lightPos;
-
-
-    // Demo triangle specifics
-    QOpenGLVertexArrayObject m_vao;
-    QOpenGLBuffer m_vbo;
-    glm::vec3 m_colour;
-    int m_colourLoc;
 
 
     // Application specific members

@@ -36,15 +36,18 @@ class Fluid
 {
 
 public:
-    Fluid(FluidProperty* _fluidProperty, QOpenGLShaderProgram *_shaderProg);
+    Fluid(FluidProperty* _fluidProperty);
     ~Fluid();
 
     void Init();
     void Simulate();
     void Draw();
+    void SetShaderUniforms(const glm::mat4 &_projMat, const glm::mat4 &_viewMat, const glm::mat4 &_modelMat, const glm::mat4 &_normalMat, const glm::vec3 &_lightPos);
 
 private:
     void InitGL();
+    void InitVAO();
+    void InitShader();
     void InitParticles();
     void AppendSphereVerts(glm::vec3 _pos = glm::vec3(0.0f,0.0f,0.0f), float _radius = 1.0f, int _stacks = 16, int _slices = 32);
 
@@ -58,14 +61,17 @@ private:
 
 
     // Rendering stuff
-    QOpenGLShaderProgram *m_shaderProg;
+    QOpenGLShaderProgram m_shaderProg;
     GLuint m_vertexAttrLoc;
     GLuint m_normalAttrLoc;
     GLuint m_posAttrLoc; // instance
     GLuint m_velAttrLoc; // instance
     GLuint m_denAttrLoc; // instance
-    GLuint projMatrixUniformLoc;
-    GLuint viewMatrixUniformLoc;
+    GLuint m_projMatrixLoc;
+    GLuint m_mvMatrixLoc;
+    GLuint m_normalMatrixLoc;
+    GLuint m_lightPosLoc;
+    GLuint m_colourLoc;
 
     QOpenGLVertexArrayObject m_vao;
     QOpenGLBuffer m_meshVBO;

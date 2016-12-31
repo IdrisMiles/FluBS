@@ -3,10 +3,9 @@
 #include<sys/time.h>
 #include <glm/gtx/transform.hpp>
 
-Fluid::Fluid(FluidProperty *_fluidProperty, QOpenGLShaderProgram *_shaderProg)
+Fluid::Fluid(FluidProperty *_fluidProperty)
 {
     m_fluidProperty = _fluidProperty;
-    m_shaderProg = _shaderProg;
     m_solver = new SPHSolverGPU(m_fluidProperty);
 
     Init();
@@ -30,7 +29,7 @@ Fluid::~Fluid()
     m_meshVBO.destroy();
     m_meshNBO.destroy();
     m_vao.destroy();
-    m_shaderProg = nullptr;
+    m_shaderProg.destroyed();
 }
 
 void Fluid::Init()
@@ -42,6 +41,7 @@ void Fluid::Init()
     m_fluidProperty->particleMass = m_fluidProperty->restDensity * (dia * dia * dia);
     std::cout<<"particle mass: "<<m_fluidProperty->particleMass<<"\n";
     AppendSphereVerts(glm::vec3(0.0f,0.0f,0.0f), m_fluidProperty->particleRadius);
+
     InitGL();
     InitParticles();
 
@@ -72,7 +72,7 @@ void Fluid::Simulate()
 
 
     // Simulate here
-    m_solver->Solve(0.001f, d_positions_ptr, d_velocities_ptr, d_densities_ptr);
+    m_solver->Solve(m_fluidProperty->deltaTime, d_positions_ptr, d_velocities_ptr, d_densities_ptr);
     cudaThreadSynchronize();
 
 
@@ -90,25 +90,67 @@ void Fluid::Simulate()
 
 void Fluid::Draw()
 {
+//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//    glEnable(GL_DEPTH_TEST);
+//    glEnable(GL_CULL_FACE);
+
+    m_shaderProg.bind();
     m_vao.bind();
     glDrawElementsInstanced(GL_TRIANGLES, m_meshTris.size()*3, GL_UNSIGNED_INT, &m_meshTris[0], m_fluidProperty->numParticles);
     m_vao.release();
+    m_shaderProg.release();
 
 }
 
 
+void Fluid::SetShaderUniforms(const glm::mat4 &_projMat, const glm::mat4 &_viewMat, const glm::mat4 &_modelMat, const glm::mat4 &_normalMat, const glm::vec3 &_lightPos)
+{
+    m_shaderProg.bind();
+    glUniformMatrix4fv(m_projMatrixLoc, 1, false, &_projMat[0][0]);
+    glUniformMatrix4fv(m_mvMatrixLoc, 1, false, &(_modelMat*_viewMat)[0][0]);
+    glUniformMatrix3fv(m_normalMatrixLoc, 1, true, &_normalMat[0][0]);
+    glUniform3fv(m_lightPosLoc, 1, &_lightPos[0]);
+
+    float m_colour[3] = {0.8f, 0.4f, 0.4f};
+    glUniform3fv(m_colourLoc, 1, m_colour);
+
+    m_shaderProg.release();
+
+}
+
+
+
 void Fluid::InitGL()
 {
-    float m_colour[3] = {0.8f, 0.4f, 0.4f};
-    GLuint m_colourLoc = m_shaderProg->uniformLocation("colour");
-    glUniform3fv(m_colourLoc, 1, m_colour);
-    m_vertexAttrLoc = m_shaderProg->attributeLocation("vertex");
-    m_normalAttrLoc = m_shaderProg->attributeLocation("normal");
-    m_posAttrLoc = m_shaderProg->attributeLocation("pos");
-    m_velAttrLoc = m_shaderProg->attributeLocation("vel");
-    m_denAttrLoc = m_shaderProg->attributeLocation("den");
-    projMatrixUniformLoc = m_shaderProg->uniformLocation("projMatrix");
-    viewMatrixUniformLoc = m_shaderProg->uniformLocation("viewMatrix");
+    InitShader();
+    InitVAO();
+}
+
+void Fluid::InitShader()
+{
+    // Create shaders
+    m_shaderProg.addShaderFromSourceFile(QOpenGLShader::Vertex, "../shader/instanceVert.glsl");
+    m_shaderProg.addShaderFromSourceFile(QOpenGLShader::Fragment, "../shader/instanceFrag.glsl");
+    m_shaderProg.bindAttributeLocation("vertex", 0);
+    m_shaderProg.bindAttributeLocation("normal", 1);
+    m_shaderProg.link();
+
+    // Get shader uniform and sttribute locations
+    m_shaderProg.bind();
+
+    m_projMatrixLoc = m_shaderProg.uniformLocation("projMatrix");
+    m_mvMatrixLoc = m_shaderProg.uniformLocation("mvMatrix");
+    m_normalMatrixLoc = m_shaderProg.uniformLocation("normalMatrix");
+    m_lightPosLoc = m_shaderProg.uniformLocation("lightPos");
+
+    m_colourLoc = m_shaderProg.uniformLocation("colour");
+    m_vertexAttrLoc = m_shaderProg.attributeLocation("vertex");
+    m_normalAttrLoc = m_shaderProg.attributeLocation("normal");
+    m_posAttrLoc = m_shaderProg.attributeLocation("pos");
+    m_velAttrLoc = m_shaderProg.attributeLocation("vel");
+    m_denAttrLoc = m_shaderProg.attributeLocation("den");
+
+    m_shaderProg.release();
 
 //    std::cout<<"vertex attr loc:\t"<<m_vertexAttrLoc<<"\n";
 //    std::cout<<"normal attr loc:\t"<<m_normalAttrLoc<<"\n";
@@ -117,6 +159,12 @@ void Fluid::InitGL()
 
 //    std::cout<<"num verts:\t"<<m_meshVerts.size()<<"\n";
 //    std::cout<<"num norms:\t"<<m_meshNorms.size()<<"\n";
+
+}
+
+void Fluid::InitVAO()
+{
+    m_shaderProg.bind();
 
     // Set up the VAO
     m_vao.create();
@@ -184,6 +232,8 @@ void Fluid::InitGL()
 
     glPointSize(5);
     m_vao.release();
+
+    m_shaderProg.release();
 }
 
 void Fluid::InitParticles()
