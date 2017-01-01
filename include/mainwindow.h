@@ -4,8 +4,9 @@
 
 // Qt includes
 #include <QMainWindow>
-
+#include "fluidpropertywidget.h"
 #include "openglscene.h"
+
 
 
 namespace Ui {
@@ -24,6 +25,7 @@ public:
 private:
     Ui::MainWindow *ui;
     OpenGLScene *m_scene;
+    FluidPropertyWidget * m_fluidPropertWidegt;
 };
 
 #endif // MAINWINDOW_H

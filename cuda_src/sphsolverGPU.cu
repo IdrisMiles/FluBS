@@ -470,7 +470,7 @@ __global__ void ComputeViscousForce_kernel(float3 *viscForce, const float viscCo
 }
 
 
-__global__ void ComputeSurfaceTensionForce_kernel(float3 *surfaceTensionForce, const float surfaceTension, const float surfaceThreshold, const float *density, const float *mass, const float3 *position, const uint *cellOcc, const uint *cellPartIdx, const uint numPoints, const float smoothingLength)
+__global__ void ComputeSurfaceTensionForce_kernel(float3 *surfaceTensionForce, const float surfaceTension, const float surfaceThreshold, /*const*/ float *density, const float *mass, const float3 *position, const uint *cellOcc, const uint *cellPartIdx, const uint numPoints, const float smoothingLength)
 {
     int thisCellIdx = blockIdx.x + (blockIdx.y * gridDim.x) + (blockIdx.z * gridDim.x * gridDim.y);
     int thisParticleGlobalIdx = cellPartIdx[thisCellIdx] + threadIdx.x;
@@ -532,6 +532,7 @@ __global__ void ComputeSurfaceTensionForce_kernel(float3 *surfaceTensionForce, c
         {
             accCurvature /= colourFieldGradMag;
             surfaceTensionForce[thisParticleGlobalIdx] = (surfaceTension * accCurvature * accColourFieldGrad);
+            //density[thisParticleGlobalIdx] = 20000.0f;
         }
         else
         {
@@ -895,7 +896,7 @@ void SPHSolverGPU::ComputeViscForce(const uint maxCellOcc, float3 *viscForce, co
     ComputeViscousForce_kernel<<<gridDim, blockSize>>>(viscForce, viscCoeff, velocity, density, mass, particles, cellOcc, cellPartIdx, numPoints, smoothingLength);
 }
 
-void SPHSolverGPU::ComputeSurfaceTensionForce(const uint maxCellOcc, float3 *surfTenForce, const float surfaceTension, const float surfaceThreshold, const float *density, const float *mass, const float3 *particles, const uint *cellOcc, const uint *cellPartIdx, const uint numPoints, const float smoothingLength)
+void SPHSolverGPU::ComputeSurfaceTensionForce(const uint maxCellOcc, float3 *surfTenForce, const float surfaceTension, const float surfaceThreshold, /*const */float *density, const float *mass, const float3 *particles, const uint *cellOcc, const uint *cellPartIdx, const uint numPoints, const float smoothingLength)
 {
     dim3 gridDim = dim3(m_fluidProperty->gridResolution, m_fluidProperty->gridResolution, m_fluidProperty->gridResolution);
     uint blockSize = std::min(maxCellOcc, 1024u);
