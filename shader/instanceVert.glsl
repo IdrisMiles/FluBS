@@ -1,31 +1,31 @@
 #version 150
 in vec3 vertex;
 in vec3 normal;
-in vec3 pos; // instance data
-in vec3 vel;
-in float den;
+in vec3 vPos; // instance data
+in vec3 vVel;
+in float vDen;
 
 out vec3 vert;
 out vec3 vertNormal;
-out vec3 vVel;
+out vec3 fDen;
 
-uniform mat4 projMatrix;
-uniform mat4 mvMatrix;
-uniform mat3 normalMatrix;
+uniform mat4 uProjMatrix;
+uniform mat4 uMVMatrix;
+uniform mat3 uNormalMatrix;
 
 
 void main()
 {
    vert = vertex.xyz;
    vertNormal = normal;
-   float d = den/1000.0;
+   float d = vDen/1000.0;
    if(d<1.0)
    {
-       vVel = mix(vec3(1,0,0), vec3(0,1,0), d);// vec3(0.0, den, 0.0);//vel;
+       fDen = mix(vec3(1,0,0), vec3(0,1,0), d);
    }
    else
    {
-       vVel = mix(vec3(0,1,0), vec3(1,1,1), d-1.0);
+       fDen = mix(vec3(0,1,0), vec3(1,1,1), d-1.0);
    }
-   gl_Position = projMatrix * mvMatrix * vec4(vertex + pos,1.0);
+   gl_Position = uProjMatrix * uMVMatrix * vec4(vertex + vPos,1.0);
 }

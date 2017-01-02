@@ -9,6 +9,7 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLBuffer>
+#include <QOpenGLFramebufferObject>
 
 // CUDA includes
 #include <cuda_runtime.h>
@@ -25,12 +26,6 @@
 
 #include <glm/glm.hpp>
 
-//struct Particle
-//{
-//    float pos[3];
-//    float vel[3];
-//    float density;
-//};
 
 class Fluid
 {
@@ -42,7 +37,7 @@ public:
     void Init();
     void Simulate();
     void Draw();
-    void SetShaderUniforms(const glm::mat4 &_projMat, const glm::mat4 &_viewMat, const glm::mat4 &_modelMat, const glm::mat4 &_normalMat, const glm::vec3 &_lightPos);
+    void SetShaderUniforms(const glm::mat4 &_projMat, const glm::mat4 &_viewMat, const glm::mat4 &_modelMat, const glm::mat4 &_normalMat, const glm::vec3 &_lightPos, const glm::vec3 &_camPos);
 
 private:
     void InitGL();
@@ -72,6 +67,8 @@ private:
     GLuint m_normalMatrixLoc;
     GLuint m_lightPosLoc;
     GLuint m_colourLoc;
+    GLuint m_radLoc;
+    GLuint m_camPosLoc;
 
     QOpenGLVertexArrayObject m_vao;
     QOpenGLBuffer m_meshVBO;
@@ -89,7 +86,7 @@ private:
     std::vector<glm::vec3> m_meshNorms;
     std::vector<glm::ivec3> m_meshTris;
 
-
+    glm::vec3 m_colour;
 
 };
 

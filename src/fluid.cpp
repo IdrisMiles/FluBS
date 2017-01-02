@@ -8,6 +8,8 @@ Fluid::Fluid(FluidProperty *_fluidProperty)
     m_fluidProperty = _fluidProperty;
     m_solver = new SPHSolverGPU(m_fluidProperty);
 
+    m_colour = glm::vec3(0.8f, 0.4f, 0.4f);
+
     Init();
 }
 
@@ -90,29 +92,30 @@ void Fluid::Simulate()
 
 void Fluid::Draw()
 {
-//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
 //    glEnable(GL_CULL_FACE);
+    glEnable(GL_FRONT_AND_BACK);
 
     m_shaderProg.bind();
     m_vao.bind();
-    glDrawElementsInstanced(GL_TRIANGLES, m_meshTris.size()*3, GL_UNSIGNED_INT, &m_meshTris[0], m_fluidProperty->numParticles);
+    //glDrawElementsInstanced(GL_TRIANGLES, m_meshTris.size()*3, GL_UNSIGNED_INT, &m_meshTris[0], m_fluidProperty->numParticles);
+    glDrawArrays(GL_POINTS, 0, m_fluidProperty->numParticles);
     m_vao.release();
     m_shaderProg.release();
 
 }
 
 
-void Fluid::SetShaderUniforms(const glm::mat4 &_projMat, const glm::mat4 &_viewMat, const glm::mat4 &_modelMat, const glm::mat4 &_normalMat, const glm::vec3 &_lightPos)
+void Fluid::SetShaderUniforms(const glm::mat4 &_projMat, const glm::mat4 &_viewMat, const glm::mat4 &_modelMat, const glm::mat4 &_normalMat, const glm::vec3 &_lightPos, const glm::vec3 &_camPos)
 {
     m_shaderProg.bind();
     glUniformMatrix4fv(m_projMatrixLoc, 1, false, &_projMat[0][0]);
     glUniformMatrix4fv(m_mvMatrixLoc, 1, false, &(_modelMat*_viewMat)[0][0]);
     glUniformMatrix3fv(m_normalMatrixLoc, 1, true, &_normalMat[0][0]);
     glUniform3fv(m_lightPosLoc, 1, &_lightPos[0]);
-
-    float m_colour[3] = {0.8f, 0.4f, 0.4f};
-    glUniform3fv(m_colourLoc, 1, m_colour);
+    glUniform3fv(m_camPosLoc, 1, &_camPos[0]);
+    glUniform3fv(m_colourLoc, 1, &m_colour[0]);
+    glUniform1f(m_radLoc, m_fluidProperty->particleRadius);
 
     m_shaderProg.release();
 
@@ -129,26 +132,29 @@ void Fluid::InitGL()
 void Fluid::InitShader()
 {
     // Create shaders
-    m_shaderProg.addShaderFromSourceFile(QOpenGLShader::Vertex, "../shader/instanceVert.glsl");
-    m_shaderProg.addShaderFromSourceFile(QOpenGLShader::Fragment, "../shader/instanceFrag.glsl");
-    m_shaderProg.bindAttributeLocation("vertex", 0);
-    m_shaderProg.bindAttributeLocation("normal", 1);
+//    m_shaderProg.addShaderFromSourceFile(QOpenGLShader::Vertex, "../shader/instanceVert.glsl");
+//    m_shaderProg.addShaderFromSourceFile(QOpenGLShader::Fragment, "../shader/instanceFrag.glsl");
+    m_shaderProg.addShaderFromSourceFile(QOpenGLShader::Vertex, "../shader/sphereSpriteVert.glsl");
+    m_shaderProg.addShaderFromSourceFile(QOpenGLShader::Geometry, "../shader/sphereSpriteGeo.glsl");
+    m_shaderProg.addShaderFromSourceFile(QOpenGLShader::Fragment, "../shader/sphereSpriteFrag.glsl");
     m_shaderProg.link();
 
     // Get shader uniform and sttribute locations
     m_shaderProg.bind();
 
-    m_projMatrixLoc = m_shaderProg.uniformLocation("projMatrix");
-    m_mvMatrixLoc = m_shaderProg.uniformLocation("mvMatrix");
-    m_normalMatrixLoc = m_shaderProg.uniformLocation("normalMatrix");
-    m_lightPosLoc = m_shaderProg.uniformLocation("lightPos");
+    m_projMatrixLoc = m_shaderProg.uniformLocation("uProjMatrix");
+    m_mvMatrixLoc = m_shaderProg.uniformLocation("uMVMatrix");
+    m_normalMatrixLoc = m_shaderProg.uniformLocation("uNormalMatrix");
+    m_lightPosLoc = m_shaderProg.uniformLocation("uLightPos");
 
-    m_colourLoc = m_shaderProg.uniformLocation("colour");
+    m_colourLoc = m_shaderProg.uniformLocation("uColour");
     m_vertexAttrLoc = m_shaderProg.attributeLocation("vertex");
     m_normalAttrLoc = m_shaderProg.attributeLocation("normal");
-    m_posAttrLoc = m_shaderProg.attributeLocation("pos");
-    m_velAttrLoc = m_shaderProg.attributeLocation("vel");
-    m_denAttrLoc = m_shaderProg.attributeLocation("den");
+    m_posAttrLoc = m_shaderProg.attributeLocation("vPos");
+    m_velAttrLoc = m_shaderProg.attributeLocation("vVel");
+    m_denAttrLoc = m_shaderProg.attributeLocation("vDen");
+    m_radLoc = m_shaderProg.uniformLocation("uRad");
+    m_camPosLoc = m_shaderProg.uniformLocation("uCameraPos");
 
     m_shaderProg.release();
 
@@ -156,6 +162,7 @@ void Fluid::InitShader()
 //    std::cout<<"normal attr loc:\t"<<m_normalAttrLoc<<"\n";
 //    std::cout<<"pos attr loc:\t"<<m_posAttrLoc<<"\n";
 //    std::cout<<"vel attr loc:\t"<<m_velAttrLoc<<"\n";
+//    std::cout<<"den attr loc:\t"<<m_denAttrLoc<<"\n";
 
 //    std::cout<<"num verts:\t"<<m_meshVerts.size()<<"\n";
 //    std::cout<<"num norms:\t"<<m_meshNorms.size()<<"\n";
@@ -172,28 +179,28 @@ void Fluid::InitVAO()
 
 
     // Setup element array.
-    m_meshIBO.create();
-    m_meshIBO.bind();
-    m_meshIBO.allocate(&m_meshTris[0], m_meshTris.size() * sizeof(glm::ivec3));
-    m_meshIBO.release();
+//    m_meshIBO.create();
+//    m_meshIBO.bind();
+//    m_meshIBO.allocate(&m_meshTris[0], m_meshTris.size() * sizeof(glm::ivec3));
+//    m_meshIBO.release();
 
 
-    // Setup our vertex buffer object.
-    m_meshVBO.create();
-    m_meshVBO.bind();
-    m_meshVBO.allocate(&m_meshVerts[0], m_meshVerts.size() * sizeof(glm::vec3));
-    glEnableVertexAttribArray(m_vertexAttrLoc);
-    glVertexAttribPointer(m_vertexAttrLoc, 3, GL_FLOAT, GL_FALSE, 1 * sizeof(glm::vec3), 0);
-    m_meshVBO.release();
+//    // Setup our vertex buffer object.
+//    m_meshVBO.create();
+//    m_meshVBO.bind();
+//    m_meshVBO.allocate(&m_meshVerts[0], m_meshVerts.size() * sizeof(glm::vec3));
+//    glEnableVertexAttribArray(m_vertexAttrLoc);
+//    glVertexAttribPointer(m_vertexAttrLoc, 3, GL_FLOAT, GL_FALSE, 1 * sizeof(glm::vec3), 0);
+//    m_meshVBO.release();
 
 
-    // set up normal buffer object
-    m_meshNBO.create();
-    m_meshNBO.bind();
-    m_meshNBO.allocate(&m_meshNorms[0], m_meshNorms.size() * sizeof(glm::vec3));
-    glEnableVertexAttribArray(m_normalAttrLoc);
-    glVertexAttribPointer(m_normalAttrLoc, 3, GL_FLOAT, GL_FALSE, 1 * sizeof(glm::vec3), 0);
-    m_meshNBO.release();
+//    // set up normal buffer object
+//    m_meshNBO.create();
+//    m_meshNBO.bind();
+//    m_meshNBO.allocate(&m_meshNorms[0], m_meshNorms.size() * sizeof(glm::vec3));
+//    glEnableVertexAttribArray(m_normalAttrLoc);
+//    glVertexAttribPointer(m_normalAttrLoc, 3, GL_FLOAT, GL_FALSE, 1 * sizeof(glm::vec3), 0);
+//    m_meshNBO.release();
 
 
 
@@ -203,7 +210,7 @@ void Fluid::InitVAO()
     m_posBO.allocate(m_fluidProperty->numParticles * sizeof(float3));
     glEnableVertexAttribArray(m_posAttrLoc);
     glVertexAttribPointer(m_posAttrLoc, 3, GL_FLOAT, GL_FALSE, 1 * sizeof(float3), 0);
-    glVertexAttribDivisor(m_posAttrLoc, 1);
+//    glVertexAttribDivisor(m_posAttrLoc, 1);
     m_posBO.release();
     cudaGraphicsGLRegisterBuffer(&m_posBO_CUDA, m_posBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
 
@@ -214,7 +221,7 @@ void Fluid::InitVAO()
     m_velBO.allocate(m_fluidProperty->numParticles * sizeof(float3));
     glEnableVertexAttribArray(m_velAttrLoc);
     glVertexAttribPointer(m_velAttrLoc, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
-    glVertexAttribDivisor(m_velAttrLoc, 1);
+//    glVertexAttribDivisor(m_velAttrLoc, 1);
     m_velBO.release();
     cudaGraphicsGLRegisterBuffer(&m_velBO_CUDA, m_velBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
 
@@ -225,7 +232,7 @@ void Fluid::InitVAO()
     m_denBO.allocate(m_fluidProperty->numParticles * sizeof(float));
     glEnableVertexAttribArray(m_denAttrLoc);
     glVertexAttribPointer(m_denAttrLoc, 1, GL_FLOAT, GL_FALSE, sizeof(GLfloat), 0);
-    glVertexAttribDivisor(m_denAttrLoc, 1);
+//    glVertexAttribDivisor(m_denAttrLoc, 1);
     m_denBO.release();
     cudaGraphicsGLRegisterBuffer(&m_denBO_CUDA, m_denBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
 

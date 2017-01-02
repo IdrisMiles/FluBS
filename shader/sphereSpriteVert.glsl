@@ -1,5 +1,5 @@
 #version 330
-in vec3 vPos; // instance data
+in vec3 vPos;
 in vec3 vVel;
 in float vDen;
 
@@ -18,5 +18,5 @@ void main()
    gVel = vVel;
    gDen = vDen;
 
-   gl_Position = uProjMatrix * uMVMatrix * vec4(vPos,1.0);
+   gl_Position = /*uProjMatrix * uMVMatrix * */vec4(vPos,1.0);
 }

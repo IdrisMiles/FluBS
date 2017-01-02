@@ -208,32 +208,23 @@ __global__ void ParticleHash_Kernel(uint *hash, uint *cellOcc, const float3 *par
     float normY = (particle.y + (0.5f * gridDim)) * invGridDim;
     float normZ = (particle.z + (0.5f * gridDim)) * invGridDim;
 
-//    if(normX >= 1.0f || normX < 0.0f ||
-//       normY >= 1.0f || normY < 0.0f ||
-//       normZ >= 1.0f || normZ < 0.0f )
-//    {
-//        printf("Well Sheet\n");
-//        hashID = 0;
-//    }
-//    else
-//    {
-        // Get hash values for x, y, z
-        uint hashX = floor(normX * gridRes);
-        uint hashY = floor(normY * gridRes);
-        uint hashZ = floor(normZ * gridRes);
 
-        hashX = (hashX >= gridRes) ? gridRes-1 : hashX;
-        hashY = (hashY >= gridRes) ? gridRes-1 : hashY;
-        hashZ = (hashZ >= gridRes) ? gridRes-1 : hashZ;
+    // Get hash values for x, y, z
+    uint hashX = floor(normX * gridRes);
+    uint hashY = floor(normY * gridRes);
+    uint hashZ = floor(normZ * gridRes);
 
-        hashID = hashX + (hashY * gridRes) + (hashZ * gridRes * gridRes);
+    hashX = (hashX >= gridRes) ? gridRes-1 : hashX;
+    hashY = (hashY >= gridRes) ? gridRes-1 : hashY;
+    hashZ = (hashZ >= gridRes) ? gridRes-1 : hashZ;
 
-        if(hashID >= gridRes * gridRes * gridRes)
-        {
-            //printf("daaaang\n");
-            //printf("%u, %u, %u\n", hashX, hashY, hashZ);
-        }
-//    }
+    hashID = hashX + (hashY * gridRes) + (hashZ * gridRes * gridRes);
+
+    if(hashID >= gridRes * gridRes * gridRes)
+    {
+        printf("daaaang\n");
+        printf("%u, %u, %u\n", hashX, hashY, hashZ);
+    }
 
     // Update hash id for this particle
     hash[idx] = hashID;
@@ -301,19 +292,6 @@ __global__ void ComputePressure_kernel(float *pressure, float *density, const fl
             }
         }
 
-        if(fabs(accDensity) < FLT_EPSILON)
-        {
-            thisDensity = mass[thisParticleGlobalIdx] * Poly6Kernel_Kernel(0.0f, smoothingLength);
-            accDensity += thisDensity;
-            printf("FUCK\n");
-        }
-
-        if(fabs(accDensity) < FLT_EPSILON)
-        {
-            printf("FUCKing hell\n");
-        }
-
-//        printf("coord: %u, %u, %u \nnum neigh: %u %u\n", xMin, xMax, blockIdx.x, numNeighs, numNeighCells);
 
 //        float beta = 0.35;
 //        float gamma = 7.0f;
@@ -611,30 +589,30 @@ __global__ void Integrate_kernel(float3 *force, float3 *particles, float3 *veloc
         float3 oldPos = particles[idx];
         float3 oldVel = velocities[idx];
 
-//        float3 f = force[idx];
-//        printf("total force: %f, %f, %f\n",f.x, f.y, f.z);
-
         float3 newVel = oldVel + (_dt * force[idx]);
         float3 newPos = oldPos + (_dt * newVel);
 
         // TODO:
         // Verlet integration
-        // RK4 integrationd_mass_ptr,
-
-
-        if(isnan(newPos.x) || isnan(newPos.y) || isnan(newPos.z))
-        {
-            printf("nan pos\n");
-        }
+        // RK4 integration
 
         if(isnan(newVel.x) || isnan(newVel.y) || isnan(newVel.z))
         {
             printf("nan vel\n");
         }
+        else
+        {
+            velocities[idx] = newVel;
+        }
 
-        velocities[idx] = newVel;
-        particles[idx] = newPos;
-
+        if(isnan(newPos.x) || isnan(newPos.y) || isnan(newPos.z))
+        {
+            printf("nan pos\n");
+        }
+        else
+        {
+            particles[idx] = newPos;
+        }
     }
 }
 
@@ -652,34 +630,34 @@ __global__ void HandleBoundaries_Kernel(float3 *particles, float3 *velocities, c
 
         if(pos.x < -boundary)
         {
-           pos.x = -boundary * 0.999f;// + fabs(fabs(pos.x) - boundary);
+           pos.x = -boundary  + fabs(fabs(pos.x) - boundary);
            vel = make_float3(boundaryDamper*fabs(vel.x),vel.y,vel.z);
         }
         if(pos.x > boundary)
         {
-           pos.x = boundary * 0.999f;// - fabs(fabs(pos.x) - boundary);
+           pos.x = boundary - fabs(fabs(pos.x) - boundary);
            vel = make_float3(-boundaryDamper*fabs(vel.x),vel.y,vel.z);
         }
 
         if(pos.y < -boundary)
         {
-           pos.y = -boundary * 0.999f;// + fabs(fabs(pos.y) - boundary);
+           pos.y = -boundary + fabs(fabs(pos.y) - boundary);
            vel = make_float3(vel.x,boundaryDamper*fabs(vel.y),vel.z);
         }
         if(pos.y > boundary)
         {
-           pos.y = boundary * 0.999f;// - fabs(fabs(pos.y) - boundary);
+           pos.y = boundary - fabs(fabs(pos.y) - boundary);
            vel = make_float3(vel.x,-boundaryDamper*fabs(vel.y),vel.z);
         }
 
         if(pos.z < -boundary)
         {
-           pos.z = -boundary * 0.999f;// + fabs(fabs(pos.z) - boundary);
+           pos.z = -boundary + fabs(fabs(pos.z) - boundary);
            vel = make_float3(vel.x,vel.y,boundaryDamper*fabs(vel.z));
         }
         if(pos.z > boundary)
         {
-           pos.z = boundary * 0.999f;// - fabs(fabs(pos.z) - boundary);
+           pos.z = boundary - fabs(fabs(pos.z) - boundary);
            vel = make_float3(vel.x,vel.y,-boundaryDamper*fabs(vel.z));
         }
 
