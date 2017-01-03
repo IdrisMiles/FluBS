@@ -5,18 +5,30 @@
 #include <QDoubleSpinBox>
 #include <QLabel>
 #include <QGridLayout>
+#include <QPushButton>
 
 #include <memory>
 #include "fluidproperty.h"
 
 class FluidPropertyWidget : public QWidget
 {
+    Q_OBJECT
+
 public:
     FluidPropertyWidget(QWidget *parent = nullptr);
     ~FluidPropertyWidget();
 
     void SetFluidProperty(std::shared_ptr<FluidProperty> _fluidProperty);
     std::shared_ptr<FluidProperty> GetFluidProperty();
+
+signals:
+    void ResetSim();
+
+public slots:
+    void ResetSimBtnClicked();
+    void TogglePlaySimBtnClicked();
+    void UpdateFluidProperty();
+
 
 
 private:
@@ -39,10 +51,14 @@ private:
     std::shared_ptr<QLabel> viscosityLabel;
     std::shared_ptr<QDoubleSpinBox> viscosity;
 
+    std::shared_ptr<QLabel> deltaTimeLabel;
     std::shared_ptr<QDoubleSpinBox> deltaTime;
     std::shared_ptr<QDoubleSpinBox> solveIterations;
     std::shared_ptr<QDoubleSpinBox> gridResolution;
     std::shared_ptr<QDoubleSpinBox> gridCellWidth;
+
+    std::shared_ptr<QPushButton> reset;
+    std::shared_ptr<QPushButton> togglePlay;
 };
 
 #endif // FLUIDPROPERTYWIDGET_H

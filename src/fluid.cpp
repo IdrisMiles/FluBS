@@ -3,10 +3,10 @@
 #include<sys/time.h>
 #include <glm/gtx/transform.hpp>
 
-Fluid::Fluid(FluidProperty *_fluidProperty)
+Fluid::Fluid(std::shared_ptr<FluidProperty> _fluidProperty)
 {
     m_fluidProperty = _fluidProperty;
-    m_solver = new SPHSolverGPU(m_fluidProperty);
+    m_solver = new SPHSolverGPU(m_fluidProperty.get());
 
     m_colour = glm::vec3(0.8f, 0.4f, 0.4f);
 
@@ -15,7 +15,8 @@ Fluid::Fluid(FluidProperty *_fluidProperty)
 
 Fluid::~Fluid()
 {
-    delete m_fluidProperty;
+//    delete m_fluidProperty;
+    m_fluidProperty = nullptr;
     delete m_solver;
 
     cudaGraphicsUnregisterResource(m_posBO_CUDA);
@@ -49,8 +50,19 @@ void Fluid::Init()
 
 }
 
+void Fluid::Reset()
+{
+    InitParticles();
+}
+
 void Fluid::Simulate()
 {
+    if(!m_fluidProperty->play)
+    {
+        return;
+    }
+
+
     static double time = 0.0;
     static double t1 = 0.0;
     static double t2 = 0.0;

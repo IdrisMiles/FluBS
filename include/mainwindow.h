@@ -21,11 +21,13 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+public slots:
+    void NewFluidInitialised(std::shared_ptr<FluidProperty> _fluidProperty);
 
 private:
     Ui::MainWindow *ui;
     OpenGLScene *m_scene;
-    FluidPropertyWidget * m_fluidPropertWidegt;
+    std::shared_ptr<FluidPropertyWidget> m_fluidPropertWidget;
 };
 
 #endif // MAINWINDOW_H

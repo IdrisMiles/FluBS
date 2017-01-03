@@ -18,7 +18,8 @@ public:
                   float _deltaTime = 0.005f,
                   unsigned int _solveIterations = 1,
                   unsigned int _gridResolution = 10,
-                  float _gridCellWidth = 1.2f);
+                  float _gridCellWidth = 1.2f,
+                  bool _play = false);
 
     ~FluidProperty();
 
@@ -37,6 +38,8 @@ public:
     unsigned int gridResolution;
     float gridCellWidth;
     float gridVolume;
+
+    bool play;
 };
 
 #endif // FLUIDPROPERTY_H

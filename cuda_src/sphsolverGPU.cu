@@ -765,7 +765,6 @@ void SPHSolverGPU::Solve(float _dt, float3* _d_p, float3* _d_v, float *_d_d)
     thrust::fill(d_viscousForces.begin(), d_viscousForces.end(), make_float3(0.0f,0.0f,0.0f));
     thrust::fill(d_surfaceTensionForces.begin(), d_surfaceTensionForces.end(), make_float3(0.0f,0.0f,0.0f));
     thrust::fill(d_totalForces.begin(), d_totalForces.end(), make_float3(0.0f,0.0f,0.0f));
-    //thrust::fill(d_densities.begin(), d_densities.end(), 0.0f);
     thrust::fill(thrust::device_pointer_cast(d_densities_ptr), thrust::device_pointer_cast(d_densities_ptr)+m_fluidProperty->numParticles, 0.0f);
     thrust::fill(d_pressures.begin(), d_pressures.end(), 0.0f);
     thrust::fill(d_mass.begin(), d_mass.end(), m_fluidProperty->particleMass);

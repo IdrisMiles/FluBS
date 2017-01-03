@@ -12,7 +12,8 @@ FluidProperty::FluidProperty(unsigned int _numParticles,
                              float _deltaTime,
                              unsigned int _solveIterations,
                              unsigned int _gridResolution,
-                             float _gridCellWidth):
+                             float _gridCellWidth,
+                             bool _play):
     numParticles(_numParticles),
     particleMass(_particleMass),
     particleRadius(_particleRadius),
@@ -25,7 +26,8 @@ FluidProperty::FluidProperty(unsigned int _numParticles,
     deltaTime(_deltaTime),
     solveIterations(_solveIterations),
     gridResolution(_gridResolution),
-    gridCellWidth(_gridCellWidth)
+    gridCellWidth(_gridCellWidth),
+    play(_play)
 {
 }
 

@@ -29,6 +29,8 @@ public:
     QSize minimumSizeHint() const Q_DECL_OVERRIDE;
     QSize sizeHint() const Q_DECL_OVERRIDE;
 
+    Fluid *GetFluid(const int &_i){_i<m_fluids.size() ? m_fluids[_i] : nullptr;}
+
 public slots:
     void setXRotation(int angle);
     void setYRotation(int angle);
@@ -38,6 +40,7 @@ public slots:
     void setZTranslation(int z);
     void cleanup();
     void UpdateSim();
+    void ResetSim();
 
 signals:
     void xRotationChanged(int angle);
@@ -46,6 +49,7 @@ signals:
     void xTranslationChanged(int x);
     void yTranslationChanged(int y);
     void zTranslationChanged(int z);
+    void FluidInitialised(std::shared_ptr<FluidProperty> _fluidProperty);
 
 protected:
     void initializeGL() Q_DECL_OVERRIDE;
@@ -72,7 +76,7 @@ private:
 
 
     // Application specific members
-    std::vector<Fluid*> m_fluids;
+    std::vector<std::shared_ptr<Fluid>> m_fluids;
 
     QTimer *m_drawTimer;
     QTimer *m_simTimer;

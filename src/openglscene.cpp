@@ -137,7 +137,9 @@ void OpenGLScene::initializeGL()
 
     //---------------------------------------------------------------------------------------
 
-    m_fluids.push_back(new Fluid(new FluidProperty()));
+    m_fluids.push_back(std::shared_ptr<Fluid>(new Fluid(std::shared_ptr<FluidProperty>(new FluidProperty()))));
+
+    emit FluidInitialised(m_fluids.back()->GetFluidPropeties());
 
     //---------------------------------------------------------------------------------------
 
@@ -175,6 +177,14 @@ void OpenGLScene::UpdateSim()
     for(auto fluid : m_fluids)
     {
         fluid->Simulate();
+    }
+}
+
+void OpenGLScene::ResetSim()
+{
+    for(auto fluid : m_fluids)
+    {
+        fluid->Reset();
     }
 }
 

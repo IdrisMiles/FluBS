@@ -31,13 +31,15 @@ class Fluid
 {
 
 public:
-    Fluid(FluidProperty* _fluidProperty);
+    Fluid(std::shared_ptr<FluidProperty> _fluidProperty);
     ~Fluid();
 
     void Init();
     void Simulate();
     void Draw();
     void SetShaderUniforms(const glm::mat4 &_projMat, const glm::mat4 &_viewMat, const glm::mat4 &_modelMat, const glm::mat4 &_normalMat, const glm::vec3 &_lightPos, const glm::vec3 &_camPos);
+    std::shared_ptr<FluidProperty> GetFluidPropeties(){return m_fluidProperty;}
+    void Reset();
 
 private:
     void InitGL();
@@ -49,7 +51,7 @@ private:
 
     // Simulation stuff
     SPHSolverGPU* m_solver;
-    FluidProperty* m_fluidProperty;
+    std::shared_ptr<FluidProperty> m_fluidProperty;
     float3 *d_positions_ptr;
     float3 *d_velocities_ptr;
     float *d_densities_ptr;
