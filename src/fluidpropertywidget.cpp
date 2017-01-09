@@ -100,15 +100,15 @@ void FluidPropertyWidget::SetFluidProperty(std::shared_ptr<FluidProperty> _fluid
 {
     if(_fluidProperty != nullptr)
     {
+
+        surfaceTension->setValue((double)_fluidProperty->surfaceTension);
+        surfaceThreshold->setValue((double)_fluidProperty->surfaceThreshold);
+        viscosity->setValue((double)_fluidProperty->viscosity);
+        gasStiffness->setValue((double)_fluidProperty->gasStiffness);
+
+        deltaTime->setValue((double)_fluidProperty->deltaTime);
+
         m_fluidProperty = _fluidProperty;
-
-        surfaceTension->setValue((double)m_fluidProperty->surfaceTension);
-        surfaceThreshold->setValue((double)m_fluidProperty->surfaceThreshold);
-        viscosity->setValue((double)m_fluidProperty->viscosity);
-        gasStiffness->setValue((double)m_fluidProperty->gasStiffness);
-
-        deltaTime->setValue((double)m_fluidProperty->deltaTime);
-
     }
 }
 

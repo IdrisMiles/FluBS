@@ -443,7 +443,7 @@ __global__ void ComputeViscousForce_kernel(float3 *viscForce, const float viscCo
             }
         }
 
-        viscForce[thisParticleGlobalIdx] = 1.0f * viscCoeff * accViscForce;
+        viscForce[thisParticleGlobalIdx] = -1.0f * viscCoeff * accViscForce;
     }
 }
 
@@ -585,6 +585,7 @@ __global__ void Integrate_kernel(float3 *force, float3 *particles, float3 *veloc
 
     if(idx < numPoints)
     {
+        //---------------------------------------------------------
         // Good old instable Euler integration - ONLY FOR TESTING
         float3 oldPos = particles[idx];
         float3 oldVel = velocities[idx];
@@ -592,9 +593,18 @@ __global__ void Integrate_kernel(float3 *force, float3 *particles, float3 *veloc
         float3 newVel = oldVel + (_dt * force[idx]);
         float3 newPos = oldPos + (_dt * newVel);
 
+        //---------------------------------------------------------
+        // Verlet/Leapfrog integration
+//        float3 newPos = oldPos + (oldVel * _dt) + (0.5f * force[idx] * _dt * _dt);
+//        float3 newVel = oldVel + (0.5 * (force[idx] + force[idx]) * _dt);
+
+        //---------------------------------------------------------
         // TODO:
         // Verlet integration
         // RK4 integration
+
+        //---------------------------------------------------------
+        // Error checking and setting new values
 
         if(isnan(newVel.x) || isnan(newVel.y) || isnan(newVel.z))
         {
