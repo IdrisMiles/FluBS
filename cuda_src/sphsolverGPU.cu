@@ -509,7 +509,7 @@ __global__ void ComputeSurfaceTensionForce_kernel(float3 *surfaceTensionForce, c
         if( colourFieldGradMag > surfaceThreshold )
         {
             accCurvature /= colourFieldGradMag;
-            surfaceTensionForce[thisParticleGlobalIdx] = (surfaceTension * accCurvature * accColourFieldGrad);
+            surfaceTensionForce[thisParticleGlobalIdx] = (-surfaceTension * accCurvature * accColourFieldGrad);
             //density[thisParticleGlobalIdx] = 20000.0f;
         }
         else
@@ -530,7 +530,15 @@ __global__ void ComputeForces_kernel(float3 *force, const float3 *externalForce,
         float3 accForce = make_float3(0.0f, 0.0f, 0.0f);
 
         // Add external force
-        //accForce = accForce + externalForce[thisCellIdx];
+        float3 extForce = externalForce[thisCellIdx];
+        if(isnan(extForce.x) || isnan(extForce.y) || isnan(extForce.z))
+        {
+            printf("nan external force\n");
+        }
+        else
+        {
+            accForce = accForce + extForce;
+        }
 
 
         // Add pressure force
@@ -720,22 +728,14 @@ SPHSolverGPU::SPHSolverGPU(FluidProperty *_fluidProperty)
     d_viscousForces.resize(m_fluidProperty->numParticles);
     d_surfaceTensionForces.resize(m_fluidProperty->numParticles);
     d_externalForces.resize(m_fluidProperty->gridResolution*m_fluidProperty->gridResolution*m_fluidProperty->gridResolution);
+    d_externalAcceleration.resize(m_fluidProperty->gridResolution*m_fluidProperty->gridResolution*m_fluidProperty->gridResolution);
+    d_gravityAcceleration.resize(m_fluidProperty->gridResolution*m_fluidProperty->gridResolution*m_fluidProperty->gridResolution);
     d_totalForces.resize(m_fluidProperty->numParticles);
     d_particleHashIds.resize(m_fluidProperty->numParticles);
     d_cellOccupancy.resize(m_fluidProperty->gridResolution*m_fluidProperty->gridResolution*m_fluidProperty->gridResolution);
     d_cellParticleIdx.resize(m_fluidProperty->gridResolution*m_fluidProperty->gridResolution*m_fluidProperty->gridResolution);
 
-    d_mass_ptr = thrust::raw_pointer_cast(&d_mass[0]);
-    d_densities_ptr = thrust::raw_pointer_cast(&d_densities[0]);
-    d_pressures_ptr = thrust::raw_pointer_cast(&d_pressures[0]);
-    d_pressureForces_ptr = thrust::raw_pointer_cast(&d_pressureForces[0]);
-    d_viscousForces_ptr = thrust::raw_pointer_cast(&d_viscousForces[0]);
-    d_surfaceTensionForces_ptr = thrust::raw_pointer_cast(&d_surfaceTensionForces[0]);
-    d_externalForces_ptr = thrust::raw_pointer_cast(&d_externalForces[0]);
-    d_totalForces_ptr = thrust::raw_pointer_cast(&d_totalForces[0]);
-    d_particleHashIds_ptr = thrust::raw_pointer_cast(&d_particleHashIds[0]);
-    d_cellOccupancy_ptr = thrust::raw_pointer_cast(d_cellOccupancy.data());
-    d_cellParticleIdx_ptr = thrust::raw_pointer_cast(&d_cellParticleIdx[0]);
+    ResetDevicePointers();
 
     m_threadsPerBlock = 1024;
     m_numBlock = iDivUp(m_fluidProperty->numParticles, m_threadsPerBlock);
@@ -752,14 +752,16 @@ void SPHSolverGPU::Init()
     thrust::fill(d_pressureForces.begin(), d_pressureForces.end(), make_float3(0.0f,0.0f,0.0f));
     thrust::fill(d_viscousForces.begin(), d_viscousForces.end(), make_float3(0.0f,0.0f,0.0f));
     thrust::fill(d_surfaceTensionForces.begin(), d_surfaceTensionForces.end(), make_float3(0.0f,0.0f,0.0f));
-    thrust::fill(d_externalForces.begin(), d_externalForces.end(), make_float3(0.0f, -9.8f,0.0f));
+    thrust::fill(d_externalForces.begin(), d_externalForces.end(), make_float3(0.0f, 0.0f, 0.0f));
+    thrust::fill(d_externalAcceleration.begin(), d_externalAcceleration.end(), make_float3(0.0f, 0.0f, 0.0f));
+    thrust::fill(d_gravityAcceleration.begin(), d_gravityAcceleration.end(), make_float3(0.0f, -9.8f, 0.0f));
     thrust::fill(d_totalForces.begin(), d_totalForces.end(), make_float3(0.0f,0.0f,0.0f));
     thrust::fill(d_densities.begin(), d_densities.end(), 0.0f);
     thrust::fill(d_pressures.begin(), d_pressures.end(), 0.0f);
     thrust::fill(d_mass.begin(), d_mass.end(), m_fluidProperty->particleMass);
-    thrust::fill(d_particleHashIds.begin(), d_particleHashIds.end(), 0);
-    thrust::fill(d_cellOccupancy.begin(), d_cellOccupancy.end(), 0);
-    thrust::fill(d_cellParticleIdx.begin(), d_cellParticleIdx.end(), 0);
+    thrust::fill(d_particleHashIds.begin(), d_particleHashIds.end(), 0u);
+    thrust::fill(d_cellOccupancy.begin(), d_cellOccupancy.end(), 0u);
+    thrust::fill(d_cellParticleIdx.begin(), d_cellParticleIdx.end(), 0u);
 }
 
 
@@ -769,32 +771,13 @@ void SPHSolverGPU::Solve(float _dt, float3* _d_p, float3* _d_v, float *_d_d)
     d_velocities_ptr = _d_v;
     d_densities_ptr = _d_d;
 
-    thrust::fill(d_cellOccupancy.begin(), d_cellOccupancy.end(), 0u);
-    thrust::fill(d_externalForces.begin(), d_externalForces.end(), make_float3(0.0f, -9.8f,0.0f));
-    thrust::fill(d_pressureForces.begin(), d_pressureForces.end(), make_float3(0.0f,0.0f,0.0f));
-    thrust::fill(d_viscousForces.begin(), d_viscousForces.end(), make_float3(0.0f,0.0f,0.0f));
-    thrust::fill(d_surfaceTensionForces.begin(), d_surfaceTensionForces.end(), make_float3(0.0f,0.0f,0.0f));
-    thrust::fill(d_totalForces.begin(), d_totalForces.end(), make_float3(0.0f,0.0f,0.0f));
-    thrust::fill(thrust::device_pointer_cast(d_densities_ptr), thrust::device_pointer_cast(d_densities_ptr)+m_fluidProperty->numParticles, 0.0f);
-    thrust::fill(d_pressures.begin(), d_pressures.end(), 0.0f);
-    thrust::fill(d_mass.begin(), d_mass.end(), m_fluidProperty->particleMass);
+    ResetProperties();
 
-
-//    d_mass_ptr = thrust::raw_pointer_cast(&d_mass[0]);
-//    d_pressures_ptr = thrust::raw_pointer_cast(&d_pressures[0]);
-//    d_pressureForces_ptr = thrust::raw_pointer_cast(&d_pressureForces[0]);
-//    d_viscousForces_ptr = thrust::raw_pointer_cast(&d_viscousForces[0]);
-//    d_surfaceTensionForces_ptr = thrust::raw_pointer_cast(&d_surfaceTensionForces[0]);
-//    d_externalForces_ptr = thrust::raw_pointer_cast(&d_externalForces[0]);
-//    d_totalForces_ptr = thrust::raw_pointer_cast(&d_totalForces[0]);
-//    d_particleHashIds_ptr = thrust::raw_pointer_cast(&d_particleHashIds[0]);
-//    d_cellOccupancy_ptr = thrust::raw_pointer_cast(d_cellOccupancy.data());
-//    d_cellParticleIdx_ptr = thrust::raw_pointer_cast(&d_cellParticleIdx[0]);
 
     cudaThreadSynchronize();
 
     // Get particle hash IDs
-    ParticleHash(d_particleHashIds_ptr, d_cellOccupancy_ptr, d_positions_ptr, m_fluidProperty->numParticles, m_fluidProperty->gridResolution, m_fluidProperty->gridCellWidth);
+    ParticleHash(d_particleHashIds_ptr, d_cellOccupancy_ptr, d_positions_ptr, m_fluidProperty->numParticles, m_fluidProperty->gridResolution, m_fluidProperty->gridCellWidth, m_fluidProperty->numParticles);
     cudaThreadSynchronize();
 
     // Sort particles
@@ -818,6 +801,10 @@ void SPHSolverGPU::Solve(float _dt, float3* _d_p, float3* _d_v, float *_d_d)
     // pressure force
     ComputePressureForce(maxCellOcc, d_pressureForces_ptr, d_pressures_ptr, d_densities_ptr, d_mass_ptr, d_positions_ptr, d_cellOccupancy_ptr, d_cellParticleIdx_ptr, m_fluidProperty->numParticles, m_fluidProperty->smoothingLength);
 
+    // TODO:
+    // Compute boundary pressures
+
+
     // viscous force
     ComputeViscForce(maxCellOcc, d_viscousForces_ptr, m_fluidProperty->viscosity, d_velocities_ptr, d_densities_ptr, d_mass_ptr, d_positions_ptr, d_cellOccupancy_ptr, d_cellParticleIdx_ptr, m_fluidProperty->numParticles, m_fluidProperty->smoothingLength);
 
@@ -825,16 +812,15 @@ void SPHSolverGPU::Solve(float _dt, float3* _d_p, float3* _d_v, float *_d_d)
     ComputeSurfaceTensionForce(maxCellOcc, d_surfaceTensionForces_ptr, m_fluidProperty->surfaceTension, m_fluidProperty->surfaceThreshold, d_densities_ptr, d_mass_ptr, d_positions_ptr, d_cellOccupancy_ptr, d_cellParticleIdx_ptr, m_fluidProperty->numParticles, m_fluidProperty->smoothingLength);
     cudaThreadSynchronize();
 
-    float minPrss = *thrust::min_element(thrust::device_pointer_cast(d_densities_ptr), thrust::device_pointer_cast(d_densities_ptr)+m_fluidProperty->numParticles);
-    float maxPrss = *thrust::max_element(thrust::device_pointer_cast(d_densities_ptr), thrust::device_pointer_cast(d_densities_ptr)+m_fluidProperty->numParticles);
-    //printf("min %f, max %f\n",minPrss, maxPrss);
-
+    // Compute total force and acceleration
     ComputeTotalForce(maxCellOcc, d_totalForces_ptr, d_externalForces_ptr, d_pressureForces_ptr, d_viscousForces_ptr, d_surfaceTensionForces_ptr, d_mass_ptr, d_positions_ptr, d_velocities_ptr,d_cellOccupancy_ptr, d_cellParticleIdx_ptr, m_fluidProperty->numParticles, m_fluidProperty->smoothingLength);
     cudaThreadSynchronize();
 
+    // integrate particle position and velocities
     Integrate(maxCellOcc, d_totalForces_ptr, d_positions_ptr, d_velocities_ptr, _dt, m_fluidProperty->numParticles);
     cudaThreadSynchronize();
 
+    // Handle boundaries
     HandleBoundaries(maxCellOcc, d_positions_ptr, d_velocities_ptr, (float)0.5f*m_fluidProperty->gridCellWidth * m_fluidProperty->gridResolution, m_fluidProperty->numParticles);
     cudaThreadSynchronize();
 
@@ -853,10 +839,44 @@ void SPHSolverGPU::Solve(float _dt, float3* _d_p, float3* _d_v, float *_d_d)
 
 }
 
-
-void SPHSolverGPU::ParticleHash(uint *hash, uint *cellOcc, float3 *particles, const uint N, const uint gridRes, const float cellWidth)
+void SPHSolverGPU::ResetProperties()
 {
-    ParticleHash_Kernel<<<m_numBlock, m_threadsPerBlock>>>(hash, cellOcc, particles, N, gridRes, cellWidth);
+    thrust::fill(d_pressureForces.begin(), d_pressureForces.end(), make_float3(0.0f,0.0f,0.0f));
+    thrust::fill(d_viscousForces.begin(), d_viscousForces.end(), make_float3(0.0f,0.0f,0.0f));
+    thrust::fill(d_surfaceTensionForces.begin(), d_surfaceTensionForces.end(), make_float3(0.0f,0.0f,0.0f));
+    thrust::fill(d_externalForces.begin(), d_externalForces.end(), make_float3(0.0f, 0.0f,0.0f));
+    thrust::fill(d_externalAcceleration.begin(), d_externalAcceleration.end(), make_float3(0.0f, 0.0f, 0.0f));
+    thrust::fill(d_gravityAcceleration.begin(), d_gravityAcceleration.end(), make_float3(0.0f, -9.8f, 0.0f));
+    thrust::fill(d_totalForces.begin(), d_totalForces.end(), make_float3(0.0f,0.0f,0.0f));
+    thrust::fill(thrust::device_pointer_cast(d_densities_ptr), thrust::device_pointer_cast(d_densities_ptr)+m_fluidProperty->numParticles, 0.0f);
+    thrust::fill(d_pressures.begin(), d_pressures.end(), 0.0f);
+    thrust::fill(d_mass.begin(), d_mass.end(), m_fluidProperty->particleMass);
+    thrust::fill(d_particleHashIds.begin(), d_particleHashIds.end(), 0u);
+    thrust::fill(d_cellOccupancy.begin(), d_cellOccupancy.end(), 0u);
+    thrust::fill(d_cellParticleIdx.begin(), d_cellParticleIdx.end(), 0u);
+}
+
+void SPHSolverGPU::ResetDevicePointers()
+{
+    d_mass_ptr = thrust::raw_pointer_cast(&d_mass[0]);
+    d_densities_ptr = thrust::raw_pointer_cast(&d_densities[0]);
+    d_pressures_ptr = thrust::raw_pointer_cast(&d_pressures[0]);
+    d_pressureForces_ptr = thrust::raw_pointer_cast(&d_pressureForces[0]);
+    d_viscousForces_ptr = thrust::raw_pointer_cast(&d_viscousForces[0]);
+    d_surfaceTensionForces_ptr = thrust::raw_pointer_cast(&d_surfaceTensionForces[0]);
+    d_externalForces_ptr = thrust::raw_pointer_cast(&d_externalForces[0]);
+    d_externalAcceleration_ptr = thrust::raw_pointer_cast(&d_externalAcceleration[0]);
+    d_gravityAcceleration_ptr = thrust::raw_pointer_cast(&d_gravityAcceleration[0]);
+    d_totalForces_ptr = thrust::raw_pointer_cast(&d_totalForces[0]);
+    d_particleHashIds_ptr = thrust::raw_pointer_cast(&d_particleHashIds[0]);
+    d_cellOccupancy_ptr = thrust::raw_pointer_cast(d_cellOccupancy.data());
+    d_cellParticleIdx_ptr = thrust::raw_pointer_cast(&d_cellParticleIdx[0]);
+}
+
+void SPHSolverGPU::ParticleHash(uint *hash, uint *cellOcc, float3 *particles, const uint N, const uint gridRes, const float cellWidth, const uint numPoints)
+{
+    uint numBlocks = iDivUp(numPoints, m_threadsPerBlock);
+    ParticleHash_Kernel<<<numBlocks, m_threadsPerBlock>>>(hash, cellOcc, particles, N, gridRes, cellWidth);
 }
 
 void SPHSolverGPU::ComputePressure(const uint maxCellOcc, float *pressure, float *density, const float restDensity, const float gasConstant, const float *mass, const uint *cellOcc, const uint *cellPartIdx, const float3 *particles, const uint numPoints, const float smoothingLength)
@@ -901,28 +921,18 @@ void SPHSolverGPU::ComputeTotalForce(const uint maxCellOcc, float3 *force, const
 
 void SPHSolverGPU::Integrate(const uint maxCellOcc, float3 *force, float3 *particles, float3 *velocities, const float _dt, const uint numPoints)
 {
-    uint threadsPerBlock = 1024;
-    uint numBlocks = iDivUp(numPoints, threadsPerBlock);
+    uint numBlocks = iDivUp(numPoints, m_threadsPerBlock);
 
-    Integrate_kernel<<<numBlocks, threadsPerBlock>>>(force, particles, velocities, _dt, numPoints);
+    Integrate_kernel<<<numBlocks, m_threadsPerBlock>>>(force, particles, velocities, _dt, numPoints);
 }
 
 void SPHSolverGPU::HandleBoundaries(const uint maxCellOcc, float3 *particles, float3 *velocities, const float _gridDim, const uint numPoints)
 {
-    uint threadsPerBlock = 1024;
-    uint numBlocks = iDivUp(numPoints, threadsPerBlock);
+    uint numBlocks = iDivUp(numPoints, m_threadsPerBlock);
 
-    HandleBoundaries_Kernel<<<numBlocks, threadsPerBlock>>>(particles, velocities, _gridDim, numPoints);
+    HandleBoundaries_Kernel<<<numBlocks, m_threadsPerBlock>>>(particles, velocities, _gridDim, numPoints);
 }
 
-
-void SPHSolverGPU::SPHSolve(const uint maxCellOcc, const uint *cellOcc, const uint *cellIds, float3 *particles, float3 *velocities, const uint numPoints, const uint gridRes, const float smoothingLength, const float dt)
-{
-    //dim3 gridDim = dim3(m_fluidProperty->gridResolution, m_fluidProperty->gridResolution, m_fluidProperty->gridResolution);
-    //uint blockSize = ((maxCellOcc / 32)) * 32 + (maxCellOcc % 32)?32:0;
-
-    //SPHSolve_Kernel<<<gridDim, blockSize>>>(maxCellOcc, cellOcc, cellIds, particles, velocities, numPoints, gridRes, smoothingLength, dt);
-}
 
 void SPHSolverGPU::InitParticleAsCube(float3 *particles, float3 *velocities, float *densities, const float restDensity, const uint numParticles, const uint numPartsPerAxis, const float scale)
 {

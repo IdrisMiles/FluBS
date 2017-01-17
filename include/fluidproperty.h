@@ -13,7 +13,7 @@ public:
                   float _surfaceTension = 0.0728f,
                   float _surfaceThreshold = 1.0f,//7.065f,
                   float _gasStiffness = 30.5f,
-                  float _viscosity = 8.9e-6f,//4f,
+                  float _viscosity = 1.0e-2f,
                   float _smoothingLength = 1.2f,
                   float _deltaTime = 0.005f,
                   unsigned int _solveIterations = 1,

@@ -3,6 +3,11 @@
 #include <QMouseEvent>
 #include <math.h>
 
+glm::mat4 OpenGLScene::m_projMat;
+glm::mat4 OpenGLScene::m_viewMat;
+glm::mat4 OpenGLScene::m_modelMat;
+glm::vec3 OpenGLScene::m_lightPos;
+
 OpenGLScene::OpenGLScene(QWidget *parent) : QOpenGLWidget(parent),
     m_xRot(0),
     m_yRot(0),
@@ -138,8 +143,8 @@ void OpenGLScene::initializeGL()
     //---------------------------------------------------------------------------------------
 
     m_fluids.push_back(std::shared_ptr<Fluid>(new Fluid(std::shared_ptr<FluidProperty>(new FluidProperty()))));
-
     emit FluidInitialised(m_fluids.back()->GetFluidPropeties());
+
 
     //---------------------------------------------------------------------------------------
 
@@ -153,6 +158,8 @@ void OpenGLScene::paintGL()
 {
     // clean gl window
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+    //    glEnable(GL_CULL_FACE);
 
     // update model matrix
     m_modelMat = glm::mat4(1);
@@ -160,7 +167,6 @@ void OpenGLScene::paintGL()
     m_modelMat = glm::rotate(m_modelMat, glm::radians(m_xRot/16.0f), glm::vec3(1,0,0));
     m_modelMat = glm::rotate(m_modelMat, glm::radians(m_yRot/16.0f), glm::vec3(0,1,0));
     glm::mat3 normalMatrix =  glm::inverse(glm::mat3(m_modelMat));
-    //glm::vec3 camPos = glm::rotate(glm::rotate(glm::mat4(1.0f), glm::radians(m_xRot/16.0f), glm::vec3(1.0f,0.0f,0.0f)), glm::radians(m_yRot/16.0f), glm::vec3(0.0f,1.0f,0.0f))* glm::vec4(0.0f,0.0f,-0.1f*m_zDis,1.0f);
     glm::vec3 camPos = glm::inverse(glm::mat3(m_modelMat)) * glm::vec4(0.0f,0.0f, 0.1f*m_zDis,1.0f);
 
     //---------------------------------------------------------------------------------------
@@ -211,3 +217,4 @@ void OpenGLScene::mouseMoveEvent(QMouseEvent *event)
     }
     m_lastPos = event->pos();
 }
+

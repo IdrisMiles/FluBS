@@ -15,6 +15,8 @@
 #include <glm/gtx/transform.hpp>
 
 #include "include/fluid.h"
+#include "include/meshloader.h"
+#include "include/rendermesh.h"
 
 
 class OpenGLScene : public QOpenGLWidget
@@ -30,6 +32,11 @@ public:
     QSize sizeHint() const Q_DECL_OVERRIDE;
 
     Fluid *GetFluid(const int &_i){_i<m_fluids.size() ? m_fluids[_i] : nullptr;}
+
+    static glm::mat4 getProjMat(){return m_projMat;}
+    static glm::mat4 getViewMat(){return m_viewMat;}
+    static glm::mat4 getModelMat(){return m_modelMat;}
+    static glm::vec3 getLightPos(){return m_lightPos;}
 
 public slots:
     void setXRotation(int angle);
@@ -68,11 +75,11 @@ private:
     int m_zDis;
 
 
-    glm::mat4 m_projMat;
-    glm::mat4 m_viewMat;
-    glm::mat4 m_modelMat;
+    static glm::mat4 m_projMat;
+    static glm::mat4 m_viewMat;
+    static glm::mat4 m_modelMat;
+    static glm::vec3 m_lightPos;
     QPoint m_lastPos;
-    glm::vec3 m_lightPos;
 
 
     // Application specific members
