@@ -9,6 +9,7 @@
 #include <float.h>
 #include <algorithm>
 
+
 #define NULL_HASH UINT_MAX
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -747,22 +748,6 @@ SPHSolverGPU::~SPHSolverGPU()
 
 }
 
-void SPHSolverGPU::Init()
-{
-    thrust::fill(d_pressureForces.begin(), d_pressureForces.end(), make_float3(0.0f,0.0f,0.0f));
-    thrust::fill(d_viscousForces.begin(), d_viscousForces.end(), make_float3(0.0f,0.0f,0.0f));
-    thrust::fill(d_surfaceTensionForces.begin(), d_surfaceTensionForces.end(), make_float3(0.0f,0.0f,0.0f));
-    thrust::fill(d_externalForces.begin(), d_externalForces.end(), make_float3(0.0f, 0.0f, 0.0f));
-    thrust::fill(d_externalAcceleration.begin(), d_externalAcceleration.end(), make_float3(0.0f, 0.0f, 0.0f));
-    thrust::fill(d_gravityAcceleration.begin(), d_gravityAcceleration.end(), make_float3(0.0f, -9.8f, 0.0f));
-    thrust::fill(d_totalForces.begin(), d_totalForces.end(), make_float3(0.0f,0.0f,0.0f));
-    thrust::fill(d_densities.begin(), d_densities.end(), 0.0f);
-    thrust::fill(d_pressures.begin(), d_pressures.end(), 0.0f);
-    thrust::fill(d_mass.begin(), d_mass.end(), m_fluidProperty->particleMass);
-    thrust::fill(d_particleHashIds.begin(), d_particleHashIds.end(), 0u);
-    thrust::fill(d_cellOccupancy.begin(), d_cellOccupancy.end(), 0u);
-    thrust::fill(d_cellParticleIdx.begin(), d_cellParticleIdx.end(), 0u);
-}
 
 
 void SPHSolverGPU::Solve(float _dt, float3* _d_p, float3* _d_v, float *_d_d)
@@ -826,16 +811,7 @@ void SPHSolverGPU::Solve(float _dt, float3* _d_p, float3* _d_v, float *_d_d)
 
 
 
-//    std::cout << "\n\nHash: \n";
-//    thrust::copy(d_particleHashIds.begin(), d_particleHashIds.end(), std::ostream_iterator<uint>(std::cout, " "));
-//    std::cout << "\n\nOccupancy: \n";
-//    thrust::copy(d_cellOccupancy.begin(), d_cellOccupancy.end(), std::ostream_iterator<uint>(std::cout, " "));
-//    std::cout << "\n\nCell particle Ids: \n";
-//    thrust::copy(d_cellParticleIdx.begin(), d_cellParticleIdx.end(), std::ostream_iterator<uint>(std::cout, " "));
-//    std::cout << "\n\nMax Cell Occ: "<<maxCellOcc<<"\n";
-//    std::cout << "\n\nPressure: \n";
-//    thrust::copy(d_pressures.begin(), d_pressures.end(), std::ostream_iterator<float>(std::cout, " "));
-
+    //PrintInfo();
 
 }
 
@@ -933,8 +909,7 @@ void SPHSolverGPU::HandleBoundaries(const uint maxCellOcc, float3 *particles, fl
     HandleBoundaries_Kernel<<<numBlocks, m_threadsPerBlock>>>(particles, velocities, _gridDim, numPoints);
 }
 
-
-void SPHSolverGPU::InitParticleAsCube(float3 *particles, float3 *velocities, float *densities, const float restDensity, const uint numParticles, const uint numPartsPerAxis, const float scale)
+void SPHSolverGPU::InitFluidAsCube(float3 *particles, float3 *velocities, float *densities, const float restDensity, const uint numParticles, const uint numPartsPerAxis, const float scale)
 {
 
     uint threadsPerBlock = 8;
@@ -947,3 +922,17 @@ void SPHSolverGPU::InitParticleAsCube(float3 *particles, float3 *velocities, flo
 }
 
 
+void SPHSolverGPU::PrintInfo()
+{
+    std::cout << "\n\nHash: \n";
+    thrust::copy(d_particleHashIds.begin(), d_particleHashIds.end(), std::ostream_iterator<uint>(std::cout, " "));
+
+    std::cout << "\n\nOccupancy: \n";
+    thrust::copy(d_cellOccupancy.begin(), d_cellOccupancy.end(), std::ostream_iterator<uint>(std::cout, " "));
+
+    std::cout << "\n\nCell particle Ids: \n";
+    thrust::copy(d_cellParticleIdx.begin(), d_cellParticleIdx.end(), std::ostream_iterator<uint>(std::cout, " "));
+
+    std::cout << "\n\nPressure: \n";
+    thrust::copy(d_pressures.begin(), d_pressures.end(), std::ostream_iterator<float>(std::cout, " "));
+}

@@ -142,8 +142,14 @@ void OpenGLScene::initializeGL()
 
     //---------------------------------------------------------------------------------------
 
-    m_fluids.push_back(std::shared_ptr<Fluid>(new Fluid(std::shared_ptr<FluidProperty>(new FluidProperty()))));
-    emit FluidInitialised(m_fluids.back()->GetFluidPropeties());
+    auto fluidProps = std::shared_ptr<FluidProperty>(new FluidProperty());
+    m_fluid = std::shared_ptr<Fluid>(new Fluid(fluidProps));
+    m_fluidSolver = std::shared_ptr<SPHSolverGPU>(new SPHSolverGPU(fluidProps.get()));
+    m_fluidSystem = std::shared_ptr<FluidSystem>(new FluidSystem(m_fluidSolver, m_fluid, nullptr, fluidProps));
+
+    emit FluidInitialised(fluidProps);
+
+    m_fluidSystem->InitialiseSim();
 
 
     //---------------------------------------------------------------------------------------
@@ -171,8 +177,8 @@ void OpenGLScene::paintGL()
 
     //---------------------------------------------------------------------------------------
     // Draw code - replace this with project specific draw stuff
-    m_fluids.back()->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, normalMatrix, m_lightPos, camPos);
-    m_fluids.back()->Draw();
+    m_fluid->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, normalMatrix, m_lightPos, camPos);
+    m_fluid->Draw();
     //---------------------------------------------------------------------------------------
 
 }
@@ -180,18 +186,12 @@ void OpenGLScene::paintGL()
 
 void OpenGLScene::UpdateSim()
 {
-    for(auto fluid : m_fluids)
-    {
-        fluid->Simulate();
-    }
+    m_fluidSystem->StepSimulation();
 }
 
 void OpenGLScene::ResetSim()
 {
-    for(auto fluid : m_fluids)
-    {
-        fluid->Reset();
-    }
+    m_fluidSystem->ResetSim();
 }
 
 void OpenGLScene::resizeGL(int w, int h)

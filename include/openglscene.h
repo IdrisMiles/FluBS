@@ -14,7 +14,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 
+#include "include/fluidsystem.h"
 #include "include/fluid.h"
+#include "include/sphsolverGPU.h"
+
 #include "include/meshloader.h"
 #include "include/rendermesh.h"
 
@@ -30,8 +33,6 @@ public:
 
     QSize minimumSizeHint() const Q_DECL_OVERRIDE;
     QSize sizeHint() const Q_DECL_OVERRIDE;
-
-    Fluid *GetFluid(const int &_i){_i<m_fluids.size() ? m_fluids[_i] : nullptr;}
 
     static glm::mat4 getProjMat(){return m_projMat;}
     static glm::mat4 getViewMat(){return m_viewMat;}
@@ -83,7 +84,9 @@ private:
 
 
     // Application specific members
-    std::vector<std::shared_ptr<Fluid>> m_fluids;
+    std::shared_ptr<Fluid> m_fluid;
+    std::shared_ptr<SPHSolverGPU> m_fluidSolver;
+    std::shared_ptr<FluidSystem> m_fluidSystem;
 
     QTimer *m_drawTimer;
     QTimer *m_simTimer;

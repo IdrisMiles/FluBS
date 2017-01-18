@@ -1,8 +1,7 @@
 #ifndef FLUID_H
 #define FLUID_H
 
-#include "include/sphsolverGPU.h"
-#include "include/fluidproperty.h"
+#include "fluidproperty.h"
 
 // OpenGL includes
 #include <GL/glew.h>
@@ -20,9 +19,6 @@
 
 // Thrust includes for CUDA stuff
 #include <thrust/host_vector.h>
-#include <thrust/device_vector.h>
-#include <thrust/sort.h>
-#include <thrust/scan.h>
 
 #include <glm/glm.hpp>
 
@@ -34,23 +30,32 @@ public:
     Fluid(std::shared_ptr<FluidProperty> _fluidProperty);
     ~Fluid();
 
-    void Init();
-    void Simulate();
     void Draw();
-    void SetShaderUniforms(const glm::mat4 &_projMat, const glm::mat4 &_viewMat, const glm::mat4 &_modelMat, const glm::mat4 &_normalMat, const glm::vec3 &_lightPos, const glm::vec3 &_camPos);
-    std::shared_ptr<FluidProperty> GetFluidPropeties(){return m_fluidProperty;}
-    void Reset();
+    void SetShaderUniforms(const glm::mat4 &_projMat,
+                           const glm::mat4 &_viewMat,
+                           const glm::mat4 &_modelMat,
+                           const glm::mat4 &_normalMat,
+                           const glm::vec3 &_lightPos,
+                           const glm::vec3 &_camPos);
+
+    float3 *GetPositionsPtr();
+    void ReleasePositionsPtr();
+
+    float3 *GetVelocitiesPtr();
+    void ReleaseVelocitiesPtr();
+
+    float *GetDensitiesPtr();
+    void ReleaseDensitiesPtr();
+
 
 private:
+    void Init();
     void InitGL();
     void InitVAO();
     void InitShader();
-    void InitParticles();
-    void AppendSphereVerts(glm::vec3 _pos = glm::vec3(0.0f,0.0f,0.0f), float _radius = 1.0f, int _stacks = 16, int _slices = 32);
 
 
     // Simulation stuff
-    SPHSolverGPU* m_solver;
     std::shared_ptr<FluidProperty> m_fluidProperty;
     float3 *d_positions_ptr;
     float3 *d_velocities_ptr;
@@ -61,9 +66,9 @@ private:
     QOpenGLShaderProgram m_shaderProg;
     GLuint m_vertexAttrLoc;
     GLuint m_normalAttrLoc;
-    GLuint m_posAttrLoc; // instance
-    GLuint m_velAttrLoc; // instance
-    GLuint m_denAttrLoc; // instance
+    GLuint m_posAttrLoc;
+    GLuint m_velAttrLoc;
+    GLuint m_denAttrLoc;
     GLuint m_projMatrixLoc;
     GLuint m_mvMatrixLoc;
     GLuint m_normalMatrixLoc;
@@ -73,9 +78,6 @@ private:
     GLuint m_camPosLoc;
 
     QOpenGLVertexArrayObject m_vao;
-    QOpenGLBuffer m_meshVBO;
-    QOpenGLBuffer m_meshNBO;
-    QOpenGLBuffer m_meshIBO;
     QOpenGLBuffer m_posBO;
     QOpenGLBuffer m_velBO;
     QOpenGLBuffer m_denBO;
@@ -84,9 +86,6 @@ private:
     cudaGraphicsResource *m_velBO_CUDA;
     cudaGraphicsResource *m_denBO_CUDA;
 
-    std::vector<glm::vec3> m_meshVerts;
-    std::vector<glm::vec3> m_meshNorms;
-    std::vector<glm::ivec3> m_meshTris;
 
     glm::vec3 m_colour;
 

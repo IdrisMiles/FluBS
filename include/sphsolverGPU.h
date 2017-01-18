@@ -25,9 +25,10 @@ public:
     SPHSolverGPU(FluidProperty* _fluidProperty);
     virtual ~SPHSolverGPU();
 
-    void Init();
+    void InitFluidAsCube(float3 *particles, float3 *velocities, float *densities, const float restDensity, const unsigned int numParticles, const unsigned int numPartsPerAxis, const float scale);
     void Solve(float _dt, float3 *_d_p, float3 *_d_v, float *_d_d);
 
+private:
     void ParticleHash(unsigned int *hash, unsigned int *cellOcc, float3 *particles, const unsigned int N, const unsigned int gridRes, const float cellWidth, const uint numPoints);
     void ComputePressure(const uint maxCellOcc, float *pressure, float *density, const float restDensity, const float gasConstant, const float *mass, const uint *cellOcc, const uint *cellPartIdx, const float3 *particles, const uint numPoints, const float smoothingLength);
     void ComputePressureForce(const uint maxCellOcc, float3 *pressureForce, const float *pressure, const float *density, const float *mass, const float3 *particles, const uint *cellOcc, const uint *cellPartIdx, const uint numPoints, const float smoothingLength);
@@ -37,10 +38,8 @@ public:
     void Integrate(const uint maxCellOcc, float3 *force, float3 *particles, float3 *velocities, const float _dt, const uint numPoints);
     void HandleBoundaries(const uint maxCellOcc, float3 *particles, float3 *velocities, const float _gridDim, const uint numPoints);
 
-    void InitParticleAsCube(float3 *particles, float3 *velocities, float *densities, const float restDensity, const unsigned int numParticles, const unsigned int numPartsPerAxis, const float scale);
 
-
-private:
+    void PrintInfo();
 
     void ResetProperties();
     void ResetDevicePointers();

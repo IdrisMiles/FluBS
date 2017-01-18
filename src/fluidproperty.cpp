@@ -29,6 +29,9 @@ FluidProperty::FluidProperty(unsigned int _numParticles,
     gridCellWidth(_gridCellWidth),
     play(_play)
 {
+
+    float dia = 2.0f * particleRadius;
+    particleMass = restDensity * (dia * dia * dia);
 }
 
 
