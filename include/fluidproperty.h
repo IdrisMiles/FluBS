@@ -30,8 +30,8 @@ public:
     float surfaceThreshold;
     float gasStiffness;
     float viscosity;
-    float smoothingLength;
     float particleRadius;
+    float smoothingLength;
 
     float deltaTime;
     unsigned int solveIterations;

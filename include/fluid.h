@@ -38,14 +38,19 @@ public:
                            const glm::vec3 &_lightPos,
                            const glm::vec3 &_camPos);
 
-    float3 *GetPositionsPtr();
-    void ReleasePositionsPtr();
+    std::shared_ptr<FluidProperty> GetFluidProperty();
 
-    float3 *GetVelocitiesPtr();
-    void ReleaseVelocitiesPtr();
+    float3 *GetPositionPtr();
+    void ReleasePositionPtr();
 
-    float *GetDensitiesPtr();
-    void ReleaseDensitiesPtr();
+    float3 *GetVelocityPtr();
+    void ReleaseVelocityPtr();
+
+    float *GetDensityPtr();
+    void ReleaseDensityPtr();
+
+    float *GetMassPtr();
+    void ReleaseMassPtr();
 
 
 private:
@@ -57,9 +62,10 @@ private:
 
     // Simulation stuff
     std::shared_ptr<FluidProperty> m_fluidProperty;
-    float3 *d_positions_ptr;
-    float3 *d_velocities_ptr;
-    float *d_densities_ptr;
+    float3 *d_position_ptr;
+    float3 *d_velocity_ptr;
+    float *d_density_ptr;
+    float *d_mass_ptr;
 
 
     // Rendering stuff
@@ -81,10 +87,12 @@ private:
     QOpenGLBuffer m_posBO;
     QOpenGLBuffer m_velBO;
     QOpenGLBuffer m_denBO;
+    QOpenGLBuffer m_massBO;
 
     cudaGraphicsResource *m_posBO_CUDA;
     cudaGraphicsResource *m_velBO_CUDA;
     cudaGraphicsResource *m_denBO_CUDA;
+    cudaGraphicsResource *m_massBO_CUDA;
 
 
     glm::vec3 m_colour;

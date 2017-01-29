@@ -16,17 +16,20 @@
 #include <thrust/reduce.h>
 
 #include "fluidproperty.h"
+#include "fluidsolverproperty.h"
 
 
 class SPHSolverGPU
 {
 
 public:
-    SPHSolverGPU(FluidProperty* _fluidProperty);
+    SPHSolverGPU(FluidProperty* _fluidProperty, FluidSolverProperty* _fluidSolverProperty);
     virtual ~SPHSolverGPU();
 
     void InitFluidAsCube(float3 *particles, float3 *velocities, float *densities, const float restDensity, const unsigned int numParticles, const unsigned int numPartsPerAxis, const float scale);
     void Solve(float _dt, float3 *_d_p, float3 *_d_v, float *_d_d);
+
+    FluidSolverProperty *GetFluidSolverProperty();
 
 private:
     void ParticleHash(unsigned int *hash, unsigned int *cellOcc, float3 *particles, const unsigned int N, const unsigned int gridRes, const float cellWidth, const uint numPoints);
@@ -46,6 +49,7 @@ private:
 
 
     FluidProperty* m_fluidProperty;
+    FluidSolverProperty* m_fluidSolverProperty;
 
     thrust::device_vector<float3> d_positions;
     thrust::device_vector<float3> d_velocities;
@@ -56,7 +60,6 @@ private:
     thrust::device_vector<float3> d_externalAcceleration;
     thrust::device_vector<float3> d_gravityAcceleration;
     thrust::device_vector<float3> d_totalForces;
-    //thrust::device_vector<float> d_colourField;
     thrust::device_vector<float> d_densities;
     thrust::device_vector<float> d_pressures;
     thrust::device_vector<float> d_mass;

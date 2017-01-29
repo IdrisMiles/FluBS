@@ -1,5 +1,7 @@
 
 #include "../include/sphsolverGPU.h"
+#include "../cuda_inc/vec_ops.cuh"
+#include "../cuda_inc/smoothingKernel.cuh"
 
 //#include "helper_math.h"
 #include <thrust/extrema.h>
@@ -12,175 +14,6 @@
 
 #define NULL_HASH UINT_MAX
 
-//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-__device__ float3 operator+(const float3 lhs, const float3 rhs)
-{
-    return make_float3(lhs.x+rhs.x, lhs.y+rhs.y, lhs.z+rhs.z);
-}
-
-__device__ float3 operator-(const float3 lhs, const float3 rhs)
-{
-    return make_float3(lhs.x-rhs.x, lhs.y-rhs.y, lhs.z-rhs.z);
-}
-
-__device__ float3 operator*(const float3 lhs, const float3 rhs)
-{
-    return make_float3(lhs.x*rhs.x, lhs.y*rhs.y, lhs.z*rhs.z);
-}
-
-__device__ float3 operator*(const float3 lhs, const float rhs)
-{
-    return make_float3(lhs.x*rhs, lhs.y*rhs, lhs.z*rhs);
-}
-
-__device__ float3 operator*(const float lhs, const float3 rhs)
-{
-    return make_float3(lhs*rhs.x, lhs*rhs.y, lhs*rhs.z);
-}
-
-__device__ float3 operator/(const float3 lhs, const float3 rhs)
-{
-    return make_float3(lhs.x/rhs.x, lhs.y/rhs.y, lhs.z/rhs.z);
-}
-
-__device__ float3 operator/(const float3 lhs, const float rhs)
-{
-    return make_float3(lhs.x/rhs, lhs.y/rhs, lhs.z/rhs);
-}
-
-__device__ float dot(const float3 lhs, const float3 rhs)
-{
-    return lhs.x*rhs.x + lhs.y*rhs.y + lhs.z*rhs.z;
-}
-
-__device__ float length(const float3 vec)
-{
-    return sqrtf(dot(vec,vec));
-}
-
-__device__ float length2(const float3 vec)
-{
-    return dot(vec,vec);
-}
-
-__device__ float magnitude(const float3 vec)
-{
-    return sqrtf(dot(vec,vec));
-}
-
-
-__device__ float3 normalize(const float3 vec)
-{
-    float mag = magnitude(vec);
-    if(fabs(mag) < FLT_EPSILON)
-    {
-        return vec;
-    }
-    else
-    {
-        return vec / mag;
-    }
-}
-
-
-//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-__device__ float SpikyKernel_Kernel(const float &_r, const float &_h)
-{
-    if(fabs(_r) > _h || _r < 0.0f)
-    {
-        return 0.0f;
-    }
-    else
-    {
-        return (15.0f/(CUDART_PI_F * pow(_h, 6.0f))) * pow((_h-_r), 3.0f);
-    }
-}
-
-__device__ float SpikyKernelGradient_Kernel(const float &_r, const float &_h)
-{
-    if(fabs(_r) > _h || fabs(_r) <= FLT_EPSILON)
-    {
-        return 0.0f;
-    }
-    else
-    {
-        float coeff = - (45.0f/(CUDART_PI_F*pow(_h,6.0f)));
-        return coeff * pow((_h-_r), 2.0f);
-    }
-}
-
-__device__ float3 SpikyKernelGradient_Kernel(const float3 _a, const float3 _b, const float _h)
-{
-    float3 dir = _a - _b;
-    float distance = length(dir);
-    if(fabs(distance) <= FLT_EPSILON)
-    {
-        return make_float3(0.f, 0.f, 0.f);
-    }
-    else
-    {
-        float c = SpikyKernelGradient_Kernel(distance, _h);
-
-        return (c * dir/distance);
-    }
-}
-
-
-__device__ float ViscosityKernel(const float &_r, const float &_h)
-{
-    if (fabs(_r) > _h || _r < 0.0f)
-    {
-        return 0.0f;
-    }
-    else
-    {
-        return ( 15.0f/(2.0f*CUDART_PI_F*pow(_h,3.0f)) ) * ( -(pow(_r,3.0f)/(2.0f*pow(_h,2.0f))) + (pow(_r,2.0f)/pow(_h,2.0f)) + (_h/(2.0f*_r)) - 1.0f );
-    }
-
-}
-
-__device__ float Poly6Kernel_Kernel(const float &_r, const float &_h)
-{
-    if (fabs(_r) > _h)
-    {
-        return 0.0f;
-    }
-
-    return (315.0f / (64.0f*CUDART_PI_F*pow(_h,9.0f))) * pow((_h*_h)-(_r*_r), 3.0f);
-}
-
-__device__ float Poly6Laplacian_Kernel(const float &_r, const float &_h)
-{
-    if(_r > _h && _r < 0.0f)
-    {
-        return 0.0f;
-    }
-    else
-    {
-        float a = -945.0 / (32.0*CUDART_PI_F*pow(_h, 9.0f));
-        float b = (_h*_h) - (_r*_r);
-        float c = 3.0f * (_h*_h) - 7.0f * (_r*_r);
-        return a * b * c;
-    }
-}
-
-__device__ float SplineGaussianKernel_Kernel(const float &_r, const float &_h)
-{
-    if(fabs(_r) > /*2.0f**/_h || _r < 0.0f)
-    {
-        return 0.0f;
-    }
-    else if(fabs(_r) > _h)
-    {
-        return (1/(CUDART_PI_F * _h)) * 0.25f * pow(2-(_r/_h), 3);
-    }
-    else
-    {
-        return (1/(CUDART_PI_F * _h)) * (1.0f - (1.5f*(pow((_r/_h), 2))) + (0.75f*(pow((_r/_h), 3))));
-    }
-}
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 template <typename T>
@@ -188,6 +21,8 @@ __device__ T clamp(T t, T min, T max)
 {
     return ( (t<min) ? min : ( (t>max)?max:t ) );
 }
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 __global__ void ParticleHash_Kernel(uint *hash, uint *cellOcc, const float3 *particles, const uint N, const uint gridRes, const float cellWidth)
 {
@@ -275,6 +110,8 @@ __global__ void ComputePressure_kernel(float *pressure, float *density, const fl
                 {
                     numNeighCells++;
                     neighCellIdx = thisCellIdx + x + (y*gridDim.x) + (z*gridDim.x*gridDim.y);
+
+                    // Get density contribution from other fluid particles
                     neighCellOcc = cellOcc[neighCellIdx];
                     neighCellPartIdx = cellPartIdx[neighCellIdx];
                     for(neighLocalIdx=0; neighLocalIdx<neighCellOcc; neighLocalIdx++)
@@ -289,6 +126,12 @@ __global__ void ComputePressure_kernel(float *pressure, float *density, const fl
 
                         numNeighs++;
                     }
+
+
+                    // Get density contribution from Boundary particles
+
+
+                    // Get density contribution from Algae particles
                 }
             }
         }
@@ -511,7 +354,6 @@ __global__ void ComputeSurfaceTensionForce_kernel(float3 *surfaceTensionForce, c
         {
             accCurvature /= colourFieldGradMag;
             surfaceTensionForce[thisParticleGlobalIdx] = (-surfaceTension * accCurvature * accColourFieldGrad);
-            //density[thisParticleGlobalIdx] = 20000.0f;
         }
         else
         {
@@ -718,9 +560,10 @@ uint iDivUp(uint a, uint b)
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-SPHSolverGPU::SPHSolverGPU(FluidProperty *_fluidProperty)
+SPHSolverGPU::SPHSolverGPU(FluidProperty *_fluidProperty, FluidSolverProperty *_fluidSolverProperty)
 {
     m_fluidProperty = _fluidProperty;
+    m_fluidSolverProperty = _fluidSolverProperty;
 
     d_mass.resize(m_fluidProperty->numParticles);
     d_densities.resize(m_fluidProperty->numParticles);
@@ -728,13 +571,13 @@ SPHSolverGPU::SPHSolverGPU(FluidProperty *_fluidProperty)
     d_pressureForces.resize(m_fluidProperty->numParticles);
     d_viscousForces.resize(m_fluidProperty->numParticles);
     d_surfaceTensionForces.resize(m_fluidProperty->numParticles);
-    d_externalForces.resize(m_fluidProperty->gridResolution*m_fluidProperty->gridResolution*m_fluidProperty->gridResolution);
-    d_externalAcceleration.resize(m_fluidProperty->gridResolution*m_fluidProperty->gridResolution*m_fluidProperty->gridResolution);
-    d_gravityAcceleration.resize(m_fluidProperty->gridResolution*m_fluidProperty->gridResolution*m_fluidProperty->gridResolution);
+    d_externalForces.resize(m_fluidSolverProperty->gridResolution*m_fluidSolverProperty->gridResolution*m_fluidSolverProperty->gridResolution);
+    d_externalAcceleration.resize(m_fluidSolverProperty->gridResolution*m_fluidSolverProperty->gridResolution*m_fluidSolverProperty->gridResolution);
+    d_gravityAcceleration.resize(m_fluidSolverProperty->gridResolution*m_fluidSolverProperty->gridResolution*m_fluidSolverProperty->gridResolution);
     d_totalForces.resize(m_fluidProperty->numParticles);
     d_particleHashIds.resize(m_fluidProperty->numParticles);
-    d_cellOccupancy.resize(m_fluidProperty->gridResolution*m_fluidProperty->gridResolution*m_fluidProperty->gridResolution);
-    d_cellParticleIdx.resize(m_fluidProperty->gridResolution*m_fluidProperty->gridResolution*m_fluidProperty->gridResolution);
+    d_cellOccupancy.resize(m_fluidSolverProperty->gridResolution*m_fluidSolverProperty->gridResolution*m_fluidSolverProperty->gridResolution);
+    d_cellParticleIdx.resize(m_fluidSolverProperty->gridResolution*m_fluidSolverProperty->gridResolution*m_fluidSolverProperty->gridResolution);
 
     ResetDevicePointers();
 
@@ -748,7 +591,10 @@ SPHSolverGPU::~SPHSolverGPU()
 
 }
 
-
+FluidSolverProperty *SPHSolverGPU::GetFluidSolverProperty()
+{
+    return m_fluidSolverProperty;
+}
 
 void SPHSolverGPU::Solve(float _dt, float3* _d_p, float3* _d_v, float *_d_d)
 {
@@ -762,7 +608,7 @@ void SPHSolverGPU::Solve(float _dt, float3* _d_p, float3* _d_v, float *_d_d)
     cudaThreadSynchronize();
 
     // Get particle hash IDs
-    ParticleHash(d_particleHashIds_ptr, d_cellOccupancy_ptr, d_positions_ptr, m_fluidProperty->numParticles, m_fluidProperty->gridResolution, m_fluidProperty->gridCellWidth, m_fluidProperty->numParticles);
+    ParticleHash(d_particleHashIds_ptr, d_cellOccupancy_ptr, d_positions_ptr, m_fluidProperty->numParticles, m_fluidSolverProperty->gridResolution, m_fluidSolverProperty->gridCellWidth, m_fluidProperty->numParticles);
     cudaThreadSynchronize();
 
     // Sort particles
@@ -780,25 +626,25 @@ void SPHSolverGPU::Solve(float _dt, float3* _d_p, float3* _d_v, float *_d_d)
     }
 
     // Run SPH solver
-    ComputePressure(maxCellOcc, d_pressures_ptr, d_densities_ptr, m_fluidProperty->restDensity, m_fluidProperty->gasStiffness, d_mass_ptr, d_cellOccupancy_ptr, d_cellParticleIdx_ptr, d_positions_ptr, m_fluidProperty->numParticles, m_fluidProperty->smoothingLength);
+    ComputePressure(maxCellOcc, d_pressures_ptr, d_densities_ptr, m_fluidProperty->restDensity, m_fluidProperty->gasStiffness, d_mass_ptr, d_cellOccupancy_ptr, d_cellParticleIdx_ptr, d_positions_ptr, m_fluidProperty->numParticles, m_fluidSolverProperty->smoothingLength);
     cudaThreadSynchronize();
 
     // pressure force
-    ComputePressureForce(maxCellOcc, d_pressureForces_ptr, d_pressures_ptr, d_densities_ptr, d_mass_ptr, d_positions_ptr, d_cellOccupancy_ptr, d_cellParticleIdx_ptr, m_fluidProperty->numParticles, m_fluidProperty->smoothingLength);
+    ComputePressureForce(maxCellOcc, d_pressureForces_ptr, d_pressures_ptr, d_densities_ptr, d_mass_ptr, d_positions_ptr, d_cellOccupancy_ptr, d_cellParticleIdx_ptr, m_fluidProperty->numParticles, m_fluidSolverProperty->smoothingLength);
 
     // TODO:
     // Compute boundary pressures
 
 
     // viscous force
-    ComputeViscForce(maxCellOcc, d_viscousForces_ptr, m_fluidProperty->viscosity, d_velocities_ptr, d_densities_ptr, d_mass_ptr, d_positions_ptr, d_cellOccupancy_ptr, d_cellParticleIdx_ptr, m_fluidProperty->numParticles, m_fluidProperty->smoothingLength);
+    ComputeViscForce(maxCellOcc, d_viscousForces_ptr, m_fluidProperty->viscosity, d_velocities_ptr, d_densities_ptr, d_mass_ptr, d_positions_ptr, d_cellOccupancy_ptr, d_cellParticleIdx_ptr, m_fluidProperty->numParticles, m_fluidSolverProperty->smoothingLength);
 
     // Compute surface tension
-    ComputeSurfaceTensionForce(maxCellOcc, d_surfaceTensionForces_ptr, m_fluidProperty->surfaceTension, m_fluidProperty->surfaceThreshold, d_densities_ptr, d_mass_ptr, d_positions_ptr, d_cellOccupancy_ptr, d_cellParticleIdx_ptr, m_fluidProperty->numParticles, m_fluidProperty->smoothingLength);
+    ComputeSurfaceTensionForce(maxCellOcc, d_surfaceTensionForces_ptr, m_fluidProperty->surfaceTension, m_fluidProperty->surfaceThreshold, d_densities_ptr, d_mass_ptr, d_positions_ptr, d_cellOccupancy_ptr, d_cellParticleIdx_ptr, m_fluidProperty->numParticles, m_fluidSolverProperty->smoothingLength);
     cudaThreadSynchronize();
 
     // Compute total force and acceleration
-    ComputeTotalForce(maxCellOcc, d_totalForces_ptr, d_externalForces_ptr, d_pressureForces_ptr, d_viscousForces_ptr, d_surfaceTensionForces_ptr, d_mass_ptr, d_positions_ptr, d_velocities_ptr,d_cellOccupancy_ptr, d_cellParticleIdx_ptr, m_fluidProperty->numParticles, m_fluidProperty->smoothingLength);
+    ComputeTotalForce(maxCellOcc, d_totalForces_ptr, d_externalForces_ptr, d_pressureForces_ptr, d_viscousForces_ptr, d_surfaceTensionForces_ptr, d_mass_ptr, d_positions_ptr, d_velocities_ptr,d_cellOccupancy_ptr, d_cellParticleIdx_ptr, m_fluidProperty->numParticles, m_fluidSolverProperty->smoothingLength);
     cudaThreadSynchronize();
 
     // integrate particle position and velocities
@@ -806,7 +652,7 @@ void SPHSolverGPU::Solve(float _dt, float3* _d_p, float3* _d_v, float *_d_d)
     cudaThreadSynchronize();
 
     // Handle boundaries
-    HandleBoundaries(maxCellOcc, d_positions_ptr, d_velocities_ptr, (float)0.5f*m_fluidProperty->gridCellWidth * m_fluidProperty->gridResolution, m_fluidProperty->numParticles);
+    HandleBoundaries(maxCellOcc, d_positions_ptr, d_velocities_ptr, (float)0.5f*m_fluidSolverProperty->gridCellWidth * m_fluidSolverProperty->gridResolution, m_fluidProperty->numParticles);
     cudaThreadSynchronize();
 
 
@@ -857,7 +703,7 @@ void SPHSolverGPU::ParticleHash(uint *hash, uint *cellOcc, float3 *particles, co
 
 void SPHSolverGPU::ComputePressure(const uint maxCellOcc, float *pressure, float *density, const float restDensity, const float gasConstant, const float *mass, const uint *cellOcc, const uint *cellPartIdx, const float3 *particles, const uint numPoints, const float smoothingLength)
 {
-    dim3 gridDim = dim3(m_fluidProperty->gridResolution, m_fluidProperty->gridResolution, m_fluidProperty->gridResolution);
+    dim3 gridDim = dim3(m_fluidSolverProperty->gridResolution, m_fluidSolverProperty->gridResolution, m_fluidSolverProperty->gridResolution);
     uint blockSize = std::min(maxCellOcc, 1024u);
 
     ComputePressure_kernel<<<gridDim, blockSize>>>(pressure, density, restDensity, gasConstant, mass, cellOcc, cellPartIdx, particles, numPoints, smoothingLength);
@@ -865,7 +711,7 @@ void SPHSolverGPU::ComputePressure(const uint maxCellOcc, float *pressure, float
 
 void SPHSolverGPU::ComputePressureForce(const uint maxCellOcc, float3 *pressureForce, const float *pressure, const float *density, const float *mass, const float3 *particles, const uint *cellOcc, const uint *cellPartIdx, const uint numPoints, const float smoothingLength)
 {
-    dim3 gridDim = dim3(m_fluidProperty->gridResolution, m_fluidProperty->gridResolution, m_fluidProperty->gridResolution);
+    dim3 gridDim = dim3(m_fluidSolverProperty->gridResolution, m_fluidSolverProperty->gridResolution, m_fluidSolverProperty->gridResolution);
     uint blockSize = std::min(maxCellOcc, 1024u);
 
     ComputePressureForce_kernel<<<gridDim, blockSize>>>(pressureForce, pressure, density, mass, particles, cellOcc, cellPartIdx, numPoints, smoothingLength);
@@ -873,7 +719,7 @@ void SPHSolverGPU::ComputePressureForce(const uint maxCellOcc, float3 *pressureF
 
 void SPHSolverGPU::ComputeViscForce(const uint maxCellOcc, float3 *viscForce, const float viscCoeff, const float3 *velocity, const float *density, const float *mass, const float3 *particles, const uint *cellOcc, const uint *cellPartIdx, const uint numPoints, const float smoothingLength)
 {
-    dim3 gridDim = dim3(m_fluidProperty->gridResolution, m_fluidProperty->gridResolution, m_fluidProperty->gridResolution);
+    dim3 gridDim = dim3(m_fluidSolverProperty->gridResolution, m_fluidSolverProperty->gridResolution, m_fluidSolverProperty->gridResolution);
     uint blockSize = std::min(maxCellOcc, 1024u);
 
     ComputeViscousForce_kernel<<<gridDim, blockSize>>>(viscForce, viscCoeff, velocity, density, mass, particles, cellOcc, cellPartIdx, numPoints, smoothingLength);
@@ -881,7 +727,7 @@ void SPHSolverGPU::ComputeViscForce(const uint maxCellOcc, float3 *viscForce, co
 
 void SPHSolverGPU::ComputeSurfaceTensionForce(const uint maxCellOcc, float3 *surfTenForce, const float surfaceTension, const float surfaceThreshold, /*const */float *density, const float *mass, const float3 *particles, const uint *cellOcc, const uint *cellPartIdx, const uint numPoints, const float smoothingLength)
 {
-    dim3 gridDim = dim3(m_fluidProperty->gridResolution, m_fluidProperty->gridResolution, m_fluidProperty->gridResolution);
+    dim3 gridDim = dim3(m_fluidSolverProperty->gridResolution, m_fluidSolverProperty->gridResolution, m_fluidSolverProperty->gridResolution);
     uint blockSize = std::min(maxCellOcc, 1024u);
 
     ComputeSurfaceTensionForce_kernel<<<gridDim, blockSize>>>(surfTenForce, surfaceTension, surfaceThreshold, density, mass, particles, cellOcc, cellPartIdx, numPoints, smoothingLength);
@@ -889,7 +735,7 @@ void SPHSolverGPU::ComputeSurfaceTensionForce(const uint maxCellOcc, float3 *sur
 
 void SPHSolverGPU::ComputeTotalForce(const uint maxCellOcc, float3 *force, const float3 *externalForce, const float3 *pressureForce, const float3 *viscForce, const float3 *surfaceTensionForce, const float *mass, const float3 *particles, const float3 *velocities, const uint *cellOcc, const uint *cellPartIdx, const uint numPoints, const float smoothingLength)
 {
-    dim3 gridDim = dim3(m_fluidProperty->gridResolution, m_fluidProperty->gridResolution, m_fluidProperty->gridResolution);
+    dim3 gridDim = dim3(m_fluidSolverProperty->gridResolution, m_fluidSolverProperty->gridResolution, m_fluidSolverProperty->gridResolution);
     uint blockSize = std::min(maxCellOcc, 1024u);
 
     ComputeForces_kernel<<<gridDim, blockSize>>>(force, externalForce, pressureForce, viscForce, surfaceTensionForce, mass, particles, velocities, cellOcc, cellPartIdx, numPoints, smoothingLength);

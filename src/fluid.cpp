@@ -25,6 +25,9 @@ Fluid::~Fluid()
     cudaGraphicsUnregisterResource(m_denBO_CUDA);
     m_denBO.destroy();
 
+    cudaGraphicsUnregisterResource(m_massBO_CUDA);
+    m_massBO.destroy();
+
     m_vao.destroy();
     m_shaderProg.destroyed();
 }
@@ -142,51 +145,80 @@ void Fluid::InitVAO()
     cudaGraphicsGLRegisterBuffer(&m_denBO_CUDA, m_denBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
 
 
+    // Set up mass buffer object
+    m_massBO.create();
+    m_massBO.bind();
+    m_massBO.allocate(m_fluidProperty->numParticles * sizeof(float));
+//    glEnableVertexAttribArray(m_massAttrLoc);
+//    glVertexAttribPointer(m_massAttrLoc, 1, GL_FLOAT, GL_FALSE, sizeof(GLfloat), 0);
+    m_massBO.release();
+    cudaGraphicsGLRegisterBuffer(&m_massBO_CUDA, m_massBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
+
+
     glPointSize(5);
     m_vao.release();
 
     m_shaderProg.release();
 }
 
-float3 * Fluid::GetPositionsPtr()
+float3 * Fluid::GetPositionPtr()
 {
     size_t numBytes;
     cudaGraphicsMapResources(1, &m_posBO_CUDA, 0);
-    cudaGraphicsResourceGetMappedPointer((void **)&d_positions_ptr, &numBytes, m_posBO_CUDA);
+    cudaGraphicsResourceGetMappedPointer((void **)&d_position_ptr, &numBytes, m_posBO_CUDA);
 
-    return d_positions_ptr;
+    return d_position_ptr;
 }
 
-void Fluid::ReleasePositionsPtr()
+void Fluid::ReleasePositionPtr()
 {
     cudaGraphicsUnmapResources(1, &m_posBO_CUDA, 0);
 }
 
-float3 *Fluid::GetVelocitiesPtr()
+float3 *Fluid::GetVelocityPtr()
 {
     size_t numBytesVel;
     cudaGraphicsMapResources(1, &m_velBO_CUDA, 0);
-    cudaGraphicsResourceGetMappedPointer((void **)&d_velocities_ptr, &numBytesVel, m_velBO_CUDA);
+    cudaGraphicsResourceGetMappedPointer((void **)&d_velocity_ptr, &numBytesVel, m_velBO_CUDA);
 
-    return d_velocities_ptr;
+    return d_velocity_ptr;
 }
 
-void Fluid::ReleaseVelocitiesPtr()
+void Fluid::ReleaseVelocityPtr()
 {
     cudaGraphicsUnmapResources(1, &m_velBO_CUDA, 0);
 }
 
-float *Fluid::GetDensitiesPtr()
+float *Fluid::GetDensityPtr()
 {
     size_t numBytesDen;
     cudaGraphicsMapResources(1, &m_denBO_CUDA, 0);
-    cudaGraphicsResourceGetMappedPointer((void **)&d_densities_ptr, &numBytesDen, m_denBO_CUDA);
+    cudaGraphicsResourceGetMappedPointer((void **)&d_density_ptr, &numBytesDen, m_denBO_CUDA);
 
-    return d_densities_ptr;
+    return d_density_ptr;
 }
 
-void Fluid::ReleaseDensitiesPtr()
+void Fluid::ReleaseDensityPtr()
 {
     cudaGraphicsUnmapResources(1, &m_denBO_CUDA, 0);
 }
 
+float *Fluid::GetMassPtr()
+{
+    size_t numBytesMass;
+    cudaGraphicsMapResources(1, &m_massBO_CUDA, 0);
+    cudaGraphicsResourceGetMappedPointer((void **)&d_mass_ptr, &numBytesMass, m_massBO_CUDA);
+
+    return d_density_ptr;
+}
+
+void Fluid::ReleaseMassPtr()
+{
+    cudaGraphicsUnmapResources(1, &m_massBO_CUDA, 0);
+}
+
+
+std::shared_ptr<FluidProperty> Fluid::GetFluidProperty()
+{
+    return m_fluidProperty;
+}
