@@ -174,11 +174,11 @@ void OpenGLScene::paintGL()
     m_modelMat = glm::rotate(m_modelMat, glm::radians(m_xRot/16.0f), glm::vec3(1,0,0));
     m_modelMat = glm::rotate(m_modelMat, glm::radians(m_yRot/16.0f), glm::vec3(0,1,0));
     glm::mat3 normalMatrix =  glm::inverse(glm::mat3(m_modelMat));
-    glm::vec3 camPos = glm::inverse(glm::mat3(m_modelMat)) * glm::vec4(0.0f,0.0f, 0.1f*m_zDis,1.0f);
+    glm::vec3 camPos = glm::vec3(glm::inverse((m_modelMat)) * glm::vec4(0.0f,0.0f, 0.1f*m_zDis,1.0f));
 
     //---------------------------------------------------------------------------------------
     // Draw code - replace this with project specific draw stuff
-    m_fluid->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, normalMatrix, m_lightPos, camPos);
+    m_fluid->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, glm::mat4(normalMatrix), m_lightPos, camPos);
     m_fluid->Draw();
     //---------------------------------------------------------------------------------------
 

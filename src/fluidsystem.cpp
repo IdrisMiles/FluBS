@@ -1,6 +1,6 @@
 #include "include/fluidsystem.h"
 #include <sys/time.h>
-
+#include "sph.h"
 
 
 FluidSystem::FluidSystem(std::shared_ptr<SPHSolverGPU> _fluidSolver,
@@ -112,6 +112,66 @@ void FluidSystem::StepSimulation()
     // Simulate here
     m_fluidSolver->Solve(m_fluidSolver->GetFluidSolverProperty()->deltaTime, pos, vel, den);
     cudaThreadSynchronize();
+
+
+
+    //-----------------------------
+
+    sph::ResetProperties(m_fluid, m_fluidSolverProperty);
+    cudaThreadSynchronize();
+
+    // Get particle hash IDs
+    sph::ComputeHash(m_fluid, m_fluidSolverProperty);
+    cudaThreadSynchronize();
+
+    // Sort particles
+    sph::SortParticlesByHash(m_fluid);
+
+    // Get Cell particle indexes - scatter addresses
+    sph::ComputeParticleScatterIds(m_fluid);
+
+    uint maxCellOcc;
+    sph::ComputeMaxCellOccupancy(m_fluid, maxCellOcc);
+    cudaThreadSynchronize();
+
+    if(maxCellOcc > 1024u)
+    {
+        std::cout<<"Too many neighs\n";
+    }
+
+    // Run SPH solver
+    sph::ComputePressure(m_fluid, m_fluidSolverProperty);
+    cudaThreadSynchronize();
+
+    // pressure force
+    sph::ComputePressureForce(m_fluid, m_fluidSolverProperty);
+
+    // TODO:
+    // Compute boundary pressures
+
+
+    // viscous force
+    sph::ComputeViscForce(m_fluid, m_fluidSolverProperty);
+
+    // Compute surface tension
+    sph::ComputeSurfaceTensionForce(m_fluid, m_fluidSolverProperty);
+    cudaThreadSynchronize();
+
+    // Compute total force and acceleration
+    sph::ComputeTotalForce(m_fluid, m_fluidSolverProperty);
+    cudaThreadSynchronize();
+
+    // integrate particle position and velocities
+    sph::Integrate(m_fluid, m_fluidSolverProperty);
+    cudaThreadSynchronize();
+
+    // Handle boundaries
+    sph::HandleBoundaries(m_fluid, m_fluidSolverProperty);
+    cudaThreadSynchronize();
+
+    //-----------------------------
+
+
 
 
     // Clean up

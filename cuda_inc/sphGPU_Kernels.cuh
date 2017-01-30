@@ -5,13 +5,7 @@
 // CUDA includes
 
 #include <cuda_runtime.h>
-#include <cuda.h>
 
-#include <math_constants.h>
-
-#include <stdio.h>
-#include <math.h>
-#include <float.h>
 
 
 

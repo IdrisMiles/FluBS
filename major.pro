@@ -32,21 +32,16 @@ UI_DIR += ./ui
 #--------------------------------------------------------------------------
 
 HEADERS += $$PWD/cuda_inc/*.cuh
-#HEADERS += $$PWD/cuda_inc/vec_ops.cuh
-#HEADERS += $$PWD/cuda_inc/smoothingKernel.cuh
 
 INCLUDEPATH += $$PWD/cuda_inc
 CUDA_SOURCES += $$PWD/cuda_src/*.cu
-#CUDA_SOURCES += $$PWD/cuda_src/vec_ops.cu
-#CUDA_SOURCES += $$PWD/cuda_src/smoothingKernel.cu
-#CUDA_SOURCES += $$PWD/cuda_src/sphsolverGPU.cu
 CUDA_PATH = /usr
-NVCC = $$CUDA_PATH/bin/nvcc -ccbin g++
+NVCC = $$CUDA_PATH/bin/nvcc
 
 SYSTEM_NAME = unix
 SYSTEM_TYPE = 64
 GENCODE_FLAGS += -arch=sm_50
-NVCC_OPTIONS = --use_fast_math
+NVCC_OPTIONS =  -ccbin g++ --use_fast_math #-dc
 
 # include paths
 INCLUDEPATH += $(CUDA_PATH)/include $(CUDA_PATH)/include/cuda
@@ -65,4 +60,3 @@ cuda.output = $$CUDA_OBJECTS_DIR/${QMAKE_FILE_BASE}_cuda.o
 cuda.commands = $$NVCC -m$$SYSTEM_TYPE $$GENCODE_FLAGS -c -o ${QMAKE_FILE_OUT} ${QMAKE_FILE_NAME} $$NVCC_OPTIONS $$CUDA_INC #--relocatable-device-code=true --compile
 cuda.dependency_type = TYPE_C
 QMAKE_EXTRA_COMPILERS += cuda
-
