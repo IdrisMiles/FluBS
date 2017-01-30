@@ -5,6 +5,7 @@
 #include "include/sphsolverGPU.h"
 #include "include/fluidproperty.h"
 #include "include/fluidsolverproperty.h"
+#include "include/sph.h"
 
 
 class FluidSystem

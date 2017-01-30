@@ -46,11 +46,44 @@ public:
     float3 *GetVelocityPtr();
     void ReleaseVelocityPtr();
 
+    float *GetMassPtr();
+    void ReleaseMassPtr();
+
     float *GetDensityPtr();
     void ReleaseDensityPtr();
 
-    float *GetMassPtr();
-    void ReleaseMassPtr();
+    float *GetPressurePtr();
+    void ReleasePressurePtr();
+
+    float3 *GetPressureForcePtr();
+    void ReleasePressureForcePtr();
+
+    float3 *GetViscForcePtr();
+    void ReleaseViscForcePtr();
+
+    float3 *GetSurfTenForcePtr();
+    void ReleaseSurfTenForcePtr();
+
+    float3 *GetGravityForcePtr();
+    void ReleaseGravityForcePtr();
+
+    float3 *GetExternalForcePtr();
+    void ReleaseExternalForcePtr();
+
+    float3 *GetTotalForcePtr();
+    void ReleaseTotalForcePtr();
+
+    unsigned int *GetParticleHashIdPtr();
+    void ReleaseParticleHashIdPtr();
+
+    unsigned int *GetCellOccupancyPtr();
+    void ReleaseCellOccupancyPtr();
+
+    unsigned int *GetCellParticleIdxPtr();
+    void ReleaseCellParticleIdxPtr();
+
+    unsigned int GetMaxCellOcc();
+    void SetMaxCellOcc(const unsigned int _maxCellOcc);
 
 
 private:
@@ -62,10 +95,29 @@ private:
 
     // Simulation stuff
     std::shared_ptr<FluidProperty> m_fluidProperty;
-    float3 *d_position_ptr;
-    float3 *d_velocity_ptr;
-    float *d_density_ptr;
-    float *d_mass_ptr;
+    float3 *d_positionPtr;
+    float3 *d_velocityPtr;
+    float *d_massPtr;
+    float *d_densityPtr;
+    float* d_pressurePtr;
+
+    float3* d_pressureForcePtr;
+    float3* d_viscousForcePtr;
+    float3* d_surfaceTensionForcePtr;
+    float3* d_gravityForcePtr;
+    float3* d_externalForcePtr;
+    float3* d_totalForcePtr;
+
+    unsigned int* d_particleHashIdPtr;
+    unsigned int* d_cellOccupancyPtr;
+    unsigned int* d_cellParticleIdxPtr;
+
+    unsigned int m_maxCellOcc;
+
+    bool m_positionMapped;
+    bool m_velocityMapped;
+    bool m_densityMapped;
+    bool m_massMapped;
 
 
     // Rendering stuff
@@ -75,6 +127,7 @@ private:
     GLuint m_posAttrLoc;
     GLuint m_velAttrLoc;
     GLuint m_denAttrLoc;
+
     GLuint m_projMatrixLoc;
     GLuint m_mvMatrixLoc;
     GLuint m_normalMatrixLoc;

@@ -9,6 +9,11 @@ Fluid::Fluid(std::shared_ptr<FluidProperty> _fluidProperty)
 
     m_colour = glm::vec3(0.6f, 0.6f, 0.6f);
 
+    m_positionMapped = false;
+    m_velocityMapped = false;
+    m_densityMapped = false;
+    m_massMapped = false;
+
     Init();
 }
 
@@ -149,8 +154,6 @@ void Fluid::InitVAO()
     m_massBO.create();
     m_massBO.bind();
     m_massBO.allocate(m_fluidProperty->numParticles * sizeof(float));
-//    glEnableVertexAttribArray(m_massAttrLoc);
-//    glVertexAttribPointer(m_massAttrLoc, 1, GL_FLOAT, GL_FALSE, sizeof(GLfloat), 0);
     m_massBO.release();
     cudaGraphicsGLRegisterBuffer(&m_massBO_CUDA, m_massBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
 
@@ -163,62 +166,211 @@ void Fluid::InitVAO()
 
 float3 * Fluid::GetPositionPtr()
 {
-    size_t numBytes;
-    cudaGraphicsMapResources(1, &m_posBO_CUDA, 0);
-    cudaGraphicsResourceGetMappedPointer((void **)&d_position_ptr, &numBytes, m_posBO_CUDA);
+    if(!m_positionMapped)
+    {
+        size_t numBytes;
+        cudaGraphicsMapResources(1, &m_posBO_CUDA, 0);
+        cudaGraphicsResourceGetMappedPointer((void **)&d_positionPtr, &numBytes, m_posBO_CUDA);
 
-    return d_position_ptr;
+        m_positionMapped = true;
+    }
+
+    return d_positionPtr;
 }
 
 void Fluid::ReleasePositionPtr()
 {
-    cudaGraphicsUnmapResources(1, &m_posBO_CUDA, 0);
+    if(m_positionMapped)
+    {
+        cudaGraphicsUnmapResources(1, &m_posBO_CUDA, 0);
+        m_positionMapped = false;
+    }
+
 }
 
 float3 *Fluid::GetVelocityPtr()
 {
-    size_t numBytesVel;
-    cudaGraphicsMapResources(1, &m_velBO_CUDA, 0);
-    cudaGraphicsResourceGetMappedPointer((void **)&d_velocity_ptr, &numBytesVel, m_velBO_CUDA);
+    if(!m_velocityMapped)
+    {
+        size_t numBytesVel;
+        cudaGraphicsMapResources(1, &m_velBO_CUDA, 0);
+        cudaGraphicsResourceGetMappedPointer((void **)&d_velocityPtr, &numBytesVel, m_velBO_CUDA);
 
-    return d_velocity_ptr;
+        m_velocityMapped = true;
+    }
+
+    return d_velocityPtr;
 }
 
 void Fluid::ReleaseVelocityPtr()
 {
-    cudaGraphicsUnmapResources(1, &m_velBO_CUDA, 0);
+    if(m_velocityMapped)
+    {
+        cudaGraphicsUnmapResources(1, &m_velBO_CUDA, 0);
+
+        m_velocityMapped = false;
+    }
 }
 
 float *Fluid::GetDensityPtr()
 {
-    size_t numBytesDen;
-    cudaGraphicsMapResources(1, &m_denBO_CUDA, 0);
-    cudaGraphicsResourceGetMappedPointer((void **)&d_density_ptr, &numBytesDen, m_denBO_CUDA);
+    if(!m_densityMapped)
+    {
+        size_t numBytesDen;
+        cudaGraphicsMapResources(1, &m_denBO_CUDA, 0);
+        cudaGraphicsResourceGetMappedPointer((void **)&d_densityPtr, &numBytesDen, m_denBO_CUDA);
 
-    return d_density_ptr;
+        m_densityMapped = true;
+    }
+
+    return d_densityPtr;
 }
 
 void Fluid::ReleaseDensityPtr()
 {
-    cudaGraphicsUnmapResources(1, &m_denBO_CUDA, 0);
+    if(m_densityMapped)
+    {
+        cudaGraphicsUnmapResources(1, &m_denBO_CUDA, 0);
+        m_densityMapped = false;
+    }
 }
 
 float *Fluid::GetMassPtr()
 {
-    size_t numBytesMass;
-    cudaGraphicsMapResources(1, &m_massBO_CUDA, 0);
-    cudaGraphicsResourceGetMappedPointer((void **)&d_mass_ptr, &numBytesMass, m_massBO_CUDA);
+    if(!m_massMapped)
+    {
+        size_t numBytesMass;
+        cudaGraphicsMapResources(1, &m_massBO_CUDA, 0);
+        cudaGraphicsResourceGetMappedPointer((void **)&d_massPtr, &numBytesMass, m_massBO_CUDA);
 
-    return d_density_ptr;
+        m_massMapped = true;
+    }
+
+    return d_densityPtr;
 }
 
 void Fluid::ReleaseMassPtr()
 {
-    cudaGraphicsUnmapResources(1, &m_massBO_CUDA, 0);
+    if(m_massMapped)
+    {
+        cudaGraphicsUnmapResources(1, &m_massBO_CUDA, 0);
+        m_massMapped = false;
+    }
 }
 
+
+float *Fluid::GetPressurePtr()
+{
+    return d_pressurePtr;
+}
+
+void Fluid::ReleasePressurePtr()
+{
+
+}
+
+float3 *Fluid::GetPressureForcePtr()
+{
+    return d_pressureForcePtr;
+}
+
+void Fluid::ReleasePressureForcePtr()
+{
+
+}
+
+float3 *Fluid::GetViscForcePtr()
+{
+    return d_viscousForcePtr;
+}
+
+void Fluid::ReleaseViscForcePtr()
+{
+
+}
+
+float3 *Fluid::GetSurfTenForcePtr()
+{
+    return d_surfaceTensionForcePtr;
+}
+
+void Fluid::ReleaseSurfTenForcePtr()
+{
+
+}
+
+float3 *Fluid::GetGravityForcePtr()
+{
+    return d_gravityForcePtr;
+}
+
+void Fluid::ReleaseGravityForcePtr()
+{
+
+}
+
+float3 *Fluid::GetExternalForcePtr()
+{
+    return d_externalForcePtr;
+}
+
+void Fluid::ReleaseExternalForcePtr()
+{
+
+}
+
+float3 *Fluid::GetTotalForcePtr()
+{
+    return d_totalForcePtr;
+}
+
+void Fluid::ReleaseTotalForcePtr()
+{
+}
+
+unsigned int *Fluid::GetParticleHashIdPtr()
+{
+    return d_particleHashIdPtr;
+}
+
+void Fluid::ReleaseParticleHashIdPtr()
+{
+
+}
+
+unsigned int *Fluid::GetCellOccupancyPtr()
+{
+    return d_cellOccupancyPtr;
+}
+
+void Fluid::ReleaseCellOccupancyPtr()
+{
+
+}
+
+unsigned int *Fluid::GetCellParticleIdxPtr()
+{
+    return d_cellParticleIdxPtr;
+}
+
+void Fluid::ReleaseCellParticleIdxPtr()
+{
+
+}
+
+unsigned int Fluid::GetMaxCellOcc()
+{
+    return m_maxCellOcc;
+}
+
+void Fluid::SetMaxCellOcc(const unsigned int _maxCellOcc)
+{
+    m_maxCellOcc = _maxCellOcc;
+}
 
 std::shared_ptr<FluidProperty> Fluid::GetFluidProperty()
 {
     return m_fluidProperty;
 }
+
+
