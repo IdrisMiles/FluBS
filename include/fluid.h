@@ -2,6 +2,7 @@
 #define FLUID_H
 
 #include "fluidproperty.h"
+#include "fluidsolverproperty.h"
 
 // OpenGL includes
 #include <GL/glew.h>
@@ -30,6 +31,8 @@ public:
     Fluid(std::shared_ptr<FluidProperty> _fluidProperty);
     ~Fluid();
 
+    void SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps);
+
     void Draw();
     void SetShaderUniforms(const glm::mat4 &_projMat,
                            const glm::mat4 &_viewMat,
@@ -37,6 +40,9 @@ public:
                            const glm::mat4 &_normalMat,
                            const glm::vec3 &_lightPos,
                            const glm::vec3 &_camPos);
+
+    void MapCudaGLResources();
+    void ReleaseCudaGLResources();
 
     std::shared_ptr<FluidProperty> GetFluidProperty();
 
@@ -88,9 +94,13 @@ public:
 
 private:
     void Init();
+    void InitCUDAMemory();
     void InitGL();
-    void InitVAO();
     void InitShader();
+    void InitVAO();
+
+    void CleanUpCUDAMemory();
+    void CleanUpGL();
 
 
     // Simulation stuff
@@ -118,6 +128,7 @@ private:
     bool m_velocityMapped;
     bool m_densityMapped;
     bool m_massMapped;
+    bool m_pressureMapped;
 
 
     // Rendering stuff
@@ -141,11 +152,13 @@ private:
     QOpenGLBuffer m_velBO;
     QOpenGLBuffer m_denBO;
     QOpenGLBuffer m_massBO;
+    QOpenGLBuffer m_pressBO;
 
     cudaGraphicsResource *m_posBO_CUDA;
     cudaGraphicsResource *m_velBO_CUDA;
     cudaGraphicsResource *m_denBO_CUDA;
     cudaGraphicsResource *m_massBO_CUDA;
+    cudaGraphicsResource *m_pressBO_CUDA;
 
 
     glm::vec3 m_colour;

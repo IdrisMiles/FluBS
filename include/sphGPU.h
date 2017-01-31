@@ -10,6 +10,20 @@ namespace sphGPU
 
     uint iDivUp(uint a, uint b);
 
+    void ResetProperties(float3 *pressureForce,
+                         float3 *viscousForce,
+                         float3 *surfTenForce,
+                         float3 *externalForce,
+                         float3 *totalForce,
+                         float * mass,
+                         float *density,
+                         float *pressure,
+                         uint *hash,
+                         uint *cellOcc,
+                         uint *cellPartIdx,
+                         const float massValue, const uint numCells,
+                         const uint numPoints);
+
     void InitFluidAsCube(float3 *particles,
                          float3 *velocities,
                          float *densities,
@@ -24,6 +38,19 @@ namespace sphGPU
                       const unsigned int numPoints,
                       const unsigned int gridRes,
                       const float cellWidth);
+
+    void SortParticlesByHash(uint *hash,
+                             float3 *position,
+                             float3 *velocity,
+                             const uint numPoints);
+
+    void ComputeParticleScatterIds(uint *cellOccupancy,
+                                   uint *cellParticleIdx,
+                                   const uint numCells);
+
+    void ComputeMaxCellOccupancy(uint *cellOccupancy,
+                                 const uint numCells,
+                                 unsigned int &_maxCellOcc);
 
     void ComputePressure(const uint maxCellOcc, const uint gridRes,
                          float *pressure,

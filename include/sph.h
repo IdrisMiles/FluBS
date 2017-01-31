@@ -13,8 +13,8 @@ namespace sph
     void InitFluidAsCube(std::shared_ptr<Fluid> _fluid, std::shared_ptr<FluidSolverProperty> _solverProps);
     void ComputeHash(std::shared_ptr<Fluid> _fluid, std::shared_ptr<FluidSolverProperty> _solverProps);
     void SortParticlesByHash(std::shared_ptr<Fluid> _fluid);
-    void ComputeParticleScatterIds(std::shared_ptr<Fluid> _fluid);
-    void ComputeMaxCellOccupancy(std::shared_ptr<Fluid> _fluid, unsigned int &_maxCellOcc);
+    void ComputeParticleScatterIds(std::shared_ptr<Fluid> _fluid, std::shared_ptr<FluidSolverProperty> _solverProps);
+    void ComputeMaxCellOccupancy(std::shared_ptr<Fluid> _fluid, std::shared_ptr<FluidSolverProperty> _solverProps, unsigned int &_maxCellOcc);
     void ComputePressure(std::shared_ptr<Fluid> _fluid, std::shared_ptr<FluidSolverProperty> _solverProps);
     void ComputePressureForce(std::shared_ptr<Fluid> _fluid, std::shared_ptr<FluidSolverProperty> _solverProps);
     void ComputeViscForce(std::shared_ptr<Fluid> _fluid, std::shared_ptr<FluidSolverProperty> _solverProps);

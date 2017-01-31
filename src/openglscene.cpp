@@ -145,8 +145,7 @@ void OpenGLScene::initializeGL()
     auto fluidProps = std::shared_ptr<FluidProperty>(new FluidProperty());
     auto fluidSolverProps = std::shared_ptr<FluidSolverProperty>(new FluidSolverProperty());
     m_fluid = std::shared_ptr<Fluid>(new Fluid(fluidProps));
-    m_fluidSolver = std::shared_ptr<SPHSolverGPU>(new SPHSolverGPU(fluidProps.get(), fluidSolverProps.get()));
-    m_fluidSystem = std::shared_ptr<FluidSystem>(new FluidSystem(m_fluidSolver, m_fluid, fluidSolverProps));
+    m_fluidSystem = std::shared_ptr<FluidSystem>(new FluidSystem(m_fluid, fluidSolverProps));
 
     emit FluidInitialised(fluidProps);
 

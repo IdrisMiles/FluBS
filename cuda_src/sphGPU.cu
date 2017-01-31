@@ -1,6 +1,13 @@
 #include "../include/sphGPU.h"
 #include "../cuda_inc/sphGPU_Kernels.cuh"
 
+#include <thrust/host_vector.h>
+#include <thrust/device_vector.h>
+#include <thrust/sort.h>
+#include <thrust/scan.h>
+#include <thrust/reduce.h>
+#include <thrust/extrema.h>
+
 #include <algorithm>
 
 uint sphGPU::iDivUp(uint a, uint b)
@@ -10,12 +17,76 @@ uint sphGPU::iDivUp(uint a, uint b)
     return c;
 }
 
+void sphGPU::ResetProperties(float3 *pressureForce,
+                             float3 *viscousForce,
+                             float3 *surfTenForce,
+                             float3 *externalForce,
+                             float3 *totalForce,
+                             float * mass,
+                             float *density,
+                             float *pressure,
+                             uint *hash,
+                             uint *cellOcc,
+                             uint *cellPartIdx,
+                             const float massValue,
+                             const uint numCells,
+                             const uint numPoints)
+{
+    thrust::device_ptr<float3> pressureForcePtr = thrust::device_pointer_cast(pressureForce);
+    thrust::device_ptr<float3> viscousForcePtr = thrust::device_pointer_cast(viscousForce);
+    thrust::device_ptr<float3> surfTenForcePtr = thrust::device_pointer_cast(surfTenForce);
+    thrust::device_ptr<float3> externalForcePtr = thrust::device_pointer_cast(externalForce);
+    thrust::device_ptr<float3> totalForcePtr = thrust::device_pointer_cast(totalForce);
+    thrust::device_ptr<float> massPtr = thrust::device_pointer_cast(mass);
+    thrust::device_ptr<float> densityPtr = thrust::device_pointer_cast(density);
+    thrust::device_ptr<float> pressurePtr = thrust::device_pointer_cast(pressure);
+    thrust::device_ptr<uint> hashPtr = thrust::device_pointer_cast(hash);
+    thrust::device_ptr<uint> cellOccPtr = thrust::device_pointer_cast(cellOcc);
+    thrust::device_ptr<uint> cellPartIdxPtr = thrust::device_pointer_cast(cellPartIdx);
 
+    thrust::fill(pressureForcePtr, pressureForcePtr+numPoints, make_float3(0.0f,0.0f,0.0f));
+    thrust::fill(viscousForcePtr, viscousForcePtr+numPoints, make_float3(0.0f,0.0f,0.0f));
+    thrust::fill(surfTenForcePtr, surfTenForcePtr+numPoints, make_float3(0.0f,0.0f,0.0f));
+    thrust::fill(externalForcePtr, externalForcePtr+numPoints, make_float3(0.0f, 0.0f,0.0f));
+    thrust::fill(totalForcePtr, totalForcePtr+numPoints, make_float3(0.0f,0.0f,0.0f));
+    thrust::fill(massPtr, massPtr+numPoints, massValue);
+    thrust::fill(densityPtr, densityPtr+numPoints, 0.0f);
+    thrust::fill(pressurePtr, pressurePtr+numPoints, 0.0f);
+    thrust::fill(hashPtr, hashPtr+numPoints, 0u);
+    thrust::fill(cellOccPtr, cellOccPtr+numCells, 0u);
+    thrust::fill(cellPartIdxPtr, cellPartIdxPtr+numCells, 0u);
+}
 
 void sphGPU::ParticleHash(uint *hash, uint *cellOcc, float3 *particles, const uint numPoints, const uint gridRes, const float cellWidth)
 {
     uint numBlocks = iDivUp(numPoints, 1024u);
     sphGPU_Kernels::ParticleHash_Kernel<<<numBlocks, 1024u>>>(hash, cellOcc, particles, numPoints, gridRes, cellWidth);
+}
+
+void sphGPU::SortParticlesByHash(uint *hash, float3 *position, float3 *velocity, const uint numPoints)
+{
+    thrust::device_ptr<uint> hashPtr = thrust::device_pointer_cast(hash);
+    thrust::device_ptr<float3> posPtr = thrust::device_pointer_cast(position);
+    thrust::device_ptr<float3> velPtr = thrust::device_pointer_cast(velocity);
+
+    thrust::sort_by_key(hashPtr,
+                        hashPtr + numPoints,
+                        thrust::make_zip_iterator(thrust::make_tuple(posPtr, velPtr)));
+}
+
+void sphGPU::ComputeParticleScatterIds(uint *cellOccupancy, uint *cellParticleIdx, const uint numCells)
+{
+    thrust::device_ptr<uint> cellOccPtr = thrust::device_pointer_cast(cellOccupancy);
+    thrust::device_ptr<uint> cellPartIdxPtr = thrust::device_pointer_cast(cellParticleIdx);
+
+    thrust::exclusive_scan(cellOccPtr, cellOccPtr+numCells, cellPartIdxPtr);
+}
+
+void sphGPU::ComputeMaxCellOccupancy(uint *cellOccupancy, const uint numCells, unsigned int &_maxCellOcc)
+{
+    thrust::device_ptr<uint> cellOccPtr = thrust::device_pointer_cast(cellOccupancy);
+
+    _maxCellOcc = *thrust::max_element(cellOccPtr, cellOccPtr+numCells);
 }
 
 void sphGPU::ComputePressure(const uint maxCellOcc, const uint gridRes, float *pressure, float *density, const float restDensity, const float gasConstant, const float *mass, const uint *cellOcc, const uint *cellPartIdx, const float3 *particles, const uint numPoints, const float smoothingLength)

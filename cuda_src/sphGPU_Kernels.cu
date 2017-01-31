@@ -51,7 +51,7 @@ __global__ void sphGPU_Kernels::ParticleHash_Kernel(uint *hash,
 
     if(hashID >= gridRes * gridRes * gridRes)
     {
-        printf("daaaang\n");
+        printf("Hash out of bounds\n");
         printf("%u, %u, %u\n", hashX, hashY, hashZ);
     }
 
