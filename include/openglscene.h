@@ -16,7 +16,6 @@
 
 #include "include/fluidsystem.h"
 #include "include/fluid.h"
-#include "include/sphsolverGPU.h"
 
 #include "include/meshloader.h"
 #include "include/rendermesh.h"

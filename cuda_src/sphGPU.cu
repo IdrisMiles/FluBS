@@ -1,6 +1,9 @@
 #include "../include/sphGPU.h"
 #include "../cuda_inc/sphGPU_Kernels.cuh"
 
+
+#include <cuda.h>
+
 #include <thrust/host_vector.h>
 #include <thrust/device_vector.h>
 #include <thrust/sort.h>

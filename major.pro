@@ -60,3 +60,69 @@ cuda.output = $$CUDA_OBJECTS_DIR/${QMAKE_FILE_BASE}_cuda.o
 cuda.commands = $$NVCC -m$$SYSTEM_TYPE $$GENCODE_FLAGS -c -o ${QMAKE_FILE_OUT} ${QMAKE_FILE_NAME} $$NVCC_OPTIONS $$CUDA_INC #--relocatable-device-code=true --compile
 cuda.dependency_type = TYPE_C
 QMAKE_EXTRA_COMPILERS += cuda
+
+
+
+
+#--------------------------------------------------------------------------
+# CUDA dynamic stuff?
+#--------------------------------------------------------------------------
+
+##set out cuda sources
+#CUDA_SOURCES += ./cuda_src/*.cu
+#HEADERS += $$PWD/cuda_inc/*.cuh
+
+## Path to cuda SDK install
+#linux:CUDA_DIR = /usr
+
+##Cuda include paths
+#INCLUDEPATH += $$CUDA_DIR/include
+#INCLUDEPATH += $$CUDA_DIR/common/inc/
+#INCLUDEPATH += $$CUDA_DIR/../shared/inc/
+#INCLUDEPATH += $$PWD/cuda_inc
+
+
+##cuda libs
+#macx:QMAKE_LIBDIR += $$CUDA_DIR/lib
+#linux:QMAKE_LIBDIR += $$CUDA_DIR/lib
+#QMAKE_LIBDIR += $$CUDA_DIR/lib
+#QMAKE_LIBDIR += $$CUDA_DIR/lib/x86_64-linux-gnu
+#QMAKE_LIBDIR += $(CUDA_PATH)/include/cuda
+#LIBS += -L$$CUDA_DIR/lib -L$$CUDA_DIR/lib/x86_64-linux-gnu -lcudart -lcudadevrt
+
+## join the includes in a line
+#CUDA_INC = $$join(INCLUDEPATH,' -I','-I',' ')
+
+
+## nvcc flags (ptxas option verbose is always useful)
+#NVCCFLAGS = -dc --compiler-options -fno-strict-aliasing --ptxas-options=-v -maxrregcount 20
+
+
+##prepare intermediat cuda compiler
+#cudaIntr.input = CUDA_SOURCES
+#cudaIntr.output = ${OBJECTS_DIR}${QMAKE_FILE_BASE}.o
+
+### Tweak arch according to your hw's compute capability
+#cudaIntr.commands = $$CUDA_DIR/bin/nvcc -m64 -g -gencode arch=compute_50,code=sm_50 $$NVCCFLAGS $$CUDA_INC $$LIBS  ${QMAKE_FILE_NAME} -o ${QMAKE_FILE_OUT}
+
+##Set our variable out. These obj files need to be used to create the link obj file
+##and used in our final gcc compilation
+#cudaIntr.variable_out = CUDA_OBJ
+#cudaIntr.variable_out += OBJECTS
+#cudaIntr.clean = cudaIntrObj/*.o
+
+#QMAKE_EXTRA_UNIX_COMPILERS += cudaIntr
+
+
+## Prepare the linking compiler step
+#cuda.input = CUDA_OBJ
+#cuda.output = ${QMAKE_FILE_BASE}_link.o
+
+## Tweak arch according to your hw's compute capability
+#cuda.commands = $$CUDA_DIR/bin/nvcc -m64 -g -gencode arch=compute_50,code=sm_50 $$LIBS -dlink    ${QMAKE_FILE_NAME} -o ${QMAKE_FILE_OUT}
+#cuda.dependency_type = TYPE_C
+#cuda.depend_command = $$CUDA_DIR/bin/nvcc -g -M $$CUDA_INC $$NVCCFLAGS   ${QMAKE_FILE_NAME}
+## Tell Qt that we want add more stuff to the Makefile
+#QMAKE_EXTRA_UNIX_COMPILERS += cuda
+
+

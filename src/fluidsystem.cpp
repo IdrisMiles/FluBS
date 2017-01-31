@@ -2,6 +2,11 @@
 #include <sys/time.h>
 #include "sph.h"
 
+#include <cuda.h>
+#include <cuda_runtime.h>
+//#include "cuda_inc/poly6kernel.cuh"
+//#include "cuda_inc/spikykernel.cuh"
+
 
 FluidSystem::FluidSystem(std::shared_ptr<Fluid> _fluid,
                          std::shared_ptr<FluidSolverProperty> _fluidSolverProperty)
@@ -43,7 +48,6 @@ void FluidSystem::InitialiseSim()
     cudaThreadSynchronize();
     sph::InitFluidAsCube(m_fluid, m_fluidSolverProperty);
     cudaThreadSynchronize();
-
     m_fluid->ReleaseCudaGLResources();
 }
 

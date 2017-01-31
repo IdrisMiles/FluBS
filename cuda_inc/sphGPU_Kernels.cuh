@@ -3,9 +3,7 @@
 
 
 // CUDA includes
-
 #include <cuda_runtime.h>
-
 
 
 

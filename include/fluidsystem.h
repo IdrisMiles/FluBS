@@ -2,11 +2,12 @@
 #define FLUIDSYSTEM_H
 
 #include "include/fluid.h"
-#include "include/sphsolverGPU.h"
 #include "include/fluidproperty.h"
 #include "include/fluidsolverproperty.h"
 #include "include/sph.h"
 
+class Poly6Kernel;
+class SpikyKernel;
 
 class FluidSystem
 {
@@ -24,11 +25,14 @@ public:
     void ResetSim();
     void StepSimulation();
 
-private:
 
+
+private:
     std::shared_ptr<Fluid> m_algae;
     std::shared_ptr<Fluid> m_fluid;
     std::shared_ptr<FluidSolverProperty> m_fluidSolverProperty;
+    Poly6Kernel *m_poly6Kernel;
+    SpikyKernel *m_spikyKernel;
 
 };
 

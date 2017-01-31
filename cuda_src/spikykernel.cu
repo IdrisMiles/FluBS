@@ -1,14 +1,4 @@
-#include "../cuda_inc/spikykernel.cuh"
-
-//SpikyKernel::SpikyKernel(float _h) : SmoothKernel()
-//{
-//    m_h = _h;
-//}
-
-//SpikyKernel::~SpikyKernel()
-//{
-
-//}
+//#include "spikykernel.cuh"
 
 //__host__ __device__ float SpikyKernel::Eval(float _x)
 //{
@@ -54,4 +44,3 @@
 //{
 //    return 0.0f;
 //}
-
