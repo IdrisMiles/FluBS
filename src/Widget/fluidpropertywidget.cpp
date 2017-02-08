@@ -1,4 +1,4 @@
-#include "include/fluidpropertywidget.h"
+#include "Widget/fluidpropertywidget.h"
 #include <float.h>
 FluidPropertyWidget::FluidPropertyWidget(QWidget *parent) : QWidget(parent)
 {
@@ -106,7 +106,6 @@ void FluidPropertyWidget::SetFluidProperty(std::shared_ptr<FluidProperty> _fluid
         viscosity->setValue((double)_fluidProperty->viscosity);
         gasStiffness->setValue((double)_fluidProperty->gasStiffness);
 
-        deltaTime->setValue((double)_fluidProperty->deltaTime);
 
         m_fluidProperty = _fluidProperty;
     }
@@ -127,7 +126,6 @@ void FluidPropertyWidget::UpdateFluidProperty()
         m_fluidProperty->viscosity = viscosity->value();
         m_fluidProperty->gasStiffness = gasStiffness->value();
 
-        m_fluidProperty->deltaTime = deltaTime->value();
 
         float dia = 2.0f * m_fluidProperty->particleRadius;
         m_fluidProperty->particleMass = m_fluidProperty->restDensity * (dia * dia * dia);

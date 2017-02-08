@@ -11,14 +11,10 @@ public:
                   float _particleRadius = 0.2f,
                   float _restDensity = 998.36f,
                   float _surfaceTension = 0.0728f,
-                  float _surfaceThreshold = 1.0f,//7.065f,
+                  float _surfaceThreshold = 1.0f, //7.065f,
                   float _gasStiffness = 30.5f,
                   float _viscosity = 1.0e-2f,
                   float _smoothingLength = 1.2f,
-                  float _deltaTime = 0.005f,
-                  unsigned int _solveIterations = 1,
-                  unsigned int _gridResolution = 10,
-                  float _gridCellWidth = 1.2f,
                   bool _play = false);
 
     ~FluidProperty();
@@ -32,12 +28,6 @@ public:
     float viscosity;
     float particleRadius;
     float smoothingLength;
-
-    float deltaTime;
-    unsigned int solveIterations;
-    unsigned int gridResolution;
-    float gridCellWidth;
-    float gridVolume;
 
     bool play;
 };

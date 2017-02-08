@@ -124,6 +124,27 @@ void sphGPU::ComputeDensity(const uint maxCellOcc,
     sphGPU_Kernels::ComputeDensity_kernel<<<gridDim, blockSize>>>(density, mass, cellOcc, cellPartIdx, particles, numPoints, smoothingLength, accumulate);
 }
 
+void sphGPU::ComputeDensityFluidRigid(const uint maxCellOcc,
+                              const uint gridRes,
+                              const uint numPoints,
+                              const float fluidRestDensity,
+                              float *fluidDensity,
+                              const float3 *fluidPos,
+                              const uint *fluidCellOcc,
+                              const uint *fluidCellPartIdx,
+                              float *rigidVolume,
+                              const float3 *rigidPos,
+                              const uint *rigidCellOcc,
+                              const uint *rigidCellPartIdx,
+                              const float smoothingLength,
+                              const bool accumulate)
+{
+    dim3 gridDim = dim3(gridRes, gridRes, gridRes);
+    uint blockSize = std::min(maxCellOcc, 1024u);
+
+    sphGPU_Kernels::ComputeDensityFluidRigid_kernel<<<gridDim, blockSize>>>(numPoints, fluidRestDensity, fluidDensity, fluidCellOcc, fluidCellPartIdx, fluidPos, rigidVolume, rigidCellOcc, rigidCellPartIdx, rigidPos, smoothingLength, accumulate);
+}
+
 void sphGPU::ComputePressure(const uint maxCellOcc,
                              const uint gridRes,
                              float *pressure,

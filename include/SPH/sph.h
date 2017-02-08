@@ -44,10 +44,10 @@ namespace sph
                                   std::shared_ptr<FluidSolverProperty> _solverProps,
                                   const bool accumulate = false);
 
-    void ComputeDensityFluidBoundary(std::shared_ptr<Fluid> _fluid,
-                                     std::shared_ptr<Boundary> _boundary,
-                                     std::shared_ptr<FluidSolverProperty> _solverProps,
-                                     const bool accumulate = false);
+    void ComputeDensityFluidRigid(std::shared_ptr<Fluid> _fluid,
+                                  std::shared_ptr<Boundary> _rigid,
+                                  std::shared_ptr<FluidSolverProperty> _solverProps,
+                                  const bool accumulate = false);
 
 
     void ComputePressure(std::shared_ptr<Fluid> _fluid,

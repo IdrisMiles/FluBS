@@ -126,15 +126,15 @@ void sph::ComputeDensityFluidFluid(std::shared_ptr<Fluid> _fluid,
 //                                     accumulate);
 }
 
-void sph::ComputeDensityFluidBoundary(std::shared_ptr<Fluid> _fluid,
-                                      std::shared_ptr<Boundary> _boundary,
+void sph::ComputeDensityFluidRigid(std::shared_ptr<Fluid> _fluid,
+                                      std::shared_ptr<Boundary> _rigid,
                                       std::shared_ptr<FluidSolverProperty> _solverProps,
                                       const bool accumulate)
 {
     auto fluidProps =  _fluid->GetFluidProperty();
-    auto boundaryProps =  _boundary->GetFluidProperty();
+    auto rigidProps =  _rigid->GetFluidProperty();
 
-    sphGPU::ComputeDensityFluidBoundary(_fluid->GetMaxCellOcc(),
+    sphGPU::ComputeDensityFluidRigid(_fluid->GetMaxCellOcc(),
                                         _solverProps->gridResolution,
                                         fluidProps->numParticles,
                                         fluidProps->restDensity,
@@ -142,10 +142,10 @@ void sph::ComputeDensityFluidBoundary(std::shared_ptr<Fluid> _fluid,
                                         _fluid->GetPositionPtr(),
                                         _fluid->GetCellOccupancyPtr(),
                                         _fluid->GetCellParticleIdxPtr(),
-                                        _boundary->GetVolumePtr(),
-                                        _boundary->GetPositionPtr(),
-                                        _boundary->GetCellOccupancyPtr(),
-                                        _boundary->GetCellParticleIdxPtr(),
+                                        _rigid->GetVolumePtr(),
+                                        _rigid->GetPositionPtr(),
+                                        _rigid->GetCellOccupancyPtr(),
+                                        _rigid->GetCellParticleIdxPtr(),
                                         fluidProps->smoothingLength,
                                         accumulate);
 }

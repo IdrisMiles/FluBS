@@ -60,6 +60,7 @@ namespace sphGPU
                                const uint numPoints,
                                const float smoothingLength);
 
+
     void ComputeDensity(const uint maxCellOcc,
                         const uint gridRes,
                         float *density,
@@ -70,6 +71,22 @@ namespace sphGPU
                         const uint numPoints,
                         const float smoothingLength,
                         const bool accumulate);
+
+
+    void ComputeDensityFluidRigid(const uint maxCellOcc,
+                                  const uint gridRes,
+                                  const uint numPoints,
+                                  const float fluidRestDensity,
+                                  float *fluidDensity,
+                                  const float3 *fluidPos,
+                                  const uint *fluidCellOcc,
+                                  const uint *fluidCellPartIdx,
+                                  float *rigidVolume,
+                                  const float3 *rigidPos,
+                                  const uint *rigidCellOcc,
+                                  const uint *rigidCellPartIdx,
+                                  const float smoothingLength,
+                                  const bool accumulate);
 
     void ComputePressure(const uint maxCellOcc,
                          const uint gridRes,
