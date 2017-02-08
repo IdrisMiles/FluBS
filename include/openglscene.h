@@ -14,11 +14,11 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 
-#include "include/fluidsystem.h"
-#include "include/fluid.h"
+#include "FluidSystem/fluidsystem.h"
+#include "Fluid/fluid.h"
 
-#include "include/meshloader.h"
-#include "include/rendermesh.h"
+#include "Mesh/meshloader.h"
+#include "Mesh/rendermesh.h"
 
 
 class OpenGLScene : public QOpenGLWidget

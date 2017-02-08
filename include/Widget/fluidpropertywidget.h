@@ -8,7 +8,7 @@
 #include <QPushButton>
 
 #include <memory>
-#include "fluidproperty.h"
+#include "Fluid/fluidproperty.h"
 
 class FluidPropertyWidget : public QWidget
 {

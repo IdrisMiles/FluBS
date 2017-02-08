@@ -1,4 +1,4 @@
-#include "../include/sphGPU.h"
+#include "../include/SPH/sphGPU.h"
 #include "../cuda_inc/sphGPU_Kernels.cuh"
 
 
@@ -92,20 +92,60 @@ void sphGPU::ComputeMaxCellOccupancy(uint *cellOccupancy, const uint numCells, u
     _maxCellOcc = *thrust::max_element(cellOccPtr, cellOccPtr+numCells);
 }
 
-void sphGPU::ComputePressure(const uint maxCellOcc, const uint gridRes, float *pressure, float *density, const float restDensity, const float gasConstant, const float *mass, const uint *cellOcc, const uint *cellPartIdx, const float3 *particles, const uint numPoints, const float smoothingLength)
+void sphGPU::ComputeParticleVolume(const uint maxCellOcc,
+                                   const uint gridRes,
+                                   float *volume,
+                                   const uint *cellOcc,
+                                   const uint *cellPartIdx,
+                                   const float3 *particles,
+                                   const uint numPoints,
+                                   const float smoothingLength)
 {
     dim3 gridDim = dim3(gridRes, gridRes, gridRes);
     uint blockSize = std::min(maxCellOcc, 1024u);
 
-    sphGPU_Kernels::ComputePressure_kernel<<<gridDim, blockSize>>>(pressure, density, restDensity, gasConstant, mass, cellOcc, cellPartIdx, particles, numPoints, smoothingLength);
+    sphGPU_Kernels::ComputeVolume_kernel<<<gridDim, blockSize>>>(volume, cellOcc, cellPartIdx, particles, numPoints, smoothingLength);
 }
 
-void sphGPU::ComputePressureForce(const uint maxCellOcc, const uint gridRes, float3 *pressureForce, const float *pressure, const float *density, const float *mass, const float3 *particles, const uint *cellOcc, const uint *cellPartIdx, const uint numPoints, const float smoothingLength)
+void sphGPU::ComputeDensity(const uint maxCellOcc,
+                            const uint gridRes,
+                            float *density,
+                            const float *mass,
+                            const uint *cellOcc,
+                            const uint *cellPartIdx,
+                            const float3 *particles,
+                            const uint numPoints,
+                            const float smoothingLength,
+                            const bool accumulate)
 {
     dim3 gridDim = dim3(gridRes, gridRes, gridRes);
     uint blockSize = std::min(maxCellOcc, 1024u);
 
-    sphGPU_Kernels::ComputePressureForce_kernel<<<gridDim, blockSize>>>(pressureForce, pressure, density, mass, particles, cellOcc, cellPartIdx, numPoints, smoothingLength);
+    sphGPU_Kernels::ComputeDensity_kernel<<<gridDim, blockSize>>>(density, mass, cellOcc, cellPartIdx, particles, numPoints, smoothingLength, accumulate);
+}
+
+void sphGPU::ComputePressure(const uint maxCellOcc,
+                             const uint gridRes,
+                             float *pressure,
+                             float *density,
+                             const float restDensity,
+                             const float gasConstant,
+                             const uint *cellOcc,
+                             const uint *cellPartIdx,
+                             const uint numPoints)
+{
+    dim3 gridDim = dim3(gridRes, gridRes, gridRes);
+    uint blockSize = std::min(maxCellOcc, 1024u);
+
+    sphGPU_Kernels::ComputePressure_kernel<<<gridDim, blockSize>>>(pressure, density, restDensity, gasConstant, cellOcc, cellPartIdx, numPoints);
+}
+
+void sphGPU::ComputePressureForce(const uint maxCellOcc, const uint gridRes, float3 *pressureForce, const float *pressure, const float *density, const float *mass, const float3 *particles, const uint *cellOcc, const uint *cellPartIdx, const uint numPoints, const float smoothingLength, const bool accumulate)
+{
+    dim3 gridDim = dim3(gridRes, gridRes, gridRes);
+    uint blockSize = std::min(maxCellOcc, 1024u);
+
+    sphGPU_Kernels::ComputePressureForce_kernel<<<gridDim, blockSize>>>(pressureForce, pressure, density, mass, particles, cellOcc, cellPartIdx, numPoints, smoothingLength, accumulate);
 }
 
 void sphGPU::ComputeViscForce(const uint maxCellOcc, const uint gridRes, float3 *viscForce, const float viscCoeff, const float3 *velocity, const float *density, const float *mass, const float3 *particles, const uint *cellOcc, const uint *cellPartIdx, const uint numPoints, const float smoothingLength)

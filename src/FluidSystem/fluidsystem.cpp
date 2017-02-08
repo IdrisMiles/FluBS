@@ -1,11 +1,10 @@
-#include "include/fluidsystem.h"
+#include "FluidSystem/fluidsystem.h"
 #include <sys/time.h>
-#include "sph.h"
+#include "SPH/sph.h"
 
 #include <cuda.h>
 #include <cuda_runtime.h>
-//#include "cuda_inc/poly6kernel.cuh"
-//#include "cuda_inc/spikykernel.cuh"
+#include <iostream>
 
 
 FluidSystem::FluidSystem(std::shared_ptr<Fluid> _fluid,
@@ -97,10 +96,14 @@ void FluidSystem::StepSimulation()
 
     if(maxCellOcc > 1024u){std::cout<<"Too many neighs\n";}
 
+
+    sph::ComputeDensityFluid(m_fluid, m_fluidSolverProperty, true);
+    cudaThreadSynchronize();
+
     sph::ComputePressure(m_fluid, m_fluidSolverProperty);
     cudaThreadSynchronize();
 
-    sph::ComputePressureForce(m_fluid, m_fluidSolverProperty);
+    sph::ComputePressureForceFluid(m_fluid, m_fluidSolverProperty);
     sph::ComputeViscForce(m_fluid, m_fluidSolverProperty);
     sph::ComputeSurfaceTensionForce(m_fluid, m_fluidSolverProperty);
     cudaThreadSynchronize();

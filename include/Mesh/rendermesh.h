@@ -13,7 +13,7 @@
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLBuffer>
 
-#include "include/mesh.h"
+#include "Mesh/mesh.h"
 
 #include <memory>
 

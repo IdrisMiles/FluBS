@@ -1,10 +1,10 @@
 #ifndef FLUIDSYSTEM_H
 #define FLUIDSYSTEM_H
 
-#include "include/fluid.h"
-#include "include/fluidproperty.h"
-#include "include/fluidsolverproperty.h"
-#include "include/sph.h"
+#include "Fluid/fluid.h"
+#include "Fluid/fluidproperty.h"
+#include "FluidSystem/fluidsolverproperty.h"
+#include "SPH/sph.h"
 
 class Poly6Kernel;
 class SpikyKernel;

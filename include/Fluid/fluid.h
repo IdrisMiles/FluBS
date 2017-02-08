@@ -1,8 +1,8 @@
 #ifndef FLUID_H
 #define FLUID_H
 
-#include "fluidproperty.h"
-#include "fluidsolverproperty.h"
+#include "Fluid/fluidproperty.h"
+#include "FluidSystem/fluidsolverproperty.h"
 
 // OpenGL includes
 #include <GL/glew.h>
@@ -14,22 +14,17 @@
 // CUDA includes
 #include <cuda_runtime.h>
 #include <cuda.h>
-#include <cuda_runtime_api.h>
-#include <device_functions.h>
 #include <cuda_gl_interop.h>
 
-// Thrust includes for CUDA stuff
-#include <thrust/host_vector.h>
-
 #include <glm/glm.hpp>
-
+#include <memory>
 
 class Fluid
 {
 
 public:
     Fluid(std::shared_ptr<FluidProperty> _fluidProperty);
-    ~Fluid();
+    virtual ~Fluid();
 
     void SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps);
 
@@ -41,10 +36,10 @@ public:
                            const glm::vec3 &_lightPos,
                            const glm::vec3 &_camPos);
 
+    std::shared_ptr<FluidProperty> GetFluidProperty();
+
     void MapCudaGLResources();
     void ReleaseCudaGLResources();
-
-    std::shared_ptr<FluidProperty> GetFluidProperty();
 
     float3 *GetPositionPtr();
     void ReleasePositionPtr();
@@ -92,7 +87,7 @@ public:
     void SetMaxCellOcc(const unsigned int _maxCellOcc);
 
 
-private:
+protected:
     void Init();
     void InitCUDAMemory();
     void InitGL();

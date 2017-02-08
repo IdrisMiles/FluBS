@@ -1,4 +1,4 @@
-#include "include/fluidproperty.h"
+#include "Fluid/fluidproperty.h"
 
 FluidProperty::FluidProperty(unsigned int _numParticles,
                              float _particleMass,

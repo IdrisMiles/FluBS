@@ -1,7 +1,7 @@
 #ifndef MESHLOADER_H
 #define MESHLOADER_H
 
-#include "include/mesh.h"
+#include "Mesh/mesh.h"
 
 
 #include <assimp/scene.h>

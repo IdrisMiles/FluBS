@@ -8,8 +8,24 @@ DESTDIR = ./bin
 TEMPLATE = app
 
 
-SOURCES += $$PWD/src/*.cpp
-HEADERS  += $$PWD/include/*.h
+SOURCES += $$PWD/src/*.cpp \
+            $$PWD/src/MeshSampler/*.cpp \
+            $$PWD/src/Mesh/*.cpp \
+            $$PWD/src/FluidSystem/*.cpp \
+            $$PWD/src/Fluid/*.cpp \
+            $$PWD/src/Rigid/*.cpp \
+            $$PWD/src/SPH/*.cpp \
+            $$PWD/src/Utility/*.cpp
+
+HEADERS  += $$PWD/include/*.h \
+            $$PWD/include/MeshSampler/*.h \
+            $$PWD/include/Mesh/*.h      \
+            $$PWD/include/FluidSystem/*.h \
+            $$PWD/include/Fluid/*.h     \
+            $$PWD/include/Rigid/*.h     \
+            $$PWD/include/SPH/*.h       \
+            $$PWD/include/Utility/*.h
+
 OTHER_FILES += shader/*
 
 INCLUDEPATH +=  $$PWD/include \

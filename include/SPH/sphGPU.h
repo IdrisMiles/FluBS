@@ -51,17 +51,35 @@ namespace sphGPU
                                  const uint numCells,
                                  unsigned int &_maxCellOcc);
 
-    void ComputePressure(const uint maxCellOcc, const uint gridRes,
+    void ComputeParticleVolume(const uint maxCellOcc,
+                               const uint gridRes,
+                               float *volume,
+                               const uint *cellOcc,
+                               const uint *cellPartIdx,
+                               const float3 *particles,
+                               const uint numPoints,
+                               const float smoothingLength);
+
+    void ComputeDensity(const uint maxCellOcc,
+                        const uint gridRes,
+                        float *density,
+                        const float *mass,
+                        const uint *cellOcc,
+                        const uint *cellPartIdx,
+                        const float3 *particles,
+                        const uint numPoints,
+                        const float smoothingLength,
+                        const bool accumulate);
+
+    void ComputePressure(const uint maxCellOcc,
+                         const uint gridRes,
                          float *pressure,
                          float *density,
                          const float restDensity,
                          const float gasConstant,
-                         const float *mass,
                          const uint *cellOcc,
                          const uint *cellPartIdx,
-                         const float3 *particles,
-                         const uint numPoints,
-                         const float smoothingLength);
+                         const uint numPoints);
 
     void ComputePressureForce(const uint maxCellOcc,
                               const uint gridRes,
@@ -73,7 +91,8 @@ namespace sphGPU
                               const uint *cellOcc,
                               const uint *cellPartIdx,
                               const uint numPoints,
-                              const float smoothingLength);
+                              const float smoothingLength,
+                              const bool accumulate);
 
     void ComputeViscForce(const uint maxCellOcc,
                           const uint gridRes,

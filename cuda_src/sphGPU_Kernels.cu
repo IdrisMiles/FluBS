@@ -65,7 +65,12 @@ __global__ void sphGPU_Kernels::ParticleHash_Kernel(uint *hash,
 
 }
 
-__global__ void sphGPU_Kernels::ComputeDensity_kernel(float *density, const float *mass, const uint *cellOcc, const uint *cellPartIdx, const float3 *particles, const uint numPoints, const float smoothingLength)
+__global__ void sphGPU_Kernels::ComputeVolume_kernel(float *volume,
+                                     const uint *cellOcc,
+                                     const uint *cellPartIdx,
+                                     const float3 *particles,
+                                     const uint numPoints,
+                                     const float smoothingLength)
 {
     int thisCellIdx = blockIdx.x + (blockIdx.y * gridDim.x) + (blockIdx.z * gridDim.x * gridDim.y);
     int thisParticleGlobalIdx = cellPartIdx[thisCellIdx] + threadIdx.x;
@@ -73,6 +78,73 @@ __global__ void sphGPU_Kernels::ComputeDensity_kernel(float *density, const floa
 
 
     if(thisParticleGlobalIdx < numPoints && threadIdx.x < cellOcc[thisCellIdx] && thisCellIdx < gridDim.x * gridDim.y * gridDim.z)
+    {
+        int neighCellIdx;
+        int neighCellOcc;
+        int neighCellPartIdx;
+        int neighParticleGlobalIdx;
+
+        int x, y, z;
+        int xMin = ((blockIdx.x==0)?0:-1);
+        int yMin = ((blockIdx.y==0)?0:-1);
+        int zMin = ((blockIdx.z==0)?0:-1);
+        int xMax = ((blockIdx.x==gridDim.x-1)?0:1);
+        int yMax = ((blockIdx.y==gridDim.y-1)?0:1);
+        int zMax = ((blockIdx.z==gridDim.z-1)?0:1);
+
+        int neighLocalIdx;
+        float accVolume = 0.0f;
+        float3 thisParticle = particles[thisParticleGlobalIdx];
+
+        uint numNeighCells = 0;
+        for(z = zMin; z <= zMax; z++)
+        {
+            for(y = yMin; y <= yMax; y++)
+            {
+                for(x = xMin; x <= xMax; x++)
+                {
+                    numNeighCells++;
+                    neighCellIdx = thisCellIdx + x + (y*gridDim.x) + (z*gridDim.x*gridDim.y);
+
+                    neighCellOcc = cellOcc[neighCellIdx];
+                    neighCellPartIdx = cellPartIdx[neighCellIdx];
+                    for(neighLocalIdx=0; neighLocalIdx<neighCellOcc; neighLocalIdx++)
+                    {
+                        neighParticleGlobalIdx = neighCellPartIdx + neighLocalIdx;
+                        float3 neighParticle = particles[neighParticleGlobalIdx];
+
+                        accVolume += fabs(Poly6Kernel_Kernel(length(thisParticle - neighParticle), smoothingLength));
+                    }
+                }
+            }
+        }
+
+        if(isnan(accVolume) || fabs(accVolume) < FLT_EPSILON)
+        {
+            volume[thisParticleGlobalIdx] = 1.0f;
+        }
+        else
+        {
+            volume[thisParticleGlobalIdx] = accVolume;
+        }
+    }
+}
+
+__global__ void sphGPU_Kernels::ComputeDensity_kernel(float *density,
+                                                      const float *mass,
+                                                      const uint *cellOcc,
+                                                      const uint *cellPartIdx,
+                                                      const float3 *particles,
+                                                      const uint numPoints,
+                                                      const float smoothingLength,
+                                                      const bool accumulate)
+{
+    int thisCellIdx = blockIdx.x + (blockIdx.y * gridDim.x) + (blockIdx.z * gridDim.x * gridDim.y);
+    int thisParticleGlobalIdx = cellPartIdx[thisCellIdx] + threadIdx.x;
+
+
+
+    if((thisParticleGlobalIdx < numPoints) && (threadIdx.x < cellOcc[thisCellIdx]) && (thisCellIdx < gridDim.x * gridDim.y * gridDim.z))
     {
         int neighCellIdx;
         int neighCellOcc;
@@ -118,12 +190,6 @@ __global__ void sphGPU_Kernels::ComputeDensity_kernel(float *density, const floa
 
                         numNeighs++;
                     }
-
-
-                    // Get density contribution from Boundary particles
-
-
-                    // Get density contribution from Algae particles
                 }
             }
         }
@@ -131,11 +197,22 @@ __global__ void sphGPU_Kernels::ComputeDensity_kernel(float *density, const floa
         if(isnan(accDensity))
         {
             printf("nan density \n");
-            density[thisParticleGlobalIdx] = 0.0f;
+
+            if(!accumulate)
+            {
+                density[thisParticleGlobalIdx] = 0.0f;
+            }
         }
         else
         {
-            density[thisParticleGlobalIdx] = accDensity;
+            if(accumulate)
+            {
+                atomicAdd(&density[thisParticleGlobalIdx], accDensity);
+            }
+            else
+            {
+                density[thisParticleGlobalIdx] = accDensity;
+            }
         }
 
 
@@ -143,14 +220,27 @@ __global__ void sphGPU_Kernels::ComputeDensity_kernel(float *density, const floa
 
 }
 
-__global__ void sphGPU_Kernels::ComputePressure_kernel(float *pressure, float *density, const float restDensity, const float gasConstant, const float *mass, const uint *cellOcc, const uint *cellPartIdx, const float3 *particles, const uint numPoints, const float smoothingLength)
+
+
+__global__ void sphGPU_Kernels::ComputeDensityFluidRigid_kernel(const uint numPoints,
+                                                                const float fluidRestDensity,
+                                                                float *fluidDensity,
+                                                                const uint *fluidCellOcc,
+                                                                const uint *fluidCellPartIdx,
+                                                                const float3 *fluidPos,
+                                                                float *rigidVolume,
+                                                                const uint *rigidCellOcc,
+                                                                const uint *rigidCellPartIdx,
+                                                                const float3 *rigidPos,
+                                                                const float smoothingLength,
+                                                                const bool accumulate)
 {
     int thisCellIdx = blockIdx.x + (blockIdx.y * gridDim.x) + (blockIdx.z * gridDim.x * gridDim.y);
-    int thisParticleGlobalIdx = cellPartIdx[thisCellIdx] + threadIdx.x;
+    int thisParticleGlobalIdx = fluidCellPartIdx[thisCellIdx] + threadIdx.x;
 
 
 
-    if(thisParticleGlobalIdx < numPoints && threadIdx.x < cellOcc[thisCellIdx] && thisCellIdx < gridDim.x * gridDim.y * gridDim.z)
+    if((thisParticleGlobalIdx < numPoints) && (threadIdx.x < fluidCellOcc[thisCellIdx]) && (thisCellIdx < gridDim.x * gridDim.y * gridDim.z))
     {
         int neighCellIdx;
         int neighCellOcc;
@@ -166,63 +256,173 @@ __global__ void sphGPU_Kernels::ComputePressure_kernel(float *pressure, float *d
         int zMax = ((blockIdx.z==gridDim.z-1)?0:1);
 
         int neighLocalIdx;
-        float accPressure = 0.0f;
         float accDensity = 0.0f;
         float thisDensity = 0.0f;
-        float3 thisParticle = particles[thisParticleGlobalIdx];
+        float3 thisParticle = fluidPos[thisParticleGlobalIdx];
 
-        unsigned int numNeighs = 0;
-        uint numNeighCells = 0;
         for(z = zMin; z <= zMax; z++)
         {
             for(y = yMin; y <= yMax; y++)
             {
                 for(x = xMin; x <= xMax; x++)
                 {
-                    numNeighCells++;
                     neighCellIdx = thisCellIdx + x + (y*gridDim.x) + (z*gridDim.x*gridDim.y);
 
                     // Get density contribution from other fluid particles
-                    neighCellOcc = cellOcc[neighCellIdx];
-                    neighCellPartIdx = cellPartIdx[neighCellIdx];
+                    neighCellOcc = rigidCellOcc[neighCellIdx];
+                    neighCellPartIdx = rigidCellPartIdx[neighCellIdx];
                     for(neighLocalIdx=0; neighLocalIdx<neighCellOcc; neighLocalIdx++)
                     {
                         neighParticleGlobalIdx = neighCellPartIdx + neighLocalIdx;
 
-                        float3 neighParticle = particles[neighParticleGlobalIdx];
+                        float3 neighParticle = rigidPos[neighParticleGlobalIdx];
 
-                        thisDensity = mass[neighParticleGlobalIdx] * fabs(Poly6Kernel_Kernel(length(thisParticle - neighParticle), smoothingLength));
+                        thisDensity = fluidRestDensity * rigidVolume[neighParticleGlobalIdx] * fabs(Poly6Kernel_Kernel(length(thisParticle - neighParticle), smoothingLength));
 
                         accDensity += thisDensity;
-
-                        numNeighs++;
                     }
-
-
-                    // Get density contribution from Boundary particles
-
-
-                    // Get density contribution from Algae particles
                 }
             }
         }
 
+        if(isnan(accDensity))
+        {
+            printf("nan density \n");
 
-//        float beta = 0.35;
-//        float gamma = 7.0f;
-        //accPressure = gasConstant * ((accDensity/restDensity) - 1.0f);
-        accPressure = gasConstant * (accDensity - restDensity);
-        //accPressure = beta * (pow((accDensity/restDensity), gamma)-1.0f);
+            if(!accumulate)
+            {
+                fluidDensity[thisParticleGlobalIdx] = 0.0f;
+            }
+        }
+        else
+        {
+            if(accumulate)
+            {
+                atomicAdd(&fluidDensity[thisParticleGlobalIdx], accDensity);
+            }
+            else
+            {
+                fluidDensity[thisParticleGlobalIdx] = accDensity;
+            }
+        }
+
+    } // end if valid point
+}
+
+
+
+__global__ void sphGPU_Kernels::ComputeDensityFluidFluid_kernel(const uint numPoints,
+                                                                float *fluidDensity,
+                                                                const uint *fluidCellOcc,
+                                                                const uint *fluidCellPartIdx,
+                                                                const float3 *fluidPos,
+                                                                const uint *otherFluidCellOcc,
+                                                                const uint *otherFluidCellPartIdx,
+                                                                float *otherFluidMass,
+                                                                const float3 *otherFluidPos,
+                                                                const float smoothingLength,
+                                                                const bool accumulate)
+{
+    int thisCellIdx = blockIdx.x + (blockIdx.y * gridDim.x) + (blockIdx.z * gridDim.x * gridDim.y);
+    int thisParticleGlobalIdx = fluidCellPartIdx[thisCellIdx] + threadIdx.x;
+
+
+
+    if((thisParticleGlobalIdx < numPoints) && (threadIdx.x < fluidCellOcc[thisCellIdx]) && (thisCellIdx < gridDim.x * gridDim.y * gridDim.z))
+    {
+        int neighCellIdx;
+        int neighCellOcc;
+        int neighCellPartIdx;
+        int neighParticleGlobalIdx;
+
+        int x, y, z;
+        int xMin = ((blockIdx.x==0)?0:-1);
+        int yMin = ((blockIdx.y==0)?0:-1);
+        int zMin = ((blockIdx.z==0)?0:-1);
+        int xMax = ((blockIdx.x==gridDim.x-1)?0:1);
+        int yMax = ((blockIdx.y==gridDim.y-1)?0:1);
+        int zMax = ((blockIdx.z==gridDim.z-1)?0:1);
+
+        int neighLocalIdx;
+        float accDensity = 0.0f;
+        float thisDensity = 0.0f;
+        float3 thisParticle = fluidPos[thisParticleGlobalIdx];
+
+        for(z = zMin; z <= zMax; z++)
+        {
+            for(y = yMin; y <= yMax; y++)
+            {
+                for(x = xMin; x <= xMax; x++)
+                {
+                    neighCellIdx = thisCellIdx + x + (y*gridDim.x) + (z*gridDim.x*gridDim.y);
+
+                    // Get density contribution from other fluid particles
+                    neighCellOcc = otherFluidCellOcc[neighCellIdx];
+                    neighCellPartIdx = otherFluidCellPartIdx[neighCellIdx];
+                    for(neighLocalIdx=0; neighLocalIdx<neighCellOcc; neighLocalIdx++)
+                    {
+                        neighParticleGlobalIdx = neighCellPartIdx + neighLocalIdx;
+
+                        float3 neighParticle = otherFluidPos[neighParticleGlobalIdx];
+
+                        thisDensity = otherFluidMass[neighParticleGlobalIdx] * fabs(Poly6Kernel_Kernel(length(thisParticle - neighParticle), smoothingLength));
+
+                        accDensity += thisDensity;
+                    }
+                }
+            }
+        }
 
         if(isnan(accDensity))
         {
             printf("nan density \n");
-            density[thisParticleGlobalIdx] = restDensity;
+
+            if(!accumulate)
+            {
+                fluidDensity[thisParticleGlobalIdx] = 0.0f;
+            }
         }
         else
         {
-            density[thisParticleGlobalIdx] = accDensity;
+            if(accumulate)
+            {
+                atomicAdd(&fluidDensity[thisParticleGlobalIdx], accDensity);
+            }
+            else
+            {
+                fluidDensity[thisParticleGlobalIdx] = accDensity;
+            }
         }
+
+    } // end if valid point
+}
+
+
+
+
+
+
+__global__ void sphGPU_Kernels::ComputePressure_kernel(float *pressure,
+                                                       float *density,
+                                                       const float restDensity,
+                                                       const float gasConstant,
+                                                       const uint *cellOcc,
+                                                       const uint *cellPartIdx,
+                                                       const uint numPoints)
+{
+    int thisCellIdx = blockIdx.x + (blockIdx.y * gridDim.x) + (blockIdx.z * gridDim.x * gridDim.y);
+    int thisParticleGlobalIdx = cellPartIdx[thisCellIdx] + threadIdx.x;
+
+
+
+    if(thisParticleGlobalIdx < numPoints && threadIdx.x < cellOcc[thisCellIdx] && thisCellIdx < gridDim.x * gridDim.y * gridDim.z)
+    {
+        //float beta = 0.35;
+        //float gamma = 7.0f;
+        //float accPressure = beta * (pow((accDensity/restDensity), gamma)-1.0f);
+        //float accPressure = gasConstant * ((accDensity/restDensity) - 1.0f);
+
+        float accPressure = gasConstant * (density[thisParticleGlobalIdx] - restDensity);
 
         if(isnan(accPressure))
         {
@@ -238,7 +438,16 @@ __global__ void sphGPU_Kernels::ComputePressure_kernel(float *pressure, float *d
 
 }
 
-__global__ void sphGPU_Kernels::ComputePressureForce_kernel(float3 *pressureForce, const float *pressure, const float *density, const float *mass, const float3 *particles, const uint *cellOcc, const uint *cellPartIdx, const uint numPoints, const float smoothingLength)
+__global__ void sphGPU_Kernels::ComputePressureForce_kernel(float3 *pressureForce,
+                                                            const float *pressure,
+                                                            const float *density,
+                                                            const float *mass,
+                                                            const float3 *particles,
+                                                            const uint *cellOcc,
+                                                            const uint *cellPartIdx,
+                                                            const uint numPoints,
+                                                            const float smoothingLength,
+                                                            const bool accumulate)
 {
     int thisCellIdx = blockIdx.x + (blockIdx.y * gridDim.x) + (blockIdx.z * gridDim.x * gridDim.y);
     int thisParticleGlobalIdx = cellPartIdx[thisCellIdx] + threadIdx.x;
@@ -298,11 +507,27 @@ __global__ void sphGPU_Kernels::ComputePressureForce_kernel(float3 *pressureForc
         }
 
 
-        pressureForce[thisParticleGlobalIdx] = -1.0f * accPressureForce;
+        if(accumulate)
+        {
+            pressureForce[thisParticleGlobalIdx] = -1.0f * accPressureForce;
+        }
+        else
+        {
+            pressureForce[thisParticleGlobalIdx] = pressureForce[thisParticleGlobalIdx] + (-1.0f * accPressureForce);
+        }
     }
 }
 
-__global__ void sphGPU_Kernels::ComputeViscousForce_kernel(float3 *viscForce, const float viscCoeff, const float3 *velocity, const float *density, const float *mass, const float3 *position, const uint *cellOcc, const uint *cellPartIdx, const uint numPoints, const float smoothingLength)
+__global__ void sphGPU_Kernels::ComputeViscousForce_kernel(float3 *viscForce,
+                                                           const float viscCoeff,
+                                                           const float3 *velocity,
+                                                           const float *density,
+                                                           const float *mass,
+                                                           const float3 *position,
+                                                           const uint *cellOcc,
+                                                           const uint *cellPartIdx,
+                                                           const uint numPoints,
+                                                           const float smoothingLength)
 {
     int thisCellIdx = blockIdx.x + (blockIdx.y * gridDim.x) + (blockIdx.z * gridDim.x * gridDim.y);
     int thisParticleGlobalIdx = cellPartIdx[thisCellIdx] + threadIdx.x;
@@ -363,7 +588,16 @@ __global__ void sphGPU_Kernels::ComputeViscousForce_kernel(float3 *viscForce, co
 }
 
 
-__global__ void sphGPU_Kernels::ComputeSurfaceTensionForce_kernel(float3 *surfaceTensionForce, const float surfaceTension, const float surfaceThreshold, /*const*/ float *density, const float *mass, const float3 *position, const uint *cellOcc, const uint *cellPartIdx, const uint numPoints, const float smoothingLength)
+__global__ void sphGPU_Kernels::ComputeSurfaceTensionForce_kernel(float3 *surfaceTensionForce,
+                                                                  const float surfaceTension,
+                                                                  const float surfaceThreshold,
+                                                                  /*const*/ float *density,
+                                                                  const float *mass,
+                                                                  const float3 *position,
+                                                                  const uint *cellOcc,
+                                                                  const uint *cellPartIdx,
+                                                                  const uint numPoints,
+                                                                  const float smoothingLength)
 {
     int thisCellIdx = blockIdx.x + (blockIdx.y * gridDim.x) + (blockIdx.z * gridDim.x * gridDim.y);
     int thisParticleGlobalIdx = cellPartIdx[thisCellIdx] + threadIdx.x;
@@ -433,7 +667,18 @@ __global__ void sphGPU_Kernels::ComputeSurfaceTensionForce_kernel(float3 *surfac
     }
 }
 
-__global__ void sphGPU_Kernels::ComputeForces_kernel(float3 *force, const float3 *externalForce, const float3 *pressureForce, const float3 *viscousForce, const float3 *surfaceTensionForce, const float *mass, const float3 *particles, const float3 *velocities, const uint *cellOcc, const uint *cellPartIdx, const uint numPoints, const float smoothingLength)
+__global__ void sphGPU_Kernels::ComputeForces_kernel(float3 *force,
+                                                     const float3 *externalForce,
+                                                     const float3 *pressureForce,
+                                                     const float3 *viscousForce,
+                                                     const float3 *surfaceTensionForce,
+                                                     const float *mass,
+                                                     const float3 *particles,
+                                                     const float3 *velocities,
+                                                     const uint *cellOcc,
+                                                     const uint *cellPartIdx,
+                                                     const uint numPoints,
+                                                     const float smoothingLength)
 {
     int thisCellIdx = blockIdx.x + (blockIdx.y * gridDim.x) + (blockIdx.z * gridDim.x * gridDim.y);
     int thisParticleGlobalIdx = cellPartIdx[thisCellIdx] + threadIdx.x;
@@ -501,7 +746,11 @@ __global__ void sphGPU_Kernels::ComputeForces_kernel(float3 *force, const float3
     }
 }
 
-__global__ void sphGPU_Kernels::Integrate_kernel(float3 *force, float3 *particles, float3 *velocities, const float _dt, const uint numPoints)
+__global__ void sphGPU_Kernels::Integrate_kernel(float3 *force,
+                                                 float3 *particles,
+                                                 float3 *velocities,
+                                                 const float _dt,
+                                                 const uint numPoints)
 {
     uint idx = threadIdx.x + (blockIdx.x * blockDim.x);
 
@@ -548,7 +797,10 @@ __global__ void sphGPU_Kernels::Integrate_kernel(float3 *force, float3 *particle
     }
 }
 
-__global__ void sphGPU_Kernels::HandleBoundaries_Kernel(float3 *particles, float3 *velocities, const float boundary, const uint numPoints)
+__global__ void sphGPU_Kernels::HandleBoundaries_Kernel(float3 *particles,
+                                                        float3 *velocities,
+                                                        const float boundary,
+                                                        const uint numPoints)
 {
     uint idx = threadIdx.x + (blockIdx.x * blockDim.x);
 
@@ -598,7 +850,13 @@ __global__ void sphGPU_Kernels::HandleBoundaries_Kernel(float3 *particles, float
     }
 }
 
-__global__ void sphGPU_Kernels::InitParticleAsCube_Kernel(float3 *particles, float3 *velocities, float *densities, const float restDensity, const uint numParticles, const uint numPartsPerAxis, const float scale)
+__global__ void sphGPU_Kernels::InitParticleAsCube_Kernel(float3 *particles,
+                                                          float3 *velocities,
+                                                          float *densities,
+                                                          const float restDensity,
+                                                          const uint numParticles,
+                                                          const uint numPartsPerAxis,
+                                                          const float scale)
 {
 
     uint x = threadIdx.x + (blockIdx.x * blockDim.x);

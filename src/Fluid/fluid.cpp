@@ -1,4 +1,4 @@
-#include "include/fluid.h"
+#include "Fluid/fluid.h"
 #include <math.h>
 #include <sys/time.h>
 #include <glm/gtx/transform.hpp>

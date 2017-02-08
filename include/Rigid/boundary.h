@@ -11,34 +11,31 @@
 // CUDA includes
 #include <cuda_runtime.h>
 #include <cuda.h>
-#include <cuda_runtime_api.h>
 #include <device_functions.h>
 #include <cuda_gl_interop.h>
 
-// Thrust includes for CUDA stuff
-#include <thrust/host_vector.h>
 
 #include <glm/glm.hpp>
-#include "include/mesh.h"
+#include "Fluid/fluid.h"
+#include "Mesh/mesh.h"
 
 
-class Boundary
+class Boundary : public Fluid
 {
 public:
-    Boundary();
-    ~Boundary();
+    Boundary(std::shared_ptr<FluidProperty> _fluidProperty, Mesh _mesh);
+    virtual ~Boundary();
 
 
+    float *GetVolumePtr();
+    void ReleaseVolumePtr();
 
 private:
 
     Mesh m_mesh;
 
-    // Simulation stuff
-    float3 *d_position_ptr;
-    float3 *d_velocity_ptr;
-    float *d_density_ptr;
-    float *d_mass_ptr;
+
+    float* d_volumePtr;
 
 };
 

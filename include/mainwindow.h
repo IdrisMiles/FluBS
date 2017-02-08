@@ -4,7 +4,7 @@
 
 // Qt includes
 #include <QMainWindow>
-#include "fluidpropertywidget.h"
+#include "Widget/fluidpropertywidget.h"
 #include "openglscene.h"
 
 

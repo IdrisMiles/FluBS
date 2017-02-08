@@ -1,4 +1,4 @@
-#include "include/fluidsolverproperty.h"
+#include "FluidSystem/fluidsolverproperty.h"
 
 FluidSolverProperty::FluidSolverProperty(float _smoothingLength,
                                          float _deltaTime,

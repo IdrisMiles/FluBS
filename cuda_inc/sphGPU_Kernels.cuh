@@ -17,24 +17,54 @@ namespace sphGPU_Kernels
                                         const uint gridRes,
                                         const float cellWidth);
 
+    __global__ void ComputeVolume_kernel(float *volume,
+                                         const uint *cellOcc,
+                                         const uint *cellPartIdx,
+                                         const float3 *particles,
+                                         const uint numPoints,
+                                         const float smoothingLength);
+
     __global__ void ComputeDensity_kernel(float *density,
                                           const float *mass,
                                           const uint *cellOcc,
                                           const uint *cellPartIdx,
                                           const float3 *particles,
                                           const uint numPoints,
-                                          const float smoothingLength);
+                                          const float smoothingLength,
+                                          const bool accumulate);
+
+    __global__ void ComputeDensityFluidRigid_kernel(const uint numPoints,
+                                                    const float fluidRestDensity,
+                                                    float *fluidDensity,
+                                                    const uint *fluidCellOcc,
+                                                    const uint *fluidCellPartIdx,
+                                                    const float3 *fluidPos,
+                                                    float *rigidVolume,
+                                                    const uint *rigidCellOcc,
+                                                    const uint *rigidCellPartIdx,
+                                                    const float3 *rigidPos,
+                                                    const float smoothingLength,
+                                                    const bool accumulate);
+
+    __global__ void ComputeDensityFluidFluid_kernel(const uint numPoints,
+                                                    float *fluidDensity,
+                                                    const uint *fluidCellOcc,
+                                                    const uint *fluidCellPartIdx,
+                                                    const float3 *fluidPos,
+                                                    const uint *otherFluidCellOcc,
+                                                    const uint *otherFluidCellPartIdx,
+                                                    float *otherFluidMass,
+                                                    const float3 *otherFluidPos,
+                                                    const float smoothingLength,
+                                                    const bool accumulate);
 
     __global__ void ComputePressure_kernel(float *pressure,
                                            float *density,
                                            const float restDensity,
                                            const float gasConstant,
-                                           const float *mass,
                                            const uint *cellOcc,
                                            const uint *cellPartIdx,
-                                           const float3 *particles,
-                                           const uint numPoints,
-                                           const float smoothingLength);
+                                           const uint numPoints);
 
     __global__ void ComputePressureForce_kernel(float3 *pressureForce,
                                                 const float *pressure,
@@ -44,7 +74,8 @@ namespace sphGPU_Kernels
                                                 const uint *cellOcc,
                                                 const uint *cellPartIdx,
                                                 const uint numPoints,
-                                                const float smoothingLength);
+                                                const float smoothingLength,
+                                                const bool accumulate);
 
     __global__ void ComputeViscousForce_kernel(float3 *viscForce,
                                                const float viscCoeff,
