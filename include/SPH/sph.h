@@ -12,6 +12,9 @@ namespace sph
     void ResetProperties(std::shared_ptr<Fluid> _fluid,
                          std::shared_ptr<FluidSolverProperty> _solverProps);
 
+    void ResetProperties(std::shared_ptr<Rigid> _rigid,
+                         std::shared_ptr<FluidSolverProperty> _solverProps);
+
     void InitFluidAsCube(std::shared_ptr<Fluid> _fluid,
                          std::shared_ptr<FluidSolverProperty> _solverProps);
 
@@ -30,7 +33,7 @@ namespace sph
 
     //--------------------------------------------------------------------------------------
 
-    void ComputeParticleVolume(std::shared_ptr<Boundary> _boundary,
+    void ComputeParticleVolume(std::shared_ptr<Rigid> _rigid,
                                std::shared_ptr<FluidSolverProperty> _solverProps);
 
     //--------------------------------------------------------------------------------------
@@ -45,7 +48,7 @@ namespace sph
                                   const bool accumulate = false);
 
     void ComputeDensityFluidRigid(std::shared_ptr<Fluid> _fluid,
-                                  std::shared_ptr<Boundary> _rigid,
+                                  std::shared_ptr<Rigid> _rigid,
                                   std::shared_ptr<FluidSolverProperty> _solverProps,
                                   const bool accumulate = false);
 
@@ -65,7 +68,7 @@ namespace sph
                                         const bool accumulate = false);
 
     void ComputePressureForceBoundary(std::shared_ptr<Fluid> _fluid,
-                                      std::shared_ptr<Boundary> _boundary,
+                                      std::shared_ptr<Rigid> _boundary,
                                       std::shared_ptr<FluidSolverProperty> _solverProps,
                                       const bool accumulate = false);
 

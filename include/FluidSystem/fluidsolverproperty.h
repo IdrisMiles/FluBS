@@ -10,9 +10,18 @@ public:
                         unsigned int _solveIterations = 1,
                         unsigned int _gridResolution = 10,
                         float _gridCellWidth = 1.2f,
-                        bool _play = false);
+                        bool _play = false):
+        smoothingLength(_smoothingLength),
+        deltaTime(_deltaTime),
+        solveIterations(_solveIterations),
+        gridResolution(_gridResolution),
+        gridCellWidth(_gridCellWidth),
+        play(_play)
+    {
 
-    ~FluidSolverProperty();
+    }
+
+    ~FluidSolverProperty(){}
 
 
 

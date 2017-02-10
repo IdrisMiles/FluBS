@@ -84,6 +84,7 @@ private:
 
     // Application specific members
     std::shared_ptr<Fluid> m_fluid;
+    std::shared_ptr<Rigid> m_rigid;
     std::shared_ptr<FluidSystem> m_fluidSystem;
 
     QTimer *m_drawTimer;

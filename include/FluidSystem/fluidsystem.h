@@ -2,6 +2,7 @@
 #define FLUIDSYSTEM_H
 
 #include "Fluid/fluid.h"
+#include "Rigid/boundary.h"
 #include "Fluid/fluidproperty.h"
 #include "FluidSystem/fluidsolverproperty.h"
 #include "SPH/sph.h"
@@ -18,6 +19,7 @@ public:
     ~FluidSystem();
 
     void AddFluid(std::shared_ptr<Fluid> _fluid);
+    void AddRigid(std::shared_ptr<Rigid> _rigid);
     void AddAlgae(std::shared_ptr<Fluid> _algae);
     void AddFluidSolverProperty(std::shared_ptr<FluidSolverProperty> _fluidSolverProperty);
 
@@ -30,6 +32,7 @@ public:
 private:
     std::shared_ptr<Fluid> m_algae;
     std::shared_ptr<Fluid> m_fluid;
+    std::vector<std::shared_ptr<Rigid>> m_rigids;
     std::shared_ptr<FluidSolverProperty> m_fluidSolverProperty;
     Poly6Kernel *m_poly6Kernel;
     SpikyKernel *m_spikyKernel;

@@ -15,9 +15,24 @@ public:
                   float _gasStiffness = 30.5f,
                   float _viscosity = 1.0e-2f,
                   float _smoothingLength = 1.2f,
-                  bool _play = false);
+                  bool _play = false):
+        numParticles(_numParticles),
+        particleMass(_particleMass),
+        particleRadius(_particleRadius),
+        restDensity(_restDensity),
+        surfaceTension(_surfaceTension),
+        surfaceThreshold(_surfaceThreshold),
+        gasStiffness(_gasStiffness),
+        viscosity(_viscosity),
+        smoothingLength(_smoothingLength),
+        play(_play)
+    {
 
-    ~FluidProperty();
+        float dia = 2.0f * particleRadius;
+        particleMass = restDensity * (dia * dia * dia);
+    }
+
+    ~FluidProperty(){}
 
     unsigned int numParticles;
     float particleMass;

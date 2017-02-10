@@ -2,6 +2,8 @@
 #include <iostream>
 #include <QMouseEvent>
 #include <math.h>
+#include "Mesh/meshloader.h"
+#include "MeshSampler/meshsampler.h"
 
 glm::mat4 OpenGLScene::m_projMat;
 glm::mat4 OpenGLScene::m_viewMat;
@@ -142,10 +144,39 @@ void OpenGLScene::initializeGL()
 
     //---------------------------------------------------------------------------------------
 
+    // fluid
     auto fluidProps = std::shared_ptr<FluidProperty>(new FluidProperty());
-    auto fluidSolverProps = std::shared_ptr<FluidSolverProperty>(new FluidSolverProperty());
     m_fluid = std::shared_ptr<Fluid>(new Fluid(fluidProps));
+
+    // rigid
+    auto fluidSolverProps = std::shared_ptr<FluidSolverProperty>(new FluidSolverProperty());
+    auto rigidProps = std::shared_ptr<RigidProperty>(new RigidProperty());
+
+    Mesh boundary = Mesh();
+    float dim = 1.0f* fluidSolverProps->gridResolution*fluidSolverProps->gridCellWidth;
+    float rad = rigidProps->particleRadius;
+    int numRigidAxis = ceil(dim / (rad*1.0f));
+    for(int z=0; z<numRigidAxis; z++)
+    {
+        for(int y=0; y<numRigidAxis; y++)
+        {
+            for(int x=0; x<numRigidAxis; x++)
+            {
+                if(x==0 || x==numRigidAxis-1 || y==0 || z==0 || z==numRigidAxis-1)
+                {
+                    glm::vec3 pos((x*rad*1.0f)-(dim*0.5f), (y*rad*1.0f)-(dim*0.5f), (z*rad*1.0f)-(dim*0.5f));
+                    boundary.verts.push_back(pos);
+                }
+            }
+        }
+    }
+
+    rigidProps->numParticles = boundary.verts.size();
+    m_rigid = std::shared_ptr<Rigid>(new Rigid(rigidProps, boundary));
+
+
     m_fluidSystem = std::shared_ptr<FluidSystem>(new FluidSystem(m_fluid, fluidSolverProps));
+    m_fluidSystem->AddRigid(m_rigid);
 
     emit FluidInitialised(fluidProps);
 
@@ -179,6 +210,9 @@ void OpenGLScene::paintGL()
     // Draw code - replace this with project specific draw stuff
     m_fluid->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, glm::mat4(normalMatrix), m_lightPos, camPos);
     m_fluid->Draw();
+    m_rigid->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, glm::mat4(normalMatrix), m_lightPos, camPos);
+    m_rigid->Draw();
+
     //---------------------------------------------------------------------------------------
 
 }

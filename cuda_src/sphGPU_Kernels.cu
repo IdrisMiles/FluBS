@@ -75,8 +75,6 @@ __global__ void sphGPU_Kernels::ComputeVolume_kernel(float *volume,
     int thisCellIdx = blockIdx.x + (blockIdx.y * gridDim.x) + (blockIdx.z * gridDim.x * gridDim.y);
     int thisParticleGlobalIdx = cellPartIdx[thisCellIdx] + threadIdx.x;
 
-
-
     if(thisParticleGlobalIdx < numPoints && threadIdx.x < cellOcc[thisCellIdx] && thisCellIdx < gridDim.x * gridDim.y * gridDim.z)
     {
         int neighCellIdx;

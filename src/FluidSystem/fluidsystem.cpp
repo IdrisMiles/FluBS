@@ -17,18 +17,27 @@ FluidSystem::FluidSystem(std::shared_ptr<Fluid> _fluid,
 
 FluidSystem::FluidSystem(const FluidSystem &_FluidSystem)
 {
-
+    m_fluid = nullptr;
+    m_algae = nullptr;
+    m_rigids.clear();
 }
 
 FluidSystem::~FluidSystem()
 {
     m_fluid = nullptr;
     m_fluidSolverProperty = nullptr;
+    m_rigids.clear();
 }
 
 void FluidSystem::AddFluid(std::shared_ptr<Fluid> _fluid)
 {
     m_fluid = _fluid;
+}
+
+void FluidSystem::AddRigid(std::shared_ptr<Rigid> _rigid)
+{
+    m_rigids.push_back(_rigid);
+    m_rigids.back()->SetupSolveSpecs(m_fluidSolverProperty);
 }
 
 void FluidSystem::AddAlgae(std::shared_ptr<Fluid> _algae)
@@ -48,13 +57,17 @@ void FluidSystem::InitialiseSim()
     sph::InitFluidAsCube(m_fluid, m_fluidSolverProperty);
     cudaThreadSynchronize();
     m_fluid->ReleaseCudaGLResources();
+
+
+    sph::ResetProperties(m_rigids[0], m_fluidSolverProperty);
+    cudaThreadSynchronize();
+    m_rigids[0]->ReleaseCudaGLResources();
 }
 
 void FluidSystem::ResetSim()
 {
     sph::InitFluidAsCube(m_fluid, m_fluidSolverProperty);
     cudaThreadSynchronize();
-
     m_fluid->ReleaseCudaGLResources();
 }
 
@@ -66,6 +79,8 @@ void FluidSystem::StepSimulation()
     }
 
 
+    //----------------------------------------------------------------------
+    // Initialise timing stuff
     static double time = 0.0;
     static double t1 = 0.0;
     static double t2 = 0.0;
@@ -74,7 +89,15 @@ void FluidSystem::StepSimulation()
     t1=tim.tv_sec+(tim.tv_usec/1000000.0);
 
 
-    //-----------------------------
+    //----------------------------------------------------------------------
+    // Call sph API to do funky stuff here
+
+    for(auto &&r : m_rigids)
+    {
+        sph::ResetProperties(r, m_fluidSolverProperty);
+        cudaThreadSynchronize();
+    }
+
 
     sph::ResetProperties(m_fluid, m_fluidSolverProperty);
     cudaThreadSynchronize();
@@ -120,15 +143,14 @@ void FluidSystem::StepSimulation()
     sph::HandleBoundaries(m_fluid, m_fluidSolverProperty);
     cudaThreadSynchronize();
 
-    //-----------------------------
-
-
-
-
+    //----------------------------------------------------------------------
     // Clean up
     m_fluid->ReleaseCudaGLResources();
+    m_rigids[0]->ReleaseCudaGLResources();
 
 
+    //----------------------------------------------------------------------
+    // Get timings
     gettimeofday(&tim, NULL);
     t2=tim.tv_sec+(tim.tv_usec/1000000.0);
     time += 10*(t2-t1);

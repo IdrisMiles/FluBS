@@ -81,15 +81,15 @@ void Fluid::InitCUDAMemory()
     cudaGraphicsGLRegisterBuffer(&m_pressBO_CUDA, m_pressBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
 
     // particle forces
-    cudaMalloc(&d_pressureForcePtr, m_fluidProperty->numParticles * sizeof(float3));
-    cudaMalloc(&d_viscousForcePtr, m_fluidProperty->numParticles * sizeof(float3));
-    cudaMalloc(&d_surfaceTensionForcePtr, m_fluidProperty->numParticles * sizeof(float3));
-    cudaMalloc(&d_gravityForcePtr, m_fluidProperty->numParticles * sizeof(float3));
-    cudaMalloc(&d_externalForcePtr, m_fluidProperty->numParticles * sizeof(float3));
-    cudaMalloc(&d_totalForcePtr, m_fluidProperty->numParticles * sizeof(float3));
+    cudaMallocManaged(&d_pressureForcePtr, m_fluidProperty->numParticles * sizeof(float3));
+    cudaMallocManaged(&d_viscousForcePtr, m_fluidProperty->numParticles * sizeof(float3));
+    cudaMallocManaged(&d_surfaceTensionForcePtr, m_fluidProperty->numParticles * sizeof(float3));
+    cudaMallocManaged(&d_gravityForcePtr, m_fluidProperty->numParticles * sizeof(float3));
+    cudaMallocManaged(&d_externalForcePtr, m_fluidProperty->numParticles * sizeof(float3));
+    cudaMallocManaged(&d_totalForcePtr, m_fluidProperty->numParticles * sizeof(float3));
 
     // particle hash
-    cudaMalloc(&d_particleHashIdPtr, m_fluidProperty->numParticles * sizeof(unsigned int));
+    cudaMallocManaged(&d_particleHashIdPtr, m_fluidProperty->numParticles * sizeof(unsigned int));
 }
 
 void Fluid::InitGL()
