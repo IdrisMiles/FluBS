@@ -32,7 +32,8 @@ public:
 private:
     std::shared_ptr<Fluid> m_algae;
     std::shared_ptr<Fluid> m_fluid;
-    std::vector<std::shared_ptr<Rigid>> m_rigids;
+    std::vector<std::shared_ptr<Rigid>> m_staticRigids;
+    std::vector<std::shared_ptr<Rigid>> m_activeRigids;
     std::shared_ptr<FluidSolverProperty> m_fluidSolverProperty;
     Poly6Kernel *m_poly6Kernel;
     SpikyKernel *m_spikyKernel;

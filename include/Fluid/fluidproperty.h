@@ -12,21 +12,16 @@ public:
                   float _particleRadius = 0.2f,
                   float _restDensity = 998.36f,
                   float _surfaceTension = 0.0728f,
-                  float _surfaceThreshold = 1.0f, //7.065f,
+                  float _surfaceThreshold = 1.0f,
                   float _gasStiffness = 30.5f,
                   float _viscosity = 1.0e-2f,
                   float _smoothingLength = 1.2f,
                   bool _play = false):
         SphParticleProperty(_numParticles, _particleMass, _particleRadius, _restDensity, _smoothingLength),
-//        numParticles(_numParticles),
-//        particleMass(_particleMass),
-//        particleRadius(_particleRadius),
-//        restDensity(_restDensity),
         surfaceTension(_surfaceTension),
         surfaceThreshold(_surfaceThreshold),
         gasStiffness(_gasStiffness),
         viscosity(_viscosity),
-//        smoothingLength(_smoothingLength),
         play(_play)
     {
 
@@ -36,15 +31,10 @@ public:
 
     ~FluidProperty(){}
 
-//    unsigned int numParticles;
-//    float particleMass;
-//    float restDensity;
     float surfaceTension;
     float surfaceThreshold;
     float gasStiffness;
     float viscosity;
-//    float particleRadius;
-//    float smoothingLength;
 
     bool play;
 };

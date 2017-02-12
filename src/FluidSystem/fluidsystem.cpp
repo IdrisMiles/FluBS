@@ -19,14 +19,14 @@ FluidSystem::FluidSystem(const FluidSystem &_FluidSystem)
 {
     m_fluid = nullptr;
     m_algae = nullptr;
-    m_rigids.clear();
+    m_staticRigids.clear();
 }
 
 FluidSystem::~FluidSystem()
 {
     m_fluid = nullptr;
     m_fluidSolverProperty = nullptr;
-    m_rigids.clear();
+    m_staticRigids.clear();
 }
 
 void FluidSystem::AddFluid(std::shared_ptr<Fluid> _fluid)
@@ -37,8 +37,42 @@ void FluidSystem::AddFluid(std::shared_ptr<Fluid> _fluid)
 
 void FluidSystem::AddRigid(std::shared_ptr<Rigid> _rigid)
 {
-    m_rigids.push_back(_rigid);
-    m_rigids.back()->SetupSolveSpecs(m_fluidSolverProperty);
+    if(_rigid->GetProperty()->m_static)
+    {
+        m_staticRigids.push_back(_rigid);
+        m_staticRigids.back()->SetupSolveSpecs(m_fluidSolverProperty);
+
+
+        // If this is a static rigid we only have to compute all this once
+        sph::ResetProperties(m_staticRigids.back(), m_fluidSolverProperty);
+        cudaThreadSynchronize();
+
+        // Get particle hash IDs
+        sph::ComputeHash(m_staticRigids.back(), m_fluidSolverProperty);
+        cudaThreadSynchronize();
+
+        // Sort particles
+        sph::SortParticlesByHash(m_staticRigids.back());
+
+
+        // Get Cell particle indexes - scatter addresses
+        sph::ComputeParticleScatterIds(m_staticRigids.back(), m_fluidSolverProperty);
+
+
+        // Find max cell occupancy
+        uint maxCellOcc;
+        sph::ComputeMaxCellOccupancy(m_staticRigids.back(), m_fluidSolverProperty, maxCellOcc);
+        cudaThreadSynchronize();
+
+        // compute rigid particle volumes
+        sph::ComputeParticleVolume(m_staticRigids.back(), m_fluidSolverProperty);
+    }
+    else
+    {
+        m_activeRigids.push_back(_rigid);
+        m_activeRigids.back()->SetupSolveSpecs(m_fluidSolverProperty);
+    }
+
 }
 
 void FluidSystem::AddAlgae(std::shared_ptr<Fluid> _algae)
@@ -61,9 +95,35 @@ void FluidSystem::InitialiseSim()
     m_fluid->ReleaseCudaGLResources();
 
 
-    sph::ResetProperties(m_rigids[0], m_fluidSolverProperty);
-    cudaThreadSynchronize();
-    m_rigids[0]->ReleaseCudaGLResources();
+    for(auto &&r : m_staticRigids)
+    {
+        // If this is a static rigid we only have to compute all this once
+        sph::ResetProperties(r, m_fluidSolverProperty);
+        cudaThreadSynchronize();
+
+        // Get particle hash IDs
+        sph::ComputeHash(r, m_fluidSolverProperty);
+        cudaThreadSynchronize();
+
+        // Sort particles
+        sph::SortParticlesByHash(r);
+
+
+        // Get Cell particle indexes - scatter addresses
+        sph::ComputeParticleScatterIds(r, m_fluidSolverProperty);
+
+
+        // Find max cell occupancy
+        uint maxCellOcc;
+        sph::ComputeMaxCellOccupancy(r, m_fluidSolverProperty, maxCellOcc);
+        cudaThreadSynchronize();
+
+        // compute rigid particle volumes
+        sph::ComputeParticleVolume(r, m_fluidSolverProperty);
+
+
+        r->ReleaseCudaGLResources();
+    }
 }
 
 void FluidSystem::ResetSim()
@@ -71,6 +131,36 @@ void FluidSystem::ResetSim()
     sph::InitFluidAsCube(m_fluid, m_fluidSolverProperty);
     cudaThreadSynchronize();
     m_fluid->ReleaseCudaGLResources();
+
+    for(auto &&r : m_staticRigids)
+    {
+        // If this is a static rigid we only have to compute all this once
+        sph::ResetProperties(r, m_fluidSolverProperty);
+        cudaThreadSynchronize();
+
+        // Get particle hash IDs
+        sph::ComputeHash(r, m_fluidSolverProperty);
+        cudaThreadSynchronize();
+
+        // Sort particles
+        sph::SortParticlesByHash(r);
+
+
+        // Get Cell particle indexes - scatter addresses
+        sph::ComputeParticleScatterIds(r, m_fluidSolverProperty);
+
+
+        // Find max cell occupancy
+        uint maxCellOcc;
+        sph::ComputeMaxCellOccupancy(r, m_fluidSolverProperty, maxCellOcc);
+        cudaThreadSynchronize();
+
+        // compute rigid particle volumes
+        sph::ComputeParticleVolume(r, m_fluidSolverProperty);
+
+
+        r->ReleaseCudaGLResources();
+    }
 }
 
 void FluidSystem::StepSimulation()
@@ -94,53 +184,31 @@ void FluidSystem::StepSimulation()
     //----------------------------------------------------------------------
     // Call sph API to do funky stuff here
 
-    for(auto &&r : m_rigids)
-    {
-        sph::ResetProperties(r, m_fluidSolverProperty);
-    }
+    // Reset all our sph particles here
     sph::ResetProperties(m_fluid, m_fluidSolverProperty);
     cudaThreadSynchronize();
 
+
     // Get particle hash IDs
-    for(auto &&r : m_rigids)
-    {
-        sph::ComputeHash(r, m_fluidSolverProperty);
-    }
     sph::ComputeHash(m_fluid, m_fluidSolverProperty);
     cudaThreadSynchronize();
 
     // Sort particles
-    for(auto &&r : m_rigids)
-    {
-        sph::SortParticlesByHash(r);
-    }
     sph::SortParticlesByHash(m_fluid);
 
     // Get Cell particle indexes - scatter addresses
-    for(auto &&r : m_rigids)
-    {
-        sph::ComputeParticleScatterIds(r, m_fluidSolverProperty);
-    }
     sph::ComputeParticleScatterIds(m_fluid, m_fluidSolverProperty);
 
+    // Find max cell occupancy
     uint maxCellOcc;
-    for(auto &&r : m_rigids)
-    {
-        sph::ComputeMaxCellOccupancy(r, m_fluidSolverProperty, maxCellOcc);
-    }
     sph::ComputeMaxCellOccupancy(m_fluid, m_fluidSolverProperty, maxCellOcc);
     cudaThreadSynchronize();
 
-    if(maxCellOcc > 1024u){std::cout<<"Too many neighs\n";}
 
-    for(auto &&r : m_rigids)
-    {
-        sph::ComputeParticleVolume(r, m_fluidSolverProperty);
-    }
 
     // Compute density
     sph::ComputeDensityFluid(m_fluid, m_fluidSolverProperty, true);
-    for(auto &&r : m_rigids)
+    for(auto &&r : m_staticRigids)
     {
         sph::ComputeDensityFluidRigid(m_fluid, r, m_fluidSolverProperty, true);
         cudaThreadSynchronize();
@@ -154,7 +222,7 @@ void FluidSystem::StepSimulation()
     sph::ComputeViscForce(m_fluid, m_fluidSolverProperty);
 //    sph::ComputeSurfaceTensionForce(m_fluid, m_fluidSolverProperty);
     cudaThreadSynchronize();
-    for(auto &&r : m_rigids)
+    for(auto &&r : m_staticRigids)
     {
         sph::ComputePressureForceFluidRigid(m_fluid, r, m_fluidSolverProperty, true);
         cudaThreadSynchronize();
@@ -168,14 +236,17 @@ void FluidSystem::StepSimulation()
     sph::Integrate(m_fluid, m_fluidSolverProperty);
     cudaThreadSynchronize();
 
-    // Handle boundaries
-    sph::HandleBoundaries(m_fluid, m_fluidSolverProperty);
-    cudaThreadSynchronize();
+    // Handle boundaries - In theory don't need to do this anymore
+    //sph::HandleBoundaries(m_fluid, m_fluidSolverProperty);
+    //cudaThreadSynchronize();
 
     //----------------------------------------------------------------------
     // Clean up
     m_fluid->ReleaseCudaGLResources();
-    m_rigids[0]->ReleaseCudaGLResources();
+    for(auto &&r : m_staticRigids)
+    {
+        r->ReleaseCudaGLResources();
+    }
 
 
     //----------------------------------------------------------------------

@@ -680,7 +680,7 @@ __global__ void sphGPU_Kernels::ComputePressureForceFluidRigid_kernel(float3 *pr
 
         if(!accumulate)
         {
-            pressureForce[thisParticleGlobalIdx] = -1.0f * accPressureForce;
+            pressureForce[thisParticleGlobalIdx] = -30.0f * accPressureForce;
         }
         else
         {

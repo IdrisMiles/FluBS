@@ -12,13 +12,10 @@ public:
                   float _particleRadius = 0.2f,
                   float _restDensity = 998.36f,
                   float _smoothingLength = 1.2f,
+                  bool _static = true,
                   bool _kinematic = false):
         SphParticleProperty(_numParticles, _particleMass, _particleRadius, _restDensity, _smoothingLength),
-//        numParticles(_numParticles),
-//        particleMass(_particleMass),
-//        particleRadius(_particleRadius),
-//        restDensity(_restDensity),
-//        smoothingLength(_smoothingLength),
+        m_static(_static),
         m_kinematic(_kinematic)
     {
 
@@ -28,11 +25,7 @@ public:
 
     ~RigidProperty(){}
 
-//    unsigned int numParticles;
-//    float particleMass;
-//    float particleRadius;
-//    float restDensity;
-//    float smoothingLength;
+    bool m_static;
     bool m_kinematic;
 };
 
