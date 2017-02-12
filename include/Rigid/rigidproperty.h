@@ -1,8 +1,9 @@
 #ifndef RIGIDPROPERTY_H
 #define RIGIDPROPERTY_H
 
+#include "Fluid/sphparticlepropeprty.h"
 
-class RigidProperty
+class RigidProperty : public SphParticleProperty
 {
 
 public:
@@ -12,11 +13,12 @@ public:
                   float _restDensity = 998.36f,
                   float _smoothingLength = 1.2f,
                   bool _kinematic = false):
-        numParticles(_numParticles),
-        particleMass(_particleMass),
-        particleRadius(_particleRadius),
-        restDensity(_restDensity),
-        smoothingLength(_smoothingLength),
+        SphParticleProperty(_numParticles, _particleMass, _particleRadius, _restDensity, _smoothingLength),
+//        numParticles(_numParticles),
+//        particleMass(_particleMass),
+//        particleRadius(_particleRadius),
+//        restDensity(_restDensity),
+//        smoothingLength(_smoothingLength),
         m_kinematic(_kinematic)
     {
 
@@ -26,11 +28,11 @@ public:
 
     ~RigidProperty(){}
 
-    unsigned int numParticles;
-    float particleMass;
-    float particleRadius;
-    float restDensity;
-    float smoothingLength;
+//    unsigned int numParticles;
+//    float particleMass;
+//    float particleRadius;
+//    float restDensity;
+//    float smoothingLength;
     bool m_kinematic;
 };
 

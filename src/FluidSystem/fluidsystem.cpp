@@ -32,6 +32,7 @@ FluidSystem::~FluidSystem()
 void FluidSystem::AddFluid(std::shared_ptr<Fluid> _fluid)
 {
     m_fluid = _fluid;
+    m_fluid->SetupSolveSpecs(m_fluidSolverProperty);
 }
 
 void FluidSystem::AddRigid(std::shared_ptr<Rigid> _rigid)
@@ -43,6 +44,7 @@ void FluidSystem::AddRigid(std::shared_ptr<Rigid> _rigid)
 void FluidSystem::AddAlgae(std::shared_ptr<Fluid> _algae)
 {
     m_algae = _algae;
+    m_algae->SetupSolveSpecs(m_fluidSolverProperty);
 }
 
 void FluidSystem::AddFluidSolverProperty(std::shared_ptr<FluidSolverProperty> _fluidSolverProperty)
@@ -73,7 +75,7 @@ void FluidSystem::ResetSim()
 
 void FluidSystem::StepSimulation()
 {
-    if(!m_fluid->GetFluidProperty()->play)
+    if(!(m_fluid->GetProperty())->play)
     {
         return;
     }
@@ -95,40 +97,65 @@ void FluidSystem::StepSimulation()
     for(auto &&r : m_rigids)
     {
         sph::ResetProperties(r, m_fluidSolverProperty);
-        cudaThreadSynchronize();
     }
-
-
     sph::ResetProperties(m_fluid, m_fluidSolverProperty);
     cudaThreadSynchronize();
 
     // Get particle hash IDs
+    for(auto &&r : m_rigids)
+    {
+        sph::ComputeHash(r, m_fluidSolverProperty);
+    }
     sph::ComputeHash(m_fluid, m_fluidSolverProperty);
     cudaThreadSynchronize();
 
     // Sort particles
+    for(auto &&r : m_rigids)
+    {
+        sph::SortParticlesByHash(r);
+    }
     sph::SortParticlesByHash(m_fluid);
 
     // Get Cell particle indexes - scatter addresses
+    for(auto &&r : m_rigids)
+    {
+//        sph::ComputeParticleScatterIds(r, m_fluidSolverProperty);
+    }
     sph::ComputeParticleScatterIds(m_fluid, m_fluidSolverProperty);
 
     uint maxCellOcc;
+    for(auto &&r : m_rigids)
+    {
+        sph::ComputeMaxCellOccupancy(r, m_fluidSolverProperty, maxCellOcc);
+    }
     sph::ComputeMaxCellOccupancy(m_fluid, m_fluidSolverProperty, maxCellOcc);
-    m_fluid->SetMaxCellOcc(maxCellOcc);
     cudaThreadSynchronize();
 
     if(maxCellOcc > 1024u){std::cout<<"Too many neighs\n";}
 
+    for(auto &&r : m_rigids)
+    {
+        sph::ComputeParticleVolume(r, m_fluidSolverProperty);
+    }
 
     sph::ComputeDensityFluid(m_fluid, m_fluidSolverProperty, true);
+    for(auto &&r : m_rigids)
+    {
+//        sph::ComputeDensityFluidRigid(m_fluid, r, m_fluidSolverProperty, true);
+    }
     cudaThreadSynchronize();
 
-    sph::ComputePressure(m_fluid, m_fluidSolverProperty);
+    sph::ComputePressureFluid(m_fluid, m_fluidSolverProperty);
     cudaThreadSynchronize();
 
-    sph::ComputePressureForceFluid(m_fluid, m_fluidSolverProperty);
+    sph::ComputePressureForceFluid(m_fluid, m_fluidSolverProperty, true);
     sph::ComputeViscForce(m_fluid, m_fluidSolverProperty);
-    sph::ComputeSurfaceTensionForce(m_fluid, m_fluidSolverProperty);
+//    sph::ComputeSurfaceTensionForce(m_fluid, m_fluidSolverProperty);
+    cudaThreadSynchronize();
+    for(auto &&r : m_rigids)
+    {
+//        sph::ComputePressureForceFluidRigid(m_fluid, r, m_fluidSolverProperty, true);
+    }
     cudaThreadSynchronize();
 
     // Compute total force and acceleration

@@ -2,7 +2,7 @@
 #define FLUIDSYSTEM_H
 
 #include "Fluid/fluid.h"
-#include "Rigid/boundary.h"
+#include "Rigid/rigid.h"
 #include "Fluid/fluidproperty.h"
 #include "FluidSystem/fluidsolverproperty.h"
 #include "SPH/sph.h"

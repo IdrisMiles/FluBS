@@ -10,6 +10,31 @@ namespace sphGPU
     uint iDivUp(uint a, uint b);
 
     void ResetProperties(float3 *pressureForce,
+                         float3 *externalForce,
+                         float3 *totalForce,
+                         float * mass,
+                         float *density,
+                         float *pressure,
+                         uint *hash,
+                         uint *cellOcc,
+                         uint *cellPartIdx,
+                         const float massValue, const uint numCells,
+                         const uint numPoints);
+
+    void ResetProperties(float3 *pressureForce,
+                         float3 *externalForce,
+                         float3 *totalForce,
+                         float * mass,
+                         float *density,
+                         float *pressure,
+                         float *volume,
+                         uint *hash,
+                         uint *cellOcc,
+                         uint *cellPartIdx,
+                         const float massValue, const uint numCells,
+                         const uint numPoints);
+
+    void ResetProperties(float3 *pressureForce,
                          float3 *viscousForce,
                          float3 *surfTenForce,
                          float3 *externalForce,
@@ -72,6 +97,19 @@ namespace sphGPU
                         const float smoothingLength,
                         const bool accumulate);
 
+    void ComputeDensityFluidFluid(const uint maxCellOcc,
+                                  const uint gridRes,
+                                  const uint numPoints,
+                                  float *fluidDensity,
+                                  const float3 *fluidPos,
+                                  const uint *fluidCellOcc,
+                                  const uint *fluidCellPartIdx,
+                                  const float *fluidContribMass,
+                                  const float3 *fluidContribPos,
+                                  const uint *fluidContribCellOcc,
+                                  const uint *fluidContribCellPartIdx,
+                                  const float smoothingLength,
+                                  const bool accumulate);
 
     void ComputeDensityFluidRigid(const uint maxCellOcc,
                                   const uint gridRes,
@@ -88,7 +126,7 @@ namespace sphGPU
                                   const float smoothingLength,
                                   const bool accumulate);
 
-    void ComputePressure(const uint maxCellOcc,
+    void ComputePressureFluid(const uint maxCellOcc,
                          const uint gridRes,
                          float *pressure,
                          float *density,
@@ -98,7 +136,7 @@ namespace sphGPU
                          const uint *cellPartIdx,
                          const uint numPoints);
 
-    void ComputePressureForce(const uint maxCellOcc,
+    void ComputePressureForceFluid(const uint maxCellOcc,
                               const uint gridRes,
                               float3 *pressureForce,
                               const float *pressure,
@@ -110,6 +148,43 @@ namespace sphGPU
                               const uint numPoints,
                               const float smoothingLength,
                               const bool accumulate);
+
+    void ComputePressureForceFluidFluid(const uint maxCellOcc,
+                                        const uint gridRes,
+                                        float3 *pressureForce,
+                                        const float *pressure,
+                                        const float *density,
+                                        const float *mass,
+                                        const float3 *particles,
+                                        const uint *cellOcc,
+                                        const uint *cellPartIdx,
+                                        const float *fluidContribPressure,
+                                        const float *fluidContribDensity,
+                                        const float *fluidContribMass,
+                                        const float3 *fluidContribParticles,
+                                        const uint *fluidContribCellOcc,
+                                        const uint *fluidContribCellPartIdx,
+                                        const uint numPoints,
+                                        const float smoothingLength,
+                                        const bool accumulate);
+
+    void ComputePressureForceFluidRigid(const uint maxCellOcc,
+                                        const uint gridRes,
+                                        float3 *pressureForce,
+                                        const float *pressure,
+                                        const float *density,
+                                        const float *mass,
+                                        const float3 *particles,
+                                        const uint *cellOcc,
+                                        const uint *cellPartIdx,
+                                        const float restDensity,
+                                        const float *rigidVolume,
+                                        const float3 *rigidPos,
+                                        const uint *rigidCellOcc,
+                                        const uint *rigidCellPartIdx,
+                                        const uint numPoints,
+                                        const float smoothingLength,
+                                        const bool accumulate);
 
     void ComputeViscForce(const uint maxCellOcc,
                           const uint gridRes,

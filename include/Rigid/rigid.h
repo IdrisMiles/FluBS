@@ -1,8 +1,5 @@
-#ifndef FLUID_H
-#define FLUID_H
-
-#include "Fluid/fluidproperty.h"
-#include "FluidSystem/fluidsolverproperty.h"
+#ifndef RIGID_H
+#define RIGID_H
 
 // OpenGL includes
 #include <GL/glew.h>
@@ -14,18 +11,24 @@
 // CUDA includes
 #include <cuda_runtime.h>
 #include <cuda.h>
+#include <device_functions.h>
 #include <cuda_gl_interop.h>
 
-#include <glm/glm.hpp>
 #include <memory>
+#include <glm/glm.hpp>
 #include "Fluid/isphparticles.h"
+#include "Rigid/rigidproperty.h"
+#include "FluidSystem/fluidsolverproperty.h"
+#include "Mesh/mesh.h"
 
-class Fluid : public ISphParticles
+
+class Rigid : public ISphParticles
 {
-
 public:
-    Fluid(std::shared_ptr<FluidProperty> _fluidProperty);
-    virtual ~Fluid();
+    Rigid(std::shared_ptr<RigidProperty> _rigidProperty, Mesh _mesh);
+    virtual ~Rigid();
+
+
 
     virtual void SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps);
 
@@ -37,22 +40,20 @@ public:
                            const glm::vec3 &_lightPos,
                            const glm::vec3 &_camPos);
 
-    virtual FluidProperty *GetProperty();
+    virtual RigidProperty* GetProperty();
 
-    void MapCudaGLResources();
-    void ReleaseCudaGLResources();
+    virtual void MapCudaGLResources();
+    virtual void ReleaseCudaGLResources();
 
-    float3 *GetViscForcePtr();
-    void ReleaseViscForcePtr();
 
-    float3 *GetSurfTenForcePtr();
-    void ReleaseSurfTenForcePtr();
+    float *GetVolumePtr();
+    void ReleaseVolumePtr();
 
     virtual unsigned int GetMaxCellOcc();
     virtual void SetMaxCellOcc(const unsigned int _maxCellOcc);
 
 
-protected:
+private:
     virtual void Init();
     virtual void InitCUDAMemory();
     virtual void InitGL();
@@ -63,11 +64,12 @@ protected:
     virtual void CleanUpGL();
 
 
+    Mesh m_mesh;
+
     // Simulation stuff
-    std::shared_ptr<FluidProperty> m_fluidProperty;
-    float3* d_viscousForcePtr;
-    float3* d_surfaceTensionForcePtr;
+    std::shared_ptr<RigidProperty> m_property;
+    float* d_volumePtr;
 
 };
 
-#endif // FLUID_H
+#endif // RIGID_H

@@ -1,5 +1,8 @@
-#ifndef RIGID_H
-#define RIGID_H
+#ifndef ISPHPARTICLES_H
+#define ISPHPARTICLES_H
+
+#include "Fluid/sphparticlepropeprty.h"
+#include "FluidSystem/fluidsolverproperty.h"
 
 // OpenGL includes
 #include <GL/glew.h>
@@ -11,27 +14,22 @@
 // CUDA includes
 #include <cuda_runtime.h>
 #include <cuda.h>
-#include <device_functions.h>
 #include <cuda_gl_interop.h>
 
-#include <memory>
 #include <glm/glm.hpp>
-#include "Rigid/rigidproperty.h"
-#include "FluidSystem/fluidsolverproperty.h"
-#include "Mesh/mesh.h"
+#include <memory>
 
-
-class Rigid
+class ISphParticles
 {
 public:
-    Rigid(std::shared_ptr<RigidProperty> _rigidProperty, Mesh _mesh);
-    virtual ~Rigid();
+    ISphParticles();
+    virtual ~ISphParticles();
 
 
 
-    void SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps);
+    virtual void SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps);
 
-    void Draw();
+    virtual void Draw();
     void SetShaderUniforms(const glm::mat4 &_projMat,
                            const glm::mat4 &_viewMat,
                            const glm::mat4 &_modelMat,
@@ -39,10 +37,14 @@ public:
                            const glm::vec3 &_lightPos,
                            const glm::vec3 &_camPos);
 
-    std::shared_ptr<RigidProperty> GetRigidProperty();
 
-    void MapCudaGLResources();
-    void ReleaseCudaGLResources();
+
+    virtual SphParticleProperty *GetProperty();
+
+
+
+    virtual void MapCudaGLResources();
+    virtual void ReleaseCudaGLResources();
 
     float3 *GetPositionPtr();
     void ReleasePositionPtr();
@@ -62,12 +64,6 @@ public:
     float3 *GetPressureForcePtr();
     void ReleasePressureForcePtr();
 
-    float3 *GetViscForcePtr();
-    void ReleaseViscForcePtr();
-
-    float3 *GetSurfTenForcePtr();
-    void ReleaseSurfTenForcePtr();
-
     float3 *GetGravityForcePtr();
     void ReleaseGravityForcePtr();
 
@@ -86,39 +82,30 @@ public:
     unsigned int *GetCellParticleIdxPtr();
     void ReleaseCellParticleIdxPtr();
 
-    float *GetVolumePtr();
-    void ReleaseVolumePtr();
-
-    unsigned int GetMaxCellOcc();
-    void SetMaxCellOcc(const unsigned int _maxCellOcc);
+    virtual unsigned int GetMaxCellOcc();
+    virtual void SetMaxCellOcc(const unsigned int _maxCellOcc);
 
 
-private:
-    void Init();
-    void InitCUDAMemory();
-    void InitGL();
-    void InitShader();
-    void InitVAO();
+protected:
+    virtual void Init();
+    virtual void InitCUDAMemory();
+    virtual void InitGL();
+    virtual void InitShader();
+    virtual void InitVAO();
 
-    void CleanUpCUDAMemory();
-    void CleanUpGL();
+    virtual void CleanUpCUDAMemory();
+    virtual void CleanUpGL();
 
-
-    Mesh m_mesh;
-    glm::vec3 m_colour;
 
     // Simulation stuff
-    std::shared_ptr<RigidProperty> m_rigidProperty;
+    std::shared_ptr<SphParticleProperty> m_property;
     float3 *d_positionPtr;
     float3 *d_velocityPtr;
     float *d_massPtr;
     float *d_densityPtr;
     float* d_pressurePtr;
-    float* d_volumePtr;
 
     float3* d_pressureForcePtr;
-    float3* d_viscousForcePtr;
-    float3* d_surfaceTensionForcePtr;
     float3* d_gravityForcePtr;
     float3* d_externalForcePtr;
     float3* d_totalForcePtr;
@@ -166,7 +153,7 @@ private:
     cudaGraphicsResource *m_pressBO_CUDA;
 
 
-
+    glm::vec3 m_colour;
 };
 
-#endif // RIGID_H
+#endif // ISPHPARTICLES_H
