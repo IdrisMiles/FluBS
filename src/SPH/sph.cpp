@@ -140,7 +140,7 @@ void sph::ComputeParticleVolume(std::shared_ptr<Rigid> _rigid,
 
 //--------------------------------------------------------------------------------------
 
-void sph::ComputeDensityFluid(std::shared_ptr<Fluid> _fluid,
+void sph::ComputeDensityFluid(std::shared_ptr<ISphParticles> _fluid,
                               std::shared_ptr<FluidSolverProperty> _solverProps,
                               const bool accumulate)
 {
@@ -158,8 +158,8 @@ void sph::ComputeDensityFluid(std::shared_ptr<Fluid> _fluid,
                             accumulate);
 }
 
-void sph::ComputeDensityFluidFluid(std::shared_ptr<Fluid> _fluid,
-                                   std::shared_ptr<Fluid> _fluidContributer,
+void sph::ComputeDensityFluidFluid(std::shared_ptr<ISphParticles> _fluid,
+                                   std::shared_ptr<ISphParticles> _fluidContributer,
                                    std::shared_ptr<FluidSolverProperty> _solverProps,
                                    const bool accumulate)
 {
@@ -181,7 +181,7 @@ void sph::ComputeDensityFluidFluid(std::shared_ptr<Fluid> _fluid,
                                      accumulate);
 }
 
-void sph::ComputeDensityFluidRigid(std::shared_ptr<Fluid> _fluid,
+void sph::ComputeDensityFluidRigid(std::shared_ptr<ISphParticles> _fluid,
                                       std::shared_ptr<Rigid> _rigid,
                                       std::shared_ptr<FluidSolverProperty> _solverProps,
                                       const bool accumulate)
@@ -221,7 +221,7 @@ void sph::ComputePressureFluid(std::shared_ptr<Fluid> _fluid, std::shared_ptr<Fl
                             fluidProps->numParticles);
 }
 
-void sph::ComputePressureForceFluid(std::shared_ptr<Fluid> _fluid, std::shared_ptr<FluidSolverProperty> _solverProps, const bool accumulate)
+void sph::ComputePressureForceFluid(std::shared_ptr<ISphParticles> _fluid, std::shared_ptr<FluidSolverProperty> _solverProps, const bool accumulate)
 {
     auto fluidProps = _fluid->GetProperty();
 
@@ -238,8 +238,8 @@ void sph::ComputePressureForceFluid(std::shared_ptr<Fluid> _fluid, std::shared_p
                                  fluidProps->smoothingLength, accumulate);
 }
 
-void sph::ComputePressureForceFluidFluid(std::shared_ptr<Fluid> _fluid,
-                                         std::shared_ptr<Fluid> _fluidContributer,
+void sph::ComputePressureForceFluidFluid(std::shared_ptr<ISphParticles> _fluid,
+                                         std::shared_ptr<ISphParticles> _fluidContributer,
                                          std::shared_ptr<FluidSolverProperty> _solverProps,
                                          const bool accumulate)
 {
@@ -264,7 +264,7 @@ void sph::ComputePressureForceFluidFluid(std::shared_ptr<Fluid> _fluid,
                                  fluidProps->smoothingLength, accumulate);
 }
 
-void sph::ComputePressureForceFluidRigid(std::shared_ptr<Fluid> _fluid,
+void sph::ComputePressureForceFluidRigid(std::shared_ptr<ISphParticles> _fluid,
                                          std::shared_ptr<Rigid> _rigid,
                                          std::shared_ptr<FluidSolverProperty> _solverProps,
                                          const bool accumulate)

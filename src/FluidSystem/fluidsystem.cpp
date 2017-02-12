@@ -119,7 +119,7 @@ void FluidSystem::StepSimulation()
     // Get Cell particle indexes - scatter addresses
     for(auto &&r : m_rigids)
     {
-//        sph::ComputeParticleScatterIds(r, m_fluidSolverProperty);
+        sph::ComputeParticleScatterIds(r, m_fluidSolverProperty);
     }
     sph::ComputeParticleScatterIds(m_fluid, m_fluidSolverProperty);
 
@@ -138,13 +138,15 @@ void FluidSystem::StepSimulation()
         sph::ComputeParticleVolume(r, m_fluidSolverProperty);
     }
 
+    // Compute density
     sph::ComputeDensityFluid(m_fluid, m_fluidSolverProperty, true);
     for(auto &&r : m_rigids)
     {
-//        sph::ComputeDensityFluidRigid(m_fluid, r, m_fluidSolverProperty, true);
+        sph::ComputeDensityFluidRigid(m_fluid, r, m_fluidSolverProperty, true);
+        cudaThreadSynchronize();
     }
-    cudaThreadSynchronize();
 
+    // Compute Pressure
     sph::ComputePressureFluid(m_fluid, m_fluidSolverProperty);
     cudaThreadSynchronize();
 
@@ -154,9 +156,9 @@ void FluidSystem::StepSimulation()
     cudaThreadSynchronize();
     for(auto &&r : m_rigids)
     {
-//        sph::ComputePressureForceFluidRigid(m_fluid, r, m_fluidSolverProperty, true);
+        sph::ComputePressureForceFluidRigid(m_fluid, r, m_fluidSolverProperty, true);
+        cudaThreadSynchronize();
     }
-    cudaThreadSynchronize();
 
     // Compute total force and acceleration
     sph::ComputeTotalForce(m_fluid, m_fluidSolverProperty);

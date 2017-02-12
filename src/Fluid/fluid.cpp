@@ -18,6 +18,28 @@ Fluid::Fluid(std::shared_ptr<FluidProperty> _fluidProperty)
     Init();
 }
 
+Fluid::Fluid(std::shared_ptr<FluidProperty> _fluidProperty, Mesh _mesh)
+{
+
+    m_mesh = _mesh;
+    m_fluidProperty = _fluidProperty;
+
+    m_colour = glm::vec3(0.6f, 0.6f, 0.6f);
+
+    m_positionMapped = false;
+    m_velocityMapped = false;
+    m_densityMapped = false;
+    m_massMapped = false;
+    m_pressureMapped = false;
+
+    Init();
+
+
+    GetPositionPtr();
+    cudaMemcpy(d_positionPtr, &m_mesh.verts[0], m_property->numParticles * sizeof(float3), cudaMemcpyHostToDevice);
+    ReleaseCudaGLResources();
+}
+
 Fluid::~Fluid()
 {
     m_fluidProperty = nullptr;

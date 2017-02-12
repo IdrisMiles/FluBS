@@ -19,12 +19,15 @@
 #include <glm/glm.hpp>
 #include <memory>
 #include "Fluid/isphparticles.h"
+#include "Mesh/mesh.h"
+
 
 class Fluid : public ISphParticles
 {
 
 public:
     Fluid(std::shared_ptr<FluidProperty> _fluidProperty);
+    Fluid(std::shared_ptr<FluidProperty> _rigidProperty, Mesh _mesh);
     virtual ~Fluid();
 
     virtual void SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps);
@@ -63,6 +66,8 @@ protected:
     virtual void CleanUpGL();
 
 
+
+    Mesh m_mesh;
     // Simulation stuff
     std::shared_ptr<FluidProperty> m_fluidProperty;
     float3* d_viscousForcePtr;

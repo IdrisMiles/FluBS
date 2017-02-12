@@ -153,9 +153,9 @@ void OpenGLScene::initializeGL()
     auto rigidProps = std::shared_ptr<RigidProperty>(new RigidProperty());
 
     Mesh boundary = Mesh();
-    float dim = 1.0f* fluidSolverProps->gridResolution*fluidSolverProps->gridCellWidth;
+    float dim = 0.95f* fluidSolverProps->gridResolution*fluidSolverProps->gridCellWidth;
     float rad = rigidProps->particleRadius;
-    int numRigidAxis = ceil(dim / (rad*2.0f));
+    int numRigidAxis = ceil(dim / (rad*1.0f));
     for(int z=0; z<numRigidAxis; z++)
     {
         for(int y=0; y<numRigidAxis; y++)
@@ -164,7 +164,7 @@ void OpenGLScene::initializeGL()
             {
                 if(x==0 || x==numRigidAxis-1 || y==0 || z==0 || z==numRigidAxis-1)
                 {
-                    glm::vec3 pos((x*rad*2.0f)-(dim*0.5f), (y*rad*2.0f)-(dim*0.5f), (z*rad*2.0f)-(dim*0.5f));
+                    glm::vec3 pos((x*rad*1.0f)-(dim*0.5f), (y*rad*1.0f)-(dim*0.5f), (z*rad*1.0f)-(dim*0.5f));
                     boundary.verts.push_back(pos);
                 }
             }

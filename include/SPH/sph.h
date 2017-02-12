@@ -43,16 +43,16 @@ namespace sph
 
     //--------------------------------------------------------------------------------------
 
-    void ComputeDensityFluid(std::shared_ptr<Fluid> _fluid,
+    void ComputeDensityFluid(std::shared_ptr<ISphParticles> _fluid,
                              std::shared_ptr<FluidSolverProperty> _solverProps,
                              const bool accumulate = false);
 
-    void ComputeDensityFluidFluid(std::shared_ptr<Fluid> _fluid,
-                                  std::shared_ptr<Fluid> _fluidContributer,
+    void ComputeDensityFluidFluid(std::shared_ptr<ISphParticles> _fluid,
+                                  std::shared_ptr<ISphParticles> _fluidContributer,
                                   std::shared_ptr<FluidSolverProperty> _solverProps,
                                   const bool accumulate = false);
 
-    void ComputeDensityFluidRigid(std::shared_ptr<Fluid> _fluid,
+    void ComputeDensityFluidRigid(std::shared_ptr<ISphParticles> _fluid,
                                   std::shared_ptr<Rigid> _rigid,
                                   std::shared_ptr<FluidSolverProperty> _solverProps,
                                   const bool accumulate = false);
@@ -63,16 +63,16 @@ namespace sph
 
 //--------------------------------------------------------------------------------------
 
-    void ComputePressureForceFluid(std::shared_ptr<Fluid> _fluid,
+    void ComputePressureForceFluid(std::shared_ptr<ISphParticles> _fluid,
                                    std::shared_ptr<FluidSolverProperty> _solverProps,
                                    const bool accumulate = false);
 
-    void ComputePressureForceFluidFluid(std::shared_ptr<Fluid> _fluid,
-                                        std::shared_ptr<Fluid> _fluidContributer,
+    void ComputePressureForceFluidFluid(std::shared_ptr<ISphParticles> _fluid,
+                                        std::shared_ptr<ISphParticles> _fluidContributer,
                                         std::shared_ptr<FluidSolverProperty> _solverProps,
                                         const bool accumulate = false);
 
-    void ComputePressureForceFluidRigid(std::shared_ptr<Fluid> _fluid,
+    void ComputePressureForceFluidRigid(std::shared_ptr<ISphParticles> _fluid,
                                         std::shared_ptr<Rigid> _rigid,
                                         std::shared_ptr<FluidSolverProperty> _solverProps,
                                         const bool accumulate = false);

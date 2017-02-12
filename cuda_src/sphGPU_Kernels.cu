@@ -47,9 +47,13 @@ __global__ void sphGPU_Kernels::ParticleHash_Kernel(uint *hash,
     hashY = (hashY >= gridRes) ? gridRes-1 : hashY;
     hashZ = (hashZ >= gridRes) ? gridRes-1 : hashZ;
 
+    hashX = (hashX < 0) ? 0 : hashX;
+    hashY = (hashY < 0) ? 0 : hashY;
+    hashZ = (hashZ < 0) ? 0 : hashZ;
+
     hashID = hashX + (hashY * gridRes) + (hashZ * gridRes * gridRes);
 
-    if(hashID >= gridRes * gridRes * gridRes)
+    if(hashID >= gridRes * gridRes * gridRes || hashID < 0)
     {
         printf("Hash out of bounds\n");
         printf("%u, %u, %u\n", hashX, hashY, hashZ);
@@ -116,6 +120,8 @@ __global__ void sphGPU_Kernels::ComputeVolume_kernel(float *volume,
                 }
             }
         }
+
+        accVolume = 1.0f / accVolume;
 
         if(isnan(accVolume) || fabs(accVolume) < FLT_EPSILON)
         {
@@ -296,7 +302,7 @@ __global__ void sphGPU_Kernels::ComputeDensityFluidRigid_kernel(const uint numPo
         {
             if(accumulate)
             {
-                atomicAdd(&fluidDensity[thisParticleGlobalIdx], accDensity);
+                atomicAdd(&fluidDensity[thisParticleGlobalIdx], 2.0f*accDensity);
             }
             else
             {
@@ -505,7 +511,7 @@ __global__ void sphGPU_Kernels::ComputePressureForce_kernel(float3 *pressureForc
         }
 
 
-        if(accumulate)
+        if(!accumulate)
         {
             pressureForce[thisParticleGlobalIdx] = -1.0f * accPressureForce;
         }
@@ -591,7 +597,7 @@ __global__ void sphGPU_Kernels::ComputePressureForceFluidFluid_kernel(float3 *pr
         }
 
 
-        if(accumulate)
+        if(!accumulate)
         {
             pressureForce[thisParticleGlobalIdx] = -1.0f * accPressureForce;
         }
@@ -661,27 +667,24 @@ __global__ void sphGPU_Kernels::ComputePressureForceFluidRigid_kernel(float3 *pr
                     for(neighLocalIdx=0; neighLocalIdx<neighCellOcc; neighLocalIdx++)
                     {
                         neighParticleGlobalIdx = neighCellPartIdx + neighLocalIdx;
-                        if(neighParticleGlobalIdx != thisParticleGlobalIdx)
-                        {
-                            float3 neighParticle = particles[neighParticleGlobalIdx];
-                            float neighVolume = rigidVolume[neighParticleGlobalIdx];
-                            float pressOverDens = (fabs(thisDensity)<FLT_EPSILON ? 0.0f: (thisPressure) / (thisDensity*thisDensity));
+                        float3 neighParticle = rigidPos[neighParticleGlobalIdx];
+                        float neighVolume = rigidVolume[neighParticleGlobalIdx];
+                        float pressOverDens = (fabs(thisDensity)<FLT_EPSILON ? 0.0f: (thisPressure) / (thisDensity*thisDensity));
 
-                            accPressureForce = accPressureForce + (thisMass * neighVolume * restDensity * pressOverDens * SpikyKernelGradientV_Kernel(thisParticle, neighParticle, smoothingLength));
-                        }
+                        accPressureForce = accPressureForce + (thisMass * neighVolume * restDensity * pressOverDens * SpikyKernelGradientV_Kernel(thisParticle, neighParticle, smoothingLength));
                     }
                 }
             }
         }
 
 
-        if(accumulate)
+        if(!accumulate)
         {
             pressureForce[thisParticleGlobalIdx] = -1.0f * accPressureForce;
         }
         else
         {
-            pressureForce[thisParticleGlobalIdx] = pressureForce[thisParticleGlobalIdx] + (-1.0f * accPressureForce);
+            pressureForce[thisParticleGlobalIdx] = pressureForce[thisParticleGlobalIdx] + (-30.0f * accPressureForce);
         }
     }
 }
