@@ -212,6 +212,25 @@ namespace sphGPU
                                     const uint numPoints,
                                     const float smoothingLength);
 
+    void ComputeForce(const uint maxCellOcc,
+                        const uint gridRes,
+                        float3 *pressureForce,
+                        float3 *viscForce,
+                        float3 *surfaceTensionForce,
+                        const float viscCoeff,
+                        const float surfaceTension,
+                        const float surfaceThreshold,
+                        const float *pressure,
+                        const float *density,
+                        const float *mass,
+                        const float3 *particles,
+                        const float3 *velocity,
+                        const uint *cellOcc,
+                        const uint *cellPartIdx,
+                        const uint numPoints,
+                        const float smoothingLength,
+                        const bool accumulate);
+
     void ComputeTotalForce(const uint maxCellOcc,
                            const uint gridRes,
                            float3 *force,

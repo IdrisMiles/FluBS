@@ -1,7 +1,7 @@
 #ifndef RIGIDPROPERTY_H
 #define RIGIDPROPERTY_H
 
-#include "Fluid/sphparticlepropeprty.h"
+#include "SPH/sphparticlepropeprty.h"
 
 class RigidProperty : public SphParticleProperty
 {

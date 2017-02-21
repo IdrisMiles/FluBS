@@ -16,8 +16,8 @@
 
 #include <memory>
 #include <glm/glm.hpp>
-#include "Fluid/isphparticles.h"
-#include "Rigid/rigidproperty.h"
+#include "SPH/isphparticles.h"
+#include "SPH/Rigid/rigidproperty.h"
 #include "FluidSystem/fluidsolverproperty.h"
 #include "Mesh/mesh.h"
 

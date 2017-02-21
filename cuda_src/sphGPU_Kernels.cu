@@ -840,7 +840,183 @@ __global__ void sphGPU_Kernels::ComputeSurfaceTensionForce_kernel(float3 *surfac
     }
 }
 
-__global__ void sphGPU_Kernels::ComputeForces_kernel(float3 *force,
+__global__ void sphGPU_Kernels::ComputeForce_kernel(float3 *pressureForce,
+                                                    float3 *viscForce,
+                                                    float3 *surfaceTensionForce,
+                                                    const float viscCoeff,
+                                                    const float surfaceTension,
+                                                    const float surfaceThreshold,
+                                                    const float *pressure,
+                                                    const float *density,
+                                                    const float *mass,
+                                                    const float3 *particles,
+                                                    const float3 *velocity,
+                                                    const uint *cellOcc,
+                                                    const uint *cellPartIdx,
+                                                    const uint numPoints,
+                                                    const float smoothingLength,
+                                                    const bool accumulate)
+{
+    int thisCellIdx = blockIdx.x + (blockIdx.y * gridDim.x) + (blockIdx.z * gridDim.x * gridDim.y);
+    int thisParticleGlobalIdx = cellPartIdx[thisCellIdx] + threadIdx.x;
+    int thisCellOcc = cellOcc[thisCellIdx];
+
+
+    if(!(thisParticleGlobalIdx < numPoints && threadIdx.x < thisCellOcc && thisCellIdx < gridDim.x * gridDim.y * gridDim.z))
+    {
+        return;
+    }
+//        const int num = 1024;
+//        __shared__ float3 s_pos[num];
+//        __shared__ float3 s_vel[num];
+//        __shared__ float s_pres[num];
+//        __shared__ float s_den[num];
+//        __shared__ float s_mass[num];
+
+        int neighCellIdx;
+        int neighCellOcc;
+        int neighCellPartIdx;
+        int neighParticleGlobalIdx;
+        int neighLocalIdx;
+
+        int x, y, z;
+        int xMin = ((blockIdx.x==0)?0:-1);
+        int yMin = ((blockIdx.y==0)?0:-1);
+        int zMin = ((blockIdx.z==0)?0:-1);
+        int xMax = ((blockIdx.x==gridDim.x-1)?0:1);
+        int yMax = ((blockIdx.y==gridDim.y-1)?0:1);
+        int zMax = ((blockIdx.z==gridDim.z-1)?0:1);
+
+//        if(threadIdx.x < 27)
+//        {
+
+//            int dx = threadIdx.x % 3;
+//            int dy = ((threadIdx.x - dx) / 3) % 3;
+//            int dz = ((threadIdx.x - dx) - (dy*3)) / 9;
+
+//            neighCellIdx = (blockIdx.x + dx) + ((blockIdx.y + dy) * gridDim.x) + ((blockIdx.z + dz) * gridDim.x * gridDim.y);
+//            neighCellOcc = cellOcc[neighCellIdx];
+//            neighCellPartIdx = cellPartIdx[neighCellIdx];
+
+//            int scatterAddr = 0;
+//            int idx = 0;
+//            for(z = zMin; z <= zMax; z++)
+//            {
+//                for(y = yMin; y <= yMax; y++)
+//                {
+//                    for(x = xMin; x <= xMax; x++)
+//                    {
+//                        if(neighCellIdx >= (blockIdx.x + x) + ((blockIdx.y + y) * gridDim.x) + ((blockIdx.z + z) * gridDim.x * gridDim.y))
+//                            continue;
+//                        scatterAddr += cellOcc[neighCellIdx];
+//                    }
+//                }
+//            }
+
+
+//                    for(neighLocalIdx=0; neighLocalIdx<neighCellOcc; neighLocalIdx++)
+//                    {
+//                        if(scatterAddr >= num)
+//                            continue;
+
+//                        neighParticleGlobalIdx = neighCellPartIdx + neighLocalIdx;
+//                        s_pos[scatterAddr] = particles[neighParticleGlobalIdx];
+//                        s_vel[scatterAddr] = velocity[neighParticleGlobalIdx];
+//                        s_den[scatterAddr] = density[neighParticleGlobalIdx];
+//                        s_pres[scatterAddr] = pressure[neighParticleGlobalIdx];
+//                        s_mass[scatterAddr] = mass[neighParticleGlobalIdx];
+//                        scatterAddr++;
+
+//                    }
+//        }
+
+//        __syncthreads();
+
+
+
+
+
+
+        float thisPressure = pressure[thisParticleGlobalIdx];
+        float3 thisPos = particles[thisParticleGlobalIdx];
+        float3 thisVel = velocity[thisParticleGlobalIdx];
+        float3 accPressureForce = make_float3(0.0f, 0.0f, 0.0f);
+        float3 accViscForce = make_float3(0.0f, 0.0f, 0.0f);
+        float3 accColourFieldGrad = make_float3(0.0f, 0.0f, 0.0f);
+        float accCurvature = 0.0f;
+
+        int idx = 0;
+        for(z = zMin; z <= zMax; z++)
+        {
+            for(y = yMin; y <= yMax; y++)
+            {
+                for(x = xMin; x <= xMax; x++)
+                {
+
+                    neighCellIdx = (blockIdx.x + x) + ((blockIdx.y + y) * gridDim.x) + ((blockIdx.z + z) * gridDim.x * gridDim.y);
+                    neighCellOcc = cellOcc[neighCellIdx];
+                    neighCellPartIdx = cellPartIdx[neighCellIdx];
+
+                    for(neighLocalIdx=0; neighLocalIdx<neighCellOcc; neighLocalIdx++)
+                    {
+                        neighParticleGlobalIdx = neighCellPartIdx + neighLocalIdx;
+                        if(neighParticleGlobalIdx != thisParticleGlobalIdx)
+                        {
+                            float3 neighPos = particles[neighParticleGlobalIdx];
+                            float3 neighVel = velocity[neighParticleGlobalIdx];
+                            float neighPressure = pressure[neighParticleGlobalIdx];
+                            float neighDensity = density[neighParticleGlobalIdx];
+                            float neighMass = mass[neighParticleGlobalIdx];
+
+                            float3 gradW = SpikyKernelGradientV_Kernel(thisPos, neighPos, smoothingLength);
+                            float W = Poly6Laplacian_Kernel(length(thisPos - neighPos), smoothingLength);
+
+                            float pressOverDens = (fabs(neighDensity)<FLT_EPSILON ? 0.0f: (thisPressure + neighPressure) / (2.0f* neighDensity));
+                            accPressureForce = accPressureForce + (neighMass * pressOverDens * gradW);
+
+                            float neighMassOverDen = ( (fabs(neighDensity)<FLT_EPSILON) ? 0.0f : neighMass / neighDensity );
+                            accViscForce = accViscForce + ( neighMassOverDen * (neighVel - thisVel) * W );
+
+//                            accColourFieldGrad = accColourFieldGrad + ( neighMassOverDen * gradW );
+//                            accCurvature = accCurvature + (neighMassOverDen * -W);
+                        }
+                        else
+                        {
+                            idx++;
+                        }
+                    }
+                }
+            }
+        }
+
+
+        if(!accumulate)
+        {
+            pressureForce[thisParticleGlobalIdx] = -1.0f * accPressureForce;
+        }
+        else
+        {
+            pressureForce[thisParticleGlobalIdx] = pressureForce[thisParticleGlobalIdx] + (-1.0f * accPressureForce);
+        }
+
+
+        viscForce[thisParticleGlobalIdx] = -1.0f * viscCoeff * accViscForce;
+
+
+//        float colourFieldGradMag = length(accColourFieldGrad);
+//        if( colourFieldGradMag > surfaceThreshold )
+//        {
+//            accCurvature /= colourFieldGradMag;
+//            surfaceTensionForce[thisParticleGlobalIdx] = (surfaceTension * accCurvature * accColourFieldGrad);
+//        }
+//        else
+//        {
+//            surfaceTensionForce[thisParticleGlobalIdx] = make_float3(0.0f, 0.0f, 0.0f);
+//        }
+
+}
+
+__global__ void sphGPU_Kernels::ComputeTotalForce_kernel(float3 *force,
                                                      const float3 *externalForce,
                                                      const float3 *pressureForce,
                                                      const float3 *viscousForce,

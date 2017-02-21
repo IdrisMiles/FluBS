@@ -1,54 +1,24 @@
-#include "Rigid/rigid.h"
+#include "SPH/isphparticles.h"
 
-Rigid::Rigid(std::shared_ptr<RigidProperty> _rigidProperty, Mesh _mesh):
-    ISphParticles()
+ISphParticles::ISphParticles()
 {
-    m_property = _rigidProperty;
-    m_mesh = _mesh;
 
-    m_colour = glm::vec3(0.4f, 0.3f, 0.1f);
+}
 
-    m_positionMapped = false;
-    m_velocityMapped = false;
-    m_densityMapped = false;
-    m_massMapped = false;
-    m_pressureMapped = false;
+ISphParticles::~ISphParticles()
+{
 
-    Init();
-
-
-    if(_mesh.verts.size() != _rigidProperty->numParticles)
-    {
-        // Warning shit don't match!
-        // Throw toys
-
-        printf("BOOOOO\n");
-    }
-
-
-    GetPositionPtr();
-    cudaMemcpy(d_positionPtr, &m_mesh.verts[0], m_property->numParticles * sizeof(float3), cudaMemcpyHostToDevice);
-    ReleaseCudaGLResources();
 }
 
 
-Rigid::~Rigid()
-{
-    m_property = nullptr;
-    CleanUpCUDAMemory();
-    CleanUpGL();
-}
-
-//------------------------------------------------------------------------
-
-void Rigid::SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps)
+void ISphParticles::SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps)
 {
     const uint numCells = _solverProps->gridResolution * _solverProps->gridResolution * _solverProps->gridResolution;
     cudaMalloc(&d_cellOccupancyPtr, numCells * sizeof(unsigned int));
     cudaMalloc(&d_cellParticleIdxPtr, numCells * sizeof(unsigned int));
 }
 
-void Rigid::Draw()
+void ISphParticles::Draw()
 {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_FRONT_AND_BACK);
@@ -61,7 +31,7 @@ void Rigid::Draw()
 
 }
 
-void Rigid::SetShaderUniforms(const glm::mat4 &_projMat, const glm::mat4 &_viewMat, const glm::mat4 &_modelMat, const glm::mat4 &_normalMat, const glm::vec3 &_lightPos, const glm::vec3 &_camPos)
+void ISphParticles::SetShaderUniforms(const glm::mat4 &_projMat, const glm::mat4 &_viewMat, const glm::mat4 &_modelMat, const glm::mat4 &_normalMat, const glm::vec3 &_lightPos, const glm::vec3 &_camPos)
 {
     m_shaderProg.bind();
     glUniformMatrix4fv(m_projMatrixLoc, 1, false, &_projMat[0][0]);
@@ -76,9 +46,17 @@ void Rigid::SetShaderUniforms(const glm::mat4 &_projMat, const glm::mat4 &_viewM
 
 }
 
-//------------------------------------------------------------------------
 
-void Rigid::Init()
+SphParticleProperty* ISphParticles::GetProperty()
+{
+    return m_property.get();
+}
+
+
+//---------------------------------------------------------------------------------------------------------------
+
+
+void ISphParticles::Init()
 {
     cudaSetDevice(0);
 
@@ -87,7 +65,7 @@ void Rigid::Init()
 
 }
 
-void Rigid::InitCUDAMemory()
+void ISphParticles::InitCUDAMemory()
 {
 
     // particle properties
@@ -97,27 +75,23 @@ void Rigid::InitCUDAMemory()
     cudaGraphicsGLRegisterBuffer(&m_massBO_CUDA, m_massBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
     cudaGraphicsGLRegisterBuffer(&m_pressBO_CUDA, m_pressBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
 
-    cudaMalloc(&d_volumePtr, m_property->numParticles * sizeof(float));
-
     // particle forces
-    cudaMalloc(&d_pressureForcePtr, m_property->numParticles * sizeof(float3));
-//    cudaMalloc(&d_viscousForcePtr, m_property->numParticles * sizeof(float3));
-//    cudaMalloc(&d_surfaceTensionForcePtr, m_property->numParticles * sizeof(float3));
-    cudaMalloc(&d_gravityForcePtr, m_property->numParticles * sizeof(float3));
-    cudaMalloc(&d_externalForcePtr, m_property->numParticles * sizeof(float3));
-    cudaMalloc(&d_totalForcePtr, m_property->numParticles * sizeof(float3));
+    cudaMallocManaged(&d_pressureForcePtr, m_property->numParticles * sizeof(float3));
+    cudaMallocManaged(&d_gravityForcePtr, m_property->numParticles * sizeof(float3));
+    cudaMallocManaged(&d_externalForcePtr, m_property->numParticles * sizeof(float3));
+    cudaMallocManaged(&d_totalForcePtr, m_property->numParticles * sizeof(float3));
 
     // particle hash
-    cudaMalloc(&d_particleHashIdPtr, m_property->numParticles * sizeof(unsigned int));
+    cudaMallocManaged(&d_particleHashIdPtr, m_property->numParticles * sizeof(unsigned int));
 }
 
-void Rigid::InitGL()
+void ISphParticles::InitGL()
 {
     InitShader();
     InitVAO();
 }
 
-void Rigid::InitShader()
+void ISphParticles::InitShader()
 {
     // Create shaders
     m_shaderProg.addShaderFromSourceFile(QOpenGLShader::Vertex, "../shader/sphereSpriteVert.glsl");
@@ -144,7 +118,7 @@ void Rigid::InitShader()
 
 }
 
-void Rigid::InitVAO()
+void ISphParticles::InitVAO()
 {
     m_shaderProg.bind();
 
@@ -200,9 +174,7 @@ void Rigid::InitVAO()
     m_shaderProg.release();
 }
 
-//------------------------------------------------------------------------
-
-void Rigid::CleanUpCUDAMemory()
+void ISphParticles::CleanUpCUDAMemory()
 {
     cudaFree(d_pressurePtr);
     cudaFree(d_pressureForcePtr);
@@ -214,7 +186,7 @@ void Rigid::CleanUpCUDAMemory()
     cudaFree(d_cellParticleIdxPtr);
 }
 
-void Rigid::CleanUpGL()
+void ISphParticles::CleanUpGL()
 {
     cudaGraphicsUnregisterResource(m_posBO_CUDA);
     m_posBO.destroy();
@@ -234,10 +206,10 @@ void Rigid::CleanUpGL()
     m_vao.destroy();
     m_shaderProg.destroyed();
 }
+//---------------------------------------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------
 
-void Rigid::MapCudaGLResources()
+void ISphParticles::MapCudaGLResources()
 {
     GetPositionPtr();
     GetVelocityPtr();
@@ -246,7 +218,7 @@ void Rigid::MapCudaGLResources()
     GetPressurePtr();
 }
 
-void Rigid::ReleaseCudaGLResources()
+void ISphParticles::ReleaseCudaGLResources()
 {
     ReleasePositionPtr();
     ReleaseVelocityPtr();
@@ -255,30 +227,200 @@ void Rigid::ReleaseCudaGLResources()
     ReleasePressurePtr();
 }
 
-//------------------------------------------------------------------------
 
-float *Rigid::GetVolumePtr()
+float3 * ISphParticles::GetPositionPtr()
 {
-    return d_volumePtr;
+    if(!m_positionMapped)
+    {
+        size_t numBytes;
+        cudaGraphicsMapResources(1, &m_posBO_CUDA, 0);
+        cudaGraphicsResourceGetMappedPointer((void **)&d_positionPtr, &numBytes, m_posBO_CUDA);
+
+        m_positionMapped = true;
+    }
+
+    return d_positionPtr;
 }
 
-void Rigid::ReleaseVolumePtr()
+void ISphParticles::ReleasePositionPtr()
+{
+    if(m_positionMapped)
+    {
+        cudaGraphicsUnmapResources(1, &m_posBO_CUDA, 0);
+        m_positionMapped = false;
+    }
+
+}
+
+float3 *ISphParticles::GetVelocityPtr()
+{
+    if(!m_velocityMapped)
+    {
+        size_t numBytesVel;
+        cudaGraphicsMapResources(1, &m_velBO_CUDA, 0);
+        cudaGraphicsResourceGetMappedPointer((void **)&d_velocityPtr, &numBytesVel, m_velBO_CUDA);
+
+        m_velocityMapped = true;
+    }
+
+    return d_velocityPtr;
+}
+
+void ISphParticles::ReleaseVelocityPtr()
+{
+    if(m_velocityMapped)
+    {
+        cudaGraphicsUnmapResources(1, &m_velBO_CUDA, 0);
+
+        m_velocityMapped = false;
+    }
+}
+
+float *ISphParticles::GetDensityPtr()
+{
+    if(!m_densityMapped)
+    {
+        size_t numBytesDen;
+        cudaGraphicsMapResources(1, &m_denBO_CUDA, 0);
+        cudaGraphicsResourceGetMappedPointer((void **)&d_densityPtr, &numBytesDen, m_denBO_CUDA);
+
+        m_densityMapped = true;
+    }
+
+    return d_densityPtr;
+}
+
+void ISphParticles::ReleaseDensityPtr()
+{
+    if(m_densityMapped)
+    {
+        cudaGraphicsUnmapResources(1, &m_denBO_CUDA, 0);
+        m_densityMapped = false;
+    }
+}
+
+float *ISphParticles::GetMassPtr()
+{
+    if(!m_massMapped)
+    {
+        size_t numBytesMass;
+        cudaGraphicsMapResources(1, &m_massBO_CUDA, 0);
+        cudaGraphicsResourceGetMappedPointer((void **)&d_massPtr, &numBytesMass, m_massBO_CUDA);
+
+        m_massMapped = true;
+    }
+
+    return d_massPtr;
+}
+
+void ISphParticles::ReleaseMassPtr()
+{
+    if(m_massMapped)
+    {
+        cudaGraphicsUnmapResources(1, &m_massBO_CUDA, 0);
+        m_massMapped = false;
+    }
+}
+
+
+float *ISphParticles::GetPressurePtr()
+{
+    if(!m_pressureMapped)
+    {
+        size_t numBytesPress;
+        cudaGraphicsMapResources(1, &m_pressBO_CUDA, 0);
+        cudaGraphicsResourceGetMappedPointer((void **)&d_pressurePtr, &numBytesPress, m_pressBO_CUDA);
+
+        m_pressureMapped = true;
+    }
+
+    return d_pressurePtr;
+}
+
+void ISphParticles::ReleasePressurePtr()
+{
+    if(m_pressureMapped)
+    {
+        cudaGraphicsUnmapResources(1, &m_pressBO_CUDA, 0);
+        m_pressureMapped = false;
+    }
+}
+
+float3 *ISphParticles::GetPressureForcePtr()
+{
+    return d_pressureForcePtr;
+}
+
+void ISphParticles::ReleasePressureForcePtr()
 {
 
 }
 
+float3 *ISphParticles::GetGravityForcePtr()
+{
+    return d_gravityForcePtr;
+}
 
-unsigned int Rigid::GetMaxCellOcc()
+void ISphParticles::ReleaseGravityForcePtr()
+{
+
+}
+
+float3 *ISphParticles::GetExternalForcePtr()
+{
+    return d_externalForcePtr;
+}
+
+void ISphParticles::ReleaseExternalForcePtr()
+{
+
+}
+
+float3 *ISphParticles::GetTotalForcePtr()
+{
+    return d_totalForcePtr;
+}
+
+void ISphParticles::ReleaseTotalForcePtr()
+{
+}
+
+unsigned int *ISphParticles::GetParticleHashIdPtr()
+{
+    return d_particleHashIdPtr;
+}
+
+void ISphParticles::ReleaseParticleHashIdPtr()
+{
+
+}
+
+unsigned int *ISphParticles::GetCellOccupancyPtr()
+{
+    return d_cellOccupancyPtr;
+}
+
+void ISphParticles::ReleaseCellOccupancyPtr()
+{
+
+}
+
+unsigned int *ISphParticles::GetCellParticleIdxPtr()
+{
+    return d_cellParticleIdxPtr;
+}
+
+void ISphParticles::ReleaseCellParticleIdxPtr()
+{
+
+}
+
+unsigned int ISphParticles::GetMaxCellOcc()
 {
     return m_maxCellOcc;
 }
 
-void Rigid::SetMaxCellOcc(const unsigned int _maxCellOcc)
+void ISphParticles::SetMaxCellOcc(const unsigned int _maxCellOcc)
 {
     m_maxCellOcc = _maxCellOcc;
-}
-
-RigidProperty *Rigid::GetProperty()
-{
-    return m_property.get();
 }

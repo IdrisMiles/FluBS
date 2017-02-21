@@ -1,12 +1,11 @@
 #ifndef SPH_H
 #define SPH_H
 
-#include "Fluid/isphparticles.h"
-#include "Fluid/fluid.h"
-//#include "Fluid/"
-#include "Rigid/rigid.h"
+#include "SPH/isphparticles.h"
+#include "SPH/Fluid/fluid.h"
+#include "SPH/Rigid/rigid.h"
 #include "SPH/sphGPU.h"
-#include "Fluid/fluidproperty.h"
+#include "SPH/Fluid/fluidproperty.h"
 #include "FluidSystem/fluidsolverproperty.h"
 
 namespace sph
@@ -85,6 +84,10 @@ namespace sph
 
     void ComputeSurfaceTensionForce(std::shared_ptr<Fluid> _fluid,
                                     std::shared_ptr<FluidSolverProperty> _solverProps);
+
+    void ComputeForce(std::shared_ptr<Fluid> _fluid,
+                      std::shared_ptr<FluidSolverProperty> _solverProps,
+                      const bool accumulate = false);
 
     void ComputeTotalForce(std::shared_ptr<Fluid> _fluid,
                            std::shared_ptr<FluidSolverProperty> _solverProps);

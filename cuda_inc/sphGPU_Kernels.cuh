@@ -132,7 +132,24 @@ namespace sphGPU_Kernels
                                                       const uint numPoints,
                                                       const float smoothingLength);
 
-    __global__ void ComputeForces_kernel(float3 *force,
+    __global__ void ComputeForce_kernel(float3 *pressureForce,
+                                        float3 *viscForce,
+                                        float3 *surfaceTensionForce,
+                                        const float viscCoeff,
+                                        const float surfaceTension,
+                                        const float surfaceThreshold,
+                                        const float *pressure,
+                                        const float *density,
+                                        const float *mass,
+                                        const float3 *particles,
+                                        const float3 *velocity,
+                                        const uint *cellOcc,
+                                        const uint *cellPartIdx,
+                                        const uint numPoints,
+                                        const float smoothingLength,
+                                        const bool accumulate);
+
+    __global__ void ComputeTotalForce_kernel(float3 *force,
                                          const float3 *externalForce,
                                          const float3 *pressureForce,
                                          const float3 *viscousForce,

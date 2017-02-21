@@ -1,7 +1,7 @@
 #ifndef ISPHPARTICLES_H
 #define ISPHPARTICLES_H
 
-#include "Fluid/sphparticlepropeprty.h"
+#include "SPH/sphparticlepropeprty.h"
 #include "FluidSystem/fluidsolverproperty.h"
 
 // OpenGL includes

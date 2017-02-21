@@ -1,7 +1,7 @@
 #ifndef FLUIDPROPERTY_H
 #define FLUIDPROPERTY_H
 
-#include "Fluid/sphparticlepropeprty.h"
+#include "SPH/sphparticlepropeprty.h"
 
 class FluidProperty : public SphParticleProperty
 {
@@ -13,8 +13,8 @@ public:
                   float _restDensity = 998.36f,
                   float _surfaceTension = 0.0728f,
                   float _surfaceThreshold = 1.0f,
-                  float _gasStiffness = 30.5f,
-                  float _viscosity = 1.0e-2f,
+                  float _gasStiffness = 100.0f,
+                  float _viscosity = 0.1f,
                   float _smoothingLength = 1.2f,
                   bool _play = false):
         SphParticleProperty(_numParticles, _particleMass, _particleRadius, _restDensity, _smoothingLength),

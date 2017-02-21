@@ -327,6 +327,30 @@ void sph::ComputeSurfaceTensionForce(std::shared_ptr<Fluid> _fluid,
                                        fluidProps->smoothingLength);
 }
 
+void sph::ComputeForce(std::shared_ptr<Fluid> _fluid,
+                       std::shared_ptr<FluidSolverProperty> _solverProps, const bool accumulate)
+{
+    auto fluidProps = _fluid->GetProperty();
+
+    sphGPU::ComputeForce(_fluid->GetMaxCellOcc(),
+                         _solverProps->gridResolution,
+                         _fluid->GetPressureForcePtr(),
+                         _fluid->GetViscForcePtr(),
+                         _fluid->GetSurfTenForcePtr(),
+                         fluidProps->viscosity,
+                         fluidProps->surfaceTension,
+                         fluidProps->surfaceThreshold,
+                         _fluid->GetPressurePtr(),
+                         _fluid->GetDensityPtr(),
+                         _fluid->GetMassPtr(),
+                         _fluid->GetPositionPtr(),
+                         _fluid->GetVelocityPtr(),
+                         _fluid->GetCellOccupancyPtr(),
+                         _fluid->GetCellParticleIdxPtr(),
+                         fluidProps->numParticles,
+                         fluidProps->smoothingLength, accumulate);
+}
+
 void sph::ComputeTotalForce(std::shared_ptr<Fluid> _fluid,
                             std::shared_ptr<FluidSolverProperty> _solverProps)
 {

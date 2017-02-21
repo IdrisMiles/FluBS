@@ -12,8 +12,8 @@ SOURCES += $$PWD/src/*.cpp \
             $$PWD/src/MeshSampler/*.cpp \
             $$PWD/src/Mesh/*.cpp \
             $$PWD/src/FluidSystem/*.cpp \
-            $$PWD/src/Fluid/*.cpp \
-            $$PWD/src/Rigid/*.cpp \
+            $$PWD/src/SPH/Fluid/*.cpp \
+            $$PWD/src/SPH/Rigid/*.cpp \
             $$PWD/src/SPH/*.cpp \
             $$PWD/src/Widget/*.cpp
 
@@ -21,12 +21,13 @@ HEADERS  += $$PWD/include/*.h \
             $$PWD/include/MeshSampler/*.h \
             $$PWD/include/Mesh/*.h      \
             $$PWD/include/FluidSystem/*.h \
-            $$PWD/include/Fluid/*.h     \
-            $$PWD/include/Rigid/*.h     \
+            $$PWD/include/SPH/Fluid/*.h     \
+            $$PWD/include/SPH/Rigid/*.h     \
             $$PWD/include/SPH/*.h       \
             $$PWD/include/Widget/*.h
 
-OTHER_FILES += shader/*
+OTHER_FILES +=  shader/* \
+                shader/Fluid/*
 
 INCLUDEPATH +=  $$PWD/include \
                 /usr/local/include \

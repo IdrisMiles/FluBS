@@ -1,5 +1,6 @@
 #include "include/openglscene.h"
 #include <iostream>
+#include <sys/time.h>
 #include <QMouseEvent>
 #include <math.h>
 #include "Mesh/meshloader.h"
@@ -146,7 +147,7 @@ void OpenGLScene::initializeGL()
 
     // fluid
     auto fluidProps = std::shared_ptr<FluidProperty>(new FluidProperty());
-    m_fluid = std::shared_ptr<Fluid>(new Fluid(fluidProps));
+    m_fluid = std::shared_ptr<Fluid>(new Fluid(fluidProps, width(), height()));
 
     // rigid
     auto fluidSolverProps = std::shared_ptr<FluidSolverProperty>(new FluidSolverProperty());
@@ -162,7 +163,7 @@ void OpenGLScene::initializeGL()
         {
             for(int x=0; x<numRigidAxis; x++)
             {
-                if(x==0 || x==numRigidAxis-1 || y==0 || z==0 || z==numRigidAxis-1)
+                if(x==0 || x==numRigidAxis-1 || y==0 || y==numRigidAxis-1 || z==0 || z==numRigidAxis-1)
                 {
                     glm::vec3 pos((x*rad*2.0f)-(dim*0.5f), (y*rad*2.0f)-(dim*0.5f), (z*rad*2.0f)-(dim*0.5f));
                     boundary.verts.push_back(pos);
@@ -172,11 +173,12 @@ void OpenGLScene::initializeGL()
     }
 
     rigidProps->numParticles = boundary.verts.size();
-    m_rigid = std::shared_ptr<Rigid>(new Rigid(rigidProps, boundary));
+    m_container = std::shared_ptr<Rigid>(new Rigid(rigidProps, boundary));
 
 
-    m_fluidSystem = std::shared_ptr<FluidSystem>(new FluidSystem(m_fluid, fluidSolverProps));
-    m_fluidSystem->AddRigid(m_rigid);
+    m_fluidSystem = std::shared_ptr<FluidSystem>(new FluidSystem(fluidSolverProps));
+    m_fluidSystem->SetContainer(m_container);
+    m_fluidSystem->AddFluid(m_fluid);
 
     emit FluidInitialised(fluidProps);
 
@@ -195,8 +197,8 @@ void OpenGLScene::paintGL()
 {
     // clean gl window
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
-    //    glEnable(GL_CULL_FACE);
+//    glEnable(GL_DEPTH_TEST);
+//    glEnable(GL_CULL_FACE);
 
     // update model matrix
     m_modelMat = glm::mat4(1);
@@ -210,8 +212,8 @@ void OpenGLScene::paintGL()
     // Draw code - replace this with project specific draw stuff
     m_fluid->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, glm::mat4(normalMatrix), m_lightPos, camPos);
     m_fluid->Draw();
-//    m_rigid->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, glm::mat4(normalMatrix), m_lightPos, camPos);
-//    m_rigid->Draw();
+//    m_container->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, glm::mat4(normalMatrix), m_lightPos, camPos);
+//    m_container->Draw();
 
     //---------------------------------------------------------------------------------------
 
@@ -220,7 +222,23 @@ void OpenGLScene::paintGL()
 
 void OpenGLScene::UpdateSim()
 {
+    static double time = 0.0;
+    static double t1 = 0.0;
+    static double t2 = 0.0;
+    struct timeval tim;
+
+    gettimeofday(&tim, NULL);
+    t1=tim.tv_sec+(tim.tv_usec/1000000.0);
+
+
     m_fluidSystem->StepSimulation();
+
+
+    gettimeofday(&tim, NULL);
+    t2=tim.tv_sec+(tim.tv_usec/1000000.0);
+    time += 10*(t2-t1);
+//    std::cout<<"fps: "<<1.0/(t2-t1)<<"\n";
+
 }
 
 void OpenGLScene::ResetSim()
@@ -230,6 +248,7 @@ void OpenGLScene::ResetSim()
 
 void OpenGLScene::resizeGL(int w, int h)
 {
+    m_fluid->SetFrameSize(w, h);
     m_projMat = glm::perspective(45.0f, GLfloat(w) / h, 0.01f, 2000.0f);
 }
 

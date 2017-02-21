@@ -4,7 +4,7 @@ in vec3 fVel;
 in float fDen;
 in vec2 fTexCoord;
 
-out vec4 fragColor;
+layout (location = 0) out vec4 fragColor;
 
 uniform vec3 uLightPos;
 uniform vec3 uColour;

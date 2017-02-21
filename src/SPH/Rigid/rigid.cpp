@@ -1,30 +1,12 @@
-#include "Fluid/fluid.h"
-#include <math.h>
-#include <sys/time.h>
-#include <glm/gtx/transform.hpp>
+#include "SPH/Rigid/rigid.h"
 
-Fluid::Fluid(std::shared_ptr<FluidProperty> _fluidProperty)
+Rigid::Rigid(std::shared_ptr<RigidProperty> _rigidProperty, Mesh _mesh):
+    ISphParticles()
 {
-    m_fluidProperty = _fluidProperty;
-
-    m_colour = glm::vec3(0.6f, 0.6f, 0.6f);
-
-    m_positionMapped = false;
-    m_velocityMapped = false;
-    m_densityMapped = false;
-    m_massMapped = false;
-    m_pressureMapped = false;
-
-    Init();
-}
-
-Fluid::Fluid(std::shared_ptr<FluidProperty> _fluidProperty, Mesh _mesh)
-{
-
+    m_property = _rigidProperty;
     m_mesh = _mesh;
-    m_fluidProperty = _fluidProperty;
 
-    m_colour = glm::vec3(0.6f, 0.6f, 0.6f);
+    m_colour = glm::vec3(0.4f, 0.3f, 0.1f);
 
     m_positionMapped = false;
     m_velocityMapped = false;
@@ -33,43 +15,43 @@ Fluid::Fluid(std::shared_ptr<FluidProperty> _fluidProperty, Mesh _mesh)
     m_pressureMapped = false;
 
     Init();
-
 
     GetPositionPtr();
     cudaMemcpy(d_positionPtr, &m_mesh.verts[0], m_property->numParticles * sizeof(float3), cudaMemcpyHostToDevice);
     ReleaseCudaGLResources();
 }
 
-Fluid::~Fluid()
+
+Rigid::~Rigid()
 {
-    m_fluidProperty = nullptr;
-    CleanUpGL();
+    m_property = nullptr;
     CleanUpCUDAMemory();
+    CleanUpGL();
 }
 
 //------------------------------------------------------------------------
 
-void Fluid::SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps)
+void Rigid::SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps)
 {
     const uint numCells = _solverProps->gridResolution * _solverProps->gridResolution * _solverProps->gridResolution;
     cudaMalloc(&d_cellOccupancyPtr, numCells * sizeof(unsigned int));
     cudaMalloc(&d_cellParticleIdxPtr, numCells * sizeof(unsigned int));
 }
 
-void Fluid::Draw()
+void Rigid::Draw()
 {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_FRONT_AND_BACK);
 
     m_shaderProg.bind();
     m_vao.bind();
-    glDrawArrays(GL_POINTS, 0, m_fluidProperty->numParticles);
+    glDrawArrays(GL_POINTS, 0, m_property->numParticles);
     m_vao.release();
     m_shaderProg.release();
 
 }
 
-void Fluid::SetShaderUniforms(const glm::mat4 &_projMat, const glm::mat4 &_viewMat, const glm::mat4 &_modelMat, const glm::mat4 &_normalMat, const glm::vec3 &_lightPos, const glm::vec3 &_camPos)
+void Rigid::SetShaderUniforms(const glm::mat4 &_projMat, const glm::mat4 &_viewMat, const glm::mat4 &_modelMat, const glm::mat4 &_normalMat, const glm::vec3 &_lightPos, const glm::vec3 &_camPos)
 {
     m_shaderProg.bind();
     glUniformMatrix4fv(m_projMatrixLoc, 1, false, &_projMat[0][0]);
@@ -78,7 +60,7 @@ void Fluid::SetShaderUniforms(const glm::mat4 &_projMat, const glm::mat4 &_viewM
     glUniform3fv(m_lightPosLoc, 1, &_lightPos[0]);
     glUniform3fv(m_camPosLoc, 1, &_camPos[0]);
     glUniform3fv(m_colourLoc, 1, &m_colour[0]);
-    glUniform1f(m_radLoc, m_fluidProperty->particleRadius);
+    glUniform1f(m_radLoc, m_property->particleRadius);
 
     m_shaderProg.release();
 
@@ -86,7 +68,7 @@ void Fluid::SetShaderUniforms(const glm::mat4 &_projMat, const glm::mat4 &_viewM
 
 //------------------------------------------------------------------------
 
-void Fluid::Init()
+void Rigid::Init()
 {
     cudaSetDevice(0);
 
@@ -95,7 +77,7 @@ void Fluid::Init()
 
 }
 
-void Fluid::InitCUDAMemory()
+void Rigid::InitCUDAMemory()
 {
 
     // particle properties
@@ -105,25 +87,25 @@ void Fluid::InitCUDAMemory()
     cudaGraphicsGLRegisterBuffer(&m_massBO_CUDA, m_massBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
     cudaGraphicsGLRegisterBuffer(&m_pressBO_CUDA, m_pressBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
 
+    cudaMalloc(&d_volumePtr, m_property->numParticles * sizeof(float));
+
     // particle forces
-    cudaMalloc(&d_pressureForcePtr, m_fluidProperty->numParticles * sizeof(float3));
-    cudaMalloc(&d_viscousForcePtr, m_fluidProperty->numParticles * sizeof(float3));
-    cudaMalloc(&d_surfaceTensionForcePtr, m_fluidProperty->numParticles * sizeof(float3));
-    cudaMalloc(&d_gravityForcePtr, m_fluidProperty->numParticles * sizeof(float3));
-    cudaMalloc(&d_externalForcePtr, m_fluidProperty->numParticles * sizeof(float3));
-    cudaMalloc(&d_totalForcePtr, m_fluidProperty->numParticles * sizeof(float3));
+    cudaMalloc(&d_pressureForcePtr, m_property->numParticles * sizeof(float3));
+    cudaMalloc(&d_gravityForcePtr, m_property->numParticles * sizeof(float3));
+    cudaMalloc(&d_externalForcePtr, m_property->numParticles * sizeof(float3));
+    cudaMalloc(&d_totalForcePtr, m_property->numParticles * sizeof(float3));
 
     // particle hash
-    cudaMalloc(&d_particleHashIdPtr, m_fluidProperty->numParticles * sizeof(unsigned int));
+    cudaMalloc(&d_particleHashIdPtr, m_property->numParticles * sizeof(unsigned int));
 }
 
-void Fluid::InitGL()
+void Rigid::InitGL()
 {
     InitShader();
     InitVAO();
 }
 
-void Fluid::InitShader()
+void Rigid::InitShader()
 {
     // Create shaders
     m_shaderProg.addShaderFromSourceFile(QOpenGLShader::Vertex, "../shader/sphereSpriteVert.glsl");
@@ -150,7 +132,7 @@ void Fluid::InitShader()
 
 }
 
-void Fluid::InitVAO()
+void Rigid::InitVAO()
 {
     m_shaderProg.bind();
 
@@ -162,7 +144,7 @@ void Fluid::InitVAO()
     // Setup our pos buffer object.
     m_posBO.create();
     m_posBO.bind();
-    m_posBO.allocate(m_fluidProperty->numParticles * sizeof(float3));
+    m_posBO.allocate(m_property->numParticles * sizeof(float3));
     glEnableVertexAttribArray(m_posAttrLoc);
     glVertexAttribPointer(m_posAttrLoc, 3, GL_FLOAT, GL_FALSE, 1 * sizeof(float3), 0);
     m_posBO.release();
@@ -171,7 +153,7 @@ void Fluid::InitVAO()
     // Set up velocity buffer object
     m_velBO.create();
     m_velBO.bind();
-    m_velBO.allocate(m_fluidProperty->numParticles * sizeof(float3));
+    m_velBO.allocate(m_property->numParticles * sizeof(float3));
     glEnableVertexAttribArray(m_velAttrLoc);
     glVertexAttribPointer(m_velAttrLoc, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
     m_velBO.release();
@@ -180,7 +162,7 @@ void Fluid::InitVAO()
     // Set up density buffer object
     m_denBO.create();
     m_denBO.bind();
-    m_denBO.allocate(m_fluidProperty->numParticles * sizeof(float));
+    m_denBO.allocate(m_property->numParticles * sizeof(float));
     glEnableVertexAttribArray(m_denAttrLoc);
     glVertexAttribPointer(m_denAttrLoc, 1, GL_FLOAT, GL_FALSE, sizeof(GLfloat), 0);
     m_denBO.release();
@@ -189,14 +171,14 @@ void Fluid::InitVAO()
     // Set up mass buffer object
     m_massBO.create();
     m_massBO.bind();
-    m_massBO.allocate(m_fluidProperty->numParticles * sizeof(float));
+    m_massBO.allocate(m_property->numParticles * sizeof(float));
     m_massBO.release();
 
 
     // Set up pressure buffer object
     m_pressBO.create();
     m_pressBO.bind();
-    m_pressBO.allocate(m_fluidProperty->numParticles * sizeof(float));
+    m_pressBO.allocate(m_property->numParticles * sizeof(float));
     m_pressBO.release();
 
 
@@ -208,21 +190,19 @@ void Fluid::InitVAO()
 
 //------------------------------------------------------------------------
 
-void Fluid::CleanUpCUDAMemory()
+void Rigid::CleanUpCUDAMemory()
 {
-    cudaFree(d_pressurePtr);
     cudaFree(d_pressureForcePtr);
-    cudaFree(d_viscousForcePtr);
-    cudaFree(d_surfaceTensionForcePtr);
     cudaFree(d_gravityForcePtr);
     cudaFree(d_externalForcePtr);
     cudaFree(d_totalForcePtr);
     cudaFree(d_particleHashIdPtr);
     cudaFree(d_cellOccupancyPtr);
     cudaFree(d_cellParticleIdxPtr);
+    cudaFree(d_volumePtr);
 }
 
-void Fluid::CleanUpGL()
+void Rigid::CleanUpGL()
 {
     cudaGraphicsUnregisterResource(m_posBO_CUDA);
     m_posBO.destroy();
@@ -245,7 +225,7 @@ void Fluid::CleanUpGL()
 
 //------------------------------------------------------------------------
 
-void Fluid::MapCudaGLResources()
+void Rigid::MapCudaGLResources()
 {
     GetPositionPtr();
     GetVelocityPtr();
@@ -254,7 +234,7 @@ void Fluid::MapCudaGLResources()
     GetPressurePtr();
 }
 
-void Fluid::ReleaseCudaGLResources()
+void Rigid::ReleaseCudaGLResources()
 {
     ReleasePositionPtr();
     ReleaseVelocityPtr();
@@ -263,42 +243,30 @@ void Fluid::ReleaseCudaGLResources()
     ReleasePressurePtr();
 }
 
-
 //------------------------------------------------------------------------
 
-float3 *Fluid::GetViscForcePtr()
+float *Rigid::GetVolumePtr()
 {
-    return d_viscousForcePtr;
+    return d_volumePtr;
 }
 
-void Fluid::ReleaseViscForcePtr()
-{
-
-}
-
-float3 *Fluid::GetSurfTenForcePtr()
-{
-    return d_surfaceTensionForcePtr;
-}
-
-void Fluid::ReleaseSurfTenForcePtr()
+void Rigid::ReleaseVolumePtr()
 {
 
 }
 
-unsigned int Fluid::GetMaxCellOcc()
+
+unsigned int Rigid::GetMaxCellOcc()
 {
     return m_maxCellOcc;
 }
 
-void Fluid::SetMaxCellOcc(const unsigned int _maxCellOcc)
+void Rigid::SetMaxCellOcc(const unsigned int _maxCellOcc)
 {
     m_maxCellOcc = _maxCellOcc;
 }
 
-FluidProperty* Fluid::GetProperty()
+RigidProperty *Rigid::GetProperty()
 {
-    return m_fluidProperty.get();
+    return m_property.get();
 }
-
-

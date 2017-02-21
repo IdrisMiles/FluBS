@@ -15,7 +15,7 @@
 #include <glm/gtx/transform.hpp>
 
 #include "FluidSystem/fluidsystem.h"
-#include "Fluid/fluid.h"
+#include "SPH/Fluid/fluid.h"
 
 #include "Mesh/meshloader.h"
 #include "Mesh/rendermesh.h"
@@ -84,7 +84,7 @@ private:
 
     // Application specific members
     std::shared_ptr<Fluid> m_fluid;
-    std::shared_ptr<Rigid> m_rigid;
+    std::shared_ptr<Rigid> m_container;
     std::shared_ptr<FluidSystem> m_fluidSystem;
 
     QTimer *m_drawTimer;
