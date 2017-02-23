@@ -10,7 +10,7 @@
 
 namespace sph
 {
-    void ResetProperties(std::shared_ptr<ISphParticles> _sphParticles,
+    void ResetProperties(std::shared_ptr<BaseSphParticle> _sphParticles,
                          std::shared_ptr<FluidSolverProperty> _solverProps);
 
     void ResetProperties(std::shared_ptr<Fluid> _fluid,
@@ -19,19 +19,19 @@ namespace sph
     void ResetProperties(std::shared_ptr<Rigid> _rigid,
                          std::shared_ptr<FluidSolverProperty> _solverProps);
 
-    void InitFluidAsCube(std::shared_ptr<ISphParticles> _sphParticles,
+    void InitFluidAsCube(std::shared_ptr<BaseSphParticle> _sphParticles,
                          std::shared_ptr<FluidSolverProperty> _solverProps);
 
     //--------------------------------------------------------------------------------------
-    void ComputeHash(std::shared_ptr<ISphParticles> _fluid,
+    void ComputeHash(std::shared_ptr<BaseSphParticle> _fluid,
                      std::shared_ptr<FluidSolverProperty> _solverProps);
 
-    void SortParticlesByHash(std::shared_ptr<ISphParticles> _sphParticles);
+    void SortParticlesByHash(std::shared_ptr<BaseSphParticle> _sphParticles);
 
-    void ComputeParticleScatterIds(std::shared_ptr<ISphParticles> _sphParticles,
+    void ComputeParticleScatterIds(std::shared_ptr<BaseSphParticle> _sphParticles,
                                    std::shared_ptr<FluidSolverProperty> _solverProps);
 
-    void ComputeMaxCellOccupancy(std::shared_ptr<ISphParticles> _fluid,
+    void ComputeMaxCellOccupancy(std::shared_ptr<BaseSphParticle> _fluid,
                                  std::shared_ptr<FluidSolverProperty> _solverProps,
                                  unsigned int &_maxCellOcc);
 
@@ -42,16 +42,16 @@ namespace sph
 
     //--------------------------------------------------------------------------------------
 
-    void ComputeDensityFluid(std::shared_ptr<ISphParticles> _fluid,
+    void ComputeDensityFluid(std::shared_ptr<BaseSphParticle> _fluid,
                              std::shared_ptr<FluidSolverProperty> _solverProps,
                              const bool accumulate = false);
 
-    void ComputeDensityFluidFluid(std::shared_ptr<ISphParticles> _fluid,
-                                  std::shared_ptr<ISphParticles> _fluidContributer,
+    void ComputeDensityFluidFluid(std::shared_ptr<BaseSphParticle> _fluid,
+                                  std::shared_ptr<BaseSphParticle> _fluidContributer,
                                   std::shared_ptr<FluidSolverProperty> _solverProps,
                                   const bool accumulate = false);
 
-    void ComputeDensityFluidRigid(std::shared_ptr<ISphParticles> _fluid,
+    void ComputeDensityFluidRigid(std::shared_ptr<BaseSphParticle> _fluid,
                                   std::shared_ptr<Rigid> _rigid,
                                   std::shared_ptr<FluidSolverProperty> _solverProps,
                                   const bool accumulate = false);
@@ -62,16 +62,16 @@ namespace sph
 
 //--------------------------------------------------------------------------------------
 
-    void ComputePressureForceFluid(std::shared_ptr<ISphParticles> _fluid,
+    void ComputePressureForceFluid(std::shared_ptr<BaseSphParticle> _fluid,
                                    std::shared_ptr<FluidSolverProperty> _solverProps,
                                    const bool accumulate = false);
 
-    void ComputePressureForceFluidFluid(std::shared_ptr<ISphParticles> _fluid,
-                                        std::shared_ptr<ISphParticles> _fluidContributer,
+    void ComputePressureForceFluidFluid(std::shared_ptr<BaseSphParticle> _fluid,
+                                        std::shared_ptr<BaseSphParticle> _fluidContributer,
                                         std::shared_ptr<FluidSolverProperty> _solverProps,
                                         const bool accumulate = false);
 
-    void ComputePressureForceFluidRigid(std::shared_ptr<ISphParticles> _fluid,
+    void ComputePressureForceFluidRigid(std::shared_ptr<BaseSphParticle> _fluid,
                                         std::shared_ptr<Rigid> _rigid,
                                         std::shared_ptr<FluidSolverProperty> _solverProps,
                                         const bool accumulate = false);

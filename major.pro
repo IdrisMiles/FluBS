@@ -35,7 +35,7 @@ INCLUDEPATH +=  $$PWD/include \
                 /home/idris/dev/include
 
 LIBS += -L/usr/local/lib -L/usr/lib -lGL -lGLU -lGLEW \
-        -L${HOME}/dev/lib -L/usr/local/lib -lassimp
+        -L/home/idris/dev/lib -L/usr/local/lib -lassimp
 
 OBJECTS_DIR = ./obj
 MOC_DIR = ./moc

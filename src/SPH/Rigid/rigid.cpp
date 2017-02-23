@@ -1,7 +1,9 @@
 #include "SPH/Rigid/rigid.h"
+#include <QOpenGLFunctions>
+#include <QOpenGLContext>
 
 Rigid::Rigid(std::shared_ptr<RigidProperty> _rigidProperty, Mesh _mesh):
-    ISphParticles()
+    BaseSphParticle()
 {
     m_property = _rigidProperty;
     m_mesh = _mesh;
@@ -40,27 +42,31 @@ void Rigid::SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps)
 
 void Rigid::Draw()
 {
+    QOpenGLFunctions *glFuncs = QOpenGLContext::currentContext()->functions();
+
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_FRONT_AND_BACK);
 
     m_shaderProg.bind();
     m_vao.bind();
-    glDrawArrays(GL_POINTS, 0, m_property->numParticles);
+    glFuncs->glDrawArrays(GL_POINTS, 0, m_property->numParticles);
     m_vao.release();
     m_shaderProg.release();
 
 }
 
 void Rigid::SetShaderUniforms(const glm::mat4 &_projMat, const glm::mat4 &_viewMat, const glm::mat4 &_modelMat, const glm::mat4 &_normalMat, const glm::vec3 &_lightPos, const glm::vec3 &_camPos)
-{
+{    
+    QOpenGLFunctions *glFuncs = QOpenGLContext::currentContext()->functions();
+
     m_shaderProg.bind();
-    glUniformMatrix4fv(m_projMatrixLoc, 1, false, &_projMat[0][0]);
-    glUniformMatrix4fv(m_mvMatrixLoc, 1, false, &(_modelMat*_viewMat)[0][0]);
-    glUniformMatrix3fv(m_normalMatrixLoc, 1, true, &_normalMat[0][0]);
-    glUniform3fv(m_lightPosLoc, 1, &_lightPos[0]);
-    glUniform3fv(m_camPosLoc, 1, &_camPos[0]);
-    glUniform3fv(m_colourLoc, 1, &m_colour[0]);
-    glUniform1f(m_radLoc, m_property->particleRadius);
+    glFuncs->glUniformMatrix4fv(m_projMatrixLoc, 1, false, &_projMat[0][0]);
+    glFuncs->glUniformMatrix4fv(m_mvMatrixLoc, 1, false, &(_modelMat*_viewMat)[0][0]);
+    glFuncs->glUniformMatrix3fv(m_normalMatrixLoc, 1, true, &_normalMat[0][0]);
+    glFuncs->glUniform3fv(m_lightPosLoc, 1, &_lightPos[0]);
+    glFuncs->glUniform3fv(m_camPosLoc, 1, &_camPos[0]);
+    glFuncs->glUniform3fv(m_colourLoc, 1, &m_colour[0]);
+    glFuncs->glUniform1f(m_radLoc, m_property->particleRadius);
 
     m_shaderProg.release();
 
@@ -134,6 +140,8 @@ void Rigid::InitShader()
 
 void Rigid::InitVAO()
 {
+    QOpenGLFunctions *glFuncs = QOpenGLContext::currentContext()->functions();
+
     m_shaderProg.bind();
 
     // Set up the VAO
@@ -145,8 +153,8 @@ void Rigid::InitVAO()
     m_posBO.create();
     m_posBO.bind();
     m_posBO.allocate(m_property->numParticles * sizeof(float3));
-    glEnableVertexAttribArray(m_posAttrLoc);
-    glVertexAttribPointer(m_posAttrLoc, 3, GL_FLOAT, GL_FALSE, 1 * sizeof(float3), 0);
+    glFuncs->glEnableVertexAttribArray(m_posAttrLoc);
+    glFuncs->glVertexAttribPointer(m_posAttrLoc, 3, GL_FLOAT, GL_FALSE, 1 * sizeof(float3), 0);
     m_posBO.release();
 
 
@@ -154,8 +162,8 @@ void Rigid::InitVAO()
     m_velBO.create();
     m_velBO.bind();
     m_velBO.allocate(m_property->numParticles * sizeof(float3));
-    glEnableVertexAttribArray(m_velAttrLoc);
-    glVertexAttribPointer(m_velAttrLoc, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
+    glFuncs->glEnableVertexAttribArray(m_velAttrLoc);
+    glFuncs->glVertexAttribPointer(m_velAttrLoc, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
     m_velBO.release();
 
 
@@ -163,8 +171,8 @@ void Rigid::InitVAO()
     m_denBO.create();
     m_denBO.bind();
     m_denBO.allocate(m_property->numParticles * sizeof(float));
-    glEnableVertexAttribArray(m_denAttrLoc);
-    glVertexAttribPointer(m_denAttrLoc, 1, GL_FLOAT, GL_FALSE, sizeof(GLfloat), 0);
+    glFuncs->glEnableVertexAttribArray(m_denAttrLoc);
+    glFuncs->glVertexAttribPointer(m_denAttrLoc, 1, GL_FLOAT, GL_FALSE, sizeof(GLfloat), 0);
     m_denBO.release();
 
 
@@ -182,7 +190,6 @@ void Rigid::InitVAO()
     m_pressBO.release();
 
 
-    glPointSize(5);
     m_vao.release();
 
     m_shaderProg.release();
@@ -253,17 +260,6 @@ float *Rigid::GetVolumePtr()
 void Rigid::ReleaseVolumePtr()
 {
 
-}
-
-
-unsigned int Rigid::GetMaxCellOcc()
-{
-    return m_maxCellOcc;
-}
-
-void Rigid::SetMaxCellOcc(const unsigned int _maxCellOcc)
-{
-    m_maxCellOcc = _maxCellOcc;
 }
 
 RigidProperty *Rigid::GetProperty()

@@ -1,15 +1,11 @@
 #ifndef ISPHPARTICLES_H
 #define ISPHPARTICLES_H
 
-#include "SPH/sphparticlepropeprty.h"
-#include "FluidSystem/fluidsolverproperty.h"
-
 // OpenGL includes
 #include <GL/glew.h>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLBuffer>
-#include <QOpenGLFramebufferObject>
 
 // CUDA includes
 #include <cuda_runtime.h>
@@ -19,11 +15,16 @@
 #include <glm/glm.hpp>
 #include <memory>
 
-class ISphParticles
+#include "SPH/sphparticlepropeprty.h"
+#include "FluidSystem/fluidsolverproperty.h"
+#include "Mesh/mesh.h"
+
+
+class BaseSphParticle
 {
 public:
-    ISphParticles();
-    virtual ~ISphParticles();
+    BaseSphParticle();
+    virtual ~BaseSphParticle();
 
 
 
@@ -82,8 +83,8 @@ public:
     unsigned int *GetCellParticleIdxPtr();
     void ReleaseCellParticleIdxPtr();
 
-    virtual unsigned int GetMaxCellOcc();
-    virtual void SetMaxCellOcc(const unsigned int _maxCellOcc);
+    unsigned int GetMaxCellOcc();
+    void SetMaxCellOcc(const unsigned int _maxCellOcc);
 
 
 protected:
@@ -97,7 +98,8 @@ protected:
     virtual void CleanUpGL();
 
 
-    // Simulation stuff
+    // Simulation Data
+    Mesh m_mesh;
     std::shared_ptr<SphParticleProperty> m_property;
     float3 *d_positionPtr;
     float3 *d_velocityPtr;
@@ -123,21 +125,21 @@ protected:
     bool m_pressureMapped;
 
 
+    //---------------------------------------------------------
+    // TODO remove already rendering stuff into its own class
+    //---------------------------------------------------------
     // Rendering stuff
     QOpenGLShaderProgram m_shaderProg;
-    GLuint m_vertexAttrLoc;
-    GLuint m_normalAttrLoc;
     GLuint m_posAttrLoc;
     GLuint m_velAttrLoc;
     GLuint m_denAttrLoc;
-
+    GLuint m_radLoc;
+    GLuint m_lightPosLoc;
+    GLuint m_colourLoc;
+    GLuint m_camPosLoc;
     GLuint m_projMatrixLoc;
     GLuint m_mvMatrixLoc;
     GLuint m_normalMatrixLoc;
-    GLuint m_lightPosLoc;
-    GLuint m_colourLoc;
-    GLuint m_radLoc;
-    GLuint m_camPosLoc;
 
     QOpenGLVertexArrayObject m_vao;
     QOpenGLBuffer m_posBO;

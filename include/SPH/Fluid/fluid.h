@@ -5,29 +5,17 @@
 #include "SPH/isphparticles.h"
 #include "FluidSystem/fluidsolverproperty.h"
 
-// OpenGL includes
-#include <GL/glew.h>
-#include <QOpenGLShaderProgram>
-#include <QOpenGLVertexArrayObject>
-#include <QOpenGLBuffer>
+// Qt OpenGL includes
 #include <QOpenGLFramebufferObject>
-
-// CUDA includes
-#include <cuda_runtime.h>
-#include <cuda.h>
-#include <cuda_gl_interop.h>
-
-#include <glm/glm.hpp>
-#include <memory>
-#include "Mesh/mesh.h"
+#include <QOpenGLTexture>
 
 
-class Fluid : public ISphParticles
+class Fluid : public BaseSphParticle
 {
 
 public:
     Fluid(std::shared_ptr<FluidProperty> _fluidProperty, int _w=1280, int _h=720);
-    Fluid(std::shared_ptr<FluidProperty> _rigidProperty, Mesh _mesh);
+    Fluid(std::shared_ptr<FluidProperty> _rigidProperty, Mesh _mesh, int _w=1280, int _h=720);
     virtual ~Fluid();
 
     virtual void SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps);
@@ -52,9 +40,6 @@ public:
     float3 *GetSurfTenForcePtr();
     void ReleaseSurfTenForcePtr();
 
-    virtual unsigned int GetMaxCellOcc();
-    virtual void SetMaxCellOcc(const unsigned int _maxCellOcc);
-
 
 protected:
     virtual void Init();
@@ -62,32 +47,39 @@ protected:
     virtual void InitGL();
     virtual void InitShader();
     virtual void InitVAO();
-    void InitFBOs();
 
     virtual void CleanUpCUDAMemory();
     virtual void CleanUpGL();
 
+    void InitFluidAsMesh();
+    void InitFBOs();
+    void CreateDepthShader();
+    void CreateSmoothDepthShader();
+    void CreateThicknessShader();
+    void CreateFluidShader();
+    void CreateDefaultParticleShader();
 
 
-    Mesh m_mesh;
-    // Simulation stuff
+    // Simulation Data
     std::shared_ptr<FluidProperty> m_fluidProperty;
     float3* d_viscousForcePtr;
     float3* d_surfaceTensionForcePtr;
 
 
+    //---------------------------------------------------------
+    // TODO remove already rendering stuff into its own class
+    //---------------------------------------------------------
     // rendering stuff
-    int w;
-    int h;
+    int m_width;
+    int m_height;
     std::shared_ptr<QOpenGLFramebufferObject> m_depthFBO;
     std::shared_ptr<QOpenGLFramebufferObject> m_smoothDepthFBO;
     std::shared_ptr<QOpenGLFramebufferObject> m_thicknessFBO;
-    QOpenGLShaderProgram m_pointSpriteShader;
-    QOpenGLShaderProgram m_depthSmoothShader;
+
+    QOpenGLShaderProgram m_depthShader;
+    QOpenGLShaderProgram m_smoothDepthShader;
     QOpenGLShaderProgram m_thicknessShader;
-    GLuint m_depthTexLoc;
-    GLuint m_smoothDepthTexLoc;
-    GLuint m_thicknessTexLoc;
+    QOpenGLShaderProgram m_fluidShader;
 
     QOpenGLVertexArrayObject m_quadVAO;
     QOpenGLBuffer m_quadVBO;

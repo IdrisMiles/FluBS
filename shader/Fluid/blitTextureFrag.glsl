@@ -2,12 +2,12 @@
 
 in vec2 fUV;
 
-uniform sampler2D tex;
+uniform sampler2D uTex;
 
 out vec4 fragColor;
 
 
 void main()
 {
-    fragColor.rgb = texture(tex, fUV.xy).rgb;
+    fragColor.rgb = texture(uTex, fUV.xy).rgb;
 }

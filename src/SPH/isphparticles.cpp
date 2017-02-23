@@ -1,53 +1,58 @@
 #include "SPH/isphparticles.h"
+#include <QOpenGLContext>
+#include <QOpenGLFunctions>
 
-ISphParticles::ISphParticles()
+BaseSphParticle::BaseSphParticle()
 {
 
 }
 
-ISphParticles::~ISphParticles()
+BaseSphParticle::~BaseSphParticle()
 {
 
 }
 
 
-void ISphParticles::SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps)
+void BaseSphParticle::SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps)
 {
     const uint numCells = _solverProps->gridResolution * _solverProps->gridResolution * _solverProps->gridResolution;
     cudaMalloc(&d_cellOccupancyPtr, numCells * sizeof(unsigned int));
     cudaMalloc(&d_cellParticleIdxPtr, numCells * sizeof(unsigned int));
 }
 
-void ISphParticles::Draw()
+void BaseSphParticle::Draw()
 {
+    QOpenGLFunctions *glFuncs = QOpenGLContext::currentContext()->functions();
+
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_FRONT_AND_BACK);
 
     m_shaderProg.bind();
     m_vao.bind();
-    glDrawArrays(GL_POINTS, 0, m_property->numParticles);
+    glFuncs->glDrawArrays(GL_POINTS, 0, m_property->numParticles);
     m_vao.release();
     m_shaderProg.release();
 
 }
 
-void ISphParticles::SetShaderUniforms(const glm::mat4 &_projMat, const glm::mat4 &_viewMat, const glm::mat4 &_modelMat, const glm::mat4 &_normalMat, const glm::vec3 &_lightPos, const glm::vec3 &_camPos)
+void BaseSphParticle::SetShaderUniforms(const glm::mat4 &_projMat, const glm::mat4 &_viewMat, const glm::mat4 &_modelMat, const glm::mat4 &_normalMat, const glm::vec3 &_lightPos, const glm::vec3 &_camPos)
 {
+    QOpenGLFunctions *glFuncs = QOpenGLContext::currentContext()->functions();
     m_shaderProg.bind();
-    glUniformMatrix4fv(m_projMatrixLoc, 1, false, &_projMat[0][0]);
-    glUniformMatrix4fv(m_mvMatrixLoc, 1, false, &(_modelMat*_viewMat)[0][0]);
-    glUniformMatrix3fv(m_normalMatrixLoc, 1, true, &_normalMat[0][0]);
-    glUniform3fv(m_lightPosLoc, 1, &_lightPos[0]);
-    glUniform3fv(m_camPosLoc, 1, &_camPos[0]);
-    glUniform3fv(m_colourLoc, 1, &m_colour[0]);
-    glUniform1f(m_radLoc, m_property->particleRadius);
+    glFuncs->glUniformMatrix4fv(m_projMatrixLoc, 1, false, &_projMat[0][0]);
+    glFuncs->glUniformMatrix4fv(m_mvMatrixLoc, 1, false, &(_modelMat*_viewMat)[0][0]);
+    glFuncs->glUniformMatrix3fv(m_normalMatrixLoc, 1, true, &_normalMat[0][0]);
+    glFuncs->glUniform3fv(m_lightPosLoc, 1, &_lightPos[0]);
+    glFuncs->glUniform3fv(m_camPosLoc, 1, &_camPos[0]);
+    glFuncs->glUniform3fv(m_colourLoc, 1, &m_colour[0]);
+    glFuncs->glUniform1f(m_radLoc, m_property->particleRadius);
 
     m_shaderProg.release();
 
 }
 
 
-SphParticleProperty* ISphParticles::GetProperty()
+SphParticleProperty* BaseSphParticle::GetProperty()
 {
     return m_property.get();
 }
@@ -56,7 +61,7 @@ SphParticleProperty* ISphParticles::GetProperty()
 //---------------------------------------------------------------------------------------------------------------
 
 
-void ISphParticles::Init()
+void BaseSphParticle::Init()
 {
     cudaSetDevice(0);
 
@@ -65,7 +70,7 @@ void ISphParticles::Init()
 
 }
 
-void ISphParticles::InitCUDAMemory()
+void BaseSphParticle::InitCUDAMemory()
 {
 
     // particle properties
@@ -85,13 +90,13 @@ void ISphParticles::InitCUDAMemory()
     cudaMallocManaged(&d_particleHashIdPtr, m_property->numParticles * sizeof(unsigned int));
 }
 
-void ISphParticles::InitGL()
+void BaseSphParticle::InitGL()
 {
     InitShader();
     InitVAO();
 }
 
-void ISphParticles::InitShader()
+void BaseSphParticle::InitShader()
 {
     // Create shaders
     m_shaderProg.addShaderFromSourceFile(QOpenGLShader::Vertex, "../shader/sphereSpriteVert.glsl");
@@ -118,8 +123,10 @@ void ISphParticles::InitShader()
 
 }
 
-void ISphParticles::InitVAO()
+void BaseSphParticle::InitVAO()
 {
+    QOpenGLFunctions *glFuncs = QOpenGLContext::currentContext()->functions();
+
     m_shaderProg.bind();
 
     // Set up the VAO
@@ -131,8 +138,8 @@ void ISphParticles::InitVAO()
     m_posBO.create();
     m_posBO.bind();
     m_posBO.allocate(m_property->numParticles * sizeof(float3));
-    glEnableVertexAttribArray(m_posAttrLoc);
-    glVertexAttribPointer(m_posAttrLoc, 3, GL_FLOAT, GL_FALSE, 1 * sizeof(float3), 0);
+    glFuncs->glEnableVertexAttribArray(m_posAttrLoc);
+    glFuncs->glVertexAttribPointer(m_posAttrLoc, 3, GL_FLOAT, GL_FALSE, 1 * sizeof(float3), 0);
     m_posBO.release();
 
 
@@ -140,8 +147,8 @@ void ISphParticles::InitVAO()
     m_velBO.create();
     m_velBO.bind();
     m_velBO.allocate(m_property->numParticles * sizeof(float3));
-    glEnableVertexAttribArray(m_velAttrLoc);
-    glVertexAttribPointer(m_velAttrLoc, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
+    glFuncs->glEnableVertexAttribArray(m_velAttrLoc);
+    glFuncs->glVertexAttribPointer(m_velAttrLoc, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
     m_velBO.release();
 
 
@@ -149,8 +156,8 @@ void ISphParticles::InitVAO()
     m_denBO.create();
     m_denBO.bind();
     m_denBO.allocate(m_property->numParticles * sizeof(float));
-    glEnableVertexAttribArray(m_denAttrLoc);
-    glVertexAttribPointer(m_denAttrLoc, 1, GL_FLOAT, GL_FALSE, sizeof(GLfloat), 0);
+    glFuncs->glEnableVertexAttribArray(m_denAttrLoc);
+    glFuncs->glVertexAttribPointer(m_denAttrLoc, 1, GL_FLOAT, GL_FALSE, sizeof(GLfloat), 0);
     m_denBO.release();
 
 
@@ -168,13 +175,12 @@ void ISphParticles::InitVAO()
     m_pressBO.release();
 
 
-    glPointSize(5);
     m_vao.release();
 
     m_shaderProg.release();
 }
 
-void ISphParticles::CleanUpCUDAMemory()
+void BaseSphParticle::CleanUpCUDAMemory()
 {
     cudaFree(d_pressurePtr);
     cudaFree(d_pressureForcePtr);
@@ -186,7 +192,7 @@ void ISphParticles::CleanUpCUDAMemory()
     cudaFree(d_cellParticleIdxPtr);
 }
 
-void ISphParticles::CleanUpGL()
+void BaseSphParticle::CleanUpGL()
 {
     cudaGraphicsUnregisterResource(m_posBO_CUDA);
     m_posBO.destroy();
@@ -209,7 +215,7 @@ void ISphParticles::CleanUpGL()
 //---------------------------------------------------------------------------------------------------------------
 
 
-void ISphParticles::MapCudaGLResources()
+void BaseSphParticle::MapCudaGLResources()
 {
     GetPositionPtr();
     GetVelocityPtr();
@@ -218,7 +224,7 @@ void ISphParticles::MapCudaGLResources()
     GetPressurePtr();
 }
 
-void ISphParticles::ReleaseCudaGLResources()
+void BaseSphParticle::ReleaseCudaGLResources()
 {
     ReleasePositionPtr();
     ReleaseVelocityPtr();
@@ -228,7 +234,7 @@ void ISphParticles::ReleaseCudaGLResources()
 }
 
 
-float3 * ISphParticles::GetPositionPtr()
+float3 * BaseSphParticle::GetPositionPtr()
 {
     if(!m_positionMapped)
     {
@@ -242,7 +248,7 @@ float3 * ISphParticles::GetPositionPtr()
     return d_positionPtr;
 }
 
-void ISphParticles::ReleasePositionPtr()
+void BaseSphParticle::ReleasePositionPtr()
 {
     if(m_positionMapped)
     {
@@ -252,7 +258,7 @@ void ISphParticles::ReleasePositionPtr()
 
 }
 
-float3 *ISphParticles::GetVelocityPtr()
+float3 *BaseSphParticle::GetVelocityPtr()
 {
     if(!m_velocityMapped)
     {
@@ -266,7 +272,7 @@ float3 *ISphParticles::GetVelocityPtr()
     return d_velocityPtr;
 }
 
-void ISphParticles::ReleaseVelocityPtr()
+void BaseSphParticle::ReleaseVelocityPtr()
 {
     if(m_velocityMapped)
     {
@@ -276,7 +282,7 @@ void ISphParticles::ReleaseVelocityPtr()
     }
 }
 
-float *ISphParticles::GetDensityPtr()
+float *BaseSphParticle::GetDensityPtr()
 {
     if(!m_densityMapped)
     {
@@ -290,7 +296,7 @@ float *ISphParticles::GetDensityPtr()
     return d_densityPtr;
 }
 
-void ISphParticles::ReleaseDensityPtr()
+void BaseSphParticle::ReleaseDensityPtr()
 {
     if(m_densityMapped)
     {
@@ -299,7 +305,7 @@ void ISphParticles::ReleaseDensityPtr()
     }
 }
 
-float *ISphParticles::GetMassPtr()
+float *BaseSphParticle::GetMassPtr()
 {
     if(!m_massMapped)
     {
@@ -313,7 +319,7 @@ float *ISphParticles::GetMassPtr()
     return d_massPtr;
 }
 
-void ISphParticles::ReleaseMassPtr()
+void BaseSphParticle::ReleaseMassPtr()
 {
     if(m_massMapped)
     {
@@ -323,7 +329,7 @@ void ISphParticles::ReleaseMassPtr()
 }
 
 
-float *ISphParticles::GetPressurePtr()
+float *BaseSphParticle::GetPressurePtr()
 {
     if(!m_pressureMapped)
     {
@@ -337,7 +343,7 @@ float *ISphParticles::GetPressurePtr()
     return d_pressurePtr;
 }
 
-void ISphParticles::ReleasePressurePtr()
+void BaseSphParticle::ReleasePressurePtr()
 {
     if(m_pressureMapped)
     {
@@ -346,81 +352,81 @@ void ISphParticles::ReleasePressurePtr()
     }
 }
 
-float3 *ISphParticles::GetPressureForcePtr()
+float3 *BaseSphParticle::GetPressureForcePtr()
 {
     return d_pressureForcePtr;
 }
 
-void ISphParticles::ReleasePressureForcePtr()
+void BaseSphParticle::ReleasePressureForcePtr()
 {
 
 }
 
-float3 *ISphParticles::GetGravityForcePtr()
+float3 *BaseSphParticle::GetGravityForcePtr()
 {
     return d_gravityForcePtr;
 }
 
-void ISphParticles::ReleaseGravityForcePtr()
+void BaseSphParticle::ReleaseGravityForcePtr()
 {
 
 }
 
-float3 *ISphParticles::GetExternalForcePtr()
+float3 *BaseSphParticle::GetExternalForcePtr()
 {
     return d_externalForcePtr;
 }
 
-void ISphParticles::ReleaseExternalForcePtr()
+void BaseSphParticle::ReleaseExternalForcePtr()
 {
 
 }
 
-float3 *ISphParticles::GetTotalForcePtr()
+float3 *BaseSphParticle::GetTotalForcePtr()
 {
     return d_totalForcePtr;
 }
 
-void ISphParticles::ReleaseTotalForcePtr()
+void BaseSphParticle::ReleaseTotalForcePtr()
 {
 }
 
-unsigned int *ISphParticles::GetParticleHashIdPtr()
+unsigned int *BaseSphParticle::GetParticleHashIdPtr()
 {
     return d_particleHashIdPtr;
 }
 
-void ISphParticles::ReleaseParticleHashIdPtr()
+void BaseSphParticle::ReleaseParticleHashIdPtr()
 {
 
 }
 
-unsigned int *ISphParticles::GetCellOccupancyPtr()
+unsigned int *BaseSphParticle::GetCellOccupancyPtr()
 {
     return d_cellOccupancyPtr;
 }
 
-void ISphParticles::ReleaseCellOccupancyPtr()
+void BaseSphParticle::ReleaseCellOccupancyPtr()
 {
 
 }
 
-unsigned int *ISphParticles::GetCellParticleIdxPtr()
+unsigned int *BaseSphParticle::GetCellParticleIdxPtr()
 {
     return d_cellParticleIdxPtr;
 }
 
-void ISphParticles::ReleaseCellParticleIdxPtr()
+void BaseSphParticle::ReleaseCellParticleIdxPtr()
 {
 
 }
 
-unsigned int ISphParticles::GetMaxCellOcc()
+unsigned int BaseSphParticle::GetMaxCellOcc()
 {
     return m_maxCellOcc;
 }
 
-void ISphParticles::SetMaxCellOcc(const unsigned int _maxCellOcc)
+void BaseSphParticle::SetMaxCellOcc(const unsigned int _maxCellOcc)
 {
     m_maxCellOcc = _maxCellOcc;
 }
