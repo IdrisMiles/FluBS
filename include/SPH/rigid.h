@@ -3,7 +3,7 @@
 
 // sph includes
 #include "SPH/isphparticles.h"
-#include "SPH/Rigid/rigidproperty.h"
+#include "SPH/rigidproperty.h"
 
 // Qt OpenGL includes
 #include <QOpenGLFramebufferObject>

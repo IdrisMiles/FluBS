@@ -26,7 +26,13 @@ public:
     virtual ~RenderMesh();
 
     virtual void LoadMesh(const Mesh &_mesh);
-    virtual void DrawMesh();
+    virtual void Draw();
+    void SetShaderUniforms(const glm::mat4 &_projMat,
+                           const glm::mat4 &_viewMat,
+                           const glm::mat4 &_modelMat,
+                           const glm::mat4 &_normalMat,
+                           const glm::vec3 &_lightPos,
+                           const glm::vec3 &_camPos);
 
     // Setter
     void SetWireframe(const bool &_wireframe);

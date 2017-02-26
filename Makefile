@@ -57,9 +57,9 @@ SOURCES       = src/heterocont.cpp \
 		src/Mesh/meshloader.cpp \
 		src/Mesh/rendermesh.cpp \
 		src/FluidSystem/fluidsystem.cpp \
-		src/SPH/Fluid/fluid.cpp \
-		src/SPH/Rigid/rigid.cpp \
+		src/SPH/fluid.cpp \
 		src/SPH/isphparticles.cpp \
+		src/SPH/rigid.cpp \
 		src/SPH/sph.cpp \
 		src/Widget/fluidpropertywidget.cpp moc/moc_mainwindow.cpp \
 		moc/moc_openglscene.cpp \
@@ -81,8 +81,8 @@ OBJECTS       = cuda_obj/poly6kernel_cuda.o \
 		obj/rendermesh.o \
 		obj/fluidsystem.o \
 		obj/fluid.o \
-		obj/rigid.o \
 		obj/isphparticles.o \
+		obj/rigid.o \
 		obj/sph.o \
 		obj/fluidpropertywidget.o \
 		obj/moc_mainwindow.o \
@@ -248,11 +248,11 @@ DIST          = ../../../Qt5.7.0/5.7/gcc_64/mkspecs/features/spec_pre.prf \
 		include/Mesh/rendermesh.h \
 		include/FluidSystem/fluidsolverproperty.h \
 		include/FluidSystem/fluidsystem.h \
-		include/SPH/Fluid/fluid.h \
-		include/SPH/Fluid/fluidproperty.h \
-		include/SPH/Rigid/rigid.h \
-		include/SPH/Rigid/rigidproperty.h \
+		include/SPH/fluid.h \
+		include/SPH/fluidproperty.h \
 		include/SPH/isphparticles.h \
+		include/SPH/rigid.h \
+		include/SPH/rigidproperty.h \
 		include/SPH/sph.h \
 		include/SPH/sphGPU.h \
 		include/SPH/sphparticlepropeprty.h \
@@ -271,9 +271,9 @@ DIST          = ../../../Qt5.7.0/5.7/gcc_64/mkspecs/features/spec_pre.prf \
 		src/Mesh/meshloader.cpp \
 		src/Mesh/rendermesh.cpp \
 		src/FluidSystem/fluidsystem.cpp \
-		src/SPH/Fluid/fluid.cpp \
-		src/SPH/Rigid/rigid.cpp \
+		src/SPH/fluid.cpp \
 		src/SPH/isphparticles.cpp \
+		src/SPH/rigid.cpp \
 		src/SPH/sph.cpp \
 		src/Widget/fluidpropertywidget.cpp
 QMAKE_TARGET  = Major
@@ -612,8 +612,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents cuda_src/poly6kernel.cu cuda_src/smoothingKernel.cu cuda_src/smoothkernel.cu cuda_src/sphGPU.cu cuda_src/sphGPU_Kernels.cu cuda_src/spikykernel.cu cuda_src/vec_ops.cu $(DISTDIR)/
-	$(COPY_FILE) --parents include/heterocont.h include/mainwindow.h include/openglscene.h include/MeshSampler/barycoordmeshsampler.h include/MeshSampler/meshsampler.h include/MeshSampler/poissondiskpointset.h include/Mesh/mesh.h include/Mesh/meshloader.h include/Mesh/rendermesh.h include/FluidSystem/fluidsolverproperty.h include/FluidSystem/fluidsystem.h include/SPH/Fluid/fluid.h include/SPH/Fluid/fluidproperty.h include/SPH/Rigid/rigid.h include/SPH/Rigid/rigidproperty.h include/SPH/isphparticles.h include/SPH/sph.h include/SPH/sphGPU.h include/SPH/sphparticlepropeprty.h include/Widget/fluidpropertywidget.h cuda_inc/poly6kernel.cuh cuda_inc/smoothingKernel.cuh cuda_inc/smoothkernel.cuh cuda_inc/sphGPU_Kernels.cuh cuda_inc/spikykernel.cuh cuda_inc/vec_ops.cuh $(DISTDIR)/
-	$(COPY_FILE) --parents src/heterocont.cpp src/main.cpp src/mainwindow.cpp src/openglscene.cpp src/MeshSampler/barycoordmeshsampler.cpp src/MeshSampler/poissondiskpointset.cpp src/Mesh/meshloader.cpp src/Mesh/rendermesh.cpp src/FluidSystem/fluidsystem.cpp src/SPH/Fluid/fluid.cpp src/SPH/Rigid/rigid.cpp src/SPH/isphparticles.cpp src/SPH/sph.cpp src/Widget/fluidpropertywidget.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents include/heterocont.h include/mainwindow.h include/openglscene.h include/MeshSampler/barycoordmeshsampler.h include/MeshSampler/meshsampler.h include/MeshSampler/poissondiskpointset.h include/Mesh/mesh.h include/Mesh/meshloader.h include/Mesh/rendermesh.h include/FluidSystem/fluidsolverproperty.h include/FluidSystem/fluidsystem.h include/SPH/fluid.h include/SPH/fluidproperty.h include/SPH/isphparticles.h include/SPH/rigid.h include/SPH/rigidproperty.h include/SPH/sph.h include/SPH/sphGPU.h include/SPH/sphparticlepropeprty.h include/Widget/fluidpropertywidget.h cuda_inc/poly6kernel.cuh cuda_inc/smoothingKernel.cuh cuda_inc/smoothkernel.cuh cuda_inc/sphGPU_Kernels.cuh cuda_inc/spikykernel.cuh cuda_inc/vec_ops.cuh $(DISTDIR)/
+	$(COPY_FILE) --parents src/heterocont.cpp src/main.cpp src/mainwindow.cpp src/openglscene.cpp src/MeshSampler/barycoordmeshsampler.cpp src/MeshSampler/poissondiskpointset.cpp src/Mesh/meshloader.cpp src/Mesh/rendermesh.cpp src/FluidSystem/fluidsystem.cpp src/SPH/fluid.cpp src/SPH/isphparticles.cpp src/SPH/rigid.cpp src/SPH/sph.cpp src/Widget/fluidpropertywidget.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents form/mainwindow.ui $(DISTDIR)/
 
 
@@ -791,7 +791,7 @@ moc/moc_mainwindow.cpp: ../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QMainWindo
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QPushButton \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qpushbutton.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractbutton.h \
-		include/SPH/Fluid/fluidproperty.h \
+		include/SPH/fluidproperty.h \
 		include/SPH/sphparticlepropeprty.h \
 		include/openglscene.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QOpenGLWidget \
@@ -819,20 +819,22 @@ moc/moc_mainwindow.cpp: ../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QMainWindo
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglvertexarrayobject.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLBuffer \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglbuffer.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLTexture \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengltexture.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFunctions \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglfunctions.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QTimer \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qtimer.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qbasictimer.h \
 		include/FluidSystem/fluidsystem.h \
-		include/SPH/Fluid/fluid.h \
+		include/SPH/fluid.h \
 		include/SPH/isphparticles.h \
 		include/FluidSystem/fluidsolverproperty.h \
 		include/Mesh/mesh.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFramebufferObject \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglframebufferobject.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLTexture \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengltexture.h \
-		include/SPH/Rigid/rigid.h \
-		include/SPH/Rigid/rigidproperty.h \
+		include/SPH/rigid.h \
+		include/SPH/rigidproperty.h \
 		include/SPH/sph.h \
 		include/SPH/sphGPU.h \
 		include/Mesh/meshloader.h \
@@ -991,22 +993,24 @@ moc/moc_openglscene.cpp: ../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QOpenGLWi
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglvertexarrayobject.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLBuffer \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglbuffer.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLTexture \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengltexture.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFunctions \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglfunctions.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QTimer \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qtimer.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qbasictimer.h \
 		include/FluidSystem/fluidsystem.h \
-		include/SPH/Fluid/fluid.h \
-		include/SPH/Fluid/fluidproperty.h \
+		include/SPH/fluid.h \
+		include/SPH/fluidproperty.h \
 		include/SPH/sphparticlepropeprty.h \
 		include/SPH/isphparticles.h \
 		include/FluidSystem/fluidsolverproperty.h \
 		include/Mesh/mesh.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFramebufferObject \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglframebufferobject.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLTexture \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengltexture.h \
-		include/SPH/Rigid/rigid.h \
-		include/SPH/Rigid/rigidproperty.h \
+		include/SPH/rigid.h \
+		include/SPH/rigidproperty.h \
 		include/SPH/sph.h \
 		include/SPH/sphGPU.h \
 		include/Mesh/meshloader.h \
@@ -1159,7 +1163,7 @@ moc/moc_fluidpropertywidget.cpp: ../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/Q
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qpushbutton.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractbutton.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qicon.h \
-		include/SPH/Fluid/fluidproperty.h \
+		include/SPH/fluidproperty.h \
 		include/SPH/sphparticlepropeprty.h \
 		include/Widget/fluidpropertywidget.h \
 		../../../Qt5.7.0/5.7/gcc_64/bin/moc
@@ -1307,7 +1311,7 @@ obj/main.o: src/main.cpp include/mainwindow.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QPushButton \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qpushbutton.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractbutton.h \
-		include/SPH/Fluid/fluidproperty.h \
+		include/SPH/fluidproperty.h \
 		include/SPH/sphparticlepropeprty.h \
 		include/openglscene.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QOpenGLWidget \
@@ -1335,20 +1339,22 @@ obj/main.o: src/main.cpp include/mainwindow.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglvertexarrayobject.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLBuffer \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglbuffer.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLTexture \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengltexture.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFunctions \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglfunctions.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QTimer \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qtimer.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qbasictimer.h \
 		include/FluidSystem/fluidsystem.h \
-		include/SPH/Fluid/fluid.h \
+		include/SPH/fluid.h \
 		include/SPH/isphparticles.h \
 		include/FluidSystem/fluidsolverproperty.h \
 		include/Mesh/mesh.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFramebufferObject \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglframebufferobject.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLTexture \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengltexture.h \
-		include/SPH/Rigid/rigid.h \
-		include/SPH/Rigid/rigidproperty.h \
+		include/SPH/rigid.h \
+		include/SPH/rigidproperty.h \
 		include/SPH/sph.h \
 		include/SPH/sphGPU.h \
 		include/Mesh/meshloader.h \
@@ -1517,7 +1523,7 @@ obj/mainwindow.o: src/mainwindow.cpp include/mainwindow.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QPushButton \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qpushbutton.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractbutton.h \
-		include/SPH/Fluid/fluidproperty.h \
+		include/SPH/fluidproperty.h \
 		include/SPH/sphparticlepropeprty.h \
 		include/openglscene.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QOpenGLWidget \
@@ -1545,20 +1551,22 @@ obj/mainwindow.o: src/mainwindow.cpp include/mainwindow.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglvertexarrayobject.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLBuffer \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglbuffer.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLTexture \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengltexture.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFunctions \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglfunctions.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QTimer \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qtimer.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qbasictimer.h \
 		include/FluidSystem/fluidsystem.h \
-		include/SPH/Fluid/fluid.h \
+		include/SPH/fluid.h \
 		include/SPH/isphparticles.h \
 		include/FluidSystem/fluidsolverproperty.h \
 		include/Mesh/mesh.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFramebufferObject \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglframebufferobject.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLTexture \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengltexture.h \
-		include/SPH/Rigid/rigid.h \
-		include/SPH/Rigid/rigidproperty.h \
+		include/SPH/rigid.h \
+		include/SPH/rigidproperty.h \
 		include/SPH/sph.h \
 		include/SPH/sphGPU.h \
 		include/Mesh/meshloader.h \
@@ -1750,22 +1758,24 @@ obj/openglscene.o: src/openglscene.cpp include/openglscene.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglvertexarrayobject.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLBuffer \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglbuffer.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLTexture \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengltexture.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFunctions \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglfunctions.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QTimer \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qtimer.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qbasictimer.h \
 		include/FluidSystem/fluidsystem.h \
-		include/SPH/Fluid/fluid.h \
-		include/SPH/Fluid/fluidproperty.h \
+		include/SPH/fluid.h \
+		include/SPH/fluidproperty.h \
 		include/SPH/sphparticlepropeprty.h \
 		include/SPH/isphparticles.h \
 		include/FluidSystem/fluidsolverproperty.h \
 		include/Mesh/mesh.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFramebufferObject \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglframebufferobject.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLTexture \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengltexture.h \
-		include/SPH/Rigid/rigid.h \
-		include/SPH/Rigid/rigidproperty.h \
+		include/SPH/rigid.h \
+		include/SPH/rigidproperty.h \
 		include/SPH/sph.h \
 		include/SPH/sphGPU.h \
 		include/Mesh/meshloader.h \
@@ -1800,6 +1810,7 @@ obj/openglscene.o: src/openglscene.cpp include/openglscene.h \
 		../../../dev/include/assimp/postprocess.h \
 		include/Mesh/rendermesh.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QMouseEvent \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QImage \
 		include/MeshSampler/meshsampler.h \
 		include/MeshSampler/poissondiskpointset.h \
 		include/MeshSampler/barycoordmeshsampler.h
@@ -1930,98 +1941,19 @@ obj/rendermesh.o: src/Mesh/rendermesh.cpp include/Mesh/rendermesh.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLBuffer \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglbuffer.h \
 		include/Mesh/mesh.h \
-		include/openglscene.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QOpenGLWidget \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qopenglwidget.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QWidget \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qwidget.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qwindowdefs.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qwindowdefs_win.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qpaintdevice.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qpalette.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qcolor.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qrgb.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qrgba64.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qbrush.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qmatrix.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qpolygon.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qregion.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qline.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qtransform.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qpainterpath.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qimage.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qpixelformat.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qpixmap.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qfont.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qfontmetrics.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qfontinfo.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qsizepolicy.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qcursor.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qkeysequence.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qevent.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qurl.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qurlquery.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qfile.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qfiledevice.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qtouchdevice.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QSurfaceFormat \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qsurfaceformat.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLContext \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglcontext.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QScopedPointer \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QSurfaceFormat \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qsurfaceformat.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglversionfunctions.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QTimer \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qtimer.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qbasictimer.h \
-		include/FluidSystem/fluidsystem.h \
-		include/SPH/Fluid/fluid.h \
-		include/SPH/Fluid/fluidproperty.h \
-		include/SPH/sphparticlepropeprty.h \
-		include/SPH/isphparticles.h \
-		include/FluidSystem/fluidsolverproperty.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFramebufferObject \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglframebufferobject.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLTexture \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengltexture.h \
-		include/SPH/Rigid/rigid.h \
-		include/SPH/Rigid/rigidproperty.h \
-		include/SPH/sph.h \
-		include/SPH/sphGPU.h \
-		include/Mesh/meshloader.h \
-		../../../dev/include/assimp/scene.h \
-		../../../dev/include/assimp/types.h \
-		../../../dev/include/assimp/defs.h \
-		../../../dev/include/assimp/vector3.h \
-		../../../dev/include/assimp/Compiler/pushpack1.h \
-		../../../dev/include/assimp/Compiler/poppack1.h \
-		../../../dev/include/assimp/vector2.h \
-		../../../dev/include/assimp/color4.h \
-		../../../dev/include/assimp/matrix3x3.h \
-		../../../dev/include/assimp/matrix4x4.h \
-		../../../dev/include/assimp/quaternion.h \
-		../../../dev/include/assimp/vector2.inl \
-		../../../dev/include/assimp/vector3.inl \
-		../../../dev/include/assimp/color4.inl \
-		../../../dev/include/assimp/quaternion.inl \
-		../../../dev/include/assimp/matrix3x3.inl \
-		../../../dev/include/assimp/matrix4x4.inl \
-		../../../dev/include/assimp/texture.h \
-		../../../dev/include/assimp/mesh.h \
-		../../../dev/include/assimp/light.h \
-		../../../dev/include/assimp/camera.h \
-		../../../dev/include/assimp/material.h \
-		../../../dev/include/assimp/material.inl \
-		../../../dev/include/assimp/anim.h \
-		../../../dev/include/assimp/metadata.h \
-		../../../dev/include/assimp/Compiler/pstdint.h \
-		../../../dev/include/assimp/Importer.hpp \
-		../../../dev/include/assimp/config.h \
-		../../../dev/include/assimp/postprocess.h
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFunctions \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglfunctions.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/rendermesh.o src/Mesh/rendermesh.cpp
 
 obj/fluidsystem.o: src/FluidSystem/fluidsystem.cpp include/FluidSystem/fluidsystem.h \
-		include/SPH/Fluid/fluid.h \
-		include/SPH/Fluid/fluidproperty.h \
+		include/SPH/fluid.h \
+		include/SPH/fluidproperty.h \
 		include/SPH/sphparticlepropeprty.h \
 		include/SPH/isphparticles.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLShaderProgram \
@@ -2127,14 +2059,14 @@ obj/fluidsystem.o: src/FluidSystem/fluidsystem.cpp include/FluidSystem/fluidsyst
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qline.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qpainterpath.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QScopedPointer \
-		include/SPH/Rigid/rigid.h \
-		include/SPH/Rigid/rigidproperty.h \
+		include/SPH/rigid.h \
+		include/SPH/rigidproperty.h \
 		include/SPH/sph.h \
 		include/SPH/sphGPU.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/fluidsystem.o src/FluidSystem/fluidsystem.cpp
 
-obj/fluid.o: src/SPH/Fluid/fluid.cpp include/SPH/Fluid/fluid.h \
-		include/SPH/Fluid/fluidproperty.h \
+obj/fluid.o: src/SPH/fluid.cpp include/SPH/fluid.h \
+		include/SPH/fluidproperty.h \
 		include/SPH/sphparticlepropeprty.h \
 		include/SPH/isphparticles.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLShaderProgram \
@@ -2248,110 +2180,7 @@ obj/fluid.o: src/SPH/Fluid/fluid.cpp include/SPH/Fluid/fluid.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglversionfunctions.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFunctions \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglfunctions.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/fluid.o src/SPH/Fluid/fluid.cpp
-
-obj/rigid.o: src/SPH/Rigid/rigid.cpp include/SPH/Rigid/rigid.h \
-		include/SPH/isphparticles.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLShaderProgram \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglshaderprogram.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qglobal.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qconfig.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qfeatures.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qsystemdetection.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qprocessordetection.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qcompilerdetection.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qtypeinfo.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qtypetraits.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qisenum.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qsysinfo.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qlogging.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qflags.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qatomic.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qbasicatomic.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qatomic_bootstrap.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qgenericatomic.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qatomic_cxx11.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qatomic_msvc.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qglobalstatic.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qmutex.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qnumeric.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qversiontagging.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengl.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qt_windows.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengles2ext.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglext.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qvector2d.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qpoint.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qnamespace.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qmetatype.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qbytearray.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qrefcount.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qarraydata.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qstring.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qchar.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qstringbuilder.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qvarlengtharray.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qcontainerfwd.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qalgorithms.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qobjectdefs.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qobjectdefs_impl.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qvector3d.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qvector4d.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qmatrix4x4.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qquaternion.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qgenericmatrix.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qdebug.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qhash.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qiterator.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qlist.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qhashfunctions.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qpair.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qbytearraylist.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qstringlist.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qregexp.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qstringmatcher.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qmap.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qtextstream.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qiodevice.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qobject.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qcoreevent.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qscopedpointer.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qobject_impl.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qlocale.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qvariant.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qshareddata.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qvector.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qset.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qcontiguouscache.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qsharedpointer.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qsharedpointer_impl.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qdatastream.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qrect.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qmargins.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qsize.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLVertexArrayObject \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglvertexarrayobject.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QObject \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLBuffer \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglbuffer.h \
-		include/SPH/sphparticlepropeprty.h \
-		include/FluidSystem/fluidsolverproperty.h \
-		include/Mesh/mesh.h \
-		include/SPH/Rigid/rigidproperty.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFramebufferObject \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglframebufferobject.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qpaintdevice.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qwindowdefs.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qwindowdefs_win.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFunctions \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglfunctions.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglcontext.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QScopedPointer \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QSurfaceFormat \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qsurfaceformat.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglversionfunctions.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLContext
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/rigid.o src/SPH/Rigid/rigid.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/fluid.o src/SPH/fluid.cpp
 
 obj/isphparticles.o: src/SPH/isphparticles.cpp include/SPH/isphparticles.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLShaderProgram \
@@ -2449,6 +2278,109 @@ obj/isphparticles.o: src/SPH/isphparticles.cpp include/SPH/isphparticles.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglfunctions.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/isphparticles.o src/SPH/isphparticles.cpp
 
+obj/rigid.o: src/SPH/rigid.cpp include/SPH/rigid.h \
+		include/SPH/isphparticles.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLShaderProgram \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglshaderprogram.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qglobal.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qconfig.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qfeatures.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qsystemdetection.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qprocessordetection.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qcompilerdetection.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qtypeinfo.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qtypetraits.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qisenum.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qsysinfo.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qlogging.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qflags.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qatomic.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qbasicatomic.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qatomic_bootstrap.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qgenericatomic.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qatomic_cxx11.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qatomic_msvc.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qglobalstatic.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qmutex.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qnumeric.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qversiontagging.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengl.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qt_windows.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengles2ext.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglext.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qvector2d.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qpoint.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qnamespace.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qmetatype.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qbytearray.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qrefcount.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qarraydata.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qstring.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qchar.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qstringbuilder.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qvarlengtharray.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qcontainerfwd.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qalgorithms.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qobjectdefs.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qobjectdefs_impl.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qvector3d.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qvector4d.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qmatrix4x4.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qquaternion.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qgenericmatrix.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qdebug.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qhash.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qiterator.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qlist.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qhashfunctions.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qpair.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qbytearraylist.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qstringlist.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qregexp.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qstringmatcher.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qmap.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qtextstream.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qiodevice.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qobject.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qcoreevent.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qscopedpointer.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qobject_impl.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qlocale.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qvariant.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qshareddata.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qvector.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qset.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qcontiguouscache.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qsharedpointer.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qsharedpointer_impl.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qdatastream.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qrect.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qmargins.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qsize.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLVertexArrayObject \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglvertexarrayobject.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QObject \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLBuffer \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglbuffer.h \
+		include/SPH/sphparticlepropeprty.h \
+		include/FluidSystem/fluidsolverproperty.h \
+		include/Mesh/mesh.h \
+		include/SPH/rigidproperty.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFramebufferObject \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglframebufferobject.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qpaintdevice.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qwindowdefs.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qwindowdefs_win.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFunctions \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglfunctions.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglcontext.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QScopedPointer \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QSurfaceFormat \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qsurfaceformat.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglversionfunctions.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLContext
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/rigid.o src/SPH/rigid.cpp
+
 obj/sph.o: src/SPH/sph.cpp include/SPH/sph.h \
 		include/SPH/isphparticles.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLShaderProgram \
@@ -2536,8 +2468,8 @@ obj/sph.o: src/SPH/sph.cpp include/SPH/sph.h \
 		include/SPH/sphparticlepropeprty.h \
 		include/FluidSystem/fluidsolverproperty.h \
 		include/Mesh/mesh.h \
-		include/SPH/Fluid/fluid.h \
-		include/SPH/Fluid/fluidproperty.h \
+		include/SPH/fluid.h \
+		include/SPH/fluidproperty.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFramebufferObject \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglframebufferobject.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qpaintdevice.h \
@@ -2557,8 +2489,8 @@ obj/sph.o: src/SPH/sph.cpp include/SPH/sph.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qline.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qpainterpath.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QScopedPointer \
-		include/SPH/Rigid/rigid.h \
-		include/SPH/Rigid/rigidproperty.h \
+		include/SPH/rigid.h \
+		include/SPH/rigidproperty.h \
 		include/SPH/sphGPU.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/sph.o src/SPH/sph.cpp
 
@@ -2678,7 +2610,7 @@ obj/fluidpropertywidget.o: src/Widget/fluidpropertywidget.cpp include/Widget/flu
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qpushbutton.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractbutton.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qicon.h \
-		include/SPH/Fluid/fluidproperty.h \
+		include/SPH/fluidproperty.h \
 		include/SPH/sphparticlepropeprty.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/fluidpropertywidget.o src/Widget/fluidpropertywidget.cpp
 

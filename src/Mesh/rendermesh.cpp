@@ -1,7 +1,11 @@
 #include "Mesh/rendermesh.h"
 #include <iostream>
 #include <algorithm>
-#include "include/openglscene.h"
+
+#include <glm/gtx/transform.hpp>
+
+#include <QOpenGLContext>
+#include <QOpenGLFunctions>
 
 RenderMesh::RenderMesh()
 {
@@ -62,31 +66,44 @@ void RenderMesh::LoadMesh(const Mesh &_mesh)
 
 }
 
-void RenderMesh::DrawMesh()
+void RenderMesh::Draw()
 {
     if(!m_drawMesh || !m_meshLoaded){return;}
 
+    QOpenGLFunctions *glFuncs = QOpenGLContext::currentContext()->functions();
+
     m_shaderProg->bind();
 
-    static float i=0;
-    m_modelMat = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f, 0.1f, 0.1f));
-    m_modelMat = glm::rotate(m_modelMat, i+=0.001f, glm::vec3(1.0f, 0.0f, 0.0f));
-    // update uniform variables
-    glUniformMatrix4fv(m_projMatrixLoc, 1, false, &OpenGLScene::getProjMat()[0][0]);
-    glUniformMatrix4fv(m_mvMatrixLoc, 1, false, &(OpenGLScene::getModelMat()*m_modelMat *OpenGLScene::getViewMat())[0][0]);
-    glm::mat3 normalMatrix =  glm::inverse(glm::mat3(OpenGLScene::getModelMat()*m_modelMat));
-    glUniformMatrix3fv(m_normalMatrixLoc, 1, true, &normalMatrix[0][0]);
-    glUniform3fv(m_colourLoc, 1, &m_colour[0]);
-
-    // draw
     m_meshVAO.bind();
     glPolygonMode(GL_FRONT_AND_BACK, m_wireframe?GL_LINE:GL_FILL);
     glDrawElements(GL_TRIANGLES, m_mesh.tris.size()*3, GL_UNSIGNED_INT, &m_mesh.tris[0]);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     m_meshVAO.release();
 
-
     m_shaderProg->release();
+}
+
+void RenderMesh::SetShaderUniforms(const glm::mat4 &_projMat,
+                              const glm::mat4 &_viewMat,
+                              const glm::mat4 &_modelMat,
+                              const glm::mat4 &_normalMat,
+                              const glm::vec3 &_lightPos,
+                              const glm::vec3 &_camPos)
+{
+    QOpenGLFunctions *glFuncs = QOpenGLContext::currentContext()->functions();
+
+    m_shaderProg->bind();
+
+    static float i=0;
+    m_modelMat = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f, 0.1f, 0.1f));
+    m_modelMat = glm::rotate(m_modelMat, i+=0.001f, glm::vec3(1.0f, 0.0f, 0.0f));
+    glFuncs->glUniformMatrix4fv(m_projMatrixLoc, 1, false, &_projMat[0][0]);
+    glFuncs->glUniformMatrix4fv(m_mvMatrixLoc, 1, false, &(_modelMat*m_modelMat*_viewMat)[0][0]);
+    glFuncs->glUniformMatrix3fv(m_normalMatrixLoc, 1, true, &_normalMat[0][0]);
+    glFuncs->glUniform3fv(m_lightPosLoc, 1, &_lightPos[0]);
+    glFuncs->glUniform3fv(m_colourLoc, 1, &m_colour[0]);
+    m_shaderProg->release();
+
 }
 
 
@@ -109,6 +126,8 @@ void RenderMesh::SetColour(const glm::vec3 &_colour)
 
 void RenderMesh::CreateShader()
 {
+    QOpenGLFunctions *glFuncs = QOpenGLContext::currentContext()->functions();
+
     // setup shaders
     m_shaderProg = new QOpenGLShaderProgram;
     m_shaderProg->addShaderFromSourceFile(QOpenGLShader::Vertex, "../shader/vert.glsl");
@@ -125,16 +144,15 @@ void RenderMesh::CreateShader()
     m_normalMatrixLoc = m_shaderProg->uniformLocation("normalMatrix");
     m_lightPosLoc = m_shaderProg->uniformLocation("lightPos");
     m_colourLoc = m_shaderProg->uniformLocation("colour");
-
-    // Light position is fixed.
-    glUniform3fv(m_lightPosLoc, 1, &OpenGLScene::getLightPos()[0]);
 }
 
 void RenderMesh::CreateVAOs()
 {
     if(m_shaderProg->bind())
     {
-        glUniform3fv(m_colourLoc, 1, &m_colour[0]);
+        QOpenGLFunctions *glFuncs = QOpenGLContext::currentContext()->functions();
+
+        glFuncs->glUniform3fv(m_colourLoc, 1, &m_colour[0]);
 
         m_meshVAO.create();
         m_meshVAO.bind();
@@ -147,16 +165,16 @@ void RenderMesh::CreateVAOs()
         // Setup our vertex buffer object.
         m_meshVBO.create();
         m_meshVBO.bind();
-        glEnableVertexAttribArray( 0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 1 * sizeof(glm::vec3), 0);
+        glFuncs->glEnableVertexAttribArray( 0);
+        glFuncs->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 1 * sizeof(glm::vec3), 0);
         m_meshVBO.release();
 
 
         // Setup our normals buffer object.
         m_meshNBO.create();
         m_meshNBO.bind();
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 1 * sizeof(glm::vec3), 0);
+        glFuncs->glEnableVertexAttribArray(1);
+        glFuncs->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 1 * sizeof(glm::vec3), 0);
         m_meshNBO.release();
 
 
@@ -182,9 +200,11 @@ void RenderMesh::UpdateVAOs()
 {
     if(m_shaderProg->bind())
     {
+        QOpenGLFunctions *glFuncs = QOpenGLContext::currentContext()->functions();
+
         m_modelMatrixLoc = m_shaderProg->attributeLocation("modelMatrix");
         m_colourLoc = m_shaderProg->uniformLocation("colour");
-        glUniform3fv(m_colourLoc, 1, &m_colour[0]);
+        glFuncs->glUniform3fv(m_colourLoc, 1, &m_colour[0]);
 
         m_meshVAO.bind();
 
@@ -195,16 +215,16 @@ void RenderMesh::UpdateVAOs()
         // Setup our vertex buffer object.
         m_meshVBO.bind();
         m_meshVBO.allocate(&m_mesh.verts[0], m_mesh.verts.size() * sizeof(glm::vec3));
-        glEnableVertexAttribArray( 0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 1 * sizeof(glm::vec3), 0);
+        glFuncs->glEnableVertexAttribArray( 0);
+        glFuncs->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 1 * sizeof(glm::vec3), 0);
         m_meshVBO.release();
 
 
         // Setup our normals buffer object.
         m_meshNBO.bind();
         m_meshNBO.allocate(&m_mesh.norms[0], m_mesh.norms.size() * sizeof(glm::vec3));
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 1 * sizeof(glm::vec3), 0);
+        glFuncs->glEnableVertexAttribArray(1);
+        glFuncs->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 1 * sizeof(glm::vec3), 0);
         m_meshNBO.release();
 
 

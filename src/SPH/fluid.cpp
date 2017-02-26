@@ -1,4 +1,4 @@
-#include "SPH/Fluid/fluid.h"
+#include "SPH/fluid.h"
 #include <math.h>
 #include <sys/time.h>
 #include <glm/gtx/transform.hpp>
@@ -68,7 +68,20 @@ void Fluid::Draw()
     m_depthFBO->release();
     m_depthShader.release();
 
+
     // Smooth depth
+    m_smoothDepthShader.bind();
+    m_smoothDepthFBO->bind();
+    glFuncs->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    m_fluidShader.setUniformValue("uDepthTex", 0);
+    glFuncs->glActiveTexture(GL_TEXTURE0);
+    glFuncs->glBindTexture(GL_TEXTURE_2D, m_depthFBO->texture());
+    m_quadVAO.bind();
+    glFuncs->glDrawArrays(GL_TRIANGLES, 0, 6);
+    m_quadVAO.release();
+    m_smoothDepthFBO->release();
+    m_smoothDepthShader.release();
+
 
     // Render thickness
     m_thicknessShader.bind();
@@ -84,20 +97,34 @@ void Fluid::Draw()
     m_thicknessShader.release();
 
 
-
-
-    // Test render depth buffer
+    // Render Fluid
     m_fluidShader.bind();
-    m_quadVAO.bind();
-    glFuncs->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glFuncs->glEnable(GL_DEPTH_TEST);
     glFuncs->glDisable(GL_BLEND);
-    m_fluidShader.setUniformValue("uTex", 0);
+    m_fluidShader.setUniformValue("uDepthTex", 0);
+    m_fluidShader.setUniformValue("uThicknessTex", 1);
+    m_fluidShader.setUniformValue("uCubeMapTex", 2);
+
     glFuncs->glActiveTexture(GL_TEXTURE0);
+    glFuncs->glBindTexture(GL_TEXTURE_2D, m_smoothDepthFBO->texture());
+
+    glFuncs->glActiveTexture(GL_TEXTURE0+1);
     glFuncs->glBindTexture(GL_TEXTURE_2D, m_thicknessFBO->texture());
+
+    glFuncs->glActiveTexture(GL_TEXTURE0+2);
+    glFuncs->glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubeMapTex->textureId());
+
+    m_quadVAO.bind();
     glFuncs->glDrawArrays(GL_TRIANGLES, 0, 6);
     m_fluidShader.release();
 
+
+    // Draw Sph Particles
+//    m_shaderProg.bind();
+//    m_vao.bind();
+//    glFuncs->glDrawArrays(GL_POINTS, 0, m_fluidProperty->numParticles);
+//    m_vao.release();
+//    m_shaderProg.release();
 
 }
 
@@ -119,14 +146,14 @@ void Fluid::SetShaderUniforms(const glm::mat4 &_projMat,
     glFuncs->glUniform1f(m_radLoc, m_fluidProperty->particleRadius);
     m_depthShader.release();
 
-//    m_depthSmoothShader.bind();
-//    glFuncs->glUniformMatrix4fv(m_projMatrixLoc, 1, false, &_projMat[0][0]);
-//    glFuncs->glUniformMatrix4fv(m_mvMatrixLoc, 1, false, &(_modelMat*_viewMat)[0][0]);
-//    glFuncs->glUniformMatrix3fv(m_normalMatrixLoc, 1, true, &_normalMat[0][0]);
-//    glFuncs->glUniform3fv(m_lightPosLoc, 1, &_lightPos[0]);
-//    glFuncs->glUniform3fv(m_camPosLoc, 1, &_camPos[0]);
-//    glFuncs->glUniform1f(m_radLoc, m_fluidProperty->particleRadius);
-//    m_depthSmoothShader.release();
+    m_smoothDepthShader.bind();
+    glFuncs->glUniformMatrix4fv(m_projMatrixLoc, 1, false, &_projMat[0][0]);
+    glFuncs->glUniformMatrix4fv(m_mvMatrixLoc, 1, false, &(_modelMat*_viewMat)[0][0]);
+    glFuncs->glUniformMatrix3fv(m_normalMatrixLoc, 1, true, &_normalMat[0][0]);
+    glFuncs->glUniform3fv(m_lightPosLoc, 1, &_lightPos[0]);
+    glFuncs->glUniform3fv(m_camPosLoc, 1, &_camPos[0]);
+    glFuncs->glUniform1f(m_radLoc, m_fluidProperty->particleRadius);
+    m_smoothDepthShader.release();
 
     m_thicknessShader.bind();
     glFuncs->glUniformMatrix4fv(m_projMatrixLoc, 1, false, &_projMat[0][0]);
@@ -137,12 +164,31 @@ void Fluid::SetShaderUniforms(const glm::mat4 &_projMat,
     glFuncs->glUniform1f(m_radLoc, m_fluidProperty->particleRadius);
     m_thicknessShader.release();
 
+    m_fluidShader.bind();
+    glFuncs->glUniform3f(m_fluidShader.uniformLocation("uCameraPos"), _camPos.x, _camPos.y, _camPos.z);
+    m_fluidShader.release();
+
+    m_shaderProg.bind();
+    glFuncs->glUniformMatrix4fv(m_projMatrixLoc, 1, false, &_projMat[0][0]);
+    glFuncs->glUniformMatrix4fv(m_mvMatrixLoc, 1, false, &(_modelMat*_viewMat)[0][0]);
+    glFuncs->glUniformMatrix3fv(m_normalMatrixLoc, 1, true, &_normalMat[0][0]);
+    glFuncs->glUniform3fv(m_lightPosLoc, 1, &_lightPos[0]);
+    glFuncs->glUniform3fv(m_camPosLoc, 1, &_camPos[0]);
+    glFuncs->glUniform1f(m_radLoc, m_fluidProperty->particleRadius);
+    m_shaderProg.release();
+
 }
 
 void Fluid::SetFrameSize(int _w, int _h)
 {
     m_width=_w; m_height=_h;
     InitFBOs();
+}
+
+
+void Fluid::SetCubeMap(std::shared_ptr<QOpenGLTexture> _cubemap)
+{
+    m_cubeMapTex = _cubemap;
 }
 
 //------------------------------------------------------------------------
@@ -205,7 +251,6 @@ void Fluid::InitVAO()
 {
     QOpenGLFunctions *glFuncs = QOpenGLContext::currentContext()->functions();
 
-    m_depthShader.bind();
 
     // Set up the VAO
     m_vao.create();
@@ -249,8 +294,6 @@ void Fluid::InitVAO()
     m_pressBO.release();
 
     m_vao.release();
-
-    m_depthShader.release();
 
 
 
@@ -353,8 +396,8 @@ void Fluid::CreateThicknessShader()
 
 void Fluid::CreateFluidShader()
 {
-    m_fluidShader.addShaderFromSourceFile(QOpenGLShader::Vertex, "../shader/Fluid/blitTextureVert.glsl");
-    m_fluidShader.addShaderFromSourceFile(QOpenGLShader::Fragment, "../shader/Fluid/blitTextureFrag.glsl");
+    m_fluidShader.addShaderFromSourceFile(QOpenGLShader::Vertex, "../shader/Fluid/fluidVert.glsl");
+    m_fluidShader.addShaderFromSourceFile(QOpenGLShader::Fragment, "../shader/Fluid/fluidFrag.glsl");
     m_fluidShader.link();
     m_fluidShader.bind();
     m_fluidShader.release();
@@ -366,6 +409,16 @@ void Fluid::CreateDefaultParticleShader()
     m_shaderProg.addShaderFromSourceFile(QOpenGLShader::Geometry, "../shader/Fluid/sphParticleGeo.glsl");
     m_shaderProg.addShaderFromSourceFile(QOpenGLShader::Fragment, "../shader/Fluid/sphParticleFrag.glsl");
     m_shaderProg.link();
+
+    m_shaderProg.bind();
+    m_projMatrixLoc = m_shaderProg.uniformLocation("uProjMatrix");
+    m_mvMatrixLoc = m_shaderProg.uniformLocation("uMVMatrix");
+    m_normalMatrixLoc = m_shaderProg.uniformLocation("uNormalMatrix");
+    m_lightPosLoc = m_shaderProg.uniformLocation("uLightPos");
+    m_posAttrLoc = m_shaderProg.attributeLocation("vPos");
+    m_radLoc = m_shaderProg.uniformLocation("uRad");
+    m_camPosLoc = m_shaderProg.uniformLocation("uCameraPos");
+    m_shaderProg.release();
 }
 
 //------------------------------------------------------------------------

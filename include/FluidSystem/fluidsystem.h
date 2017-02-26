@@ -1,9 +1,9 @@
 #ifndef FLUIDSYSTEM_H
 #define FLUIDSYSTEM_H
 
-#include "SPH/Fluid/fluid.h"
-#include "SPH/Rigid/rigid.h"
-#include "SPH/Fluid/fluidproperty.h"
+#include "SPH/fluid.h"
+#include "SPH/rigid.h"
+#include "SPH/fluidproperty.h"
 #include "FluidSystem/fluidsolverproperty.h"
 #include "SPH/sph.h"
 

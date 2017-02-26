@@ -9,5 +9,12 @@ out vec4 fragColor;
 
 void main()
 {
-    fragColor.rgb = texture(uTex, fUV.xy).rgb;
+    vec4 colour = texture(uTex, fUV.xy);
+
+    if(colour.a < 0.1f)
+    {
+        discard;
+    }
+
+    fragColor.rgb = colour.rgb;
 }

@@ -2,10 +2,10 @@
 #define SPH_H
 
 #include "SPH/isphparticles.h"
-#include "SPH/Fluid/fluid.h"
-#include "SPH/Rigid/rigid.h"
+#include "SPH/fluid.h"
+#include "SPH/rigid.h"
 #include "SPH/sphGPU.h"
-#include "SPH/Fluid/fluidproperty.h"
+#include "SPH/fluidproperty.h"
 #include "FluidSystem/fluidsolverproperty.h"
 
 namespace sph

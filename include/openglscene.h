@@ -9,13 +9,14 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLBuffer>
+#include <QOpenGLTexture>
+#include <QOpenGLFunctions>
 #include <QTimer>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 
 #include "FluidSystem/fluidsystem.h"
-#include "SPH/Fluid/fluid.h"
 
 #include "Mesh/meshloader.h"
 #include "Mesh/rendermesh.h"
@@ -33,10 +34,6 @@ public:
     QSize minimumSizeHint() const Q_DECL_OVERRIDE;
     QSize sizeHint() const Q_DECL_OVERRIDE;
 
-    static glm::mat4 getProjMat(){return m_projMat;}
-    static glm::mat4 getViewMat(){return m_viewMat;}
-    static glm::mat4 getModelMat(){return m_modelMat;}
-    static glm::vec3 getLightPos(){return m_lightPos;}
 
 public slots:
     void setXRotation(int angle);
@@ -67,18 +64,35 @@ protected:
 
 private:
 
+    void DrawSkybox();
+    void CreateSkybox();
+    QOpenGLShaderProgram m_skyboxShader;
+    std::shared_ptr<QOpenGLTexture> m_skyboxTex;
+    QOpenGLVertexArrayObject m_skyboxVAO;
+    QOpenGLBuffer m_skyboxVBO;
+
+    /// @brief Attribute to control the x rotation of the scene
     int m_xRot;
+
+    /// @brief Attribute to control the y rotation of the scene
     int m_yRot;
+
+    /// @brief Attribute to control the z rotation of the scene
     int m_zRot;
+
+    /// @brief Attribute to control the x translation of the scene
     int m_xDis;
+
+    /// @brief Attribute to control the y translation of the scene
     int m_yDis;
+
+    /// @brief Attribute to control the z translation of the scene
     int m_zDis;
 
-
-    static glm::mat4 m_projMat;
-    static glm::mat4 m_viewMat;
-    static glm::mat4 m_modelMat;
-    static glm::vec3 m_lightPos;
+    glm::mat4 m_projMat;
+    glm::mat4 m_viewMat;
+    glm::mat4 m_modelMat;
+    glm::vec3 m_lightPos;
     QPoint m_lastPos;
 
 

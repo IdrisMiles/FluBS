@@ -1,4 +1,4 @@
-#include "SPH/Rigid/rigid.h"
+#include "SPH/rigid.h"
 #include <QOpenGLFunctions>
 #include <QOpenGLContext>
 
