@@ -79,6 +79,7 @@ protected:
     std::shared_ptr<QOpenGLFramebufferObject> m_depthFBO;
     std::shared_ptr<QOpenGLFramebufferObject> m_smoothDepthFBO;
     std::shared_ptr<QOpenGLFramebufferObject> m_thicknessFBO;
+    std::shared_ptr<QOpenGLFramebufferObject> m_smoothThicknessFBO;
 
     QOpenGLShaderProgram m_depthShader;
     QOpenGLShaderProgram m_smoothDepthShader;

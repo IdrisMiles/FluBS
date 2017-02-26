@@ -54,8 +54,9 @@ Fluid::~Fluid()
 
 void Fluid::Draw()
 {
-
     QOpenGLFunctions *glFuncs = QOpenGLContext::currentContext()->functions();
+
+
     // Render Depth
     m_depthShader.bind();
     m_depthFBO->bind();
@@ -93,27 +94,23 @@ void Fluid::Draw()
     m_vao.bind();
     glFuncs->glDrawArrays(GL_POINTS, 0, m_fluidProperty->numParticles);
     m_vao.release();
+    glFuncs->glDisable(GL_BLEND);
+    glFuncs->glEnable(GL_DEPTH_TEST);
     m_thicknessFBO->release();
     m_thicknessShader.release();
 
 
     // Render Fluid
     m_fluidShader.bind();
-    glFuncs->glEnable(GL_DEPTH_TEST);
-    glFuncs->glDisable(GL_BLEND);
     m_fluidShader.setUniformValue("uDepthTex", 0);
-    m_fluidShader.setUniformValue("uThicknessTex", 1);
-    m_fluidShader.setUniformValue("uCubeMapTex", 2);
-
     glFuncs->glActiveTexture(GL_TEXTURE0);
     glFuncs->glBindTexture(GL_TEXTURE_2D, m_smoothDepthFBO->texture());
-
+    m_fluidShader.setUniformValue("uThicknessTex", 1);
     glFuncs->glActiveTexture(GL_TEXTURE0+1);
     glFuncs->glBindTexture(GL_TEXTURE_2D, m_thicknessFBO->texture());
-
+    m_fluidShader.setUniformValue("uCubeMapTex", 2);
     glFuncs->glActiveTexture(GL_TEXTURE0+2);
     glFuncs->glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubeMapTex->textureId());
-
     m_quadVAO.bind();
     glFuncs->glDrawArrays(GL_TRIANGLES, 0, 6);
     m_fluidShader.release();
@@ -125,7 +122,6 @@ void Fluid::Draw()
 //    glFuncs->glDrawArrays(GL_POINTS, 0, m_fluidProperty->numParticles);
 //    m_vao.release();
 //    m_shaderProg.release();
-
 }
 
 void Fluid::SetShaderUniforms(const glm::mat4 &_projMat,
@@ -138,30 +134,20 @@ void Fluid::SetShaderUniforms(const glm::mat4 &_projMat,
     QOpenGLFunctions *glFuncs = QOpenGLContext::currentContext()->functions();
 
     m_depthShader.bind();
-    glFuncs->glUniformMatrix4fv(m_projMatrixLoc, 1, false, &_projMat[0][0]);
-    glFuncs->glUniformMatrix4fv(m_mvMatrixLoc, 1, false, &(_modelMat*_viewMat)[0][0]);
-    glFuncs->glUniformMatrix3fv(m_normalMatrixLoc, 1, true, &_normalMat[0][0]);
-    glFuncs->glUniform3fv(m_lightPosLoc, 1, &_lightPos[0]);
-    glFuncs->glUniform3fv(m_camPosLoc, 1, &_camPos[0]);
-    glFuncs->glUniform1f(m_radLoc, m_fluidProperty->particleRadius);
+    glFuncs->glUniformMatrix4fv(m_depthShader.uniformLocation("uProjMatrix"), 1, false, &_projMat[0][0]);
+    glFuncs->glUniformMatrix4fv(m_depthShader.uniformLocation("uMVMatrix"), 1, false, &(_modelMat*_viewMat)[0][0]);
+    glFuncs->glUniform3fv(m_depthShader.uniformLocation("uCameraPos"), 1, &_camPos[0]);
+    glFuncs->glUniform1f(m_depthShader.uniformLocation("uRad"), m_fluidProperty->particleRadius);
     m_depthShader.release();
 
     m_smoothDepthShader.bind();
-    glFuncs->glUniformMatrix4fv(m_projMatrixLoc, 1, false, &_projMat[0][0]);
-    glFuncs->glUniformMatrix4fv(m_mvMatrixLoc, 1, false, &(_modelMat*_viewMat)[0][0]);
-    glFuncs->glUniformMatrix3fv(m_normalMatrixLoc, 1, true, &_normalMat[0][0]);
-    glFuncs->glUniform3fv(m_lightPosLoc, 1, &_lightPos[0]);
-    glFuncs->glUniform3fv(m_camPosLoc, 1, &_camPos[0]);
-    glFuncs->glUniform1f(m_radLoc, m_fluidProperty->particleRadius);
     m_smoothDepthShader.release();
 
     m_thicknessShader.bind();
-    glFuncs->glUniformMatrix4fv(m_projMatrixLoc, 1, false, &_projMat[0][0]);
-    glFuncs->glUniformMatrix4fv(m_mvMatrixLoc, 1, false, &(_modelMat*_viewMat)[0][0]);
-    glFuncs->glUniformMatrix3fv(m_normalMatrixLoc, 1, true, &_normalMat[0][0]);
-    glFuncs->glUniform3fv(m_lightPosLoc, 1, &_lightPos[0]);
-    glFuncs->glUniform3fv(m_camPosLoc, 1, &_camPos[0]);
-    glFuncs->glUniform1f(m_radLoc, m_fluidProperty->particleRadius);
+    glFuncs->glUniformMatrix4fv(m_thicknessShader.uniformLocation("uProjMatrix"), 1, false, &_projMat[0][0]);
+    glFuncs->glUniformMatrix4fv(m_thicknessShader.uniformLocation("uMVMatrix"), 1, false, &(_modelMat*_viewMat)[0][0]);
+    glFuncs->glUniform3fv(m_thicknessShader.uniformLocation("uCameraPos"), 1, &_camPos[0]);
+    glFuncs->glUniform1f(m_thicknessShader.uniformLocation("uRad"), m_fluidProperty->particleRadius);
     m_thicknessShader.release();
 
     m_fluidShader.bind();
@@ -169,12 +155,13 @@ void Fluid::SetShaderUniforms(const glm::mat4 &_projMat,
     m_fluidShader.release();
 
     m_shaderProg.bind();
-    glFuncs->glUniformMatrix4fv(m_projMatrixLoc, 1, false, &_projMat[0][0]);
-    glFuncs->glUniformMatrix4fv(m_mvMatrixLoc, 1, false, &(_modelMat*_viewMat)[0][0]);
-    glFuncs->glUniformMatrix3fv(m_normalMatrixLoc, 1, true, &_normalMat[0][0]);
-    glFuncs->glUniform3fv(m_lightPosLoc, 1, &_lightPos[0]);
-    glFuncs->glUniform3fv(m_camPosLoc, 1, &_camPos[0]);
-    glFuncs->glUniform1f(m_radLoc, m_fluidProperty->particleRadius);
+    glFuncs->glUniformMatrix4fv(m_shaderProg.uniformLocation("uProjMatrix"), 1, false, &_projMat[0][0]);
+    glFuncs->glUniformMatrix4fv(m_shaderProg.uniformLocation("uMVMatrix"), 1, false, &(_modelMat*_viewMat)[0][0]);
+    glFuncs->glUniform3fv(m_shaderProg.uniformLocation("uCameraPos"), 1, &_camPos[0]);
+    glFuncs->glUniform1f(m_shaderProg.uniformLocation("uRad"), m_fluidProperty->particleRadius);
+    glFuncs->glUniform3fv(m_shaderProg.uniformLocation("uLightPos"), 1, &_lightPos[0]);
+    glFuncs->glUniform3fv(m_shaderProg.uniformLocation("uColour"), 1, &m_colour[0]);
+    glFuncs->glUniform1f(m_shaderProg.uniformLocation("uRestDen"), m_fluidProperty->restDensity);
     m_shaderProg.release();
 
 }
@@ -270,6 +257,8 @@ void Fluid::InitVAO()
     m_velBO.create();
     m_velBO.bind();
     m_velBO.allocate(m_fluidProperty->numParticles * sizeof(float3));
+    glFuncs->glEnableVertexAttribArray(m_velAttrLoc);
+    glFuncs->glVertexAttribPointer(m_velAttrLoc, 3, GL_FLOAT, GL_FALSE, 1 * sizeof(float3), 0);
     m_velBO.release();
 
 
@@ -277,6 +266,8 @@ void Fluid::InitVAO()
     m_denBO.create();
     m_denBO.bind();
     m_denBO.allocate(m_fluidProperty->numParticles * sizeof(float));
+    glFuncs->glEnableVertexAttribArray(m_denAttrLoc);
+    glFuncs->glVertexAttribPointer(m_denAttrLoc, 1, GL_FLOAT, GL_FALSE, 1 * sizeof(float), 0);
     m_denBO.release();
 
 
@@ -345,6 +336,7 @@ void Fluid::InitFBOs()
     m_depthFBO.reset(new QOpenGLFramebufferObject(m_width, m_height, fboFormat));
     m_smoothDepthFBO.reset(new QOpenGLFramebufferObject(m_width, m_height, fboFormat));
     m_thicknessFBO.reset(new QOpenGLFramebufferObject(m_width, m_height, fboFormat));
+    m_smoothThicknessFBO.reset(new QOpenGLFramebufferObject(m_width, m_height, fboFormat));
 }
 
 void Fluid::InitFluidAsMesh()
@@ -367,15 +359,7 @@ void Fluid::CreateDepthShader()
 
     // Get shader uniform and sttribute locations
     m_depthShader.bind();
-
-    m_projMatrixLoc = m_depthShader.uniformLocation("uProjMatrix");
-    m_mvMatrixLoc = m_depthShader.uniformLocation("uMVMatrix");
-    m_normalMatrixLoc = m_depthShader.uniformLocation("uNormalMatrix");
-    m_lightPosLoc = m_depthShader.uniformLocation("uLightPos");
     m_posAttrLoc = m_depthShader.attributeLocation("vPos");
-    m_radLoc = m_depthShader.uniformLocation("uRad");
-    m_camPosLoc = m_depthShader.uniformLocation("uCameraPos");
-
     m_depthShader.release();
 }
 
@@ -411,13 +395,9 @@ void Fluid::CreateDefaultParticleShader()
     m_shaderProg.link();
 
     m_shaderProg.bind();
-    m_projMatrixLoc = m_shaderProg.uniformLocation("uProjMatrix");
-    m_mvMatrixLoc = m_shaderProg.uniformLocation("uMVMatrix");
-    m_normalMatrixLoc = m_shaderProg.uniformLocation("uNormalMatrix");
-    m_lightPosLoc = m_shaderProg.uniformLocation("uLightPos");
     m_posAttrLoc = m_shaderProg.attributeLocation("vPos");
-    m_radLoc = m_shaderProg.uniformLocation("uRad");
-    m_camPosLoc = m_shaderProg.uniformLocation("uCameraPos");
+    m_velAttrLoc = m_shaderProg.attributeLocation("vVel");
+    m_denAttrLoc = m_shaderProg.attributeLocation("vDen");
     m_shaderProg.release();
 }
 
@@ -463,6 +443,7 @@ void Fluid::CleanUpGL()
     m_depthFBO = nullptr;
     m_smoothDepthFBO = nullptr;
     m_thicknessFBO = nullptr;
+    m_smoothThicknessFBO = nullptr;
 
     m_shaderProg.destroyed();
     m_depthShader.destroyed();

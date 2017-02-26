@@ -19,17 +19,34 @@ void main()
 
     d += depth.rgb;
 
+    vec3 neighDepth;
+    float range = 0.9;
     int numIterations = 20;
     for(int i=0; i<numIterations; i++)
     {
-        d += texture(uDepthTex, fUV.xy + vec2(h, 0.0f)).rgb;
-        d += texture(uDepthTex, fUV.xy + vec2(-h, 0.0f)).rgb;
-        d += texture(uDepthTex, fUV.xy + vec2(0.0f, h)).rgb;
-        d += texture(uDepthTex, fUV.xy + vec2(0.0f, -h)).rgb;
-        d += texture(uDepthTex, fUV.xy + vec2(h, h)).rgb;
-        d += texture(uDepthTex, fUV.xy + vec2(-h, h)).rgb;
-        d += texture(uDepthTex, fUV.xy + vec2(h, -h)).rgb;
-        d += texture(uDepthTex, fUV.xy + vec2(-h, -h)).rgb;
+        neighDepth = texture(uDepthTex, fUV.xy + vec2(h, 0.0f)).rgb;
+        d += abs(neighDepth.r - depth.r) < range ? neighDepth : depth.rgb;
+
+        neighDepth = texture(uDepthTex, fUV.xy + vec2(-h, 0.0f)).rgb;
+        d += abs(neighDepth.r - depth.r) < range ? neighDepth : depth.rgb;
+
+        neighDepth = texture(uDepthTex, fUV.xy + vec2(0.0f, h)).rgb;
+        d += abs(neighDepth.r - depth.r) < range ? neighDepth : depth.rgb;
+
+        neighDepth = texture(uDepthTex, fUV.xy + vec2(0.0f, -h)).rgb;
+        d += abs(neighDepth.r - depth.r) < range ? neighDepth : depth.rgb;
+
+        neighDepth = texture(uDepthTex, fUV.xy + vec2(h, h)).rgb;
+        d += abs(neighDepth.r - depth.r) < range ? neighDepth : depth.rgb;
+
+        neighDepth = texture(uDepthTex, fUV.xy + vec2(-h, h)).rgb;
+        d += abs(neighDepth.r - depth.r) < range ? neighDepth : depth.rgb;
+
+        neighDepth = texture(uDepthTex, fUV.xy + vec2(h, -h)).rgb;
+        d += abs(neighDepth.r - depth.r) < range ? neighDepth : depth.rgb;
+
+        neighDepth = texture(uDepthTex, fUV.xy + vec2(-h, -h)).rgb;
+        d += abs(neighDepth.r - depth.r) < range ? neighDepth : depth.rgb;
         h*=1.05;
     }
 

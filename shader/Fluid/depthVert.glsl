@@ -1,6 +1,6 @@
 #version 430
 
-in vec3 vPos;
+layout(location = 0) in vec3 vPos;
 
 void main()
 {

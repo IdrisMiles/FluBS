@@ -19,6 +19,6 @@ void main()
         discard;
     }
 
-//    oDepth = vec4(vec3(1.0f / (far+near)), 1.0f);
+//    oDepth = vec4(vec3(0.1f / (far+near)), 1.0f);
     oDepth = vec4(vec3(1.0f/far+near), 1.0f);
 }

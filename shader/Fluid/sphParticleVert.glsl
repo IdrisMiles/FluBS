@@ -1,15 +1,11 @@
 #version 330
-in vec3 vPos;
-in vec3 vVel;
-in float vDen;
+layout(location = 0) in vec3 vPos;
+layout(location = 1) in vec3 vVel;
+layout(location = 2) in float vDen;
 
 out vec3 gPos;
 out vec3 gVel;
 out float gDen;
-
-uniform mat4 uProjMatrix;
-uniform mat4 uMVMatrix;
-uniform mat3 uNormalMatrix;
 
 
 void main()

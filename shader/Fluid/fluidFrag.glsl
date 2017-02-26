@@ -8,7 +8,20 @@ uniform sampler2D uDepthTex;
 uniform sampler2D uThicknessTex;
 uniform samplerCube uCubeMapTex;
 
+uniform mat4 uInvProjMatrix;
+uniform mat4 uNormalMatrix;
+
 out vec4 fragColor;
+
+
+//-----------------------------------------------------------------------------------------------------------------
+
+vec3 UvToEye(vec2 _uv, float _depth)
+{
+    return vec3(0.0f, 0.0f, _depth);
+}
+
+//-----------------------------------------------------------------------------------------------------------------
 
 void main()
 {
@@ -47,7 +60,6 @@ void main()
     vec3 refractColour = texture(uCubeMapTex, refractRay).rgb;
     float attenuation = thickness.r;
     refractColour *= (1.0f - attenuation);
-
 
 
     // final colour
