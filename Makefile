@@ -57,6 +57,7 @@ SOURCES       = src/heterocont.cpp \
 		src/Mesh/meshloader.cpp \
 		src/Mesh/rendermesh.cpp \
 		src/FluidSystem/fluidsystem.cpp \
+		src/SPH/algae.cpp \
 		src/SPH/fluid.cpp \
 		src/SPH/isphparticles.cpp \
 		src/SPH/rigid.cpp \
@@ -80,6 +81,7 @@ OBJECTS       = cuda_obj/poly6kernel_cuda.o \
 		obj/meshloader.o \
 		obj/rendermesh.o \
 		obj/fluidsystem.o \
+		obj/algae.o \
 		obj/fluid.o \
 		obj/isphparticles.o \
 		obj/rigid.o \
@@ -248,6 +250,7 @@ DIST          = ../../../Qt5.7.0/5.7/gcc_64/mkspecs/features/spec_pre.prf \
 		include/Mesh/rendermesh.h \
 		include/FluidSystem/fluidsolverproperty.h \
 		include/FluidSystem/fluidsystem.h \
+		include/SPH/algae.h \
 		include/SPH/fluid.h \
 		include/SPH/fluidproperty.h \
 		include/SPH/isphparticles.h \
@@ -271,6 +274,7 @@ DIST          = ../../../Qt5.7.0/5.7/gcc_64/mkspecs/features/spec_pre.prf \
 		src/Mesh/meshloader.cpp \
 		src/Mesh/rendermesh.cpp \
 		src/FluidSystem/fluidsystem.cpp \
+		src/SPH/algae.cpp \
 		src/SPH/fluid.cpp \
 		src/SPH/isphparticles.cpp \
 		src/SPH/rigid.cpp \
@@ -612,8 +616,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents cuda_src/poly6kernel.cu cuda_src/smoothingKernel.cu cuda_src/smoothkernel.cu cuda_src/sphGPU.cu cuda_src/sphGPU_Kernels.cu cuda_src/spikykernel.cu cuda_src/vec_ops.cu $(DISTDIR)/
-	$(COPY_FILE) --parents include/heterocont.h include/mainwindow.h include/openglscene.h include/MeshSampler/barycoordmeshsampler.h include/MeshSampler/meshsampler.h include/MeshSampler/poissondiskpointset.h include/Mesh/mesh.h include/Mesh/meshloader.h include/Mesh/rendermesh.h include/FluidSystem/fluidsolverproperty.h include/FluidSystem/fluidsystem.h include/SPH/fluid.h include/SPH/fluidproperty.h include/SPH/isphparticles.h include/SPH/rigid.h include/SPH/rigidproperty.h include/SPH/sph.h include/SPH/sphGPU.h include/SPH/sphparticlepropeprty.h include/Widget/fluidpropertywidget.h cuda_inc/poly6kernel.cuh cuda_inc/smoothingKernel.cuh cuda_inc/smoothkernel.cuh cuda_inc/sphGPU_Kernels.cuh cuda_inc/spikykernel.cuh cuda_inc/vec_ops.cuh $(DISTDIR)/
-	$(COPY_FILE) --parents src/heterocont.cpp src/main.cpp src/mainwindow.cpp src/openglscene.cpp src/MeshSampler/barycoordmeshsampler.cpp src/MeshSampler/poissondiskpointset.cpp src/Mesh/meshloader.cpp src/Mesh/rendermesh.cpp src/FluidSystem/fluidsystem.cpp src/SPH/fluid.cpp src/SPH/isphparticles.cpp src/SPH/rigid.cpp src/SPH/sph.cpp src/Widget/fluidpropertywidget.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents include/heterocont.h include/mainwindow.h include/openglscene.h include/MeshSampler/barycoordmeshsampler.h include/MeshSampler/meshsampler.h include/MeshSampler/poissondiskpointset.h include/Mesh/mesh.h include/Mesh/meshloader.h include/Mesh/rendermesh.h include/FluidSystem/fluidsolverproperty.h include/FluidSystem/fluidsystem.h include/SPH/algae.h include/SPH/fluid.h include/SPH/fluidproperty.h include/SPH/isphparticles.h include/SPH/rigid.h include/SPH/rigidproperty.h include/SPH/sph.h include/SPH/sphGPU.h include/SPH/sphparticlepropeprty.h include/Widget/fluidpropertywidget.h cuda_inc/poly6kernel.cuh cuda_inc/smoothingKernel.cuh cuda_inc/smoothkernel.cuh cuda_inc/sphGPU_Kernels.cuh cuda_inc/spikykernel.cuh cuda_inc/vec_ops.cuh $(DISTDIR)/
+	$(COPY_FILE) --parents src/heterocont.cpp src/main.cpp src/mainwindow.cpp src/openglscene.cpp src/MeshSampler/barycoordmeshsampler.cpp src/MeshSampler/poissondiskpointset.cpp src/Mesh/meshloader.cpp src/Mesh/rendermesh.cpp src/FluidSystem/fluidsystem.cpp src/SPH/algae.cpp src/SPH/fluid.cpp src/SPH/isphparticles.cpp src/SPH/rigid.cpp src/SPH/sph.cpp src/Widget/fluidpropertywidget.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents form/mainwindow.ui $(DISTDIR)/
 
 
@@ -2064,6 +2068,9 @@ obj/fluidsystem.o: src/FluidSystem/fluidsystem.cpp include/FluidSystem/fluidsyst
 		include/SPH/sph.h \
 		include/SPH/sphGPU.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/fluidsystem.o src/FluidSystem/fluidsystem.cpp
+
+obj/algae.o: src/SPH/algae.cpp include/SPH/algae.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/algae.o src/SPH/algae.cpp
 
 obj/fluid.o: src/SPH/fluid.cpp include/SPH/fluid.h \
 		include/SPH/fluidproperty.h \

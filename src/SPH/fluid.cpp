@@ -57,71 +57,72 @@ void Fluid::Draw()
     QOpenGLFunctions *glFuncs = QOpenGLContext::currentContext()->functions();
 
 
-    // Render Depth
-    m_depthShader.bind();
-    m_depthFBO->bind();
-    glFuncs->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glFuncs->glEnable(GL_DEPTH_TEST);
-    glFuncs->glDisable(GL_BLEND);
-    m_vao.bind();
-    glFuncs->glDrawArrays(GL_POINTS, 0, m_fluidProperty->numParticles);
-    m_vao.release();
-    m_depthFBO->release();
-    m_depthShader.release();
-
-
-    // Smooth depth
-    m_smoothDepthShader.bind();
-    m_smoothDepthFBO->bind();
-    glFuncs->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    m_fluidShader.setUniformValue("uDepthTex", 0);
-    glFuncs->glActiveTexture(GL_TEXTURE0);
-    glFuncs->glBindTexture(GL_TEXTURE_2D, m_depthFBO->texture());
-    m_quadVAO.bind();
-    glFuncs->glDrawArrays(GL_TRIANGLES, 0, 6);
-    m_quadVAO.release();
-    m_smoothDepthFBO->release();
-    m_smoothDepthShader.release();
-
-
-    // Render thickness
-    m_thicknessShader.bind();
-    m_thicknessFBO->bind();
-    glFuncs->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glFuncs->glDisable(GL_DEPTH_TEST);
-    glFuncs->glEnable(GL_BLEND);
-    glFuncs->glBlendFunc(GL_ONE, GL_ONE);
-    m_vao.bind();
-    glFuncs->glDrawArrays(GL_POINTS, 0, m_fluidProperty->numParticles);
-    m_vao.release();
-    glFuncs->glDisable(GL_BLEND);
-    glFuncs->glEnable(GL_DEPTH_TEST);
-    m_thicknessFBO->release();
-    m_thicknessShader.release();
-
-
-    // Render Fluid
-    m_fluidShader.bind();
-    m_fluidShader.setUniformValue("uDepthTex", 0);
-    glFuncs->glActiveTexture(GL_TEXTURE0);
-    glFuncs->glBindTexture(GL_TEXTURE_2D, m_smoothDepthFBO->texture());
-    m_fluidShader.setUniformValue("uThicknessTex", 1);
-    glFuncs->glActiveTexture(GL_TEXTURE0+1);
-    glFuncs->glBindTexture(GL_TEXTURE_2D, m_thicknessFBO->texture());
-    m_fluidShader.setUniformValue("uCubeMapTex", 2);
-    glFuncs->glActiveTexture(GL_TEXTURE0+2);
-    glFuncs->glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubeMapTex->textureId());
-    m_quadVAO.bind();
-    glFuncs->glDrawArrays(GL_TRIANGLES, 0, 6);
-    m_fluidShader.release();
-
-
-    // Draw Sph Particles
-//    m_shaderProg.bind();
+//    // Render Depth
+//    m_depthShader.bind();
+//    m_depthFBO->bind();
+//    glFuncs->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//    glFuncs->glEnable(GL_DEPTH_TEST);
+//    glFuncs->glDisable(GL_BLEND);
 //    m_vao.bind();
 //    glFuncs->glDrawArrays(GL_POINTS, 0, m_fluidProperty->numParticles);
 //    m_vao.release();
-//    m_shaderProg.release();
+//    m_depthFBO->release();
+//    m_depthShader.release();
+
+
+//    // Smooth depth
+//    m_smoothDepthShader.bind();
+//    m_smoothDepthFBO->bind();
+//    glFuncs->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//    m_fluidShader.setUniformValue("uDepthTex", 0);
+//    glFuncs->glActiveTexture(GL_TEXTURE0);
+//    glFuncs->glBindTexture(GL_TEXTURE_2D, m_depthFBO->texture());
+//    m_quadVAO.bind();
+//    glFuncs->glDrawArrays(GL_TRIANGLES, 0, 6);
+//    m_quadVAO.release();
+//    m_smoothDepthFBO->release();
+//    m_smoothDepthShader.release();
+
+
+//    // Render thickness
+//    m_thicknessShader.bind();
+//    m_thicknessFBO->bind();
+//    glFuncs->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//    glFuncs->glDisable(GL_DEPTH_TEST);
+//    glFuncs->glEnable(GL_BLEND);
+//    glFuncs->glBlendFunc(GL_ONE, GL_ONE);
+//    m_vao.bind();
+//    glFuncs->glDrawArrays(GL_POINTS, 0, m_fluidProperty->numParticles);
+//    m_vao.release();
+//    glFuncs->glDisable(GL_BLEND);
+//    glFuncs->glEnable(GL_DEPTH_TEST);
+//    m_thicknessFBO->release();
+//    m_thicknessShader.release();
+
+
+//    // Render Fluid
+//    m_fluidShader.bind();
+//    m_fluidShader.setUniformValue("uDepthTex", 0);
+//    glFuncs->glActiveTexture(GL_TEXTURE0);
+//    glFuncs->glBindTexture(GL_TEXTURE_2D, m_smoothDepthFBO->texture());
+//    m_fluidShader.setUniformValue("uThicknessTex", 1);
+//    glFuncs->glActiveTexture(GL_TEXTURE0+1);
+//    glFuncs->glBindTexture(GL_TEXTURE_2D, m_thicknessFBO->texture());
+//    m_fluidShader.setUniformValue("uCubeMapTex", 2);
+//    glFuncs->glActiveTexture(GL_TEXTURE0+2);
+//    glFuncs->glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubeMapTex->textureId());
+//    m_quadVAO.bind();
+//    glFuncs->glDrawArrays(GL_TRIANGLES, 0, 6);
+//    m_fluidShader.release();
+
+
+    // Draw Sph Particles
+    m_shaderProg.bind();
+    glFuncs->glEnable(GL_DEPTH_TEST);
+    m_vao.bind();
+    glFuncs->glDrawArrays(GL_POINTS, 0, m_fluidProperty->numParticles);
+    m_vao.release();
+    m_shaderProg.release();
 }
 
 void Fluid::SetShaderUniforms(const glm::mat4 &_projMat,
