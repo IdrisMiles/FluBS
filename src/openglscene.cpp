@@ -130,9 +130,8 @@ void OpenGLScene::initializeGL()
     connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &OpenGLScene::cleanup);
 
     glewInit();
-
-    //initializeOpenGLFunctions();
     glClearColor(0.4f, 0.4f, 0.4f, 0.0f);
+
 
     //---------------------------------------------------------------------------------------
     // initialise view and projection matrices
@@ -143,21 +142,23 @@ void OpenGLScene::initializeGL()
     // Light position is fixed.
     m_lightPos = glm::vec3(0, 0, 70);
 
+
     //---------------------------------------------------------------------------------------
     // Create Skybox
     CreateSkybox();
 
+
     //---------------------------------------------------------------------------------------
+    // Set up simulation here
 
-    // fluid
     auto fluidProps = std::shared_ptr<FluidProperty>(new FluidProperty());
-    m_fluid = std::shared_ptr<Fluid>(new Fluid(fluidProps, width(), height()));
-    m_fluid->SetCubeMap(m_skyboxTex);
-
-    // rigid
     auto fluidSolverProps = std::shared_ptr<FluidSolverProperty>(new FluidSolverProperty());
     auto rigidProps = std::shared_ptr<RigidProperty>(new RigidProperty());
 
+    // fluid
+    m_fluid = std::shared_ptr<Fluid>(new Fluid(fluidProps));
+
+    // rigid
     Mesh boundary = Mesh();
     float dim = 0.95f* fluidSolverProps->gridResolution*fluidSolverProps->gridCellWidth;
     float rad = rigidProps->particleRadius;
@@ -180,7 +181,7 @@ void OpenGLScene::initializeGL()
     rigidProps->numParticles = boundary.verts.size();
     m_container = std::shared_ptr<Rigid>(new Rigid(rigidProps, boundary));
 
-
+    // Fluid system
     m_fluidSystem = std::shared_ptr<FluidSystem>(new FluidSystem(fluidSolverProps));
     m_fluidSystem->SetContainer(m_container);
     m_fluidSystem->AddFluid(m_fluid);
@@ -191,8 +192,20 @@ void OpenGLScene::initializeGL()
 
 
     //---------------------------------------------------------------------------------------
+    // sph renderers
+    m_fluidRenderer = std::shared_ptr<FluidRenderer>(new FluidRenderer(width(), height()));
+    m_fluidRenderer->SetCubeMap(m_skyboxTex);
+    m_fluidRenderer->SetSphParticles(m_fluid);
+
+    m_sphRenderer = std::shared_ptr<SphParticleRenderer>(new SphParticleRenderer());
+    m_sphRenderer->SetSphParticles(m_fluid);
+
+    m_rigidRenderer = std::shared_ptr<RigidRenderer>(new RigidRenderer());
+    m_rigidRenderer->SetSphParticles(m_container);
 
 
+    //---------------------------------------------------------------------------------------
+    // Start simulation and drawing rimers
     m_drawTimer->start(16);
     m_simTimer->start(16);
 
@@ -214,17 +227,19 @@ void OpenGLScene::paintGL()
     glm::vec3 camPos = glm::vec3(glm::inverse((m_modelMat)) * glm::vec4(0.0f,0.0f, 0.0f,1.0f));
 
     //---------------------------------------------------------------------------------------
-    // Draw code - replace this with project specific draw stuff
 
     // Draw skybox first
     DrawSkybox();
 
     // Draw fluid
-    m_fluid->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, glm::mat4(normalMatrix), m_lightPos, camPos);
-    m_fluid->Draw();
+    m_fluidRenderer->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, glm::mat4(normalMatrix), m_lightPos, camPos);
+    m_fluidRenderer->Draw();
 
-//    m_container->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, glm::mat4(normalMatrix), m_lightPos, camPos);
-//    m_container->Draw();
+//    m_sphRenderer->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, glm::mat4(normalMatrix), m_lightPos, camPos);
+//    m_sphRenderer->Draw();
+
+//    m_rigidRenderer->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, glm::mat4(normalMatrix), m_lightPos, camPos);
+//    m_rigidRenderer->Draw();
 
     //---------------------------------------------------------------------------------------
 
@@ -258,7 +273,7 @@ void OpenGLScene::ResetSim()
 
 void OpenGLScene::resizeGL(int w, int h)
 {
-    m_fluid->SetFrameSize(w, h);
+    m_fluidRenderer->SetFrameSize(w, h);
     m_projMat = glm::perspective(45.0f, GLfloat(w) / h, 0.1f, 1000.0f);
 }
 

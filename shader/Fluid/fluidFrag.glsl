@@ -32,7 +32,7 @@ void main()
         discard;
     }
 
-    float h = 0.002f;
+    float h = 0.005f;
     float h2 = 2.0f*h;
 
     // Get position

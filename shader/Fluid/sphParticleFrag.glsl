@@ -1,4 +1,5 @@
-#version 330
+#version 430
+
 in vec3 fPos;
 in vec3 fVel;
 in float fDen;

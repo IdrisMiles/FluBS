@@ -1,6 +1,5 @@
 #include "SPH/isphparticles.h"
-#include <QOpenGLContext>
-#include <QOpenGLFunctions>
+
 
 BaseSphParticle::BaseSphParticle()
 {
@@ -19,38 +18,6 @@ void BaseSphParticle::SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solv
     cudaMalloc(&d_cellOccupancyPtr, numCells * sizeof(unsigned int));
     cudaMalloc(&d_cellParticleIdxPtr, numCells * sizeof(unsigned int));
 }
-
-void BaseSphParticle::Draw()
-{
-    QOpenGLFunctions *glFuncs = QOpenGLContext::currentContext()->functions();
-
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_FRONT_AND_BACK);
-
-    m_shaderProg.bind();
-    m_vao.bind();
-    glFuncs->glDrawArrays(GL_POINTS, 0, m_property->numParticles);
-    m_vao.release();
-    m_shaderProg.release();
-
-}
-
-void BaseSphParticle::SetShaderUniforms(const glm::mat4 &_projMat, const glm::mat4 &_viewMat, const glm::mat4 &_modelMat, const glm::mat4 &_normalMat, const glm::vec3 &_lightPos, const glm::vec3 &_camPos)
-{
-    QOpenGLFunctions *glFuncs = QOpenGLContext::currentContext()->functions();
-    m_shaderProg.bind();
-    glFuncs->glUniformMatrix4fv(m_projMatrixLoc, 1, false, &_projMat[0][0]);
-    glFuncs->glUniformMatrix4fv(m_mvMatrixLoc, 1, false, &(_modelMat*_viewMat)[0][0]);
-    glFuncs->glUniformMatrix3fv(m_normalMatrixLoc, 1, true, &_normalMat[0][0]);
-    glFuncs->glUniform3fv(m_lightPosLoc, 1, &_lightPos[0]);
-    glFuncs->glUniform3fv(m_camPosLoc, 1, &_camPos[0]);
-    glFuncs->glUniform3fv(m_colourLoc, 1, &m_colour[0]);
-    glFuncs->glUniform1f(m_radLoc, m_property->particleRadius);
-
-    m_shaderProg.release();
-
-}
-
 
 SphParticleProperty* BaseSphParticle::GetProperty()
 {
@@ -92,54 +59,16 @@ void BaseSphParticle::InitCUDAMemory()
 
 void BaseSphParticle::InitGL()
 {
-    InitShader();
     InitVAO();
 }
 
-void BaseSphParticle::InitShader()
-{
-    // Create shaders
-    m_shaderProg.addShaderFromSourceFile(QOpenGLShader::Vertex, "../shader/sphereSpriteVert.glsl");
-    m_shaderProg.addShaderFromSourceFile(QOpenGLShader::Geometry, "../shader/sphereSpriteGeo.glsl");
-    m_shaderProg.addShaderFromSourceFile(QOpenGLShader::Fragment, "../shader/sphereSpriteFrag.glsl");
-    m_shaderProg.link();
-
-    // Get shader uniform and sttribute locations
-    m_shaderProg.bind();
-
-    m_projMatrixLoc = m_shaderProg.uniformLocation("uProjMatrix");
-    m_mvMatrixLoc = m_shaderProg.uniformLocation("uMVMatrix");
-    m_normalMatrixLoc = m_shaderProg.uniformLocation("uNormalMatrix");
-    m_lightPosLoc = m_shaderProg.uniformLocation("uLightPos");
-
-    m_colourLoc = m_shaderProg.uniformLocation("uColour");
-    m_posAttrLoc = m_shaderProg.attributeLocation("vPos");
-    m_velAttrLoc = m_shaderProg.attributeLocation("vVel");
-    m_denAttrLoc = m_shaderProg.attributeLocation("vDen");
-    m_radLoc = m_shaderProg.uniformLocation("uRad");
-    m_camPosLoc = m_shaderProg.uniformLocation("uCameraPos");
-
-    m_shaderProg.release();
-
-}
 
 void BaseSphParticle::InitVAO()
 {
-    QOpenGLFunctions *glFuncs = QOpenGLContext::currentContext()->functions();
-
-    m_shaderProg.bind();
-
-    // Set up the VAO
-    m_vao.create();
-    m_vao.bind();
-
-
     // Setup our pos buffer object.
     m_posBO.create();
     m_posBO.bind();
     m_posBO.allocate(m_property->numParticles * sizeof(float3));
-    glFuncs->glEnableVertexAttribArray(m_posAttrLoc);
-    glFuncs->glVertexAttribPointer(m_posAttrLoc, 3, GL_FLOAT, GL_FALSE, 1 * sizeof(float3), 0);
     m_posBO.release();
 
 
@@ -147,8 +76,6 @@ void BaseSphParticle::InitVAO()
     m_velBO.create();
     m_velBO.bind();
     m_velBO.allocate(m_property->numParticles * sizeof(float3));
-    glFuncs->glEnableVertexAttribArray(m_velAttrLoc);
-    glFuncs->glVertexAttribPointer(m_velAttrLoc, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
     m_velBO.release();
 
 
@@ -156,8 +83,6 @@ void BaseSphParticle::InitVAO()
     m_denBO.create();
     m_denBO.bind();
     m_denBO.allocate(m_property->numParticles * sizeof(float));
-    glFuncs->glEnableVertexAttribArray(m_denAttrLoc);
-    glFuncs->glVertexAttribPointer(m_denAttrLoc, 1, GL_FLOAT, GL_FALSE, sizeof(GLfloat), 0);
     m_denBO.release();
 
 
@@ -174,10 +99,6 @@ void BaseSphParticle::InitVAO()
     m_pressBO.allocate(m_property->numParticles * sizeof(float));
     m_pressBO.release();
 
-
-    m_vao.release();
-
-    m_shaderProg.release();
 }
 
 void BaseSphParticle::CleanUpCUDAMemory()
@@ -209,8 +130,8 @@ void BaseSphParticle::CleanUpGL()
     cudaGraphicsUnregisterResource(m_pressBO_CUDA);
     m_pressBO.destroy();
 
-    m_vao.destroy();
-    m_shaderProg.destroyed();
+//    m_vao.destroy();
+//    m_shaderProg.destroyed();
 }
 //---------------------------------------------------------------------------------------------------------------
 
@@ -429,4 +350,30 @@ unsigned int BaseSphParticle::GetMaxCellOcc()
 void BaseSphParticle::SetMaxCellOcc(const unsigned int _maxCellOcc)
 {
     m_maxCellOcc = _maxCellOcc;
+}
+
+
+QOpenGLBuffer *BaseSphParticle::GetPosBO()
+{
+    return &m_posBO;
+}
+
+QOpenGLBuffer *BaseSphParticle::GetVelBO()
+{
+    return &m_velBO;
+}
+
+QOpenGLBuffer *BaseSphParticle::GetDenBO()
+{
+    return &m_denBO;
+}
+
+QOpenGLBuffer *BaseSphParticle::GetMassBO()
+{
+    return &m_massBO;
+}
+
+QOpenGLBuffer *BaseSphParticle::GetPressBO()
+{
+    return &m_pressBO;
 }

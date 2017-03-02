@@ -5,10 +5,6 @@
 #include "SPH/isphparticles.h"
 #include "SPH/rigidproperty.h"
 
-// Qt OpenGL includes
-#include <QOpenGLFramebufferObject>
-
-
 
 
 class Rigid : public BaseSphParticle
@@ -20,14 +16,6 @@ public:
 
 
     virtual void SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps);
-
-    virtual void Draw();
-    void SetShaderUniforms(const glm::mat4 &_projMat,
-                           const glm::mat4 &_viewMat,
-                           const glm::mat4 &_modelMat,
-                           const glm::mat4 &_normalMat,
-                           const glm::vec3 &_lightPos,
-                           const glm::vec3 &_camPos);
 
     virtual RigidProperty* GetProperty();
 
@@ -43,7 +31,7 @@ protected:
     virtual void Init();
     virtual void InitCUDAMemory();
     virtual void InitGL();
-    virtual void InitShader();
+
     virtual void InitVAO();
 
     virtual void CleanUpCUDAMemory();

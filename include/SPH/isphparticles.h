@@ -3,8 +3,6 @@
 
 // OpenGL includes
 #include <GL/glew.h>
-#include <QOpenGLShaderProgram>
-#include <QOpenGLVertexArrayObject>
 #include <QOpenGLBuffer>
 
 // CUDA includes
@@ -29,14 +27,6 @@ public:
 
 
     virtual void SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps);
-
-    virtual void Draw();
-    void SetShaderUniforms(const glm::mat4 &_projMat,
-                           const glm::mat4 &_viewMat,
-                           const glm::mat4 &_modelMat,
-                           const glm::mat4 &_normalMat,
-                           const glm::vec3 &_lightPos,
-                           const glm::vec3 &_camPos);
 
 
 
@@ -87,11 +77,17 @@ public:
     void SetMaxCellOcc(const unsigned int _maxCellOcc);
 
 
+    QOpenGLBuffer *GetPosBO();
+    QOpenGLBuffer *GetVelBO();
+    QOpenGLBuffer *GetDenBO();
+    QOpenGLBuffer *GetMassBO();
+    QOpenGLBuffer *GetPressBO();
+
+
 protected:
     virtual void Init();
     virtual void InitCUDAMemory();
     virtual void InitGL();
-    virtual void InitShader();
     virtual void InitVAO();
 
     virtual void CleanUpCUDAMemory();
@@ -124,24 +120,6 @@ protected:
     bool m_massMapped;
     bool m_pressureMapped;
 
-
-    //---------------------------------------------------------
-    // TODO remove already rendering stuff into its own class
-    //---------------------------------------------------------
-    // Rendering stuff
-    QOpenGLShaderProgram m_shaderProg;
-    GLuint m_posAttrLoc;
-    GLuint m_velAttrLoc;
-    GLuint m_denAttrLoc;
-    GLuint m_radLoc;
-    GLuint m_lightPosLoc;
-    GLuint m_colourLoc;
-    GLuint m_camPosLoc;
-    GLuint m_projMatrixLoc;
-    GLuint m_mvMatrixLoc;
-    GLuint m_normalMatrixLoc;
-
-    QOpenGLVertexArrayObject m_vao;
     QOpenGLBuffer m_posBO;
     QOpenGLBuffer m_velBO;
     QOpenGLBuffer m_denBO;
