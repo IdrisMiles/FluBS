@@ -8,7 +8,7 @@ public:
     FluidSolverProperty(float _smoothingLength = 1.2f,
                         float _deltaTime = 0.005f,
                         unsigned int _solveIterations = 1,
-                        unsigned int _gridResolution = 10,
+                        unsigned int _gridResolution = 20,
                         float _gridCellWidth = 1.2f,
                         bool _play = false):
         smoothingLength(_smoothingLength),

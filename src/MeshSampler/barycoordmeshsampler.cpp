@@ -88,6 +88,10 @@ Mesh MeshSampler::BaryCoord::SampleMesh(const Mesh &_mesh, const int _numSamples
     while(samples.verts.size() < _numSamples && currIteration < maxIterations)
     {
         unsigned int sampleTriProbabilityIndex = randDistTriIndex(prg);
+//        if(sampleTriProbabilityIndex >= sampleTriProbability.size())
+//        {
+//            sampleTriProbabilityIndex = sampleTriProbability.size()-1;
+//        }
         triIndex = sampleTriProbability[sampleTriProbabilityIndex];
 //        std::cout<<"sampleTriProb size "<<sampleTriProbability.size()<<"\n";
 //        std::cout<<"sampleTriProbIndex "<<sampleTriProbabilityIndex<<"\n";

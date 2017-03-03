@@ -855,6 +855,7 @@ moc/moc_mainwindow.cpp: ../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QMainWindo
 		include/Render/sphparticlerenderer.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFramebufferObject \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglframebufferobject.h \
+		include/Render/rigidrenderer.h \
 		include/Mesh/meshloader.h \
 		../../../dev/include/assimp/scene.h \
 		../../../dev/include/assimp/types.h \
@@ -1033,6 +1034,7 @@ moc/moc_openglscene.cpp: ../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QOpenGLWi
 		include/Render/sphparticlerenderer.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFramebufferObject \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglframebufferobject.h \
+		include/Render/rigidrenderer.h \
 		include/Mesh/meshloader.h \
 		../../../dev/include/assimp/scene.h \
 		../../../dev/include/assimp/types.h \
@@ -1379,6 +1381,7 @@ obj/main.o: src/main.cpp include/mainwindow.h \
 		include/Render/sphparticlerenderer.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFramebufferObject \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglframebufferobject.h \
+		include/Render/rigidrenderer.h \
 		include/Mesh/meshloader.h \
 		../../../dev/include/assimp/scene.h \
 		../../../dev/include/assimp/types.h \
@@ -1593,6 +1596,7 @@ obj/mainwindow.o: src/mainwindow.cpp include/mainwindow.h \
 		include/Render/sphparticlerenderer.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFramebufferObject \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglframebufferobject.h \
+		include/Render/rigidrenderer.h \
 		include/Mesh/meshloader.h \
 		../../../dev/include/assimp/scene.h \
 		../../../dev/include/assimp/types.h \
@@ -1804,6 +1808,7 @@ obj/openglscene.o: src/openglscene.cpp include/openglscene.h \
 		include/Render/sphparticlerenderer.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFramebufferObject \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglframebufferobject.h \
+		include/Render/rigidrenderer.h \
 		include/Mesh/meshloader.h \
 		../../../dev/include/assimp/scene.h \
 		../../../dev/include/assimp/types.h \
@@ -2290,7 +2295,102 @@ obj/fluidrenderer.o: src/Render/fluidrenderer.cpp include/Render/fluidrenderer.h
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglfunctions.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/fluidrenderer.o src/Render/fluidrenderer.cpp
 
-obj/rigidrenderer.o: src/Render/rigidrenderer.cpp include/Render/rigidrenderer.h
+obj/rigidrenderer.o: src/Render/rigidrenderer.cpp include/Render/rigidrenderer.h \
+		include/Render/sphparticlerenderer.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLShaderProgram \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglshaderprogram.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qglobal.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qconfig.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qfeatures.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qsystemdetection.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qprocessordetection.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qcompilerdetection.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qtypeinfo.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qtypetraits.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qisenum.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qsysinfo.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qlogging.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qflags.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qatomic.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qbasicatomic.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qatomic_bootstrap.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qgenericatomic.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qatomic_cxx11.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qatomic_msvc.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qglobalstatic.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qmutex.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qnumeric.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qversiontagging.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengl.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qt_windows.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengles2ext.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglext.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qvector2d.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qpoint.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qnamespace.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qmetatype.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qbytearray.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qrefcount.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qarraydata.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qstring.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qchar.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qstringbuilder.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qvarlengtharray.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qcontainerfwd.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qalgorithms.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qobjectdefs.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qobjectdefs_impl.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qvector3d.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qvector4d.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qmatrix4x4.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qquaternion.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qgenericmatrix.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qdebug.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qhash.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qiterator.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qlist.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qhashfunctions.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qpair.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qbytearraylist.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qstringlist.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qregexp.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qstringmatcher.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qmap.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qtextstream.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qiodevice.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qobject.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qcoreevent.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qscopedpointer.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qobject_impl.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qlocale.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qvariant.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qshareddata.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qvector.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qset.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qcontiguouscache.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qsharedpointer.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qsharedpointer_impl.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qdatastream.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qrect.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qmargins.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qsize.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLVertexArrayObject \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglvertexarrayobject.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QObject \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLBuffer \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglbuffer.h \
+		include/SPH/isphparticles.h \
+		include/SPH/sphparticlepropeprty.h \
+		include/FluidSystem/fluidsolverproperty.h \
+		include/Mesh/mesh.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLContext \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglcontext.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QScopedPointer \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QSurfaceFormat \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qsurfaceformat.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglversionfunctions.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFunctions \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglfunctions.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/rigidrenderer.o src/Render/rigidrenderer.cpp
 
 obj/sphparticlerenderer.o: src/Render/sphparticlerenderer.cpp include/Render/sphparticlerenderer.h \

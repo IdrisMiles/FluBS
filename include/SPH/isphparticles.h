@@ -24,15 +24,9 @@ public:
     BaseSphParticle();
     virtual ~BaseSphParticle();
 
-
-
     virtual void SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps);
 
-
-
     virtual SphParticleProperty *GetProperty();
-
-
 
     virtual void MapCudaGLResources();
     virtual void ReleaseCudaGLResources();
@@ -78,9 +72,13 @@ public:
 
 
     QOpenGLBuffer *GetPosBO();
+
     QOpenGLBuffer *GetVelBO();
+
     QOpenGLBuffer *GetDenBO();
+
     QOpenGLBuffer *GetMassBO();
+
     QOpenGLBuffer *GetPressBO();
 
 
@@ -131,9 +129,6 @@ protected:
     cudaGraphicsResource *m_denBO_CUDA;
     cudaGraphicsResource *m_massBO_CUDA;
     cudaGraphicsResource *m_pressBO_CUDA;
-
-
-    glm::vec3 m_colour;
 };
 
 #endif // ISPHPARTICLES_H

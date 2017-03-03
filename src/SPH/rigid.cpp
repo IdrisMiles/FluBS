@@ -6,8 +6,6 @@ Rigid::Rigid(std::shared_ptr<RigidProperty> _rigidProperty, Mesh _mesh):
     m_property = _rigidProperty;
     m_mesh = _mesh;
 
-    m_colour = glm::vec3(0.4f, 0.3f, 0.1f);
-
     m_positionMapped = false;
     m_velocityMapped = false;
     m_densityMapped = false;
@@ -27,6 +25,16 @@ Rigid::~Rigid()
     m_property = nullptr;
     CleanUpCUDAMemory();
     CleanUpGL();
+}
+
+void Rigid::UpdateMesh(Mesh &_mesh)
+{
+    m_mesh = _mesh;
+
+
+    GetPositionPtr();
+    cudaMemcpy(d_positionPtr, &m_mesh.verts[0], m_property->numParticles * sizeof(float3), cudaMemcpyHostToDevice);
+    ReleaseCudaGLResources();
 }
 
 //------------------------------------------------------------------------

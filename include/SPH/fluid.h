@@ -1,9 +1,9 @@
 #ifndef FLUID_H
 #define FLUID_H
 
+// sph includes
 #include "SPH/fluidproperty.h"
 #include "SPH/isphparticles.h"
-#include "FluidSystem/fluidsolverproperty.h"
 
 
 
@@ -28,22 +28,36 @@ public:
     float3 *GetSurfTenForcePtr();
     void ReleaseSurfTenForcePtr();
 
+    float3 *GetPredictPosPtr();
+    void ReleasePredictPosPtr();
+
+    float3 *GetPredictVelPtr();
+    void ReleasePredictVelPtr();
+
+    float *GetDensityErrPtr();
+    void ReleaseDensityErrPtr();
+
+
 protected:
+    void InitFluidAsMesh();
     virtual void Init();
     virtual void InitCUDAMemory();
+    virtual void InitGL();
+    virtual void InitVAO();
+
+    virtual void CleanUpGL();
     virtual void CleanUpCUDAMemory();
-    void InitFluidAsMesh();
 
 
-    // Simulation Data
+    // specfic simulation Data
     std::shared_ptr<FluidProperty> m_fluidProperty;
     float3* d_viscousForcePtr;
     float3* d_surfaceTensionForcePtr;
 
+    float3 *d_predictPositionPtr;
+    float3 *d_predictVelocityPtr;
+    float *d_densityErrPtr;
 
-    virtual void InitGL();
-    virtual void InitVAO();
-    virtual void CleanUpGL();
 
 };
 

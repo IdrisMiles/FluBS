@@ -13,7 +13,7 @@ public:
     Rigid(std::shared_ptr<RigidProperty> _rigidProperty, Mesh _mesh);
     virtual ~Rigid();
 
-
+    void UpdateMesh(Mesh &_mesh);
 
     virtual void SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps);
 
@@ -21,7 +21,6 @@ public:
 
     virtual void MapCudaGLResources();
     virtual void ReleaseCudaGLResources();
-
 
     float *GetVolumePtr();
     void ReleaseVolumePtr();
@@ -31,14 +30,13 @@ protected:
     virtual void Init();
     virtual void InitCUDAMemory();
     virtual void InitGL();
-
     virtual void InitVAO();
 
     virtual void CleanUpCUDAMemory();
     virtual void CleanUpGL();
 
 
-    // Simulation Data
+    // specfic simulation Data
     std::shared_ptr<RigidProperty> m_property;
     float* d_volumePtr;
 

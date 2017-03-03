@@ -8,8 +8,6 @@ Fluid::Fluid(std::shared_ptr<FluidProperty> _fluidProperty)
 {
     m_fluidProperty = _fluidProperty;
 
-    m_colour = glm::vec3(0.6f, 0.6f, 0.6f);
-
     m_positionMapped = false;
     m_velocityMapped = false;
     m_densityMapped = false;
@@ -23,9 +21,6 @@ Fluid::Fluid(std::shared_ptr<FluidProperty> _fluidProperty, Mesh _mesh)
 {
     m_fluidProperty = _fluidProperty;
     m_mesh = _mesh;
-
-
-    m_colour = glm::vec3(0.6f, 0.6f, 0.6f);
 
     m_positionMapped = false;
     m_velocityMapped = false;
@@ -80,6 +75,9 @@ void Fluid::InitCUDAMemory()
     cudaMalloc(&d_gravityForcePtr, m_fluidProperty->numParticles * sizeof(float3));
     cudaMalloc(&d_externalForcePtr, m_fluidProperty->numParticles * sizeof(float3));
     cudaMalloc(&d_totalForcePtr, m_fluidProperty->numParticles * sizeof(float3));
+    cudaMalloc(&d_predictPositionPtr, m_fluidProperty->numParticles * sizeof(float3));
+    cudaMalloc(&d_predictVelocityPtr, m_fluidProperty->numParticles * sizeof(float3));
+    cudaMalloc(&d_densityErrPtr, m_fluidProperty->numParticles * sizeof(float));
 
     // particle hash
     cudaMalloc(&d_particleHashIdPtr, m_fluidProperty->numParticles * sizeof(unsigned int));
@@ -150,6 +148,9 @@ void Fluid::CleanUpCUDAMemory()
     cudaFree(d_particleHashIdPtr);
     cudaFree(d_cellOccupancyPtr);
     cudaFree(d_cellParticleIdxPtr);
+    cudaFree(d_predictPositionPtr);
+    cudaFree(d_predictVelocityPtr);
+    cudaFree(d_densityErrPtr);
 }
 
 void Fluid::CleanUpGL()
@@ -208,6 +209,37 @@ float3 *Fluid::GetSurfTenForcePtr()
 }
 
 void Fluid::ReleaseSurfTenForcePtr()
+{
+
+}
+
+
+float3 *Fluid::GetPredictPosPtr()
+{
+    return d_predictPositionPtr;
+}
+
+void Fluid::ReleasePredictPosPtr()
+{
+
+}
+
+float3 *Fluid::GetPredictVelPtr()
+{
+    return d_predictVelocityPtr;
+}
+
+void Fluid::ReleasePredictVelPtr()
+{
+
+}
+
+float *Fluid::GetDensityErrPtr()
+{
+    return d_densityErrPtr;
+}
+
+void Fluid::ReleaseDensityErrPtr()
 {
 
 }

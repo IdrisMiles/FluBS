@@ -132,9 +132,11 @@ namespace sphGPU_Kernels
                                                       const uint numPoints,
                                                       const float smoothingLength);
 
-    __global__ void ComputeForce_kernel(float3 *pressureForce,
+    __global__ void ComputeForce_kernel(/*float3 *force,*/
+                                        float3 *pressureForce,
                                         float3 *viscForce,
                                         float3 *surfaceTensionForce,
+//                                        const float3 gravity,
                                         const float viscCoeff,
                                         const float surfaceTension,
                                         const float surfaceThreshold,
@@ -149,18 +151,24 @@ namespace sphGPU_Kernels
                                         const float smoothingLength,
                                         const bool accumulate);
 
-    __global__ void ComputeTotalForce_kernel(float3 *force,
-                                         const float3 *externalForce,
-                                         const float3 *pressureForce,
-                                         const float3 *viscousForce,
-                                         const float3 *surfaceTensionForce,
-                                         const float *mass,
-                                         const float3 *particles,
-                                         const float3 *velocities,
-                                         const uint *cellOcc,
-                                         const uint *cellPartIdx,
-                                         const uint numPoints,
-                                         const float smoothingLength);
+    __global__ void ComputeTotalForce_kernel(const bool accumulatePressure,
+                                             const bool accumulateViscous,
+                                             const bool accumulateSurfTen,
+                                             const bool accumulateExternal,
+                                             const bool accumulateGravity,
+                                             float3 *force,
+                                             const float3 *externalForce,
+                                             const float3 *pressureForce,
+                                             const float3 *viscousForce,
+                                             const float3 *surfaceTensionForce,
+                                             const float3 gravity,
+                                             const float *mass,
+                                             const float3 *particles,
+                                             const float3 *velocities,
+                                             const uint *cellOcc,
+                                             const uint *cellPartIdx,
+                                             const uint numPoints,
+                                             const float smoothingLength);
 
     __global__ void Integrate_kernel(float3 *force,
                                      float3 *particles,

@@ -129,7 +129,7 @@ __global__ void sphGPU_Kernels::ComputeVolume_kernel(float *volume,
         }
         else
         {
-            volume[thisParticleGlobalIdx] = accVolume;
+            volume[thisParticleGlobalIdx] = 10.0f*accVolume;
         }
     }
 }
@@ -302,7 +302,7 @@ __global__ void sphGPU_Kernels::ComputeDensityFluidRigid_kernel(const uint numPo
         {
             if(accumulate)
             {
-                atomicAdd(&fluidDensity[thisParticleGlobalIdx], 2.0f*accDensity);
+                atomicAdd(&fluidDensity[thisParticleGlobalIdx], accDensity);
             }
             else
             {
@@ -426,7 +426,12 @@ __global__ void sphGPU_Kernels::ComputePressure_kernel(float *pressure,
         //float accPressure = beta * (pow((accDensity/restDensity), gamma)-1.0f);
         //float accPressure = gasConstant * ((accDensity/restDensity) - 1.0f);
 
-        float accPressure = gasConstant * (density[thisParticleGlobalIdx] - restDensity);
+//        float k = 50.0f;
+        float gamma = 7.0f;
+        float accPressure = (gasConstant*restDensity / gamma) * (pow((density[thisParticleGlobalIdx]/restDensity), gamma) - 1.0f);
+
+//        float accPressure = gasConstant * (density[thisParticleGlobalIdx] - restDensity);
+//        float accPressure = gasConstant * ( (density[thisParticleGlobalIdx] / restDensity) - 1.0f);
 
         if(isnan(accPressure))
         {
@@ -477,6 +482,8 @@ __global__ void sphGPU_Kernels::ComputePressureForce_kernel(float3 *pressureForc
         float3 accPressureForce = make_float3(0.0f, 0.0f, 0.0f);
 
 
+        float thisMass = mass[thisParticleGlobalIdx];
+        float thisDensity = density[thisParticleGlobalIdx];
         float thisPressure = pressure[thisParticleGlobalIdx];
         float3 thisParticle = particles[thisParticleGlobalIdx];
 
@@ -503,7 +510,11 @@ __global__ void sphGPU_Kernels::ComputePressureForce_kernel(float3 *pressureForc
 
                             float pressOverDens = (fabs(neighDensity)<FLT_EPSILON ? 0.0f: (thisPressure + neighPressure) / (2.0f* neighDensity));
 
-                            accPressureForce = accPressureForce + (neighMass * pressOverDens * SpikyKernelGradientV_Kernel(thisParticle, neighParticle, smoothingLength));
+//                            accPressureForce = accPressureForce + (neighMass * pressOverDens * SpikyKernelGradientV_Kernel(thisParticle, neighParticle, smoothingLength));
+//                            accPressureForce = accPressureForce + (neighMass * (thisPressure+neighPressure) / (neighDensity + neighDensity) * SpikyKernelGradientV_Kernel(thisParticle, neighParticle, smoothingLength));
+
+
+                            accPressureForce = accPressureForce + ( ((thisPressure/(thisDensity*thisDensity)) + (neighPressure/(neighDensity*neighDensity))) * SpikyKernelGradientV_Kernel(thisParticle, neighParticle, smoothingLength) );
                         }
                     }
                 }
@@ -513,11 +524,13 @@ __global__ void sphGPU_Kernels::ComputePressureForce_kernel(float3 *pressureForc
 
         if(!accumulate)
         {
-            pressureForce[thisParticleGlobalIdx] = -1.0f * accPressureForce;
+            pressureForce[thisParticleGlobalIdx] = -1.0f * thisMass * thisMass * accPressureForce;
+//            pressureForce[thisParticleGlobalIdx] = -1.0f * accPressureForce;
         }
         else
         {
-            pressureForce[thisParticleGlobalIdx] = pressureForce[thisParticleGlobalIdx] + (-1.0f * accPressureForce);
+            pressureForce[thisParticleGlobalIdx] = pressureForce[thisParticleGlobalIdx] + (-1.0f * thisMass * thisMass * accPressureForce);
+//            pressureForce[thisParticleGlobalIdx] = pressureForce[thisParticleGlobalIdx] + (-1.0f * accPressureForce);
         }
     }
 }
@@ -563,6 +576,8 @@ __global__ void sphGPU_Kernels::ComputePressureForceFluidFluid_kernel(float3 *pr
         float3 accPressureForce = make_float3(0.0f, 0.0f, 0.0f);
 
 
+        float thisMass = mass[thisParticleGlobalIdx];
+        float thisDensity = density[thisParticleGlobalIdx];
         float thisPressure = pressure[thisParticleGlobalIdx];
         float3 thisParticle = particles[thisParticleGlobalIdx];
 
@@ -589,7 +604,12 @@ __global__ void sphGPU_Kernels::ComputePressureForceFluidFluid_kernel(float3 *pr
 
                             float pressOverDens = (fabs(neighDensity)<FLT_EPSILON ? 0.0f: (thisPressure + neighPressure) / (2.0f* neighDensity));
 
-                            accPressureForce = accPressureForce + (neighMass * pressOverDens * SpikyKernelGradientV_Kernel(thisParticle, neighParticle, smoothingLength));
+//                            accPressureForce = accPressureForce + (neighMass * pressOverDens * SpikyKernelGradientV_Kernel(thisParticle, neighParticle, smoothingLength));
+
+//                            accPressureForce = accPressureForce + (neighMass * (thisPressure+neighPressure) / (neighDensity + neighDensity) * SpikyKernelGradientV_Kernel(thisParticle, neighParticle, smoothingLength));
+
+
+                            accPressureForce = accPressureForce + ( ((thisPressure/(thisDensity*thisDensity)) + (neighPressure/(neighDensity*neighDensity))) * SpikyKernelGradientV_Kernel(thisParticle, neighParticle, smoothingLength) );
                         }
                     }
                 }
@@ -599,11 +619,13 @@ __global__ void sphGPU_Kernels::ComputePressureForceFluidFluid_kernel(float3 *pr
 
         if(!accumulate)
         {
-            pressureForce[thisParticleGlobalIdx] = -1.0f * accPressureForce;
+//            pressureForce[thisParticleGlobalIdx] = -1.0f * accPressureForce;
+            pressureForce[thisParticleGlobalIdx] = -1.0f * thisMass* thisMass * accPressureForce;
         }
         else
         {
-            pressureForce[thisParticleGlobalIdx] = pressureForce[thisParticleGlobalIdx] + (-1.0f * accPressureForce);
+            pressureForce[thisParticleGlobalIdx] = pressureForce[thisParticleGlobalIdx] + (-1.0f *thisMass * thisMass * accPressureForce);
+//            pressureForce[thisParticleGlobalIdx] = pressureForce[thisParticleGlobalIdx] + (-1.0f * accPressureForce);
         }
     }
 }
@@ -680,11 +702,13 @@ __global__ void sphGPU_Kernels::ComputePressureForceFluidRigid_kernel(float3 *pr
 
         if(!accumulate)
         {
-            pressureForce[thisParticleGlobalIdx] = -30.0f * accPressureForce;
+            pressureForce[thisParticleGlobalIdx] = -1.0 * accPressureForce;
+//            pressureForce[thisParticleGlobalIdx] = -1.0 * thisMass * thisMass * accPressureForce;
         }
         else
         {
-            pressureForce[thisParticleGlobalIdx] = pressureForce[thisParticleGlobalIdx] + (-30.0f * accPressureForce);
+            pressureForce[thisParticleGlobalIdx] = pressureForce[thisParticleGlobalIdx] + (-1.0f * accPressureForce);
+//            pressureForce[thisParticleGlobalIdx] = pressureForce[thisParticleGlobalIdx] + (-1.0f * thisMass * thisMass * accPressureForce);
         }
     }
 }
@@ -840,9 +864,11 @@ __global__ void sphGPU_Kernels::ComputeSurfaceTensionForce_kernel(float3 *surfac
     }
 }
 
-__global__ void sphGPU_Kernels::ComputeForce_kernel(float3 *pressureForce,
+__global__ void sphGPU_Kernels::ComputeForce_kernel(/*float3 *force,*/
+                                                    float3 *pressureForce,
                                                     float3 *viscForce,
                                                     float3 *surfaceTensionForce,
+//                                                    const float3 gravity,
                                                     const float viscCoeff,
                                                     const float surfaceTension,
                                                     const float surfaceThreshold,
@@ -977,8 +1003,8 @@ __global__ void sphGPU_Kernels::ComputeForce_kernel(float3 *pressureForce,
                             float neighMassOverDen = ( (fabs(neighDensity)<FLT_EPSILON) ? 0.0f : neighMass / neighDensity );
                             accViscForce = accViscForce + ( neighMassOverDen * (neighVel - thisVel) * W );
 
-//                            accColourFieldGrad = accColourFieldGrad + ( neighMassOverDen * gradW );
-//                            accCurvature = accCurvature + (neighMassOverDen * -W);
+                            accColourFieldGrad = accColourFieldGrad + ( neighMassOverDen * gradW );
+                            accCurvature = accCurvature + (neighMassOverDen * -W);
                         }
                         else
                         {
@@ -990,44 +1016,99 @@ __global__ void sphGPU_Kernels::ComputeForce_kernel(float3 *pressureForce,
         }
 
 
-        if(!accumulate)
-        {
-            pressureForce[thisParticleGlobalIdx] = -1.0f * accPressureForce;
-        }
-        else
-        {
-            pressureForce[thisParticleGlobalIdx] = pressureForce[thisParticleGlobalIdx] + (-1.0f * accPressureForce);
-        }
+        accPressureForce = -1.0f * accPressureForce;
+        accPressureForce = accumulate ? pressureForce[thisParticleGlobalIdx] + accPressureForce : accPressureForce;
+        pressureForce[thisParticleGlobalIdx] = accPressureForce;
 
 
-        viscForce[thisParticleGlobalIdx] = -1.0f * viscCoeff * accViscForce;
+        accViscForce = -1.0f * viscCoeff * accViscForce;
+        viscForce[thisParticleGlobalIdx] = accViscForce;
 
 
-//        float colourFieldGradMag = length(accColourFieldGrad);
-//        if( colourFieldGradMag > surfaceThreshold )
+        float colourFieldGradMag = length(accColourFieldGrad);
+        float3 accSurfTenForce = (colourFieldGradMag > surfaceThreshold ) ? (-1.0f * surfaceTension * (accCurvature/colourFieldGradMag) * accColourFieldGrad) : make_float3(0.0f,0.0f,0.0f);
+        surfaceTensionForce[thisParticleGlobalIdx] = accSurfTenForce;
+
+
+
+
+
+//        // re-initialise forces to zero
+//        float3 accForce = make_float3(0.0f, 0.0f, 0.0f);
+
+//        // Add external force
+//        float3 extForce = externalForce[thisCellIdx];
+//        if(isnan(extForce.x) || isnan(extForce.y) || isnan(extForce.z))
 //        {
-//            accCurvature /= colourFieldGradMag;
-//            surfaceTensionForce[thisParticleGlobalIdx] = (surfaceTension * accCurvature * accColourFieldGrad);
+//            printf("nan external force\n");
 //        }
 //        else
 //        {
-//            surfaceTensionForce[thisParticleGlobalIdx] = make_float3(0.0f, 0.0f, 0.0f);
+//            accForce = accForce + extForce;
 //        }
+
+
+//        // Add pressure force
+//        if(isnan(accPressureForce.x) || isnan(accPressureForce.y) || isnan(accPressureForce.z))
+//        {
+//            printf("nan pressure force\n");
+//        }
+//        else
+//        {
+//            accForce = accForce + accPressureForce;
+//        }
+
+//        // Add Viscous force
+//        if(isnan(accViscForce.x) || isnan(accViscForce.y) || isnan(accViscForce.z))
+//        {
+//            printf("nan visc force\n");
+//        }
+//        else
+//        {
+//            accForce = accForce + accViscForce;
+//        }
+
+//        // Add surface tension force
+//        if(isnan(accSurfTenForce.x) || isnan(accSurfTenForce.y) || isnan(accSurfTenForce.z))
+//        {
+//            printf("nan surfTen force\n");
+//        }
+//        else
+//        {
+//            //printf("%f, %f, %f\n",surfTenForce.x, surfTenForce.y,surfTenForce.z);
+//            accForce = accForce + accSurfTenForce;
+//        }
+
+
+//        // Work out acceleration from force
+//        float3 acceleration = accForce / mass[thisParticleGlobalIdx];
+
+//        // Add gravity acceleration
+//        acceleration = acceleration + gravity;
+
+//        // Set particle force
+//        force[thisParticleGlobalIdx] = acceleration;
 
 }
 
-__global__ void sphGPU_Kernels::ComputeTotalForce_kernel(float3 *force,
-                                                     const float3 *externalForce,
-                                                     const float3 *pressureForce,
-                                                     const float3 *viscousForce,
-                                                     const float3 *surfaceTensionForce,
-                                                     const float *mass,
-                                                     const float3 *particles,
-                                                     const float3 *velocities,
-                                                     const uint *cellOcc,
-                                                     const uint *cellPartIdx,
-                                                     const uint numPoints,
-                                                     const float smoothingLength)
+__global__ void sphGPU_Kernels::ComputeTotalForce_kernel(const bool accumulatePressure,
+                                                         const bool accumulateViscous,
+                                                         const bool accumulateSurfTen,
+                                                         const bool accumulateExternal,
+                                                         const bool accumulateGravity,
+                                                         float3 *force,
+                                                         const float3 *externalForce,
+                                                         const float3 *pressureForce,
+                                                         const float3 *viscousForce,
+                                                         const float3 *surfaceTensionForce,
+                                                         const float3 gravity,
+                                                         const float *mass,
+                                                         const float3 *particles,
+                                                         const float3 *velocities,
+                                                         const uint *cellOcc,
+                                                         const uint *cellPartIdx,
+                                                         const uint numPoints,
+                                                         const float smoothingLength)
 {
     int thisCellIdx = blockIdx.x + (blockIdx.y * gridDim.x) + (blockIdx.z * gridDim.x * gridDim.y);
     int thisParticleGlobalIdx = cellPartIdx[thisCellIdx] + threadIdx.x;
@@ -1038,49 +1119,63 @@ __global__ void sphGPU_Kernels::ComputeTotalForce_kernel(float3 *force,
         float3 accForce = make_float3(0.0f, 0.0f, 0.0f);
 
         // Add external force
-        float3 extForce = externalForce[thisCellIdx];
-        if(isnan(extForce.x) || isnan(extForce.y) || isnan(extForce.z))
+        if(accumulateExternal)
         {
-            printf("nan external force\n");
-        }
-        else
-        {
-            accForce = accForce + extForce;
+            float3 extForce = externalForce[thisCellIdx];
+            if(isnan(extForce.x) || isnan(extForce.y) || isnan(extForce.z))
+            {
+                printf("nan external force\n");
+            }
+            else
+            {
+                accForce = accForce + extForce;
+            }
         }
 
 
         // Add pressure force
-        float3 pressForce = pressureForce[thisParticleGlobalIdx];
-        if(isnan(pressForce.x) || isnan(pressForce.y) || isnan(pressForce.z))
+        if(accumulatePressure)
         {
-            printf("nan pressure force\n");
+            float3 pressForce = pressureForce[thisParticleGlobalIdx];
+            if(isnan(pressForce.x) || isnan(pressForce.y) || isnan(pressForce.z))
+            {
+                printf("nan pressure force\n");
+            }
+            else
+            {
+                accForce = accForce + pressForce;
+            }
         }
-        else
-        {
-            accForce = accForce + pressForce;
-        }
+
 
         // Add Viscous force
-        float3 viscForce = viscousForce[thisParticleGlobalIdx];
-        if(isnan(viscForce.x) || isnan(viscForce.y) || isnan(viscForce.z))
+        if(accumulateViscous)
         {
-            printf("nan visc force\n");
-        }
-        else
-        {
-            accForce = accForce + viscForce;
+            float3 viscForce = viscousForce[thisParticleGlobalIdx];
+            if(isnan(viscForce.x) || isnan(viscForce.y) || isnan(viscForce.z))
+            {
+                printf("nan visc force\n");
+            }
+            else
+            {
+                accForce = accForce + viscForce;
+            }
         }
 
+
         // Add surface tension force
-        float3 surfTenForce = surfaceTensionForce[thisParticleGlobalIdx];
-        if(isnan(surfTenForce.x) || isnan(surfTenForce.y) || isnan(surfTenForce.z))
+        if(accumulateSurfTen)
         {
-            printf("nan surfTen force\n");
-        }
-        else
-        {
-            //printf("%f, %f, %f\n",surfTenForce.x, surfTenForce.y,surfTenForce.z);
-            accForce = accForce + surfTenForce;
+            float3 surfTenForce = surfaceTensionForce[thisParticleGlobalIdx];
+            if(isnan(surfTenForce.x) || isnan(surfTenForce.y) || isnan(surfTenForce.z))
+            {
+                printf("nan surfTen force\n");
+            }
+            else
+            {
+                //printf("%f, %f, %f\n",surfTenForce.x, surfTenForce.y,surfTenForce.z);
+                accForce = accForce + surfTenForce;
+            }
         }
 
 
@@ -1088,7 +1183,10 @@ __global__ void sphGPU_Kernels::ComputeTotalForce_kernel(float3 *force,
         float3 acceleration = accForce / mass[thisParticleGlobalIdx];
 
         // Add gravity acceleration
-        acceleration = acceleration + make_float3(0.0f, -9.81f, 0.0f);
+        if(accumulateGravity)
+        {
+            acceleration = acceleration + gravity;
+        }
 
         // Set particle force
         force[thisParticleGlobalIdx] = acceleration;

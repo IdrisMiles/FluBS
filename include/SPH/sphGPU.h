@@ -18,7 +18,8 @@ namespace sphGPU
                          uint *hash,
                          uint *cellOcc,
                          uint *cellPartIdx,
-                         const float massValue, const uint numCells,
+                         const float massValue,
+                         const uint numCells,
                          const uint numPoints);
 
     void ResetProperties(float3 *pressureForce,
@@ -31,7 +32,8 @@ namespace sphGPU
                          uint *hash,
                          uint *cellOcc,
                          uint *cellPartIdx,
-                         const float massValue, const uint numCells,
+                         const float massValue,
+                         const uint numCells,
                          const uint numPoints);
 
     void ResetProperties(float3 *pressureForce,
@@ -39,13 +41,18 @@ namespace sphGPU
                          float3 *surfTenForce,
                          float3 *externalForce,
                          float3 *totalForce,
+                         float *densityErr,
                          float * mass,
                          float *density,
                          float *pressure,
                          uint *hash,
                          uint *cellOcc,
                          uint *cellPartIdx,
-                         const float massValue, const uint numCells,
+                         const float massValue,
+                         const uint numCells,
+                         const uint numPoints);
+
+    void ResetTotalForce(float3 *totalForce,
                          const uint numPoints);
 
     void InitFluidAsCube(float3 *particles,
@@ -233,11 +240,17 @@ namespace sphGPU
 
     void ComputeTotalForce(const uint maxCellOcc,
                            const uint gridRes,
+                           const bool accumulatePressure,
+                           const bool accumulateViscous,
+                           const bool accumulateSurfTen,
+                           const bool accumulateExternal,
+                           const bool accumulateGravity,
                            float3 *force,
                            const float3 *externalForce,
                            const float3 *pressureForce,
                            const float3 *viscForce,
                            const float3 *surfaceTensionForce,
+                           const float3 gravity,
                            const float *mass,
                            const float3 *particles,
                            const float3 *velocities,
@@ -260,6 +273,37 @@ namespace sphGPU
                           float3 *velocities,
                           const float _gridDim,
                           const uint numPoints);
+
+
+
+    namespace pci
+    {
+//        void PredictIntegrate(const uint maxCellOcc,
+//                              const uint gridRes,
+//                              float3 *force,
+//                              float3 *particles,
+//                              float3 *velocities,
+//                              const float _dt,
+//                              const uint numPoints);
+
+//        void PredictDensity(const uint maxCellOcc,
+//                   const uint gridRes,);
+
+        void predictDensityVariation(const uint maxCellOcc,
+                                     const uint gridRes);
+
+        void ComputeMaxDensityVariation(const uint maxCellOcc,
+                                        const uint gridRes,
+                                        float &_maxDenVar);
+
+        void UpdatePressure(const uint maxCellOcc,
+                            const uint gridRes);
+
+        void ComputePressureForce(const uint maxCellOcc,
+                                  const uint gridRes);
+
+
+    }
 }
 
 #endif // SPHGPU_H

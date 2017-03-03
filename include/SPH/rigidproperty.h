@@ -12,9 +12,10 @@ public:
                   float _particleRadius = 0.2f,
                   float _restDensity = 998.36f,
                   float _smoothingLength = 1.2f,
+                  float3 _gravity = make_float3(0.0f, -9.8f, 0.0f),
                   bool _static = true,
                   bool _kinematic = false):
-        SphParticleProperty(_numParticles, _particleMass, _particleRadius, _restDensity, _smoothingLength),
+        SphParticleProperty(_numParticles, _particleMass, _particleRadius, _restDensity, _smoothingLength, _gravity),
         m_static(_static),
         m_kinematic(_kinematic)
     {

@@ -100,12 +100,15 @@ private:
 
     // Application specific members
     std::shared_ptr<Fluid> m_fluid;
+    std::shared_ptr<Fluid> m_algae;
     std::shared_ptr<Rigid> m_container;
+    std::shared_ptr<Rigid> m_staticRigid;
+    std::shared_ptr<Rigid> m_activeRigid;
     std::shared_ptr<FluidSystem> m_fluidSystem;
+    Mesh m_activeRigidMesh;
 
     std::shared_ptr<FluidRenderer> m_fluidRenderer;
-    std::shared_ptr<RigidRenderer> m_rigidRenderer;
-    std::shared_ptr<SphParticleRenderer> m_sphRenderer;
+    std::vector<std::shared_ptr<SphParticleRenderer>> m_sphRenderers;
 
     QTimer *m_drawTimer;
     QTimer *m_simTimer;

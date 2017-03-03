@@ -97,6 +97,7 @@ void sphGPU::ResetProperties(float3 *pressureForce,
                              float3 *surfTenForce,
                              float3 *externalForce,
                              float3 *totalForce,
+                             float *densityErr,
                              float * mass,
                              float *density,
                              float *pressure,
@@ -112,6 +113,7 @@ void sphGPU::ResetProperties(float3 *pressureForce,
     thrust::device_ptr<float3> surfTenForcePtr = thrust::device_pointer_cast(surfTenForce);
     thrust::device_ptr<float3> externalForcePtr = thrust::device_pointer_cast(externalForce);
     thrust::device_ptr<float3> totalForcePtr = thrust::device_pointer_cast(totalForce);
+    thrust::device_ptr<float> densityErrPtr = thrust::device_pointer_cast(densityErr);
     thrust::device_ptr<float> massPtr = thrust::device_pointer_cast(mass);
     thrust::device_ptr<float> densityPtr = thrust::device_pointer_cast(density);
     thrust::device_ptr<float> pressurePtr = thrust::device_pointer_cast(pressure);
@@ -124,12 +126,20 @@ void sphGPU::ResetProperties(float3 *pressureForce,
     thrust::fill(surfTenForcePtr, surfTenForcePtr+numPoints, make_float3(0.0f,0.0f,0.0f));
     thrust::fill(externalForcePtr, externalForcePtr+numPoints, make_float3(0.0f, 0.0f,0.0f));
     thrust::fill(totalForcePtr, totalForcePtr+numPoints, make_float3(0.0f,0.0f,0.0f));
+    thrust::fill(densityErrPtr, densityErrPtr+numPoints, 0.0f);
     thrust::fill(massPtr, massPtr+numPoints, massValue);
     thrust::fill(densityPtr, densityPtr+numPoints, 0.0f);
     thrust::fill(pressurePtr, pressurePtr+numPoints, 0.0f);
     thrust::fill(hashPtr, hashPtr+numPoints, 0u);
     thrust::fill(cellOccPtr, cellOccPtr+numCells, 0u);
     thrust::fill(cellPartIdxPtr, cellPartIdxPtr+numCells, 0u);
+}
+
+void sphGPU::ResetTotalForce(float3 *totalForce,
+                             const uint numPoints)
+{
+    thrust::device_ptr<float3> totalForcePtr = thrust::device_pointer_cast(totalForce);
+    thrust::fill(totalForcePtr, totalForcePtr+numPoints, make_float3(0.0f,0.0f,0.0f));
 }
 
 void sphGPU::ParticleHash(uint *hash, uint *cellOcc, float3 *particles, const uint numPoints, const uint gridRes, const float cellWidth)
@@ -416,12 +426,48 @@ void sphGPU::ComputeForce(const uint maxCellOcc,
                                                                 accumulate);
 }
 
-void sphGPU::ComputeTotalForce(const uint maxCellOcc, const uint gridRes, float3 *force, const float3 *externalForce, const float3 *pressureForce, const float3 *viscForce, const float3 *surfaceTensionForce, const float *mass, const float3 *particles, const float3 *velocities, const uint *cellOcc, const uint *cellPartIdx, const uint numPoints, const float smoothingLength)
+void sphGPU::ComputeTotalForce(const uint maxCellOcc,
+                               const uint gridRes,
+                               const bool accumulatePressure,
+                               const bool accumulateViscous,
+                               const bool accumulateSurfTen,
+                               const bool accumulateExternal,
+                               const bool accumulateGravity,
+                               float3 *force,
+                               const float3 *externalForce,
+                               const float3 *pressureForce,
+                               const float3 *viscForce,
+                               const float3 *surfaceTensionForce,
+                               const float3 gravity,
+                               const float *mass,
+                               const float3 *particles,
+                               const float3 *velocities,
+                               const uint *cellOcc,
+                               const uint *cellPartIdx,
+                               const uint numPoints,
+                               const float smoothingLength)
 {
     dim3 gridDim = dim3(gridRes, gridRes, gridRes);
     uint blockSize = std::min(maxCellOcc, 1024u);
 
-    sphGPU_Kernels::ComputeTotalForce_kernel<<<gridDim, blockSize>>>(force, externalForce, pressureForce, viscForce, surfaceTensionForce, mass, particles, velocities, cellOcc, cellPartIdx, numPoints, smoothingLength);
+    sphGPU_Kernels::ComputeTotalForce_kernel<<<gridDim, blockSize>>>(accumulatePressure,
+                                                                     accumulateViscous,
+                                                                     accumulateSurfTen,
+                                                                     accumulateExternal,
+                                                                     accumulateGravity,
+                                                                     force,
+                                                                     externalForce,
+                                                                     pressureForce,
+                                                                     viscForce,
+                                                                     surfaceTensionForce,
+                                                                     gravity,
+                                                                     mass,
+                                                                     particles,
+                                                                     velocities,
+                                                                     cellOcc,
+                                                                     cellPartIdx,
+                                                                     numPoints,
+                                                                     smoothingLength);
 }
 
 void sphGPU::Integrate(const uint maxCellOcc, const uint gridRes, float3 *force, float3 *particles, float3 *velocities, const float _dt, const uint numPoints)
@@ -449,3 +495,8 @@ void sphGPU::InitFluidAsCube(float3 *particles, float3 *velocities, float *densi
     sphGPU_Kernels::InitParticleAsCube_Kernel<<<gridDim, blockDim>>>(particles, velocities, densities, restDensity, numParticles, numPartsPerAxis, scale);
 
 }
+
+
+//---------------------------------------------------------------------------------------------------------
+// PSCI SPH
+

@@ -34,9 +34,12 @@ void main()
     vec3 densityColour = vec3(0,0,0);
 
     float densityRatio = fDen/uRestDen;
+//    densityColour = (densityRatio < 1.0) ?
+//                mix(vec3(1.0f,0.0f,0.0f), vec3(0.2f,0.5f,1.0f), densityRatio) :
+//                mix(vec3(0.2f,0.5f,1.0f), vec3(1.0f,1.0f,1.0f), densityRatio-1.0f);
     densityColour = (densityRatio < 1.0) ?
-                mix(vec3(1.0f,0.0f,0.0f), vec3(0.2f,0.5f,1.0f), densityRatio) :
-                mix(vec3(0.2f,0.5f,1.0f), vec3(1.0f,1.0f,1.0f), densityRatio-1.0f);
+                mix(vec3(1.0f,0.0f,0.0f), uColour, densityRatio) :
+                mix(uColour, vec3(1.0f,1.0f,1.0f), densityRatio-1.0f);
 
     vec3 shadedColour = clamp((densityColour * 0.4f) + (densityColour * 0.6f * NL), 0.0f, 1.0f);
 

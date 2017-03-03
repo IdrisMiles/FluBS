@@ -152,16 +152,26 @@ void OpenGLScene::initializeGL()
     // Set up simulation here
 
     auto fluidProps = std::shared_ptr<FluidProperty>(new FluidProperty());
+    auto algaeProps = std::shared_ptr<FluidProperty>(new FluidProperty(1));
     auto fluidSolverProps = std::shared_ptr<FluidSolverProperty>(new FluidSolverProperty());
-    auto rigidProps = std::shared_ptr<RigidProperty>(new RigidProperty());
+    auto containerProps = std::shared_ptr<RigidProperty>(new RigidProperty());
+    auto cubeProps = std::shared_ptr<RigidProperty>(new RigidProperty());
+    auto activeRigidProps = std::shared_ptr<RigidProperty>(new RigidProperty(8000,
+                                                                             1.0f,
+                                                                             0.2f,
+                                                                             998.36f,
+                                                                             1.2f,
+                                                                             make_float3(0.0f, -9.81f, 0.0f),
+                                                                             false));
 
     // fluid
     m_fluid = std::shared_ptr<Fluid>(new Fluid(fluidProps));
+    m_algae = std::shared_ptr<Fluid>(new Fluid(algaeProps));
 
     // rigid
     Mesh boundary = Mesh();
     float dim = 0.95f* fluidSolverProps->gridResolution*fluidSolverProps->gridCellWidth;
-    float rad = rigidProps->particleRadius;
+    float rad = containerProps->particleRadius;
     int numRigidAxis = ceil(dim / (rad*2.0f));
     for(int z=0; z<numRigidAxis; z++)
     {
@@ -177,14 +187,97 @@ void OpenGLScene::initializeGL()
             }
         }
     }
+    containerProps->numParticles = boundary.verts.size();
+    m_container = std::shared_ptr<Rigid>(new Rigid(containerProps, boundary));
 
-    rigidProps->numParticles = boundary.verts.size();
-    m_container = std::shared_ptr<Rigid>(new Rigid(rigidProps, boundary));
+    Mesh primitivesMesh = Mesh();
+    dim = 0.95f* fluidSolverProps->gridResolution*fluidSolverProps->gridCellWidth;
+    rad = cubeProps->particleRadius;
+    numRigidAxis = ceil((dim*0.1) / (rad*2.0f));
+    for(int z=0; z<numRigidAxis; z++)
+    {
+        for(int y=0; y<numRigidAxis; y++)
+        {
+            for(int x=0; x<numRigidAxis; x++)
+            {
+                if(x==0 || x==numRigidAxis-1 || y==0 || y==numRigidAxis-1 || z==0 || z==numRigidAxis-1)
+                {
+                    glm::vec3 pos((x*rad*2.0f)-(dim*0.1f*0.5f), (y*rad*2.0f)-(dim*0.1f*0.5f), (z*rad*2.0f)-(dim*0.1f*0.5f));
+
+                    primitivesMesh.verts.push_back(pos + glm::vec3(dim*0.2f, -dim*0.4f, dim*0.2f));
+
+                    primitivesMesh.verts.push_back(pos + glm::vec3(dim*0.2f, -dim*0.4f, -dim*0.2f));
+
+                    primitivesMesh.verts.push_back(pos + glm::vec3(-dim*0.2f, -dim*0.4f, dim*0.2f));
+
+                    primitivesMesh.verts.push_back(pos + glm::vec3(-dim*0.2f, -dim*0.4f, -dim*0.2f));
+                }
+            }
+        }
+    }
+
+    int _stacks = 15;
+    int _slices = 40;
+    float _radius = 2.0f;
+    glm::vec3 _pos(dim*0.0f, -dim*0.4f, -dim*0.0f);
+    for( int t = 1 ; t < _stacks-1 ; t++ )
+    {
+        float theta1 = ( (float)(t)/(_stacks-1) )*glm::pi<float>();
+
+        for( int p = 0 ; p < _slices ; p++ )
+        {
+            float phi1 = ( (float)(p)/(_slices-1) )*2*glm::pi<float>();
+
+            glm::vec3 vert = glm::vec3(sin(theta1)*cos(phi1), cos(theta1), -sin(theta1)*sin(phi1));
+            primitivesMesh.verts.push_back(_pos + (_radius*vert));
+        }
+    }
+    primitivesMesh.verts.push_back(_pos + (_radius * glm::vec3(0.0f, 1.0f, 0.0f)));
+    primitivesMesh.verts.push_back(_pos + (_radius * glm::vec3(0.0f, -1.0f, 0.0f)));
+
+    cubeProps->numParticles = primitivesMesh.verts.size();
+    m_staticRigid = std::shared_ptr<Rigid>(new Rigid(cubeProps, primitivesMesh));
+
+
+//    Mesh torus = MeshLoader::LoadMesh("geo/Bow_01_01.dae")[0];
+//    Mesh particleTorus = MeshSampler::BaryCoord::SampleMesh(torus, 500);
+//    glm::mat4 t = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+//    t = glm::translate(t, glm::vec3(0.0f, 0.0f, dim*0.37f));
+//    for(auto &v:particleTorus.verts)
+//    {
+//        v *= 0.8f;
+//        v = t * glm::vec4(v, 1.0f);
+//    }
+    m_activeRigidMesh = Mesh();
+    for(int z=0; z<numRigidAxis; z++)
+    {
+        for(int y=0; y<numRigidAxis; y++)
+        {
+            for(int x=0; x<numRigidAxis; x++)
+            {
+                if(x==0 || x==numRigidAxis-1 || y==0 || y==numRigidAxis-1 || z==0 || z==numRigidAxis-1)
+                {
+                    glm::vec3 pos((x*rad*2.0f)-(dim*0.1f*0.5f), (y*rad*2.0f)-(dim*0.1f*0.5f), (z*rad*2.0f)-(dim*0.1f*0.5f));
+
+                    m_activeRigidMesh.verts.push_back(pos + glm::vec3(dim*0.0f, -dim*0.4f, 0.0f));
+                }
+            }
+        }
+    }
+
+    activeRigidProps->numParticles = m_activeRigidMesh.verts.size();
+    m_activeRigid = std::shared_ptr<Rigid>(new Rigid(activeRigidProps, m_activeRigidMesh));
+
+
+
 
     // Fluid system
     m_fluidSystem = std::shared_ptr<FluidSystem>(new FluidSystem(fluidSolverProps));
     m_fluidSystem->SetContainer(m_container);
     m_fluidSystem->AddFluid(m_fluid);
+    m_fluidSystem->AddRigid(m_staticRigid);
+    m_fluidSystem->AddRigid(m_activeRigid);
+    m_fluidSystem->AddAlgae(m_algae);
 
     emit FluidInitialised(fluidProps);
 
@@ -197,12 +290,22 @@ void OpenGLScene::initializeGL()
     m_fluidRenderer->SetCubeMap(m_skyboxTex);
     m_fluidRenderer->SetSphParticles(m_fluid);
 
-    m_sphRenderer = std::shared_ptr<SphParticleRenderer>(new SphParticleRenderer());
-    m_sphRenderer->SetSphParticles(m_fluid);
 
-    m_rigidRenderer = std::shared_ptr<RigidRenderer>(new RigidRenderer());
-    m_rigidRenderer->SetSphParticles(m_container);
+    m_sphRenderers.push_back(std::shared_ptr<SphParticleRenderer>(new SphParticleRenderer()));
+    m_sphRenderers.back()->SetSphParticles(m_fluid);
+    m_sphRenderers.back()->SetColour(glm::vec3(0.2f, 0.4f, 1.0f));
 
+    m_sphRenderers.push_back(std::shared_ptr<SphParticleRenderer>(new SphParticleRenderer()));
+    m_sphRenderers.back()->SetSphParticles(m_staticRigid);
+    m_sphRenderers.back()->SetColour(glm::vec3(0.2f, 0.2f, 0.2f));
+
+    m_sphRenderers.push_back(std::shared_ptr<SphParticleRenderer>(new SphParticleRenderer()));
+    m_sphRenderers.back()->SetSphParticles(m_activeRigid);
+    m_sphRenderers.back()->SetColour(glm::vec3(0.2f, 0.4f, 1.0f));
+
+    m_sphRenderers.push_back(std::shared_ptr<SphParticleRenderer>(new SphParticleRenderer()));
+    m_sphRenderers.back()->SetSphParticles(m_algae);
+    m_sphRenderers.back()->SetColour(glm::vec3(0.2f, 1.0f, 0.3f));
 
     //---------------------------------------------------------------------------------------
     // Start simulation and drawing rimers
@@ -232,14 +335,16 @@ void OpenGLScene::paintGL()
     DrawSkybox();
 
     // Draw fluid
-    m_fluidRenderer->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, glm::mat4(normalMatrix), m_lightPos, camPos);
-    m_fluidRenderer->Draw();
+//    m_fluidRenderer->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, glm::mat4(normalMatrix), m_lightPos, camPos);
+//    m_fluidRenderer->Draw();
 
-//    m_sphRenderer->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, glm::mat4(normalMatrix), m_lightPos, camPos);
-//    m_sphRenderer->Draw();
 
-//    m_rigidRenderer->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, glm::mat4(normalMatrix), m_lightPos, camPos);
-//    m_rigidRenderer->Draw();
+    for(auto &&sr: m_sphRenderers)
+    {
+        sr->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, glm::mat4(normalMatrix), m_lightPos, camPos);
+        sr->Draw();
+    }
+
 
     //---------------------------------------------------------------------------------------
 
@@ -255,6 +360,14 @@ void OpenGLScene::UpdateSim()
     gettimeofday(&tim, NULL);
     t1=tim.tv_sec+(tim.tv_usec/1000000.0);
 
+    static float i=0.0f;
+    i+=0.2f;
+    Mesh tmp = Mesh();
+    for(auto &v: m_activeRigidMesh.verts)
+    {
+        tmp.verts.push_back(v + glm::vec3(5.0f*sin(glm::radians(i)), 0.0f, 0.0f));
+    }
+    m_activeRigid->UpdateMesh(tmp);
 
     m_fluidSystem->StepSimulation();
 

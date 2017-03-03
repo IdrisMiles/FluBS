@@ -7,7 +7,7 @@ class FluidProperty : public SphParticleProperty
 {
 
 public:
-    FluidProperty(unsigned int _numParticles = 8000,
+    FluidProperty(unsigned int _numParticles = 16000,
                   float _particleMass = 1.0f,
                   float _particleRadius = 0.2f,
                   float _restDensity = 998.36f,
@@ -16,8 +16,9 @@ public:
                   float _gasStiffness = 100.0f,
                   float _viscosity = 0.1f,
                   float _smoothingLength = 1.2f,
+                  float3 _gravity = make_float3(0.0f, -9.8f, 0.0f),
                   bool _play = false):
-        SphParticleProperty(_numParticles, _particleMass, _particleRadius, _restDensity, _smoothingLength),
+        SphParticleProperty(_numParticles, _particleMass, _particleRadius, _restDensity, _smoothingLength, _gravity),
         surfaceTension(_surfaceTension),
         surfaceThreshold(_surfaceThreshold),
         gasStiffness(_gasStiffness),
