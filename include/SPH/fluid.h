@@ -59,6 +59,13 @@ protected:
     float *d_densityErrPtr;
 
 
+    // PCI SPH vars
+    // https://graphics.ethz.ch/~sobarbar/papers/Sol09/Sol09.pdf
+    // Euqation 8.
+    float m_pciBeta; //dt^2 * m^2 * (2/restDensity^2)
+    float m_pciSigma;
+
+
 };
 
 #endif // FLUID_H

@@ -7,6 +7,11 @@
 #include "FluidSystem/fluidsolverproperty.h"
 #include "SPH/sph.h"
 
+
+/// @author Idris Miles
+/// @version 1.0
+
+
 class Poly6Kernel;
 class SpikyKernel;
 

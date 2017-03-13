@@ -14,7 +14,7 @@ CC            = gcc
 CXX           = g++
 DEFINES       = -DQT_QML_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -g -Wall -W -D_REENTRANT -fPIC $(DEFINES)
-CXXFLAGS      = -pipe -g -std=gnu++11 -Wall -W -D_REENTRANT -fPIC $(DEFINES)
+CXXFLAGS      = -pipe -std=c++11 -g -std=gnu++11 -Wall -W -D_REENTRANT -fPIC $(DEFINES)
 INCPATH       = -I. -Iinclude -isystem /usr/local/include -isystem /usr/include -I../../../dev/include -Icuda_inc -I$(CUDA_PATH)/include -I$(CUDA_PATH)/include/cuda -I../../../Qt5.7.0/5.7/gcc_64/include -I../../../Qt5.7.0/5.7/gcc_64/include/QtOpenGL -I../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets -I../../../Qt5.7.0/5.7/gcc_64/include/QtGui -I../../../Qt5.7.0/5.7/gcc_64/include/QtCore -Imoc -Iui -I../../../Qt5.7.0/5.7/gcc_64/mkspecs/linux-g++
 QMAKE         = /home/idris/Qt5.7.0/5.7/gcc_64/bin/qmake
 DEL_FILE      = rm -f
@@ -658,30 +658,30 @@ compiler_cuda_make_all: cuda_obj/poly6kernel_cuda.o cuda_obj/smoothingKernel_cud
 compiler_cuda_clean:
 	-$(DEL_FILE) cuda_obj/poly6kernel_cuda.o cuda_obj/smoothingKernel_cuda.o cuda_obj/smoothkernel_cuda.o cuda_obj/sphGPU_cuda.o cuda_obj/sphGPU_Kernels_cuda.o cuda_obj/spikykernel_cuda.o cuda_obj/vec_ops_cuda.o
 cuda_obj/poly6kernel_cuda.o: cuda_src/poly6kernel.cu
-	/usr/bin/nvcc -m64 -arch=sm_50 -c -o cuda_obj/poly6kernel_cuda.o cuda_src/poly6kernel.cu -ccbin g++ --use_fast_math -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I/home/idris/uni/major/dev/cuda_inc -I$(CUDA_PATH)/include -I$(CUDA_PATH)/include/cuda
+	/usr/bin/nvcc -m64 -arch=sm_50 -c -o cuda_obj/poly6kernel_cuda.o cuda_src/poly6kernel.cu -ccbin g++ --use_fast_math -std=c++11 -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I/home/idris/uni/major/dev/cuda_inc -I$(CUDA_PATH)/include -I$(CUDA_PATH)/include/cuda
 
 cuda_obj/smoothingKernel_cuda.o: cuda_src/smoothingKernel.cu
-	/usr/bin/nvcc -m64 -arch=sm_50 -c -o cuda_obj/smoothingKernel_cuda.o cuda_src/smoothingKernel.cu -ccbin g++ --use_fast_math -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I/home/idris/uni/major/dev/cuda_inc -I$(CUDA_PATH)/include -I$(CUDA_PATH)/include/cuda
+	/usr/bin/nvcc -m64 -arch=sm_50 -c -o cuda_obj/smoothingKernel_cuda.o cuda_src/smoothingKernel.cu -ccbin g++ --use_fast_math -std=c++11 -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I/home/idris/uni/major/dev/cuda_inc -I$(CUDA_PATH)/include -I$(CUDA_PATH)/include/cuda
 
 cuda_obj/smoothkernel_cuda.o: cuda_src/smoothkernel.cu
-	/usr/bin/nvcc -m64 -arch=sm_50 -c -o cuda_obj/smoothkernel_cuda.o cuda_src/smoothkernel.cu -ccbin g++ --use_fast_math -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I/home/idris/uni/major/dev/cuda_inc -I$(CUDA_PATH)/include -I$(CUDA_PATH)/include/cuda
+	/usr/bin/nvcc -m64 -arch=sm_50 -c -o cuda_obj/smoothkernel_cuda.o cuda_src/smoothkernel.cu -ccbin g++ --use_fast_math -std=c++11 -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I/home/idris/uni/major/dev/cuda_inc -I$(CUDA_PATH)/include -I$(CUDA_PATH)/include/cuda
 
 cuda_obj/sphGPU_cuda.o: include/SPH/sphGPU.h \
 		cuda_inc/sphGPU_Kernels.cuh \
 		cuda_src/sphGPU.cu
-	/usr/bin/nvcc -m64 -arch=sm_50 -c -o cuda_obj/sphGPU_cuda.o cuda_src/sphGPU.cu -ccbin g++ --use_fast_math -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I/home/idris/uni/major/dev/cuda_inc -I$(CUDA_PATH)/include -I$(CUDA_PATH)/include/cuda
+	/usr/bin/nvcc -m64 -arch=sm_50 -c -o cuda_obj/sphGPU_cuda.o cuda_src/sphGPU.cu -ccbin g++ --use_fast_math -std=c++11 -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I/home/idris/uni/major/dev/cuda_inc -I$(CUDA_PATH)/include -I$(CUDA_PATH)/include/cuda
 
 cuda_obj/sphGPU_Kernels_cuda.o: cuda_inc/sphGPU_Kernels.cuh \
 		cuda_inc/vec_ops.cuh \
 		cuda_inc/smoothingKernel.cuh \
 		cuda_src/sphGPU_Kernels.cu
-	/usr/bin/nvcc -m64 -arch=sm_50 -c -o cuda_obj/sphGPU_Kernels_cuda.o cuda_src/sphGPU_Kernels.cu -ccbin g++ --use_fast_math -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I/home/idris/uni/major/dev/cuda_inc -I$(CUDA_PATH)/include -I$(CUDA_PATH)/include/cuda
+	/usr/bin/nvcc -m64 -arch=sm_50 -c -o cuda_obj/sphGPU_Kernels_cuda.o cuda_src/sphGPU_Kernels.cu -ccbin g++ --use_fast_math -std=c++11 -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I/home/idris/uni/major/dev/cuda_inc -I$(CUDA_PATH)/include -I$(CUDA_PATH)/include/cuda
 
 cuda_obj/spikykernel_cuda.o: cuda_src/spikykernel.cu
-	/usr/bin/nvcc -m64 -arch=sm_50 -c -o cuda_obj/spikykernel_cuda.o cuda_src/spikykernel.cu -ccbin g++ --use_fast_math -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I/home/idris/uni/major/dev/cuda_inc -I$(CUDA_PATH)/include -I$(CUDA_PATH)/include/cuda
+	/usr/bin/nvcc -m64 -arch=sm_50 -c -o cuda_obj/spikykernel_cuda.o cuda_src/spikykernel.cu -ccbin g++ --use_fast_math -std=c++11 -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I/home/idris/uni/major/dev/cuda_inc -I$(CUDA_PATH)/include -I$(CUDA_PATH)/include/cuda
 
 cuda_obj/vec_ops_cuda.o: cuda_src/vec_ops.cu
-	/usr/bin/nvcc -m64 -arch=sm_50 -c -o cuda_obj/vec_ops_cuda.o cuda_src/vec_ops.cu -ccbin g++ --use_fast_math -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I/home/idris/uni/major/dev/cuda_inc -I$(CUDA_PATH)/include -I$(CUDA_PATH)/include/cuda
+	/usr/bin/nvcc -m64 -arch=sm_50 -c -o cuda_obj/vec_ops_cuda.o cuda_src/vec_ops.cu -ccbin g++ --use_fast_math -std=c++11 -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I/home/idris/uni/major/dev/cuda_inc -I$(CUDA_PATH)/include -I$(CUDA_PATH)/include/cuda
 
 compiler_rcc_make_all:
 compiler_rcc_clean:

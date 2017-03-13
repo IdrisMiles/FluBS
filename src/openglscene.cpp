@@ -249,6 +249,9 @@ void OpenGLScene::initializeGL()
 //        v = t * glm::vec4(v, 1.0f);
 //    }
     m_activeRigidMesh = Mesh();
+    dim = 1.0f* fluidSolverProps->gridResolution*fluidSolverProps->gridCellWidth;
+    rad = cubeProps->particleRadius;
+    numRigidAxis = ceil((0.2*dim) / (rad*2.0f));
     for(int z=0; z<numRigidAxis; z++)
     {
         for(int y=0; y<numRigidAxis; y++)
@@ -257,7 +260,7 @@ void OpenGLScene::initializeGL()
             {
                 if(x==0 || x==numRigidAxis-1 || y==0 || y==numRigidAxis-1 || z==0 || z==numRigidAxis-1)
                 {
-                    glm::vec3 pos((x*rad*2.0f)-(dim*0.1f*0.5f), (y*rad*2.0f)-(dim*0.1f*0.5f), (z*rad*2.0f)-(dim*0.1f*0.5f));
+                    glm::vec3 pos((x*rad*2.0f)-(dim*0.2f*0.5f), (y*rad*2.0f)-(dim*0.2f*0.5f), (z*rad*2.0f)-(dim*0.2f*0.5f));
 
                     m_activeRigidMesh.verts.push_back(pos + glm::vec3(dim*0.0f, -dim*0.4f, 0.0f));
                 }
@@ -360,14 +363,16 @@ void OpenGLScene::UpdateSim()
     gettimeofday(&tim, NULL);
     t1=tim.tv_sec+(tim.tv_usec/1000000.0);
 
-    static float i=0.0f;
-    i+=0.2f;
-    Mesh tmp = Mesh();
-    for(auto &v: m_activeRigidMesh.verts)
-    {
-        tmp.verts.push_back(v + glm::vec3(5.0f*sin(glm::radians(i)), 0.0f, 0.0f));
-    }
-    m_activeRigid->UpdateMesh(tmp);
+//    static float i=0.0f;
+//    i+=0.1f;
+//    Mesh tmp = Mesh();
+//    glm::mat4 t = glm::rotate(glm::mat4(1.0f), glm::radians(i), glm::vec3(0.0f, 1.0f, 0.0f));
+//    for(auto &v: m_activeRigidMesh.verts)
+//    {
+//        glm::vec3 vert = glm::vec3(t * glm::vec4(v, 1.0f));
+//        tmp.verts.push_back(vert + glm::vec3(5.0f + 5.0f*sin(glm::radians(i)), 0.0f, 0.0f));
+//    }
+//    m_activeRigid->UpdateMesh(tmp);
 
     m_fluidSystem->StepSimulation();
 

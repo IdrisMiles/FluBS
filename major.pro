@@ -7,6 +7,8 @@ TARGET = Major
 DESTDIR = ./bin
 TEMPLATE = app
 
+QMAKE_CXXFLAGS += -std=c++11
+CONFIG += c++11
 
 SOURCES += $$PWD/src/*.cpp              \
             $$PWD/src/MeshSampler/*.cpp \
@@ -57,7 +59,7 @@ NVCC = $$CUDA_PATH/bin/nvcc
 SYSTEM_NAME = unix
 SYSTEM_TYPE = 64
 GENCODE_FLAGS += -arch=sm_50
-NVCC_OPTIONS =  -ccbin g++ --use_fast_math #-dc
+NVCC_OPTIONS =  -ccbin g++ --use_fast_math -std=c++11 #-dc
 
 # include paths
 INCLUDEPATH += $(CUDA_PATH)/include $(CUDA_PATH)/include/cuda
