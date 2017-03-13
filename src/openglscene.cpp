@@ -344,7 +344,7 @@ void OpenGLScene::paintGL()
 
     for(auto &&sr: m_sphRenderers)
     {
-        sr->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, glm::mat4(normalMatrix), m_lightPos, camPos);
+        sr->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, normalMatrix, m_lightPos, camPos);
         sr->Draw();
     }
 
@@ -363,16 +363,16 @@ void OpenGLScene::UpdateSim()
     gettimeofday(&tim, NULL);
     t1=tim.tv_sec+(tim.tv_usec/1000000.0);
 
-//    static float i=0.0f;
-//    i+=0.1f;
-//    Mesh tmp = Mesh();
-//    glm::mat4 t = glm::rotate(glm::mat4(1.0f), glm::radians(i), glm::vec3(0.0f, 1.0f, 0.0f));
-//    for(auto &v: m_activeRigidMesh.verts)
-//    {
-//        glm::vec3 vert = glm::vec3(t * glm::vec4(v, 1.0f));
-//        tmp.verts.push_back(vert + glm::vec3(5.0f + 5.0f*sin(glm::radians(i)), 0.0f, 0.0f));
-//    }
-//    m_activeRigid->UpdateMesh(tmp);
+   static float i=0.0f;
+   i+=0.1f;
+   Mesh tmp = Mesh();
+   glm::mat4 t = glm::rotate(glm::mat4(1.0f), glm::radians(i), glm::vec3(0.0f, 1.0f, 0.0f));
+   for(auto &v: m_activeRigidMesh.verts)
+   {
+       glm::vec3 vert = glm::vec3(t * glm::vec4(v, 1.0f));
+       tmp.verts.push_back(vert + glm::vec3(5.0f + 5.0f*sin(glm::radians(i)), 0.0f, 0.0f));
+   }
+   m_activeRigid->UpdateMesh(tmp);
 
     m_fluidSystem->StepSimulation();
 
