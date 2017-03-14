@@ -4,37 +4,33 @@
 #include <glm/gtx/transform.hpp>
 
 
-Fluid::Fluid(std::shared_ptr<FluidProperty> _fluidProperty)
+Fluid::Fluid(std::shared_ptr<FluidProperty> _fluidProperty):
+    m_property(_fluidProperty),
+    m_positionMapped(false),
+    m_velocityMapped(false),
+    m_densityMapped(false),
+    m_massMapped(false),
+    m_pressureMapped(false)
 {
-    m_fluidProperty = _fluidProperty;
-
-    m_positionMapped = false;
-    m_velocityMapped = false;
-    m_densityMapped = false;
-    m_massMapped = false;
-    m_pressureMapped = false;
-
     Init();
 }
 
-Fluid::Fluid(std::shared_ptr<FluidProperty> _fluidProperty, Mesh _mesh)
+Fluid::Fluid(std::shared_ptr<FluidProperty> _fluidProperty, Mesh _mesh):
+    m_property(_fluidProperty),
+    m_mesh(_mesh),
+    m_positionMapped(false),
+    m_velocityMapped(false),
+    m_densityMapped(false),
+    m_massMapped(false),
+    m_pressureMapped(false)
 {
-    m_fluidProperty = _fluidProperty;
-    m_mesh = _mesh;
-
-    m_positionMapped = false;
-    m_velocityMapped = false;
-    m_densityMapped = false;
-    m_massMapped = false;
-    m_pressureMapped = false;
-
     Init();
     InitFluidAsMesh();
 }
 
 Fluid::~Fluid()
 {
-    m_fluidProperty = nullptr;
+    m_property = nullptr;
     CleanUpGL();
     CleanUpCUDAMemory();
 }
@@ -69,18 +65,18 @@ void Fluid::InitCUDAMemory()
     cudaGraphicsGLRegisterBuffer(&m_pressBO_CUDA, m_pressBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
 
     // particle forces
-    cudaMalloc(&d_pressureForcePtr, m_fluidProperty->numParticles * sizeof(float3));
-    cudaMalloc(&d_viscousForcePtr, m_fluidProperty->numParticles * sizeof(float3));
-    cudaMalloc(&d_surfaceTensionForcePtr, m_fluidProperty->numParticles * sizeof(float3));
-    cudaMalloc(&d_gravityForcePtr, m_fluidProperty->numParticles * sizeof(float3));
-    cudaMalloc(&d_externalForcePtr, m_fluidProperty->numParticles * sizeof(float3));
-    cudaMalloc(&d_totalForcePtr, m_fluidProperty->numParticles * sizeof(float3));
-    cudaMalloc(&d_predictPositionPtr, m_fluidProperty->numParticles * sizeof(float3));
-    cudaMalloc(&d_predictVelocityPtr, m_fluidProperty->numParticles * sizeof(float3));
-    cudaMalloc(&d_densityErrPtr, m_fluidProperty->numParticles * sizeof(float));
+    cudaMalloc(&d_pressureForcePtr, m_property->numParticles * sizeof(float3));
+    cudaMalloc(&d_viscousForcePtr, m_property->numParticles * sizeof(float3));
+    cudaMalloc(&d_surfaceTensionForcePtr, m_property->numParticles * sizeof(float3));
+    cudaMalloc(&d_gravityForcePtr, m_property->numParticles * sizeof(float3));
+    cudaMalloc(&d_externalForcePtr, m_property->numParticles * sizeof(float3));
+    cudaMalloc(&d_totalForcePtr, m_property->numParticles * sizeof(float3));
+    cudaMalloc(&d_predictPositionPtr, m_property->numParticles * sizeof(float3));
+    cudaMalloc(&d_predictVelocityPtr, m_property->numParticles * sizeof(float3));
+    cudaMalloc(&d_densityErrPtr, m_property->numParticles * sizeof(float));
 
     // particle hash
-    cudaMalloc(&d_particleHashIdPtr, m_fluidProperty->numParticles * sizeof(unsigned int));
+    cudaMalloc(&d_particleHashIdPtr, m_property->numParticles * sizeof(unsigned int));
 }
 
 void Fluid::InitGL()
@@ -94,35 +90,35 @@ void Fluid::InitVAO()
     // Setup our pos buffer object.
     m_posBO.create();
     m_posBO.bind();
-    m_posBO.allocate(m_fluidProperty->numParticles * sizeof(float3));
+    m_posBO.allocate(m_property->numParticles * sizeof(float3));
     m_posBO.release();
 
 
     // Set up velocity buffer object
     m_velBO.create();
     m_velBO.bind();
-    m_velBO.allocate(m_fluidProperty->numParticles * sizeof(float3));
+    m_velBO.allocate(m_property->numParticles * sizeof(float3));
     m_velBO.release();
 
 
     // Set up density buffer object
     m_denBO.create();
     m_denBO.bind();
-    m_denBO.allocate(m_fluidProperty->numParticles * sizeof(float));
+    m_denBO.allocate(m_property->numParticles * sizeof(float));
     m_denBO.release();
 
 
     // Set up mass buffer object
     m_massBO.create();
     m_massBO.bind();
-    m_massBO.allocate(m_fluidProperty->numParticles * sizeof(float));
+    m_massBO.allocate(m_property->numParticles * sizeof(float));
     m_massBO.release();
 
 
     // Set up pressure buffer object
     m_pressBO.create();
     m_pressBO.bind();
-    m_pressBO.allocate(m_fluidProperty->numParticles * sizeof(float));
+    m_pressBO.allocate(m_property->numParticles * sizeof(float));
     m_pressBO.release();
 }
 
@@ -246,7 +242,7 @@ void Fluid::ReleaseDensityErrPtr()
 
 FluidProperty* Fluid::GetProperty()
 {
-    return m_fluidProperty.get();
+    return m_property.get();
 }
 
 

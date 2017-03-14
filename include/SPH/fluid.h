@@ -50,7 +50,7 @@ protected:
 
 
     // specfic simulation Data
-    std::shared_ptr<FluidProperty> m_fluidProperty;
+    std::shared_ptr<FluidProperty> m_property;
     float3* d_viscousForcePtr;
     float3* d_surfaceTensionForcePtr;
 

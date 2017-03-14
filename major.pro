@@ -7,8 +7,8 @@ TARGET = Major
 DESTDIR = ./bin
 TEMPLATE = app
 
-QMAKE_CXXFLAGS += -std=c++11
-CONFIG += c++11
+CONFIG += console c++11
+QMAKE_CXXFLAGS += -std=c++11 -g
 
 SOURCES += $$PWD/src/*.cpp              \
             $$PWD/src/MeshSampler/*.cpp \
@@ -51,15 +51,16 @@ UI_DIR += ./ui
 
 HEADERS += $$PWD/cuda_inc/*.cuh
 
-INCLUDEPATH += $$PWD/cuda_inc
-CUDA_SOURCES += $$PWD/cuda_src/*.cu
+INCLUDEPATH +=  ./cuda_inc \
+                ./include
+CUDA_SOURCES += ./cuda_src/*.cu
 CUDA_PATH = /usr
 NVCC = $$CUDA_PATH/bin/nvcc
 
 SYSTEM_NAME = unix
 SYSTEM_TYPE = 64
 GENCODE_FLAGS += -arch=sm_50
-NVCC_OPTIONS =  -ccbin g++ --use_fast_math -std=c++11 #-dc
+NVCC_OPTIONS = -ccbin g++ --use_fast_math --compiler-options -fno-strict-aliasing --ptxas-options=-v #-rdc=true
 
 # include paths
 INCLUDEPATH += $(CUDA_PATH)/include $(CUDA_PATH)/include/cuda
@@ -75,7 +76,7 @@ LIBS += -lcudart -lcurand #-lcudadevrt
 
 cuda.input = CUDA_SOURCES
 cuda.output = $$CUDA_OBJECTS_DIR/${QMAKE_FILE_BASE}_cuda.o
-cuda.commands = $$NVCC -m$$SYSTEM_TYPE $$GENCODE_FLAGS -c -o ${QMAKE_FILE_OUT} ${QMAKE_FILE_NAME} $$NVCC_OPTIONS $$CUDA_INC #--relocatable-device-code=true --compile
+cuda.commands = $$NVCC -m$$SYSTEM_TYPE $$GENCODE_FLAGS -c -o ${QMAKE_FILE_OUT} ${QMAKE_FILE_NAME} $$NVCC_OPTIONS $$CUDA_INC
 cuda.dependency_type = TYPE_C
 QMAKE_EXTRA_COMPILERS += cuda
 
