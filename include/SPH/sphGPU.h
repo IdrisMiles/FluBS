@@ -9,32 +9,38 @@ namespace sphGPU
 
     uint iDivUp(uint a, uint b);
 
+    //--------------------------------------------------------------------------------------------------------------------
+
     void ResetProperties(float3 *pressureForce,
                          float3 *externalForce,
                          float3 *totalForce,
-                         float * mass,
+//                         float * mass,
                          float *density,
                          float *pressure,
                          uint *hash,
                          uint *cellOcc,
                          uint *cellPartIdx,
-                         const float massValue,
+//                         const float massValue,
                          const uint numCells,
                          const uint numPoints);
+
+    //--------------------------------------------------------------------------------------------------------------------
 
     void ResetProperties(float3 *pressureForce,
                          float3 *externalForce,
                          float3 *totalForce,
-                         float * mass,
+//                         float * mass,
                          float *density,
                          float *pressure,
                          float *volume,
                          uint *hash,
                          uint *cellOcc,
                          uint *cellPartIdx,
-                         const float massValue,
+//                         const float massValue,
                          const uint numCells,
                          const uint numPoints);
+
+    //--------------------------------------------------------------------------------------------------------------------
 
     void ResetProperties(float3 *pressureForce,
                          float3 *viscousForce,
@@ -42,18 +48,20 @@ namespace sphGPU
                          float3 *externalForce,
                          float3 *totalForce,
                          float *densityErr,
-                         float * mass,
                          float *density,
                          float *pressure,
                          uint *hash,
                          uint *cellOcc,
                          uint *cellPartIdx,
-                         const float massValue,
                          const uint numCells,
                          const uint numPoints);
 
+    //--------------------------------------------------------------------------------------------------------------------
+
     void ResetTotalForce(float3 *totalForce,
                          const uint numPoints);
+
+    //--------------------------------------------------------------------------------------------------------------------
 
     void InitFluidAsCube(float3 *particles,
                          float3 *velocities,
@@ -63,6 +71,8 @@ namespace sphGPU
                          const unsigned int numPartsPerAxis,
                          const float scale);
 
+    //--------------------------------------------------------------------------------------------------------------------
+
     void ParticleHash(unsigned int *hash,
                       unsigned int *cellOcc,
                       float3 *particles,
@@ -70,18 +80,26 @@ namespace sphGPU
                       const unsigned int gridRes,
                       const float cellWidth);
 
+    //--------------------------------------------------------------------------------------------------------------------
+
     void SortParticlesByHash(uint *hash,
                              float3 *position,
                              float3 *velocity,
                              const uint numPoints);
 
+    //--------------------------------------------------------------------------------------------------------------------
+
     void ComputeParticleScatterIds(uint *cellOccupancy,
                                    uint *cellParticleIdx,
                                    const uint numCells);
 
+    //--------------------------------------------------------------------------------------------------------------------
+
     void ComputeMaxCellOccupancy(uint *cellOccupancy,
                                  const uint numCells,
                                  unsigned int &_maxCellOcc);
+
+    //--------------------------------------------------------------------------------------------------------------------
 
     void ComputeParticleVolume(const uint maxCellOcc,
                                const uint gridRes,
@@ -92,17 +110,20 @@ namespace sphGPU
                                const uint numPoints,
                                const float smoothingLength);
 
+    //--------------------------------------------------------------------------------------------------------------------
 
     void ComputeDensity(const uint maxCellOcc,
                         const uint gridRes,
                         float *density,
-                        const float *mass,
+                        const float mass,
                         const uint *cellOcc,
                         const uint *cellPartIdx,
                         const float3 *particles,
                         const uint numPoints,
                         const float smoothingLength,
                         const bool accumulate);
+
+    //--------------------------------------------------------------------------------------------------------------------
 
     void ComputeDensityFluidFluid(const uint maxCellOcc,
                                   const uint gridRes,
@@ -111,12 +132,14 @@ namespace sphGPU
                                   const float3 *fluidPos,
                                   const uint *fluidCellOcc,
                                   const uint *fluidCellPartIdx,
-                                  const float *fluidContribMass,
+                                  const float fluidContribMass,
                                   const float3 *fluidContribPos,
                                   const uint *fluidContribCellOcc,
                                   const uint *fluidContribCellPartIdx,
                                   const float smoothingLength,
                                   const bool accumulate);
+
+    //--------------------------------------------------------------------------------------------------------------------
 
     void ComputeDensityFluidRigid(const uint maxCellOcc,
                                   const uint gridRes,
@@ -133,22 +156,26 @@ namespace sphGPU
                                   const float smoothingLength,
                                   const bool accumulate);
 
+    //--------------------------------------------------------------------------------------------------------------------
+
     void ComputePressureFluid(const uint maxCellOcc,
-                         const uint gridRes,
-                         float *pressure,
-                         float *density,
-                         const float restDensity,
-                         const float gasConstant,
-                         const uint *cellOcc,
-                         const uint *cellPartIdx,
-                         const uint numPoints);
+                              const uint gridRes,
+                              float *pressure,
+                              float *density,
+                              const float restDensity,
+                              const float gasConstant,
+                              const uint *cellOcc,
+                              const uint *cellPartIdx,
+                              const uint numPoints);
+
+    //--------------------------------------------------------------------------------------------------------------------
 
     void ComputePressureForceFluid(const uint maxCellOcc,
                               const uint gridRes,
                               float3 *pressureForce,
                               const float *pressure,
                               const float *density,
-                              const float *mass,
+                              const float mass,
                               const float3 *particles,
                               const uint *cellOcc,
                               const uint *cellPartIdx,
@@ -156,18 +183,20 @@ namespace sphGPU
                               const float smoothingLength,
                               const bool accumulate);
 
+    //--------------------------------------------------------------------------------------------------------------------
+
     void ComputePressureForceFluidFluid(const uint maxCellOcc,
                                         const uint gridRes,
                                         float3 *pressureForce,
                                         const float *pressure,
                                         const float *density,
-                                        const float *mass,
+                                        const float mass,
                                         const float3 *particles,
                                         const uint *cellOcc,
                                         const uint *cellPartIdx,
                                         const float *fluidContribPressure,
                                         const float *fluidContribDensity,
-                                        const float *fluidContribMass,
+                                        const float fluidContribMass,
                                         const float3 *fluidContribParticles,
                                         const uint *fluidContribCellOcc,
                                         const uint *fluidContribCellPartIdx,
@@ -175,12 +204,14 @@ namespace sphGPU
                                         const float smoothingLength,
                                         const bool accumulate);
 
+    //--------------------------------------------------------------------------------------------------------------------
+
     void ComputePressureForceFluidRigid(const uint maxCellOcc,
                                         const uint gridRes,
                                         float3 *pressureForce,
                                         const float *pressure,
                                         const float *density,
-                                        const float *mass,
+                                        const float mass,
                                         const float3 *particles,
                                         const uint *cellOcc,
                                         const uint *cellPartIdx,
@@ -193,31 +224,37 @@ namespace sphGPU
                                         const float smoothingLength,
                                         const bool accumulate);
 
+    //--------------------------------------------------------------------------------------------------------------------
+
     void ComputeViscForce(const uint maxCellOcc,
                           const uint gridRes,
                           float3 *viscForce,
                           const float viscCoeff,
                           const float3 *velocity,
                           const float *density,
-                          const float *mass,
+                          const float mass,
                           const float3 *particles,
                           const uint *cellOcc,
                           const uint *cellPartIdx,
                           const uint numPoints,
                           const float smoothingLength);
 
+    //--------------------------------------------------------------------------------------------------------------------
+
     void ComputeSurfaceTensionForce(const uint maxCellOcc,
                                     const uint gridRes,
                                     float3 *surfTenForce,
                                     const float surfaceTension,
                                     const float surfaceThreshold,
-                                    float *density,
-                                    const float *mass,
+                                    const float *density,
+                                    const float mass,
                                     const float3 *particles,
                                     const uint *cellOcc,
                                     const uint *cellPartIdx,
                                     const uint numPoints,
                                     const float smoothingLength);
+
+    //--------------------------------------------------------------------------------------------------------------------
 
     void ComputeForce(const uint maxCellOcc,
                         const uint gridRes,
@@ -229,7 +266,7 @@ namespace sphGPU
                         const float surfaceThreshold,
                         const float *pressure,
                         const float *density,
-                        const float *mass,
+                        const float mass,
                         const float3 *particles,
                         const float3 *velocity,
                         const uint *cellOcc,
@@ -237,6 +274,8 @@ namespace sphGPU
                         const uint numPoints,
                         const float smoothingLength,
                         const bool accumulate);
+
+    //--------------------------------------------------------------------------------------------------------------------
 
     void ComputeTotalForce(const uint maxCellOcc,
                            const uint gridRes,
@@ -251,13 +290,15 @@ namespace sphGPU
                            const float3 *viscForce,
                            const float3 *surfaceTensionForce,
                            const float3 gravity,
-                           const float *mass,
+                           const float mass,
                            const float3 *particles,
                            const float3 *velocities,
                            const uint *cellOcc,
                            const uint *cellPartIdx,
                            const uint numPoints,
                            const float smoothingLength);
+
+    //--------------------------------------------------------------------------------------------------------------------
 
     void Integrate(const uint maxCellOcc,
                    const uint gridRes,
@@ -267,6 +308,8 @@ namespace sphGPU
                    const float _dt,
                    const uint numPoints);
 
+    //--------------------------------------------------------------------------------------------------------------------
+
     void HandleBoundaries(const uint maxCellOcc,
                           const uint gridRes,
                           float3 *particles,
@@ -274,8 +317,46 @@ namespace sphGPU
                           const float _gridDim,
                           const uint numPoints);
 
+    //--------------------------------------------------------------------------------------------------------------------
+
+    void ComputeAdvectionForce(const uint maxCellOcc,
+                               const uint gridRes,
+                               float3 *pos,
+                               float3 *advectForce,
+                               const uint *cellOcc,
+                               const uint *cellPartIdx,
+                               const float3 *advectorPos,
+                               const float3 *advectorForce,
+                               const uint *advectorCellOcc,
+                               const uint *advectorCellPartIdx, const uint numPoints,
+                               const float smoothingLength,
+                               const bool accumulate);
+
+    //--------------------------------------------------------------------------------------------------------------------
+    void AdvectParticle(const uint maxCellOcc,
+                        const uint gridRes,
+                        float3 *pos,
+                        float3 *vel,
+                        const uint *cellOcc,
+                        const uint *cellPartIdx,
+                        const float3 *advectorPos,
+                        const float3 *advectorVel,
+                        const uint *advectorCellOcc,
+                        const uint *advectorCellPartIdx,
+                        const uint numPoints,
+                        const float smoothingLength,
+                        const float deltaTime);
+
+    //--------------------------------------------------------------------------------------------------------------------
+    void ComputeBioluminescence(const uint maxCellOcc,
+                                const uint gridRes,
+                                const float *pressure,
+                                float *prevPressure,
+                                float *illumination,
+                                const uint numPoints);
 
 
+    //--------------------------------------------------------------------------------------------------------------------
     namespace pci
     {
 //        void PredictIntegrate(const uint maxCellOcc,

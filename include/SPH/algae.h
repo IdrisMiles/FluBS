@@ -6,6 +6,7 @@
 #include "SPH/isphparticles.h"
 
 
+
 class Algae : public BaseSphParticle
 {
 public:
@@ -25,6 +26,17 @@ public:
 
 
 
+    float *GetPrevPressurePtr();
+    void ReleasePrevPressurePtr();
+
+    float *GetPrevDensityPtr();
+    void ReleasePrevDensityPtr();
+
+    float *GetEnergyPtr();
+    void ReleaseEnergyPtr();
+
+    float *GetIlluminationPtr();
+    void ReleaseIlluminationPtr();
 
 protected:
     void InitAlgaeAsMesh();
@@ -39,6 +51,11 @@ protected:
 
     // specfic simulation Data
     std::shared_ptr<AlgaeProperty> m_property;
+
+    float *d_prevPressurePtr;
+    float *d_prevDensityPtr;
+    float *d_energyPtr;
+    float *d_illuminationPtr;
 };
 
 #endif // ALGAE_H

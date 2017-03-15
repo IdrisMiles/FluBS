@@ -5,28 +5,35 @@
 
 
 Fluid::Fluid(std::shared_ptr<FluidProperty> _fluidProperty):
-    m_property(_fluidProperty),
-    m_positionMapped(false),
-    m_velocityMapped(false),
-    m_densityMapped(false),
-    m_massMapped(false),
-    m_pressureMapped(false)
+    m_property(_fluidProperty)
 {
+    m_positionMapped = false;
+    m_velocityMapped = false;
+    m_densityMapped = false;
+    m_massMapped = false;
+    m_pressureMapped = false;
+
     Init();
 }
 
+//--------------------------------------------------------------------------------------------------------------------
+
 Fluid::Fluid(std::shared_ptr<FluidProperty> _fluidProperty, Mesh _mesh):
-    m_property(_fluidProperty),
-    m_mesh(_mesh),
-    m_positionMapped(false),
-    m_velocityMapped(false),
-    m_densityMapped(false),
-    m_massMapped(false),
-    m_pressureMapped(false)
+    m_property(_fluidProperty)
 {
+    m_mesh = _mesh;
+
+    m_positionMapped = false;
+    m_velocityMapped = false;
+    m_densityMapped = false;
+    m_massMapped = false;
+    m_pressureMapped = false;
+
     Init();
     InitFluidAsMesh();
 }
+
+//--------------------------------------------------------------------------------------------------------------------
 
 Fluid::~Fluid()
 {
@@ -35,8 +42,7 @@ Fluid::~Fluid()
     CleanUpCUDAMemory();
 }
 
-
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
 
 void Fluid::SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps)
 {
@@ -44,6 +50,15 @@ void Fluid::SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps)
     cudaMalloc(&d_cellOccupancyPtr, numCells * sizeof(unsigned int));
     cudaMalloc(&d_cellParticleIdxPtr, numCells * sizeof(unsigned int));
 }
+
+//--------------------------------------------------------------------------------------------------------------------
+
+FluidProperty* Fluid::GetProperty()
+{
+    return m_property.get();
+}
+
+//--------------------------------------------------------------------------------------------------------------------
 
 void Fluid::Init()
 {
@@ -53,6 +68,8 @@ void Fluid::Init()
     InitCUDAMemory();
 
 }
+
+//--------------------------------------------------------------------------------------------------------------------
 
 void Fluid::InitCUDAMemory()
 {
@@ -79,10 +96,14 @@ void Fluid::InitCUDAMemory()
     cudaMalloc(&d_particleHashIdPtr, m_property->numParticles * sizeof(unsigned int));
 }
 
+//--------------------------------------------------------------------------------------------------------------------
+
 void Fluid::InitGL()
 {
     InitVAO();
 }
+
+//--------------------------------------------------------------------------------------------------------------------
 
 void Fluid::InitVAO()
 {
@@ -130,12 +151,10 @@ void Fluid::InitFluidAsMesh()
     ReleaseCudaGLResources();
 }
 
-//------------------------------------------------------------------------
-// Clean-up Functions
+//--------------------------------------------------------------------------------------------------------------------
 
 void Fluid::CleanUpCUDAMemory()
 {
-    cudaFree(d_pressureForcePtr);
     cudaFree(d_viscousForcePtr);
     cudaFree(d_surfaceTensionForcePtr);
     cudaFree(d_gravityForcePtr);
@@ -148,6 +167,8 @@ void Fluid::CleanUpCUDAMemory()
     cudaFree(d_predictVelocityPtr);
     cudaFree(d_densityErrPtr);
 }
+
+//--------------------------------------------------------------------------------------------------------------------
 
 void Fluid::CleanUpGL()
 {
@@ -167,7 +188,7 @@ void Fluid::CleanUpGL()
     m_pressBO.destroy();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
 
 void Fluid::MapCudaGLResources()
 {
@@ -178,6 +199,8 @@ void Fluid::MapCudaGLResources()
     GetPressurePtr();
 }
 
+//--------------------------------------------------------------------------------------------------------------------
+
 void Fluid::ReleaseCudaGLResources()
 {
     ReleasePositionPtr();
@@ -187,62 +210,39 @@ void Fluid::ReleaseCudaGLResources()
     ReleasePressurePtr();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
 
 float3 *Fluid::GetViscForcePtr()
 {
     return d_viscousForcePtr;
 }
 
-void Fluid::ReleaseViscForcePtr()
-{
-
-}
+//--------------------------------------------------------------------------------------------------------------------
 
 float3 *Fluid::GetSurfTenForcePtr()
 {
     return d_surfaceTensionForcePtr;
 }
 
-void Fluid::ReleaseSurfTenForcePtr()
-{
-
-}
-
+//--------------------------------------------------------------------------------------------------------------------
 
 float3 *Fluid::GetPredictPosPtr()
 {
     return d_predictPositionPtr;
 }
 
-void Fluid::ReleasePredictPosPtr()
-{
-
-}
+//--------------------------------------------------------------------------------------------------------------------
 
 float3 *Fluid::GetPredictVelPtr()
 {
     return d_predictVelocityPtr;
 }
 
-void Fluid::ReleasePredictVelPtr()
-{
-
-}
+//--------------------------------------------------------------------------------------------------------------------
 
 float *Fluid::GetDensityErrPtr()
 {
     return d_densityErrPtr;
 }
 
-void Fluid::ReleaseDensityErrPtr()
-{
-
-}
-
-FluidProperty* Fluid::GetProperty()
-{
-    return m_property.get();
-}
-
-
+//--------------------------------------------------------------------------------------------------------------------

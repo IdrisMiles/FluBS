@@ -1,27 +1,34 @@
 #include "include/SPH/algae.h"
 
+#include <math.h>
+#include <glm/gtx/transform.hpp>
+
+
 Algae::Algae(std::shared_ptr<AlgaeProperty> _property):
-    m_property(_property),
-    m_positionMapped(false),
-    m_velocityMapped(false),
-    m_densityMapped(false),
-    m_massMapped(false),
-    m_pressureMapped(false)
+    m_property(_property)
 {
+    m_positionMapped = false;
+    m_velocityMapped = false;
+    m_densityMapped = false;
+    m_massMapped = false;
+    m_pressureMapped = false;
+
     Init();
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
 Algae::Algae(std::shared_ptr<AlgaeProperty> _property, Mesh _mesh):
-    m_property(_property),
-    m_mesh(_mesh),
-    m_positionMapped(false),
-    m_velocityMapped(false),
-    m_densityMapped(false),
-    m_massMapped(false),
-    m_pressureMapped(false)
+    m_property(_property)
 {
+    m_mesh = _mesh;
+
+    m_positionMapped = false;
+    m_velocityMapped = false;
+    m_densityMapped = false;
+    m_massMapped = false;
+    m_pressureMapped = false;
+
     Init();
     InitAlgaeAsMesh();
 }
@@ -166,7 +173,6 @@ void Algae::InitAlgaeAsMesh()
 
 void Algae::CleanUpCUDAMemory()
 {
-    cudaFree(d_pressureForcePtr);
     cudaFree(d_gravityForcePtr);
     cudaFree(d_externalForcePtr);
     cudaFree(d_totalForcePtr);
@@ -193,6 +199,61 @@ void Algae::CleanUpGL()
 
     cudaGraphicsUnregisterResource(m_pressBO_CUDA);
     m_pressBO.destroy();
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+float *Algae::GetPrevPressurePtr()
+{
+    return d_prevPressurePtr;
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void Algae::ReleasePrevPressurePtr()
+{
+
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+float *Algae::GetPrevDensityPtr()
+{
+    return d_prevDensityPtr;
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void Algae::ReleasePrevDensityPtr()
+{
+
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+float *Algae::GetEnergyPtr()
+{
+    return d_energyPtr;
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void Algae::ReleaseEnergyPtr()
+{
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+float *Algae::GetIlluminationPtr()
+{
+    return d_illuminationPtr;
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void Algae::ReleaseIlluminationPtr()
+{
+
 }
 
 //--------------------------------------------------------------------------------------------------------------------

@@ -126,7 +126,6 @@ void Rigid::InitVAO()
 
 void Rigid::CleanUpCUDAMemory()
 {
-    cudaFree(d_pressureForcePtr);
     cudaFree(d_gravityForcePtr);
     cudaFree(d_externalForcePtr);
     cudaFree(d_totalForcePtr);

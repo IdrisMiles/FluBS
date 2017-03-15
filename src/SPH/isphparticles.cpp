@@ -103,7 +103,6 @@ void BaseSphParticle::InitVAO()
 
 void BaseSphParticle::CleanUpCUDAMemory()
 {
-    cudaFree(d_pressurePtr);
     cudaFree(d_pressureForcePtr);
     cudaFree(d_gravityForcePtr);
     cudaFree(d_externalForcePtr);
@@ -130,8 +129,6 @@ void BaseSphParticle::CleanUpGL()
     cudaGraphicsUnregisterResource(m_pressBO_CUDA);
     m_pressBO.destroy();
 
-//    m_vao.destroy();
-//    m_shaderProg.destroyed();
 }
 //---------------------------------------------------------------------------------------------------------------
 

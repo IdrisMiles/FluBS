@@ -23,19 +23,14 @@ public:
     void ReleaseCudaGLResources();
 
     float3 *GetViscForcePtr();
-    void ReleaseViscForcePtr();
 
     float3 *GetSurfTenForcePtr();
-    void ReleaseSurfTenForcePtr();
 
     float3 *GetPredictPosPtr();
-    void ReleasePredictPosPtr();
 
     float3 *GetPredictVelPtr();
-    void ReleasePredictVelPtr();
 
     float *GetDensityErrPtr();
-    void ReleaseDensityErrPtr();
 
 
 protected:

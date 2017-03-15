@@ -129,7 +129,7 @@ void FluidSystem::AddRigid(std::shared_ptr<Rigid> _rigid)
 
 }
 
-void FluidSystem::AddAlgae(std::shared_ptr<Fluid> _algae)
+void FluidSystem::AddAlgae(std::shared_ptr<Algae> _algae)
 {
     m_algae = _algae;
     m_algae->SetupSolveSpecs(m_fluidSolverProperty);
@@ -143,7 +143,7 @@ void FluidSystem::AddFluidSolverProperty(std::shared_ptr<FluidSolverProperty> _f
 void FluidSystem::InitialiseSim()
 {
     ResetFluid(m_fluid);
-    ResetFluid(m_algae);
+    ResetAlgae(m_algae);
     ResetRigid(m_container);
     for(auto &&r : m_staticRigids)
     {
@@ -158,7 +158,7 @@ void FluidSystem::InitialiseSim()
 void FluidSystem::ResetSim()
 {
     ResetFluid(m_fluid);
-    ResetFluid(m_algae);
+    ResetAlgae(m_algae);
     ResetRigid(m_container);
     for(auto &&r : m_staticRigids)
     {
@@ -207,6 +207,16 @@ void FluidSystem::ResetFluid(std::shared_ptr<Fluid> _fluid)
     _fluid->ReleaseCudaGLResources();
 }
 
+
+void FluidSystem::ResetAlgae(std::shared_ptr<Algae> _algae)
+{
+    sph::ResetProperties(m_fluidSolverProperty, _algae);
+    cudaThreadSynchronize();
+    sph::InitFluidAsCube(m_fluidSolverProperty, _algae);
+    cudaThreadSynchronize();
+    _algae->ReleaseCudaGLResources();
+}
+
 void FluidSystem::GenerateDefaultContainer()
 {
     auto rigidProps = std::shared_ptr<RigidProperty>(new RigidProperty());
@@ -251,9 +261,7 @@ void FluidSystem::StepSimulation()
     //----------------------------------------------------------------------
     // Call sph API to do funky stuff here
 
-    sph::ResetProperties(m_fluidSolverProperty, m_fluid);
-    sph::ResetProperties(m_fluidSolverProperty, m_algae);
-    sph::ResetProperties(m_fluidSolverProperty, m_activeRigids);
+    sph::ResetProperties(m_fluidSolverProperty, m_fluid, m_algae, m_activeRigids);
     cudaThreadSynchronize();
 
 
@@ -282,7 +290,7 @@ void FluidSystem::StepSimulation()
     //----------------------------------------------------------------------
 
     sph::ComputeParticleVolume(m_fluidSolverProperty, m_activeRigids);
-    sph::ComputeDensity(m_fluidSolverProperty, m_fluid, true, m_container, m_staticRigids, m_activeRigids, m_algae);
+    sph::ComputeDensity(m_fluidSolverProperty, m_fluid, true, m_container, m_staticRigids, m_activeRigids);
     sph::ComputeDensity(m_fluidSolverProperty, m_algae, true, m_container, m_staticRigids, m_activeRigids, m_fluid);
     cudaThreadSynchronize();
 
@@ -303,6 +311,11 @@ void FluidSystem::StepSimulation()
 
     sph::Integrate(m_fluidSolverProperty, m_fluid);
     cudaThreadSynchronize();
+
+    //----------------------------------------------------------------------
+
+//    sph::AdvectParticle(m_fluidSolverProperty, m_algae, m_fluid);
+//    sph::HandleBoundaries(m_fluidSolverProperty, m_algae);
 
 
 

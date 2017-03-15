@@ -9,16 +9,16 @@ void sph::ResetProperties(std::shared_ptr<FluidSolverProperty> _solverProps,
     sphGPU::ResetProperties(_sphParticles->GetPressureForcePtr(),
                             _sphParticles->GetExternalForcePtr(),
                             _sphParticles->GetTotalForcePtr(),
-                            _sphParticles->GetMassPtr(),
                             _sphParticles->GetDensityPtr(),
                             _sphParticles->GetPressurePtr(),
                             _sphParticles->GetParticleHashIdPtr(),
                             _sphParticles->GetCellOccupancyPtr(),
                             _sphParticles->GetCellParticleIdxPtr(),
-                            fluidProps->particleMass,
                             numCells,
                             fluidProps->numParticles);
 }
+
+//--------------------------------------------------------------------------------------------------------------------
 
 void sph::ResetProperties(std::shared_ptr<FluidSolverProperty> _solverProps,
                           std::vector<std::shared_ptr<BaseSphParticle>> _sphParticles)
@@ -28,6 +28,8 @@ void sph::ResetProperties(std::shared_ptr<FluidSolverProperty> _solverProps,
         ResetProperties(_solverProps, sp);
     }
 }
+
+//--------------------------------------------------------------------------------------------------------------------
 
 void sph::ResetProperties(std::shared_ptr<FluidSolverProperty> _solverProps,
                           std::shared_ptr<Fluid> _fluid)
@@ -41,16 +43,16 @@ void sph::ResetProperties(std::shared_ptr<FluidSolverProperty> _solverProps,
                             _fluid->GetExternalForcePtr(),
                             _fluid->GetTotalForcePtr(),
                             _fluid->GetDensityErrPtr(),
-                            _fluid->GetMassPtr(),
                             _fluid->GetDensityPtr(),
                             _fluid->GetPressurePtr(),
                             _fluid->GetParticleHashIdPtr(),
                             _fluid->GetCellOccupancyPtr(),
                             _fluid->GetCellParticleIdxPtr(),
-                            fluidProps->particleMass,
                             numCells,
                             fluidProps->numParticles);
 }
+
+//--------------------------------------------------------------------------------------------------------------------
 
 void sph::ResetProperties(std::shared_ptr<FluidSolverProperty> _solverProps,
                           std::vector<std::shared_ptr<Fluid>> _fluid)
@@ -61,26 +63,28 @@ void sph::ResetProperties(std::shared_ptr<FluidSolverProperty> _solverProps,
     }
 }
 
+//--------------------------------------------------------------------------------------------------------------------
+
 void sph::ResetProperties(std::shared_ptr<FluidSolverProperty> _solverProps,
                           std::shared_ptr<Rigid> _rigid)
 {
     const uint numCells = _solverProps->gridResolution * _solverProps->gridResolution * _solverProps->gridResolution;
-    auto fluidProps =  _rigid->GetProperty();
+    auto rigidProps =  _rigid->GetProperty();
 
     sphGPU::ResetProperties(_rigid->GetPressureForcePtr(),
                             _rigid->GetExternalForcePtr(),
                             _rigid->GetTotalForcePtr(),
-                            _rigid->GetMassPtr(),
                             _rigid->GetDensityPtr(),
                             _rigid->GetPressurePtr(),
                             _rigid->GetVolumePtr(),
                             _rigid->GetParticleHashIdPtr(),
                             _rigid->GetCellOccupancyPtr(),
                             _rigid->GetCellParticleIdxPtr(),
-                            fluidProps->particleMass,
                             numCells,
-                            fluidProps->numParticles);
+                            rigidProps->numParticles);
 }
+
+//--------------------------------------------------------------------------------------------------------------------
 
 void sph::ResetProperties(std::shared_ptr<FluidSolverProperty> _solverProps,
                           std::vector<std::shared_ptr<Rigid>> _rigid)
@@ -91,6 +95,27 @@ void sph::ResetProperties(std::shared_ptr<FluidSolverProperty> _solverProps,
     }
 }
 
+//--------------------------------------------------------------------------------------------------------------------
+void sph::ResetProperties(std::shared_ptr<FluidSolverProperty> _solverProps,
+                          std::shared_ptr<Algae> _algae)
+{
+    const uint numCells = _solverProps->gridResolution * _solverProps->gridResolution * _solverProps->gridResolution;
+    auto algaeProps =  _algae->GetProperty();
+
+    sphGPU::ResetProperties(_algae->GetPressureForcePtr(),
+                            _algae->GetExternalForcePtr(),
+                            _algae->GetTotalForcePtr(),
+                            _algae->GetDensityPtr(),
+                            _algae->GetPressurePtr(),
+                            _algae->GetParticleHashIdPtr(),
+                            _algae->GetCellOccupancyPtr(),
+                            _algae->GetCellParticleIdxPtr(),
+                            numCells,
+                            algaeProps->numParticles);
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
 void sph::ResetTotalForce(std::shared_ptr<FluidSolverProperty> _solverProps,
                           std::shared_ptr<BaseSphParticle> _sphParticles)
 {
@@ -100,6 +125,8 @@ void sph::ResetTotalForce(std::shared_ptr<FluidSolverProperty> _solverProps,
     sphGPU::ResetTotalForce(_sphParticles->GetTotalForcePtr(),
                             fluidProps->numParticles);
 }
+
+//--------------------------------------------------------------------------------------------------------------------
 
 void sph::InitFluidAsCube(std::shared_ptr<FluidSolverProperty> _solverProps,
                           std::shared_ptr<BaseSphParticle> _sphParticles)
@@ -115,7 +142,7 @@ void sph::InitFluidAsCube(std::shared_ptr<FluidSolverProperty> _solverProps,
                             2.0f*fluidProps->particleRadius);
 }
 
-//--------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
 
 void sph::ComputeHash(std::shared_ptr<FluidSolverProperty> _solverProps,
                       std::shared_ptr<BaseSphParticle> _fluid)
@@ -130,15 +157,7 @@ void sph::ComputeHash(std::shared_ptr<FluidSolverProperty> _solverProps,
                          _solverProps->gridCellWidth);
 }
 
-
-//void sph::ComputeHash(std::vector<std::shared_ptr<BaseSphParticle>> _fluid,
-//                      std::shared_ptr<FluidSolverProperty> _solverProps)
-//{
-//    for(auto &&f : _fluid)
-//    {
-//        ComputeHash(f, _solverProps);
-//    }
-//}
+//--------------------------------------------------------------------------------------------------------------------
 
 void sph::SortParticlesByHash(std::shared_ptr<BaseSphParticle> _sphParticles)
 {
@@ -148,13 +167,7 @@ void sph::SortParticlesByHash(std::shared_ptr<BaseSphParticle> _sphParticles)
                                 _sphParticles->GetProperty()->numParticles);
 }
 
-//void sph::SortParticlesByHash(std::vector<std::shared_ptr<BaseSphParticle>> _sphParticles)
-//{
-//    for(auto &&f : _sphParticles)
-//    {
-//        SortParticlesByHash(f);
-//    }
-//}
+//--------------------------------------------------------------------------------------------------------------------
 
 void sph::ComputeParticleScatterIds(std::shared_ptr<FluidSolverProperty> _solverProps,
                                     std::shared_ptr<BaseSphParticle> _sphParticles)
@@ -166,14 +179,7 @@ void sph::ComputeParticleScatterIds(std::shared_ptr<FluidSolverProperty> _solver
                                       numCells);
 }
 
-//void sph::ComputeParticleScatterIds(std::vector<std::shared_ptr<BaseSphParticle>> _sphParticles,
-//                                    std::shared_ptr<FluidSolverProperty> _solverProps)
-//{
-//    for(auto &&f : _sphParticles)
-//    {
-//        ComputeParticleScatterIds(f, _solverProps);
-//    }
-//}
+//--------------------------------------------------------------------------------------------------------------------
 
 void sph::ComputeMaxCellOccupancy(std::shared_ptr<FluidSolverProperty> _solverProps,
                                   std::shared_ptr<BaseSphParticle> _sphParticles,
@@ -188,15 +194,7 @@ void sph::ComputeMaxCellOccupancy(std::shared_ptr<FluidSolverProperty> _solverPr
     _sphParticles->SetMaxCellOcc(_maxCellOcc);
 }
 
-//void sph::ComputeMaxCellOccupancy(std::vector<std::shared_ptr<BaseSphParticle>> _sphParticles,
-//                                    std::shared_ptr<FluidSolverProperty> _solverProps,
-//                                  unsigned int &_maxCellOcc)
-//{
-//    for(auto &&f : _sphParticles)
-//    {
-//        ComputeMaxCellOccupancy(f, _solverProps, _maxCellOcc);
-//    }
-//}
+//--------------------------------------------------------------------------------------------------------------------
 
 void sph::ComputeParticleVolume(std::shared_ptr<FluidSolverProperty> _solverProps,
                                 std::shared_ptr<Rigid> _rigid)
@@ -213,6 +211,8 @@ void sph::ComputeParticleVolume(std::shared_ptr<FluidSolverProperty> _solverProp
                                   rigidProps->smoothingLength);
 }
 
+//--------------------------------------------------------------------------------------------------------------------
+
 void sph::ComputeParticleVolume(std::shared_ptr<FluidSolverProperty> _solverProps,
                                 std::vector<std::shared_ptr<Rigid>> _rigid)
 {
@@ -222,7 +222,7 @@ void sph::ComputeParticleVolume(std::shared_ptr<FluidSolverProperty> _solverProp
     }
 }
 
-//--------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
 
 void sph::ComputeDensity(std::shared_ptr<FluidSolverProperty> _solverProps,
                          std::shared_ptr<BaseSphParticle> _fluid,
@@ -233,7 +233,7 @@ void sph::ComputeDensity(std::shared_ptr<FluidSolverProperty> _solverProps,
     sphGPU::ComputeDensity(_fluid->GetMaxCellOcc(),
                             _solverProps->gridResolution,
                             _fluid->GetDensityPtr(),
-                            _fluid->GetMassPtr(),
+                            fluidProps->particleMass,
                             _fluid->GetCellOccupancyPtr(),
                             _fluid->GetCellParticleIdxPtr(),
                             _fluid->GetPositionPtr(),
@@ -241,6 +241,8 @@ void sph::ComputeDensity(std::shared_ptr<FluidSolverProperty> _solverProps,
                             fluidProps->smoothingLength,
                             accumulate);
 }
+
+//--------------------------------------------------------------------------------------------------------------------
 
 void sph::ComputeDensity(std::shared_ptr<FluidSolverProperty> _solverProps,
                          std::shared_ptr<BaseSphParticle> _fluid,
@@ -257,13 +259,15 @@ void sph::ComputeDensity(std::shared_ptr<FluidSolverProperty> _solverProps,
                                      _fluid->GetPositionPtr(),
                                      _fluid->GetCellOccupancyPtr(),
                                      _fluid->GetCellParticleIdxPtr(),
-                                     _fluidContributer->GetMassPtr(),
+                                     fluidContribProps->particleMass,
                                      _fluidContributer->GetPositionPtr(),
                                      _fluidContributer->GetCellOccupancyPtr(),
                                      _fluidContributer->GetCellParticleIdxPtr(),
                                      fluidProps->smoothingLength,
                                      accumulate);
 }
+
+//--------------------------------------------------------------------------------------------------------------------
 
 void sph::ComputeDensity(std::shared_ptr<FluidSolverProperty> _solverProps,
                          std::shared_ptr<BaseSphParticle> _fluid,
@@ -289,6 +293,8 @@ void sph::ComputeDensity(std::shared_ptr<FluidSolverProperty> _solverProps,
                                         accumulate);
 }
 
+//--------------------------------------------------------------------------------------------------------------------
+
 void sph::ComputeDensity(std::shared_ptr<FluidSolverProperty> _solverProps,
                          std::shared_ptr<BaseSphParticle> _fluid,
                          std::vector<std::shared_ptr<BaseSphParticle>> &_fluidContributers,
@@ -299,6 +305,8 @@ void sph::ComputeDensity(std::shared_ptr<FluidSolverProperty> _solverProps,
         sph::ComputeDensity(_solverProps, _fluid, fc, accumulate);
     }
 }
+
+//--------------------------------------------------------------------------------------------------------------------
 
 void sph::ComputeDensity(std::shared_ptr<FluidSolverProperty> _solverProps,
                          std::shared_ptr<BaseSphParticle> _fluid,
@@ -311,6 +319,25 @@ void sph::ComputeDensity(std::shared_ptr<FluidSolverProperty> _solverProps,
     }
 }
 
+//--------------------------------------------------------------------------------------------------------------------
+
+void sph::ComputePressure(std::shared_ptr<FluidSolverProperty> _solverProps,
+                          std::shared_ptr<BaseSphParticle> _particles)
+{
+    auto particleProps =  _particles->GetProperty();
+
+//    sphGPU::ComputePressureFluid(_fluid->GetMaxCellOcc(),
+//                            _solverProps->gridResolution,
+//                            _fluid->GetPressurePtr(),
+//                            _fluid->GetDensityPtr(),
+//                            particleProps->restDensity,
+//                            particleProps->gasStiffness,
+//                            _fluid->GetCellOccupancyPtr(),
+//                            _fluid->GetCellParticleIdxPtr(),
+//                            particleProps->numParticles);
+}
+
+//--------------------------------------------------------------------------------------------------------------------
 
 void sph::ComputePressure(std::shared_ptr<FluidSolverProperty> _solverProps,
                           std::shared_ptr<Fluid> _fluid)
@@ -328,6 +355,27 @@ void sph::ComputePressure(std::shared_ptr<FluidSolverProperty> _solverProps,
                             fluidProps->numParticles);
 }
 
+//--------------------------------------------------------------------------------------------------------------------
+
+void sph::ComputePressure(std::shared_ptr<FluidSolverProperty> _solverProps,
+                          std::shared_ptr<Algae> _algae)
+{
+    auto algaeProps =  _algae->GetProperty();
+
+//    sphGPU::ComputePressureFluid(_fluid->GetMaxCellOcc(),
+//                                 _solverProps->gridResolution,
+//                                 _algae->GetPrevPressurePtr()
+//                                 _algae->GetPressurePtr(),
+//                                 _algae->GetDensityPtr(),
+//                                 algaeProps->restDensity,
+////                                 algaeProps->gasStiffness,
+//                                 _algae->GetCellOccupancyPtr(),
+//                                 _algae->GetCellParticleIdxPtr(),
+//                                 algaeProps->numParticles);
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
 void sph::ComputePressureForce(std::shared_ptr<FluidSolverProperty> _solverProps,
                                std::shared_ptr<BaseSphParticle> _fluid,
                                const bool accumulate)
@@ -339,13 +387,15 @@ void sph::ComputePressureForce(std::shared_ptr<FluidSolverProperty> _solverProps
                                  _fluid->GetPressureForcePtr(),
                                  _fluid->GetPressurePtr(),
                                  _fluid->GetDensityPtr(),
-                                 _fluid->GetMassPtr(),
+                                 fluidProps->particleMass,
                                  _fluid->GetPositionPtr(),
                                  _fluid->GetCellOccupancyPtr(),
                                  _fluid->GetCellParticleIdxPtr(),
                                  fluidProps->numParticles,
                                  fluidProps->smoothingLength, accumulate);
 }
+
+//--------------------------------------------------------------------------------------------------------------------
 
 void sph::ComputePressureForce(std::shared_ptr<FluidSolverProperty> _solverProps,
                                std::shared_ptr<BaseSphParticle> _fluid,
@@ -353,25 +403,28 @@ void sph::ComputePressureForce(std::shared_ptr<FluidSolverProperty> _solverProps
                                const bool accumulate)
 {
     auto fluidProps = _fluid->GetProperty();
+    auto fluidContribProps = _fluidContributer->GetProperty();
 
     sphGPU::ComputePressureForceFluidFluid(_fluid->GetMaxCellOcc(),
                                  _solverProps->gridResolution,
                                  _fluid->GetPressureForcePtr(),
                                  _fluid->GetPressurePtr(),
                                  _fluid->GetDensityPtr(),
-                                 _fluid->GetMassPtr(),
+                                 fluidProps->particleMass,
                                  _fluid->GetPositionPtr(),
                                  _fluid->GetCellOccupancyPtr(),
                                  _fluid->GetCellParticleIdxPtr(),
                                  _fluidContributer->GetPressurePtr(),
                                  _fluidContributer->GetDensityPtr(),
-                                 _fluidContributer->GetMassPtr(),
+                                 fluidContribProps->particleMass,
                                  _fluidContributer->GetPositionPtr(),
                                  _fluidContributer->GetCellOccupancyPtr(),
                                  _fluidContributer->GetCellParticleIdxPtr(),
                                  fluidProps->numParticles,
                                  fluidProps->smoothingLength, accumulate);
 }
+
+//--------------------------------------------------------------------------------------------------------------------
 
 void sph::ComputePressureForce(std::shared_ptr<FluidSolverProperty> _solverProps,
                                std::shared_ptr<BaseSphParticle> _fluid,
@@ -385,7 +438,7 @@ void sph::ComputePressureForce(std::shared_ptr<FluidSolverProperty> _solverProps
                                            _fluid->GetPressureForcePtr(),
                                            _fluid->GetPressurePtr(),
                                            _fluid->GetDensityPtr(),
-                                           _fluid->GetMassPtr(),
+                                           fluidProps->particleMass,
                                            _fluid->GetPositionPtr(),
                                            _fluid->GetCellOccupancyPtr(),
                                            _fluid->GetCellParticleIdxPtr(),
@@ -398,6 +451,8 @@ void sph::ComputePressureForce(std::shared_ptr<FluidSolverProperty> _solverProps
                                            fluidProps->smoothingLength, accumulate);
 }
 
+//--------------------------------------------------------------------------------------------------------------------
+
 void sph::ComputePressureForce(std::shared_ptr<FluidSolverProperty> _solverProps,
                                std::shared_ptr<BaseSphParticle> _fluid,
                                std::vector<std::shared_ptr<BaseSphParticle>> &_fluidContributers,
@@ -408,6 +463,8 @@ void sph::ComputePressureForce(std::shared_ptr<FluidSolverProperty> _solverProps
         sph::ComputePressureForce(_solverProps, _fluid, fc, accumulate);
     }
 }
+
+//--------------------------------------------------------------------------------------------------------------------
 
 void sph::ComputePressureForce(std::shared_ptr<FluidSolverProperty> _solverProps,
                                std::shared_ptr<BaseSphParticle> _fluid,
@@ -420,6 +477,8 @@ void sph::ComputePressureForce(std::shared_ptr<FluidSolverProperty> _solverProps
     }
 }
 
+//--------------------------------------------------------------------------------------------------------------------
+
 void sph::ComputeViscForce(std::shared_ptr<FluidSolverProperty> _solverProps,
                            std::shared_ptr<Fluid> _fluid)
 {
@@ -431,13 +490,15 @@ void sph::ComputeViscForce(std::shared_ptr<FluidSolverProperty> _solverProps,
                              fluidProps->viscosity,
                              _fluid->GetVelocityPtr(),
                              _fluid->GetDensityPtr(),
-                             _fluid->GetMassPtr(),
+                             fluidProps->particleMass,
                              _fluid->GetPositionPtr(),
                              _fluid->GetCellOccupancyPtr(),
                              _fluid->GetCellParticleIdxPtr(),
                              fluidProps->numParticles,
                              fluidProps->smoothingLength);
 }
+
+//--------------------------------------------------------------------------------------------------------------------
 
 void sph::ComputeSurfaceTensionForce(std::shared_ptr<FluidSolverProperty> _solverProps,
                                      std::shared_ptr<Fluid> _fluid)
@@ -450,13 +511,15 @@ void sph::ComputeSurfaceTensionForce(std::shared_ptr<FluidSolverProperty> _solve
                                        fluidProps->surfaceTension,
                                        fluidProps->surfaceThreshold,
                                        _fluid->GetDensityPtr(),
-                                       _fluid->GetMassPtr(),
+                                       fluidProps->particleMass,
                                        _fluid->GetPositionPtr(),
                                        _fluid->GetCellOccupancyPtr(),
                                        _fluid->GetCellParticleIdxPtr(),
                                        fluidProps->numParticles,
                                        fluidProps->smoothingLength);
 }
+
+//--------------------------------------------------------------------------------------------------------------------
 
 void sph::ComputeForces(std::shared_ptr<FluidSolverProperty> _solverProps,
                         std::shared_ptr<Fluid> _fluid,
@@ -477,7 +540,7 @@ void sph::ComputeForces(std::shared_ptr<FluidSolverProperty> _solverProps,
                          fluidProps->surfaceThreshold,
                          _fluid->GetPressurePtr(),
                          _fluid->GetDensityPtr(),
-                         _fluid->GetMassPtr(),
+                         fluidProps->particleMass,
                          _fluid->GetPositionPtr(),
                          _fluid->GetVelocityPtr(),
                          _fluid->GetCellOccupancyPtr(),
@@ -485,6 +548,8 @@ void sph::ComputeForces(std::shared_ptr<FluidSolverProperty> _solverProps,
                          fluidProps->numParticles,
                          fluidProps->smoothingLength, accumulate);
 }
+
+//--------------------------------------------------------------------------------------------------------------------
 
 void sph::ComputeTotalForce(std::shared_ptr<FluidSolverProperty> _solverProps,
                             std::shared_ptr<Fluid> _fluid,
@@ -509,7 +574,7 @@ void sph::ComputeTotalForce(std::shared_ptr<FluidSolverProperty> _solverProps,
                               _fluid->GetViscForcePtr(),
                               _fluid->GetSurfTenForcePtr(),
                               fluidProps->gravity,
-                              _fluid->GetMassPtr(),
+                              fluidProps->particleMass,
                               _fluid->GetPositionPtr(),
                               _fluid->GetVelocityPtr(),
                               _fluid->GetCellOccupancyPtr(),
@@ -518,6 +583,8 @@ void sph::ComputeTotalForce(std::shared_ptr<FluidSolverProperty> _solverProps,
                               fluidProps->smoothingLength);
 
 }
+
+//--------------------------------------------------------------------------------------------------------------------
 
 void sph::Integrate(std::shared_ptr<FluidSolverProperty> _solverProps,
                     std::shared_ptr<Fluid> _fluid)
@@ -533,8 +600,10 @@ void sph::Integrate(std::shared_ptr<FluidSolverProperty> _solverProps,
                       fluidProps->numParticles);
 }
 
+//--------------------------------------------------------------------------------------------------------------------
+
 void sph::HandleBoundaries(std::shared_ptr<FluidSolverProperty> _solverProps,
-                           std::shared_ptr<Fluid> _fluid)
+                           std::shared_ptr<BaseSphParticle> _fluid)
 {
     auto fluidProps = _fluid->GetProperty();
 
@@ -547,11 +616,63 @@ void sph::HandleBoundaries(std::shared_ptr<FluidSolverProperty> _solverProps,
 }
 
 
+//--------------------------------------------------------------------------------------------------------------------
+// Algae functions
+
+void sph::ComputeAdvectionForce(std::shared_ptr<FluidSolverProperty> _solverProps,
+                                std::shared_ptr<BaseSphParticle> _particles,
+                                std::shared_ptr<Fluid> _advector)
+{
+    auto particleProps = _particles->GetProperty();
+    auto advectorProps = _advector->GetProperty();
+
+//    sphGPU::ComputeAdvectionForce()
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void sph::AdvectParticle(std::shared_ptr<FluidSolverProperty> _solverProps,
+                         std::shared_ptr<BaseSphParticle> _particles,
+                         std::shared_ptr<Fluid> _advector)
+{
+    auto particleProps = _particles->GetProperty();
+    auto advectorProps = _advector->GetProperty();
+
+    sphGPU::AdvectParticle(_particles->GetMaxCellOcc(),
+                           _solverProps->gridResolution,
+                           _particles->GetPositionPtr(),
+                           _particles->GetVelocityPtr(),
+                           _particles->GetCellOccupancyPtr(),
+                           _particles->GetCellParticleIdxPtr(),
+                           _advector->GetPositionPtr(),
+                           _advector->GetVelocityPtr(),
+                           _advector->GetCellOccupancyPtr(),
+                           _advector->GetCellParticleIdxPtr(),
+                           particleProps->numParticles,
+                           particleProps->smoothingLength,
+                           _solverProps->deltaTime);
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void sph::ComputeBioluminescence(std::shared_ptr<FluidSolverProperty> _solverProps,
+                                 std::shared_ptr<Algae> _algae,
+                                 bool accumulate)
+{
+    auto algaeProps = _algae->GetProperty();
+
+    sphGPU::ComputeBioluminescence(_algae->GetMaxCellOcc(),
+                                   _solverProps->gridResolution,
+                                   _algae->GetPressurePtr(),
+                                   _algae->GetPrevPressurePtr(),
+                                   _algae->GetIlluminationPtr(),
+                                   algaeProps->numParticles);
+}
 
 
 
 
-//---------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
 // PCISPH functions
 
 void sph::pci::PredictIntegrate(std::shared_ptr<FluidSolverProperty> _solverProps,
@@ -560,17 +681,23 @@ void sph::pci::PredictIntegrate(std::shared_ptr<FluidSolverProperty> _solverProp
 
 }
 
+//--------------------------------------------------------------------------------------------------------------------
+
 void sph::pci::PredictDensity(std::shared_ptr<FluidSolverProperty> _solverProps,
                               std::shared_ptr<Fluid> _fluid)
 {
 
 }
 
+//--------------------------------------------------------------------------------------------------------------------
+
 void sph::pci::predictDensityVariation(std::shared_ptr<FluidSolverProperty> _solverProps,
                                        std::shared_ptr<Fluid> _fluid)
 {
 
 }
+
+//--------------------------------------------------------------------------------------------------------------------
 
 void sph::pci::ComputeMaxDensityVariation(std::shared_ptr<FluidSolverProperty> _solverProps,
                                           std::shared_ptr<Fluid> _fluid,
@@ -579,11 +706,15 @@ void sph::pci::ComputeMaxDensityVariation(std::shared_ptr<FluidSolverProperty> _
 
 }
 
+//--------------------------------------------------------------------------------------------------------------------
+
 void sph::pci::UpdatePressure(std::shared_ptr<FluidSolverProperty> _solverProps,
                               std::shared_ptr<Fluid> _fluid)
 {
 
 }
+
+//--------------------------------------------------------------------------------------------------------------------
 
 void sph::pci::ComputePressureForce(std::shared_ptr<FluidSolverProperty> _solverProps,
                                     std::shared_ptr<Fluid> _fluid)

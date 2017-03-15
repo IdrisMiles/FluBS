@@ -26,7 +26,7 @@ public:
     void SetContainer(std::shared_ptr<Rigid> _container);
     void AddFluid(std::shared_ptr<Fluid> _fluid);
     void AddRigid(std::shared_ptr<Rigid> _rigid);
-    void AddAlgae(std::shared_ptr<Fluid> _algae);
+    void AddAlgae(std::shared_ptr<Algae> _algae);
     void AddFluidSolverProperty(std::shared_ptr<FluidSolverProperty> _fluidSolverProperty);
 
     virtual void InitialiseSim();
@@ -38,9 +38,10 @@ public:
 private:
     void ResetRigid(std::shared_ptr<Rigid> _rigid);
     void ResetFluid(std::shared_ptr<Fluid> _fluid);
+    void ResetAlgae(std::shared_ptr<Algae> _algae);
     void GenerateDefaultContainer();
 
-    std::shared_ptr<Fluid> m_algae;
+    std::shared_ptr<Algae> m_algae;
     std::shared_ptr<Fluid> m_fluid;
     std::shared_ptr<Rigid> m_container;
     std::vector<std::shared_ptr<Rigid>> m_staticRigids;

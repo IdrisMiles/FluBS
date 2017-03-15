@@ -4,12 +4,16 @@
 #include "SPH/isphparticles.h"
 #include "SPH/fluid.h"
 #include "SPH/rigid.h"
+#include "SPH/algae.h"
 #include "SPH/sphGPU.h"
 #include "SPH/fluidproperty.h"
 #include "FluidSystem/fluidsolverproperty.h"
 
 namespace sph
 {
+    //--------------------------------------------------------------------------------------------------------------------
+    // Reset Property functions
+
     void ResetProperties(std::shared_ptr<FluidSolverProperty> _solverProps,
                          std::shared_ptr<BaseSphParticle> _sphParticles);
 
@@ -28,19 +32,18 @@ namespace sph
     void ResetProperties(std::shared_ptr<FluidSolverProperty> _solverProps,
                          std::vector<std::shared_ptr<Rigid>> _rigid);
 
+    void ResetProperties(std::shared_ptr<FluidSolverProperty> _solverProps,
+                         std::shared_ptr<Algae> _algae);
 
-//    void ResetProperties(std::shared_ptr<FluidSolverProperty> _solverProps){;}
-//    void ResetProperties(std::shared_ptr<FluidSolverProperty> _solverProps,
-//                         std::shared_ptr<BaseSphParticle> _sphParticles){;}
 
-//    template<typename T, typename ... Targs>
-//    void ResetProperties(std::shared_ptr<FluidSolverProperty> _solverProps,
-//                         T _sphParticles,
-//                         Targs ... args)
-//    {
-//        ResetProperties(_sphParticles, _solverProps);
-//        ResetProperties(_solverProps, args ...);
-//    }
+    template<typename T, typename ... Targs>
+    void ResetProperties(std::shared_ptr<FluidSolverProperty> _solverProps,
+                         T _sphParticles,
+                         Targs ... args)
+    {
+        ResetProperties(_solverProps, _sphParticles);
+        ResetProperties(_solverProps, args ...);
+    }
 
     void ResetTotalForce(std::shared_ptr<FluidSolverProperty> _solverProps,
                          std::shared_ptr<BaseSphParticle> _sphParticles);
@@ -48,7 +51,10 @@ namespace sph
     void InitFluidAsCube(std::shared_ptr<FluidSolverProperty> _solverProps,
                          std::shared_ptr<BaseSphParticle> _sphParticles);
 
-    //--------------------------------------------------------------------------------------
+
+    //--------------------------------------------------------------------------------------------------------------------
+    // Compute Particle Hash functions
+
     void ComputeHash(std::shared_ptr<FluidSolverProperty> _solverProps,
                      std::shared_ptr<BaseSphParticle> _fluid);
 
@@ -62,6 +68,9 @@ namespace sph
         }
     }
 
+    //--------------------------------------------------------------------------------------------------------------------
+    // Sort Particle functions
+
     void SortParticlesByHash(std::shared_ptr<BaseSphParticle> _sphParticles);
 
     template<typename T>
@@ -72,6 +81,9 @@ namespace sph
             SortParticlesByHash(f);
         }
     }
+
+    //--------------------------------------------------------------------------------------------------------------------
+    // Compute scatter address functions
 
     void ComputeParticleScatterIds(std::shared_ptr<FluidSolverProperty> _solverProps,
                                    std::shared_ptr<BaseSphParticle> _sphParticles);
@@ -85,6 +97,18 @@ namespace sph
             ComputeParticleScatterIds(_solverProps, f);
         }
     }
+
+//    template<typename T, typename ... Targs>
+//    void ComputeParticleScatterIds(std::shared_ptr<FluidSolverProperty> _solverProps,
+//                                   T _sphParticles,
+//                                   Targs ... args)
+//    {
+//        ComputeParticleScatterIds(_solverProps, _sphParticles);
+//        ComputeParticleScatterIds(_solverProps, args ...);
+//    }
+
+    //--------------------------------------------------------------------------------------------------------------------
+    // Compute max cell occupancy functions
 
     void ComputeMaxCellOccupancy(std::shared_ptr<FluidSolverProperty> _solverProps,
                                  std::shared_ptr<BaseSphParticle> _fluid,
@@ -101,7 +125,8 @@ namespace sph
         }
     }
 
-    //--------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------------------------------------------
+    // Compute particle volume functions - for Rigid
 
     void ComputeParticleVolume(std::shared_ptr<FluidSolverProperty> _solverProps,
                                std::shared_ptr<Rigid> _rigid);
@@ -109,7 +134,8 @@ namespace sph
     void ComputeParticleVolume(std::shared_ptr<FluidSolverProperty> _solverProps,
                                std::vector<std::shared_ptr<Rigid>> _rigid);
 
-    //--------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------------------------------------------
+    // Compute Density functions
 
     void ComputeDensity(std::shared_ptr<FluidSolverProperty> _solverProps,
                         std::shared_ptr<BaseSphParticle> _fluid,
@@ -146,12 +172,18 @@ namespace sph
         ComputeDensity(_solverProps, _fluid, accumulate, args ...);
     }
 
+    //--------------------------------------------------------------------------------------------------------------------
 
+    void ComputePressure(std::shared_ptr<FluidSolverProperty> _solverProps,
+                         std::shared_ptr<BaseSphParticle> _particles);
 
     void ComputePressure(std::shared_ptr<FluidSolverProperty> _solverProps,
                          std::shared_ptr<Fluid> _fluid);
 
-//--------------------------------------------------------------------------------------
+    void ComputePressure(std::shared_ptr<FluidSolverProperty> _solverProps,
+                         std::shared_ptr<Algae> _algae);
+
+    //--------------------------------------------------------------------------------------------------------------------
 
     /// @brief Method to compute pressure force exerted on _fluid body of fluid by _fluid
     void ComputePressureForce(std::shared_ptr<FluidSolverProperty> _solverProps,
@@ -191,8 +223,7 @@ namespace sph
         ComputePressureForce(_solverProps, _fluid, accumulate, args ...);
     }
 
-
-    //--------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------------------------------------------
 
     void ComputeViscForce(std::shared_ptr<FluidSolverProperty> _solverProps,
                           std::shared_ptr<Fluid> _fluid);
@@ -201,8 +232,12 @@ namespace sph
                           std::shared_ptr<Fluid> _fluid,
                           std::shared_ptr<Rigid> _rigid);
 
+    //--------------------------------------------------------------------------------------------------------------------
+
     void ComputeSurfaceTensionForce(std::shared_ptr<FluidSolverProperty> _solverProps,
                                     std::shared_ptr<Fluid> _fluid);
+
+    //--------------------------------------------------------------------------------------------------------------------
 
     void ComputeForces(std::shared_ptr<FluidSolverProperty> _solverProps,
                        std::shared_ptr<Fluid> _fluid,
@@ -210,6 +245,8 @@ namespace sph
                        const bool viscosity = true,
                        const bool surfTen = true,
                        const bool accumulate = false);
+
+    //--------------------------------------------------------------------------------------------------------------------
 
     void ComputeTotalForce(std::shared_ptr<FluidSolverProperty> _solverProps,
                            std::shared_ptr<Fluid> _fluid,
@@ -219,17 +256,44 @@ namespace sph
                            const bool accumulateExternal = true,
                            const bool accumulateGravity = true);
 
-    //--------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------------------------------------------
 
     void Integrate(std::shared_ptr<FluidSolverProperty> _solverProps,
                    std::shared_ptr<Fluid> _fluid);
 
+    //--------------------------------------------------------------------------------------------------------------------
+
     void HandleBoundaries(std::shared_ptr<FluidSolverProperty> _solverProps,
-                          std::shared_ptr<Fluid> _fluid);
+                          std::shared_ptr<BaseSphParticle> _fluid);
+
+    //--------------------------------------------------------------------------------------------------------------------
+    // Algae movement stuff
+
+    // Advection force = surrounding particles total forces,
+    // use advectiion, pressure, etc... forces to move particle
+    void ComputeAdvectionForce(std::shared_ptr<FluidSolverProperty> _solverProps,
+                               std::shared_ptr<BaseSphParticle> _particles,
+                               std::shared_ptr<Fluid> _advector);
 
 
+    //--------------------------------------------------------------------------------------------------------------------
+    // OR
 
-    //--------------------------------------------------------------------------------------
+    // move particle based on surrounding particles velocities
+    void AdvectParticle(std::shared_ptr<FluidSolverProperty> _solverProps,
+                        std::shared_ptr<BaseSphParticle> _particles,
+                        std::shared_ptr<Fluid> _advector);
+
+
+    //--------------------------------------------------------------------------------------------------------------------
+
+    // compute bioluminescence from stored pressures, or compute pressure aswell
+    void ComputeBioluminescence(std::shared_ptr<FluidSolverProperty> _solverProps,
+                                std::shared_ptr<Algae> _algae,
+                                bool accumulate);
+
+    //--------------------------------------------------------------------------------------------------------------------
+
     // PCI SPH
     namespace pci
     {
@@ -254,6 +318,7 @@ namespace sph
 
 
     }
+
 }
 
 #endif // SPH_H

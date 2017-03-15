@@ -152,7 +152,7 @@ void OpenGLScene::initializeGL()
     // Set up simulation here
 
     auto fluidProps = std::shared_ptr<FluidProperty>(new FluidProperty());
-    auto algaeProps = std::shared_ptr<FluidProperty>(new FluidProperty(1));
+    auto algaeProps = std::shared_ptr<AlgaeProperty>(new AlgaeProperty(64000, 1.0f, 0.1f, 98.36f));
     auto fluidSolverProps = std::shared_ptr<FluidSolverProperty>(new FluidSolverProperty());
     auto containerProps = std::shared_ptr<RigidProperty>(new RigidProperty());
     auto cubeProps = std::shared_ptr<RigidProperty>(new RigidProperty());
@@ -166,7 +166,7 @@ void OpenGLScene::initializeGL()
 
     // fluid
     m_fluid = std::shared_ptr<Fluid>(new Fluid(fluidProps));
-    m_algae = std::shared_ptr<Fluid>(new Fluid(algaeProps));
+    m_algae = std::shared_ptr<Algae>(new Algae(algaeProps));
 
     // rigid
     Mesh boundary = Mesh();
@@ -380,7 +380,7 @@ void OpenGLScene::UpdateSim()
     gettimeofday(&tim, NULL);
     t2=tim.tv_sec+(tim.tv_usec/1000000.0);
     time += 10*(t2-t1);
-//    std::cout<<"fps: "<<1.0/(t2-t1)<<"\n";
+    std::cout<<"fps: "<<1.0/(t2-t1)<<"\n";
 
 }
 

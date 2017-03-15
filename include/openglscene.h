@@ -100,7 +100,7 @@ private:
 
     // Application specific members
     std::shared_ptr<Fluid> m_fluid;
-    std::shared_ptr<Fluid> m_algae;
+    std::shared_ptr<Algae> m_algae;
     std::shared_ptr<Rigid> m_container;
     std::shared_ptr<Rigid> m_staticRigid;
     std::shared_ptr<Rigid> m_activeRigid;
