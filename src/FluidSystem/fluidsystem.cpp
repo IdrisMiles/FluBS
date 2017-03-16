@@ -314,15 +314,12 @@ void FluidSystem::StepSimulation()
     //----------------------------------------------------------------------
 
     sph::AdvectParticle(m_fluidSolverProperty, m_algae, m_fluid);
-//    sph::ComputeAdvectionForce(m_fluidSolverProperty, m_algae, m_fluid, false);
     sph::ComputeBioluminescence(m_fluidSolverProperty, m_algae);
     cudaThreadSynchronize();
 
     sph::Integrate(m_fluidSolverProperty, m_algae);
     sph::Integrate(m_fluidSolverProperty, m_fluid);
     cudaThreadSynchronize();
-
-//    sph::HandleBoundaries(m_fluidSolverProperty, m_algae);
 
 
 
