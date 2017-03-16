@@ -11,11 +11,14 @@ FluidRenderer::FluidRenderer(int _w, int _h) :
     m_colour = glm::vec3(0.2f, 0.5f, 0.9f);
 }
 
+//--------------------------------------------------------------------------------------------------------------------
+
 FluidRenderer::~FluidRenderer()
 {
     CleanUpGL();
 }
 
+//--------------------------------------------------------------------------------------------------------------------
 
 void FluidRenderer::SetSphParticles(std::shared_ptr<BaseSphParticle> _sphParticles)
 {
@@ -28,6 +31,8 @@ void FluidRenderer::SetSphParticles(std::shared_ptr<BaseSphParticle> _sphParticl
 
     Init();
 }
+
+//--------------------------------------------------------------------------------------------------------------------
 
 void FluidRenderer::Draw()
 {
@@ -93,6 +98,8 @@ void FluidRenderer::Draw()
     m_fluidShader.release();
 }
 
+//--------------------------------------------------------------------------------------------------------------------
+
 void FluidRenderer::SetShaderUniforms(const glm::mat4 &_projMat,
                                            const glm::mat4 &_viewMat,
                                            const glm::mat4 &_modelMat,
@@ -141,12 +148,15 @@ void FluidRenderer::SetShaderUniforms(const glm::mat4 &_projMat,
     m_shaderProg.release();
 }
 
+//--------------------------------------------------------------------------------------------------------------------
+
 void FluidRenderer::SetFrameSize(int _w, int _h)
 {
     m_width=_w; m_height=_h;
     InitFBOs();
 }
 
+//--------------------------------------------------------------------------------------------------------------------
 
 void FluidRenderer::SetCubeMap(std::shared_ptr<QOpenGLTexture> _cubemap)
 {
@@ -154,7 +164,7 @@ void FluidRenderer::SetCubeMap(std::shared_ptr<QOpenGLTexture> _cubemap)
 }
 
 
-//-------------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
 
 
 void FluidRenderer::Init()
@@ -162,6 +172,7 @@ void FluidRenderer::Init()
     InitGL();
 }
 
+//--------------------------------------------------------------------------------------------------------------------
 
 void FluidRenderer::InitGL()
 {
@@ -169,6 +180,8 @@ void FluidRenderer::InitGL()
     InitVAO();
     InitFBOs();
 }
+
+//--------------------------------------------------------------------------------------------------------------------
 
 void FluidRenderer::InitShader()
 {
@@ -178,6 +191,8 @@ void FluidRenderer::InitShader()
     CreateThicknessShader();
     CreateFluidShader();
 }
+
+//--------------------------------------------------------------------------------------------------------------------
 
 void FluidRenderer::InitVAO()
 {
@@ -265,6 +280,7 @@ void FluidRenderer::InitVAO()
     m_fluidShader.release();
 }
 
+//--------------------------------------------------------------------------------------------------------------------
 
 void FluidRenderer::CleanUpGL()
 {
@@ -297,6 +313,8 @@ void FluidRenderer::CleanUpGL()
     m_fluidShader.destroyed();
 }
 
+//--------------------------------------------------------------------------------------------------------------------
+
 void FluidRenderer::InitFBOs()
 {
     QOpenGLFramebufferObjectFormat fboFormat;
@@ -309,7 +327,7 @@ void FluidRenderer::InitFBOs()
 }
 
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
 // Create Shader Functions
 
 void FluidRenderer::CreateDepthShader()
@@ -326,12 +344,16 @@ void FluidRenderer::CreateDepthShader()
     m_depthShader.release();
 }
 
+//--------------------------------------------------------------------------------------------------------------------
+
 void FluidRenderer::CreateSmoothDepthShader()
 {
     m_smoothDepthShader.addShaderFromSourceFile(QOpenGLShader::Vertex, "../shader/Fluid/smoothDepthVert.glsl");
     m_smoothDepthShader.addShaderFromSourceFile(QOpenGLShader::Fragment, "../shader/Fluid/smoothDepthFrag.glsl");
     m_smoothDepthShader.link();
 }
+
+//--------------------------------------------------------------------------------------------------------------------
 
 void FluidRenderer::CreateThicknessShader()
 {
@@ -341,6 +363,8 @@ void FluidRenderer::CreateThicknessShader()
     m_thicknessShader.link();
 }
 
+//--------------------------------------------------------------------------------------------------------------------
+
 void FluidRenderer::CreateFluidShader()
 {
     m_fluidShader.addShaderFromSourceFile(QOpenGLShader::Vertex, "../shader/Fluid/fluidVert.glsl");
@@ -349,6 +373,8 @@ void FluidRenderer::CreateFluidShader()
     m_fluidShader.bind();
     m_fluidShader.release();
 }
+
+//--------------------------------------------------------------------------------------------------------------------
 
 void FluidRenderer::CreateDefaultParticleShader()
 {
@@ -363,3 +389,5 @@ void FluidRenderer::CreateDefaultParticleShader()
     m_denAttrLoc = m_shaderProg.attributeLocation("vDen");
     m_shaderProg.release();
 }
+
+//--------------------------------------------------------------------------------------------------------------------

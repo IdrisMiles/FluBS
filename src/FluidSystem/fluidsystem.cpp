@@ -317,6 +317,8 @@ void FluidSystem::StepSimulation()
     sph::ComputeBioluminescence(m_fluidSolverProperty, m_algae);
     cudaThreadSynchronize();
 
+    //----------------------------------------------------------------------
+
     sph::Integrate(m_fluidSolverProperty, m_algae);
     sph::Integrate(m_fluidSolverProperty, m_fluid);
     cudaThreadSynchronize();

@@ -11,7 +11,7 @@ class FluidRenderer : public SphParticleRenderer
 {
 public:
     FluidRenderer(int _w = 1280, int _h = 720);
-    ~FluidRenderer();
+    virtual ~FluidRenderer();
 
     virtual void SetSphParticles(std::shared_ptr<BaseSphParticle> _sphParticles);
     virtual void Draw();
@@ -32,7 +32,7 @@ protected:
     virtual void InitVAO();
     virtual void CleanUpGL();
 
-    void InitFBOs();
+    virtual void InitFBOs();
     void CreateDepthShader();
     void CreateSmoothDepthShader();
     void CreateThicknessShader();
