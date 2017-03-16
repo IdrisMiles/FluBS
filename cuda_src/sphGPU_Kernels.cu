@@ -1350,11 +1350,12 @@ __global__ void sphGPU_Kernels::InitParticleAsCube_Kernel(float3 *particles,
 //--------------------------------------------------------------------------------------------------------------------
 // Algae functions
 __global__ void sphGPU_Kernels::ComputeAdvectionForce(float3 *pos,
+                                                      float3 *vel,
                                                       float3 *advectForce,
                                                       const uint *cellOcc,
                                                       const uint *cellPartIdx,
                                                       const float3 *advectorPos,
-                                                      const float3 *advectorForce,
+                                                      const float3 *advectorForce, const float *advectorDensity, const float advectorMass,
                                                       const uint *advectorCellOcc,
                                                       const uint *advectorCellPartIdx,
                                                       const uint numPoints,
@@ -1384,6 +1385,8 @@ __global__ void sphGPU_Kernels::ComputeAdvectionForce(float3 *pos,
 
 
         float3 thisPos = pos[thisParticleGlobalIdx];
+        float3 accForce = make_float3(0.0f, 0.0f, 0.0f);
+//        vel[thisParticleGlobalIdx] = vel[thisParticleGlobalIdx]*0.9f;//make_float3(0.0f, 0.0f, 0.0f);
 
         for(z = zMin; z <= zMax; z++)
         {
@@ -1399,15 +1402,22 @@ __global__ void sphGPU_Kernels::ComputeAdvectionForce(float3 *pos,
                     for(neighLocalIdx=0; neighLocalIdx<neighCellOcc; neighLocalIdx++)
                     {
                         neighParticleGlobalIdx = neighCellPartIdx + neighLocalIdx;
-                        if(neighParticleGlobalIdx == thisParticleGlobalIdx){continue;}
+                        float3 neighPos = advectorPos[neighParticleGlobalIdx];
 
+                        float W = Poly6Kernel_Kernel(length(thisPos-neighPos), smoothingLength);
+                        float invDensity = 1.0f / advectorDensity[neighParticleGlobalIdx];
 
+                        accForce = accForce + (advectorForce[neighParticleGlobalIdx] * W * invDensity);
+
+                        accForce = accForce + ((neighPos - thisPos) *0.1f* W);
                     }
                 }
             }
         }
 
+        accForce = (accForce * advectorMass * 0.20f);// + make_float3(0.0f, -0.8f, 0.0f);
 
+        advectForce[thisParticleGlobalIdx] = accForce;
     }
 }
 
@@ -1418,6 +1428,8 @@ __global__ void sphGPU_Kernels::AdvectParticle(float3 *pos,
                                                const uint *cellPartIdx,
                                                const float3 *advectorPos,
                                                const float3 *advectorVel,
+                                               const float *advectorDensity,
+                                               const float advectorMass,
                                                const uint *advectorCellOcc,
                                                const uint *advectorCellPartIdx,
                                                const uint numPoints,
@@ -1467,14 +1479,15 @@ __global__ void sphGPU_Kernels::AdvectParticle(float3 *pos,
                         float3 neighVel = advectorVel[neighParticleGlobalIdx];
 
                         float W = Poly6Kernel_Kernel(length(thisPos-neighPos), smoothingLength);
-                        accVel = accVel + (neighVel * 0.1f * W);
-                        accVel = accVel + ((neighPos - thisPos) *0.1f* W);
+                        float invDensity = 1.0f / advectorDensity[neighParticleGlobalIdx];
+                        accVel = accVel + (neighVel * W * invDensity);
+//                        accVel = accVel + ((neighPos - thisPos) *0.1f* W);
                     }
                 }
             }
         }
 
-        vel[thisParticleGlobalIdx] = accVel;
+        vel[thisParticleGlobalIdx] = accVel * advectorMass;
         pos[thisParticleGlobalIdx] = thisPos + (accVel * deltaTime);
     }
 }

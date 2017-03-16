@@ -111,6 +111,10 @@ void Algae::InitCUDAMemory()
 
     // particle hash
     cudaMalloc(&d_particleHashIdPtr, m_property->numParticles * sizeof(unsigned int));
+
+    cudaMalloc(&d_prevPressurePtr, m_property->numParticles * sizeof(float));
+    cudaMalloc(&d_energyPtr, m_property->numParticles * sizeof(float));
+    cudaMalloc(&d_illuminationPtr, m_property->numParticles * sizeof(float));
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -179,6 +183,9 @@ void Algae::CleanUpCUDAMemory()
     cudaFree(d_particleHashIdPtr);
     cudaFree(d_cellOccupancyPtr);
     cudaFree(d_cellParticleIdxPtr);
+    cudaFree(d_prevPressurePtr);
+    cudaFree(d_illuminationPtr);
+    cudaFree(d_energyPtr);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -211,20 +218,6 @@ float *Algae::GetPrevPressurePtr()
 //--------------------------------------------------------------------------------------------------------------------
 
 void Algae::ReleasePrevPressurePtr()
-{
-
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-float *Algae::GetPrevDensityPtr()
-{
-    return d_prevDensityPtr;
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void Algae::ReleasePrevDensityPtr()
 {
 
 }

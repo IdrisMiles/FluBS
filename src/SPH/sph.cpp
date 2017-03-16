@@ -587,15 +587,15 @@ void sph::ComputeTotalForce(std::shared_ptr<FluidSolverProperty> _solverProps,
 //--------------------------------------------------------------------------------------------------------------------
 
 void sph::Integrate(std::shared_ptr<FluidSolverProperty> _solverProps,
-                    std::shared_ptr<Fluid> _fluid)
+                    std::shared_ptr<BaseSphParticle> _particles)
 {
-    auto fluidProps = _fluid->GetProperty();
+    auto fluidProps = _particles->GetProperty();
 
-    sphGPU::Integrate(_fluid->GetMaxCellOcc(),
+    sphGPU::Integrate(_particles->GetMaxCellOcc(),
                       _solverProps->gridResolution,
-                      _fluid->GetTotalForcePtr(),
-                      _fluid->GetPositionPtr(),
-                      _fluid->GetVelocityPtr(),
+                      _particles->GetTotalForcePtr(),
+                      _particles->GetPositionPtr(),
+                      _particles->GetVelocityPtr(),
                       _solverProps->deltaTime,
                       fluidProps->numParticles);
 }
@@ -621,12 +621,28 @@ void sph::HandleBoundaries(std::shared_ptr<FluidSolverProperty> _solverProps,
 
 void sph::ComputeAdvectionForce(std::shared_ptr<FluidSolverProperty> _solverProps,
                                 std::shared_ptr<BaseSphParticle> _particles,
-                                std::shared_ptr<Fluid> _advector)
+                                std::shared_ptr<Fluid> _advector,
+                                const bool accumulate)
 {
     auto particleProps = _particles->GetProperty();
     auto advectorProps = _advector->GetProperty();
 
-//    sphGPU::ComputeAdvectionForce()
+    sphGPU::ComputeAdvectionForce(_particles->GetMaxCellOcc(),
+                                  _solverProps->gridResolution,
+                                  _particles->GetPositionPtr(),
+                                  _particles->GetVelocityPtr(),
+                                  _particles->GetTotalForcePtr(),
+                                  _particles->GetCellOccupancyPtr(),
+                                  _particles->GetCellParticleIdxPtr(),
+                                  _advector->GetPositionPtr(),
+                                  _advector->GetTotalForcePtr(),
+                                  _advector->GetDensityPtr(),
+                                  advectorProps->particleMass,
+                                  _advector->GetCellOccupancyPtr(),
+                                  _advector->GetCellParticleIdxPtr(),
+                                  particleProps->numParticles,
+                                  particleProps->smoothingLength,
+                                  accumulate);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -646,6 +662,8 @@ void sph::AdvectParticle(std::shared_ptr<FluidSolverProperty> _solverProps,
                            _particles->GetCellParticleIdxPtr(),
                            _advector->GetPositionPtr(),
                            _advector->GetVelocityPtr(),
+                           _advector->GetDensityPtr(),
+                           advectorProps->particleMass,
                            _advector->GetCellOccupancyPtr(),
                            _advector->GetCellParticleIdxPtr(),
                            particleProps->numParticles,
@@ -656,8 +674,7 @@ void sph::AdvectParticle(std::shared_ptr<FluidSolverProperty> _solverProps,
 //--------------------------------------------------------------------------------------------------------------------
 
 void sph::ComputeBioluminescence(std::shared_ptr<FluidSolverProperty> _solverProps,
-                                 std::shared_ptr<Algae> _algae,
-                                 bool accumulate)
+                                 std::shared_ptr<Algae> _algae)
 {
     auto algaeProps = _algae->GetProperty();
 

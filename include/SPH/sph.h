@@ -259,7 +259,7 @@ namespace sph
     //--------------------------------------------------------------------------------------------------------------------
 
     void Integrate(std::shared_ptr<FluidSolverProperty> _solverProps,
-                   std::shared_ptr<Fluid> _fluid);
+                   std::shared_ptr<BaseSphParticle> _particles);
 
     //--------------------------------------------------------------------------------------------------------------------
 
@@ -273,7 +273,8 @@ namespace sph
     // use advectiion, pressure, etc... forces to move particle
     void ComputeAdvectionForce(std::shared_ptr<FluidSolverProperty> _solverProps,
                                std::shared_ptr<BaseSphParticle> _particles,
-                               std::shared_ptr<Fluid> _advector);
+                               std::shared_ptr<Fluid> _advector,
+                               const bool accumulate = false);
 
 
     //--------------------------------------------------------------------------------------------------------------------
@@ -289,8 +290,7 @@ namespace sph
 
     // compute bioluminescence from stored pressures, or compute pressure aswell
     void ComputeBioluminescence(std::shared_ptr<FluidSolverProperty> _solverProps,
-                                std::shared_ptr<Algae> _algae,
-                                bool accumulate);
+                                std::shared_ptr<Algae> _algae);
 
     //--------------------------------------------------------------------------------------------------------------------
 

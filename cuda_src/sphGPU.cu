@@ -509,22 +509,40 @@ void sphGPU::InitFluidAsCube(float3 *particles, float3 *velocities, float *densi
 //--------------------------------------------------------------------------------------------------------------------
 // Algae functions
 void sphGPU::ComputeAdvectionForce(const uint maxCellOcc,
-                           const uint gridRes,
-                           float3 *pos,
-                           float3 *advectForce,
-                           const uint *cellOcc,
-                           const uint *cellPartIdx,
-                           const float3 *advectorPos,
-                           const float3 *advectorForce,
-                           const uint *advectorCellOcc,
-                           const uint *advectorCellPartIdx,
+                                   const uint gridRes,
+                                   float3 *pos,
+                                   float3 *vel,
+                                   float3 *advectForce,
+                                   const uint *cellOcc,
+                                   const uint *cellPartIdx,
+                                   const float3 *advectorPos,
+                                   const float3 *advectorForce,
+                                   const float* advectorDensity,
+                                   const float advectorMass,
+                                   const uint *advectorCellOcc,
+                                   const uint *advectorCellPartIdx,
                                    const uint numPoints,
-                           const float smoothingLength,
-                           const bool accumulate)
+                                   const float smoothingLength,
+                                   const bool accumulate)
 {
 
     dim3 gridDim = dim3(gridRes, gridRes, gridRes);
     uint blockSize = std::min(maxCellOcc, 1024u);
+
+    sphGPU_Kernels::ComputeAdvectionForce<<<gridDim, blockSize>>>(pos,
+                                                                  vel,
+                                                                  advectForce,
+                                                                  cellOcc,
+                                                                  cellPartIdx,
+                                                                  advectorPos,
+                                                                  advectorForce,
+                                                                  advectorDensity,
+                                                                  advectorMass,
+                                                                  advectorCellOcc,
+                                                                  advectorCellPartIdx,
+                                                                  numPoints,
+                                                                  smoothingLength,
+                                                                  accumulate);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -536,6 +554,8 @@ void sphGPU::AdvectParticle(const uint maxCellOcc,
                             const uint *cellPartIdx,
                             const float3 *advectorPos,
                             const float3 *advectorVel,
+                            const float *advectorDensity,
+                            const float advectorMass,
                             const uint *advectorCellOcc,
                             const uint *advectorCellPartIdx,
                             const uint numPoints,
@@ -552,6 +572,8 @@ void sphGPU::AdvectParticle(const uint maxCellOcc,
                                                            cellPartIdx,
                                                            advectorPos,
                                                            advectorVel,
+                                                           advectorDensity,
+                                                           advectorMass,
                                                            advectorCellOcc,
                                                            advectorCellPartIdx,
                                                            numPoints,

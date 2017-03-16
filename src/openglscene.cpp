@@ -152,7 +152,7 @@ void OpenGLScene::initializeGL()
     // Set up simulation here
 
     auto fluidProps = std::shared_ptr<FluidProperty>(new FluidProperty());
-    auto algaeProps = std::shared_ptr<AlgaeProperty>(new AlgaeProperty(64000, 1.0f, 0.1f, 98.36f));
+    auto algaeProps = std::shared_ptr<AlgaeProperty>(new AlgaeProperty(64000, 1.0f, 0.1f, 998.36f));
     auto fluidSolverProps = std::shared_ptr<FluidSolverProperty>(new FluidSolverProperty());
     auto containerProps = std::shared_ptr<RigidProperty>(new RigidProperty());
     auto cubeProps = std::shared_ptr<RigidProperty>(new RigidProperty());

@@ -191,11 +191,14 @@ namespace sphGPU_Kernels
 
     //--------------------------------------------------------------------------------------------------------------------
     __global__ void ComputeAdvectionForce(float3 *pos,
+                                          float3 *vel,
                                           float3 *advectForce,
                                           const uint *cellOcc,
                                           const uint *cellPartIdx,
                                           const float3 *advectorPos,
                                           const float3 *advectorForce,
+                                          const float* advectorDensity,
+                                          const float advectorMass,
                                           const uint *advectorCellOcc,
                                           const uint *advectorCellPartIdx,
                                           const uint numPoints,
@@ -209,6 +212,8 @@ namespace sphGPU_Kernels
                                    const uint *cellPartIdx,
                                    const float3 *advectorPos,
                                    const float3 *advectorVel,
+                                   const float* advectorDensity,
+                                   const float advectorMass,
                                    const uint *advectorCellOcc,
                                    const uint *advectorCellPartIdx,
                                    const uint numPoints,
