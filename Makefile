@@ -66,7 +66,8 @@ SOURCES       = src/heterocont.cpp \
 		src/Render/fluidrenderer.cpp \
 		src/Render/rigidrenderer.cpp \
 		src/Render/sphparticlerenderer.cpp \
-		src/Widget/fluidpropertywidget.cpp moc/moc_mainwindow.cpp \
+		src/Widget/fluidpropertywidget.cpp \
+		src/Cache/cachesystem.cpp moc/moc_mainwindow.cpp \
 		moc/moc_openglscene.cpp \
 		moc/moc_fluidpropertywidget.cpp
 OBJECTS       = cuda_obj/poly6kernel_cuda.o \
@@ -95,6 +96,7 @@ OBJECTS       = cuda_obj/poly6kernel_cuda.o \
 		obj/rigidrenderer.o \
 		obj/sphparticlerenderer.o \
 		obj/fluidpropertywidget.o \
+		obj/cachesystem.o \
 		obj/moc_mainwindow.o \
 		obj/moc_openglscene.o \
 		obj/moc_fluidpropertywidget.o
@@ -272,6 +274,8 @@ DIST          = ../../../Qt5.7.0/5.7/gcc_64/mkspecs/features/spec_pre.prf \
 		include/Render/rigidrenderer.h \
 		include/Render/sphparticlerenderer.h \
 		include/Widget/fluidpropertywidget.h \
+		include/Cache/cachesystem.h \
+		json/src/json.hpp \
 		cuda_inc/poly6kernel.cuh \
 		cuda_inc/smoothingKernel.cuh \
 		cuda_inc/smoothkernel.cuh \
@@ -295,7 +299,8 @@ DIST          = ../../../Qt5.7.0/5.7/gcc_64/mkspecs/features/spec_pre.prf \
 		src/Render/fluidrenderer.cpp \
 		src/Render/rigidrenderer.cpp \
 		src/Render/sphparticlerenderer.cpp \
-		src/Widget/fluidpropertywidget.cpp
+		src/Widget/fluidpropertywidget.cpp \
+		src/Cache/cachesystem.cpp
 QMAKE_TARGET  = Major
 DESTDIR       = bin/
 TARGET        = bin/Major
@@ -630,8 +635,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents cuda_src/poly6kernel.cu cuda_src/smoothingKernel.cu cuda_src/smoothkernel.cu cuda_src/sphGPU.cu cuda_src/sphGPU_Kernels.cu cuda_src/spikykernel.cu cuda_src/vec_ops.cu $(DISTDIR)/
-	$(COPY_FILE) --parents include/heterocont.h include/mainwindow.h include/openglscene.h include/MeshSampler/barycoordmeshsampler.h include/MeshSampler/meshsampler.h include/MeshSampler/poissondiskpointset.h include/Mesh/mesh.h include/Mesh/meshloader.h include/Mesh/rendermesh.h include/FluidSystem/fluidsolverproperty.h include/FluidSystem/fluidsystem.h include/SPH/algae.h include/SPH/algaeproperty.h include/SPH/fluid.h include/SPH/fluidproperty.h include/SPH/isphparticles.h include/SPH/rigid.h include/SPH/rigidproperty.h include/SPH/sph.h include/SPH/sphGPU.h include/SPH/sphparticlepropeprty.h include/Render/bioluminescentfluidrenderer.h include/Render/fluidrenderer.h include/Render/rigidrenderer.h include/Render/sphparticlerenderer.h include/Widget/fluidpropertywidget.h cuda_inc/poly6kernel.cuh cuda_inc/smoothingKernel.cuh cuda_inc/smoothkernel.cuh cuda_inc/sphGPU_Kernels.cuh cuda_inc/spikykernel.cuh cuda_inc/vec_ops.cuh $(DISTDIR)/
-	$(COPY_FILE) --parents src/heterocont.cpp src/main.cpp src/mainwindow.cpp src/openglscene.cpp src/MeshSampler/barycoordmeshsampler.cpp src/MeshSampler/poissondiskpointset.cpp src/Mesh/meshloader.cpp src/Mesh/rendermesh.cpp src/FluidSystem/fluidsystem.cpp src/SPH/algae.cpp src/SPH/fluid.cpp src/SPH/isphparticles.cpp src/SPH/rigid.cpp src/SPH/sph.cpp src/Render/bioluminescentfluidrenderer.cpp src/Render/fluidrenderer.cpp src/Render/rigidrenderer.cpp src/Render/sphparticlerenderer.cpp src/Widget/fluidpropertywidget.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents include/heterocont.h include/mainwindow.h include/openglscene.h include/MeshSampler/barycoordmeshsampler.h include/MeshSampler/meshsampler.h include/MeshSampler/poissondiskpointset.h include/Mesh/mesh.h include/Mesh/meshloader.h include/Mesh/rendermesh.h include/FluidSystem/fluidsolverproperty.h include/FluidSystem/fluidsystem.h include/SPH/algae.h include/SPH/algaeproperty.h include/SPH/fluid.h include/SPH/fluidproperty.h include/SPH/isphparticles.h include/SPH/rigid.h include/SPH/rigidproperty.h include/SPH/sph.h include/SPH/sphGPU.h include/SPH/sphparticlepropeprty.h include/Render/bioluminescentfluidrenderer.h include/Render/fluidrenderer.h include/Render/rigidrenderer.h include/Render/sphparticlerenderer.h include/Widget/fluidpropertywidget.h include/Cache/cachesystem.h json/src/json.hpp cuda_inc/poly6kernel.cuh cuda_inc/smoothingKernel.cuh cuda_inc/smoothkernel.cuh cuda_inc/sphGPU_Kernels.cuh cuda_inc/spikykernel.cuh cuda_inc/vec_ops.cuh $(DISTDIR)/
+	$(COPY_FILE) --parents src/heterocont.cpp src/main.cpp src/mainwindow.cpp src/openglscene.cpp src/MeshSampler/barycoordmeshsampler.cpp src/MeshSampler/poissondiskpointset.cpp src/Mesh/meshloader.cpp src/Mesh/rendermesh.cpp src/FluidSystem/fluidsystem.cpp src/SPH/algae.cpp src/SPH/fluid.cpp src/SPH/isphparticles.cpp src/SPH/rigid.cpp src/SPH/sph.cpp src/Render/bioluminescentfluidrenderer.cpp src/Render/fluidrenderer.cpp src/Render/rigidrenderer.cpp src/Render/sphparticlerenderer.cpp src/Widget/fluidpropertywidget.cpp src/Cache/cachesystem.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents form/mainwindow.ui $(DISTDIR)/
 
 
@@ -1856,7 +1861,9 @@ obj/openglscene.o: src/openglscene.cpp include/openglscene.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QImage \
 		include/MeshSampler/meshsampler.h \
 		include/MeshSampler/poissondiskpointset.h \
-		include/MeshSampler/barycoordmeshsampler.h
+		include/MeshSampler/barycoordmeshsampler.h \
+		include/Cache/cachesystem.h \
+		json/src/json.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/openglscene.o src/openglscene.cpp
 
 obj/barycoordmeshsampler.o: src/MeshSampler/barycoordmeshsampler.cpp include/MeshSampler/barycoordmeshsampler.h \
@@ -2338,7 +2345,14 @@ obj/bioluminescentfluidrenderer.o: src/Render/bioluminescentfluidrenderer.cpp in
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qpainterpath.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QScopedPointer \
 		include/SPH/algae.h \
-		include/SPH/algaeproperty.h
+		include/SPH/algaeproperty.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLContext \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglcontext.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QSurfaceFormat \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qsurfaceformat.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglversionfunctions.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFunctions \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglfunctions.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/bioluminescentfluidrenderer.o src/Render/bioluminescentfluidrenderer.cpp
 
 obj/fluidrenderer.o: src/Render/fluidrenderer.cpp include/Render/fluidrenderer.h \
@@ -2773,6 +2787,10 @@ obj/fluidpropertywidget.o: src/Widget/fluidpropertywidget.cpp include/Widget/flu
 		include/SPH/fluidproperty.h \
 		include/SPH/sphparticlepropeprty.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/fluidpropertywidget.o src/Widget/fluidpropertywidget.cpp
+
+obj/cachesystem.o: src/Cache/cachesystem.cpp include/Cache/cachesystem.h \
+		json/src/json.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/cachesystem.o src/Cache/cachesystem.cpp
 
 obj/moc_mainwindow.o: moc/moc_mainwindow.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/moc_mainwindow.o moc/moc_mainwindow.cpp

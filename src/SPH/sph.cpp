@@ -358,7 +358,8 @@ void sph::ComputePressure(std::shared_ptr<FluidSolverProperty> _solverProps,
 //--------------------------------------------------------------------------------------------------------------------
 
 void sph::ComputePressure(std::shared_ptr<FluidSolverProperty> _solverProps,
-                          std::shared_ptr<Algae> _algae)
+                          std::shared_ptr<Algae> _algae,
+                          std::shared_ptr<Fluid> _fluid)
 {
     auto algaeProps =  _algae->GetProperty();
 

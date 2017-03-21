@@ -71,15 +71,15 @@ public:
     void SetMaxCellOcc(const unsigned int _maxCellOcc);
 
 
-    QOpenGLBuffer *GetPosBO();
+    QOpenGLBuffer &GetPosBO();
 
-    QOpenGLBuffer *GetVelBO();
+    QOpenGLBuffer &GetVelBO();
 
-    QOpenGLBuffer *GetDenBO();
+    QOpenGLBuffer &GetDenBO();
 
-    QOpenGLBuffer *GetMassBO();
+    QOpenGLBuffer &GetMassBO();
 
-    QOpenGLBuffer *GetPressBO();
+    QOpenGLBuffer &GetPressBO();
 
 
 protected:

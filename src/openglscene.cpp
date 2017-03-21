@@ -8,7 +8,7 @@
 
 #include "Mesh/meshloader.h"
 #include "MeshSampler/meshsampler.h"
-
+#include "Cache/cachesystem.h"
 
 OpenGLScene::OpenGLScene(QWidget *parent) : QOpenGLWidget(parent),
     m_xRot(0),
@@ -150,6 +150,7 @@ void OpenGLScene::initializeGL()
 
     //---------------------------------------------------------------------------------------
     // Set up simulation here
+    CacheSystem cs;
 
     auto fluidProps = std::shared_ptr<FluidProperty>(new FluidProperty());
     auto algaeProps = std::shared_ptr<AlgaeProperty>(new AlgaeProperty(64000, 1.0f, 0.1f, 998.36f));
@@ -238,16 +239,6 @@ void OpenGLScene::initializeGL()
     cubeProps->numParticles = primitivesMesh.verts.size();
     m_staticRigid = std::shared_ptr<Rigid>(new Rigid(cubeProps, primitivesMesh));
 
-
-//    Mesh torus = MeshLoader::LoadMesh("geo/Bow_01_01.dae")[0];
-//    Mesh particleTorus = MeshSampler::BaryCoord::SampleMesh(torus, 500);
-//    glm::mat4 t = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-//    t = glm::translate(t, glm::vec3(0.0f, 0.0f, dim*0.37f));
-//    for(auto &v:particleTorus.verts)
-//    {
-//        v *= 0.8f;
-//        v = t * glm::vec4(v, 1.0f);
-//    }
     m_activeRigidMesh = Mesh();
     dim = 1.0f* fluidSolverProps->gridResolution*fluidSolverProps->gridCellWidth;
     rad = cubeProps->particleRadius;
@@ -300,11 +291,11 @@ void OpenGLScene::initializeGL()
 
     m_sphRenderers.push_back(std::shared_ptr<SphParticleRenderer>(new SphParticleRenderer()));
     m_sphRenderers.back()->SetSphParticles(m_staticRigid);
-    m_sphRenderers.back()->SetColour(glm::vec3(0.2f, 0.2f, 0.2f));
+    m_sphRenderers.back()->SetColour(glm::vec3(0.4f, 0.4f, 0.4f));
 
     m_sphRenderers.push_back(std::shared_ptr<SphParticleRenderer>(new SphParticleRenderer()));
     m_sphRenderers.back()->SetSphParticles(m_activeRigid);
-    m_sphRenderers.back()->SetColour(glm::vec3(0.2f, 0.4f, 1.0f));
+    m_sphRenderers.back()->SetColour(glm::vec3(0.9f, 0.4f, 0.2f));
 
     m_sphRenderers.push_back(std::shared_ptr<SphParticleRenderer>(new SphParticleRenderer()));
     m_sphRenderers.back()->SetSphParticles(m_algae);
@@ -380,7 +371,7 @@ void OpenGLScene::UpdateSim()
     gettimeofday(&tim, NULL);
     t2=tim.tv_sec+(tim.tv_usec/1000000.0);
     time += 10*(t2-t1);
-    std::cout<<"fps: "<<1.0/(t2-t1)<<"\n";
+//    std::cout<<"fps: "<<1.0/(t2-t1)<<"\n";
 
 }
 

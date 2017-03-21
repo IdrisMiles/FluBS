@@ -181,7 +181,8 @@ namespace sph
                          std::shared_ptr<Fluid> _fluid);
 
     void ComputePressure(std::shared_ptr<FluidSolverProperty> _solverProps,
-                         std::shared_ptr<Algae> _algae);
+                         std::shared_ptr<Algae> _algae,
+                         std::shared_ptr<Fluid> _fluid);
 
     //--------------------------------------------------------------------------------------------------------------------
 

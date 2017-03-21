@@ -285,7 +285,7 @@ __global__ void sphGPU_Kernels::ComputeDensityFluidRigid_kernel(const uint numPo
 
                         thisDensity = fluidRestDensity * rigidVolume[neighParticleGlobalIdx] * Poly6Kernel_Kernel(length(thisParticle - neighParticle), smoothingLength);
 
-                        accDensity += thisDensity;
+                        accDensity += (thisDensity);
                     }
                 }
             }
@@ -1409,13 +1409,13 @@ __global__ void sphGPU_Kernels::ComputeAdvectionForce(float3 *pos,
 
                         accForce = accForce + (advectorForce[neighParticleGlobalIdx] * W * invDensity);
 
-                        accForce = accForce + ((neighPos - thisPos) *0.1f* W);
+//                        accForce = accForce + ((neighPos - thisPos) *0.1f* W);
                     }
                 }
             }
         }
 
-        accForce = (accForce * advectorMass * 0.20f);// + make_float3(0.0f, -0.8f, 0.0f);
+        accForce = (accForce * advectorMass * 1.00f);// + make_float3(0.0f, -0.8f, 0.0f);
 
         advectForce[thisParticleGlobalIdx] = accForce;
     }
@@ -1487,7 +1487,7 @@ __global__ void sphGPU_Kernels::AdvectParticle(float3 *pos,
             }
         }
 
-        vel[thisParticleGlobalIdx] = accVel * advectorMass;
+        vel[thisParticleGlobalIdx] = (vel[thisParticleGlobalIdx]*0.5f) + (accVel * advectorMass * 0.50f);
         pos[thisParticleGlobalIdx] = thisPos + (accVel * deltaTime);
     }
 }

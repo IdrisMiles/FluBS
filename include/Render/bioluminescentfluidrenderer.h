@@ -10,7 +10,8 @@ public:
     BioluminescentFluidRenderer(int _w = 1280, int _h = 720);
     virtual ~BioluminescentFluidRenderer();
 
-    virtual void SetSphParticles(std::shared_ptr<BaseSphParticle> _sphParticles);
+    virtual void SetSphParticles(std::shared_ptr<BaseSphParticle> _sphParticles,
+                                 std::shared_ptr<Algae> _algaeParticles);
     virtual void Draw();
     virtual void SetShaderUniforms(const glm::mat4 &_projMat,
                            const glm::mat4 &_viewMat,
@@ -24,10 +25,25 @@ protected:
     virtual void Init();
     virtual void InitGL();
     virtual void InitShader();
-    virtual void InitVAO();
+    virtual void InitAlgaeVAO();
     virtual void CleanUpGL();
 
     virtual void InitFBOs();
+    void CreateBioluminescentShader();
+
+
+    std::shared_ptr<Algae> m_algaeParticles;
+
+    QOpenGLVertexArrayObject m_algaeVao;
+    std::shared_ptr<QOpenGLBuffer> m_algaePosBO;
+    std::shared_ptr<QOpenGLBuffer> m_illuminationBO;
+
+    GLuint m_algaePosAttrLoc;
+    GLuint m_algaeIllumAttrLoc;
+
+    std::shared_ptr<QOpenGLFramebufferObject> m_algaeDepthFBO;
+    std::shared_ptr<QOpenGLFramebufferObject> m_algaeThicknessFBO;
+
 };
 
 #endif // BIOLUMINESCENTFLUIDRENDERER_H

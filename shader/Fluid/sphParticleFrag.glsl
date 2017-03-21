@@ -11,7 +11,7 @@ uniform vec3 uLightPos = vec3(0.0f, 0.0f, 1.0f);
 uniform vec3 uColour = vec3(0.0f, 0.0f, 0.0f);
 uniform float uRad = 1.0f;
 uniform float uRestDen = 1000.0f;
-uniform bool shadeDensity = false;
+uniform bool shadeDensity = true;
 
 
 void main()

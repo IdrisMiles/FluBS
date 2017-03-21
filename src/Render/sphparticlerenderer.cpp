@@ -16,11 +16,11 @@ SphParticleRenderer::~SphParticleRenderer()
 void SphParticleRenderer::SetSphParticles(std::shared_ptr<BaseSphParticle> _sphParticles)
 {
     m_sphParticles = _sphParticles;
-    m_posBO.reset(m_sphParticles->GetPosBO());
-    m_velBO.reset(m_sphParticles->GetVelBO());
-    m_denBO.reset(m_sphParticles->GetDenBO());
-    m_massBO.reset(m_sphParticles->GetMassBO());
-    m_pressBO.reset(m_sphParticles->GetPressBO());
+    m_posBO = std::make_shared<QOpenGLBuffer>(m_sphParticles->GetPosBO());
+    m_velBO = std::make_shared<QOpenGLBuffer>(m_sphParticles->GetVelBO());
+    m_denBO = std::make_shared<QOpenGLBuffer>(m_sphParticles->GetDenBO());
+    m_massBO = std::make_shared<QOpenGLBuffer>(m_sphParticles->GetMassBO());
+    m_pressBO = std::make_shared<QOpenGLBuffer>(m_sphParticles->GetPressBO());
 
     Init();
 }

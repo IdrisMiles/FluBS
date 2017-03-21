@@ -350,27 +350,27 @@ void BaseSphParticle::SetMaxCellOcc(const unsigned int _maxCellOcc)
 }
 
 
-QOpenGLBuffer *BaseSphParticle::GetPosBO()
+QOpenGLBuffer &BaseSphParticle::GetPosBO()
 {
-    return &m_posBO;
+    return m_posBO;
 }
 
-QOpenGLBuffer *BaseSphParticle::GetVelBO()
+QOpenGLBuffer &BaseSphParticle::GetVelBO()
 {
-    return &m_velBO;
+    return m_velBO;
 }
 
-QOpenGLBuffer *BaseSphParticle::GetDenBO()
+QOpenGLBuffer &BaseSphParticle::GetDenBO()
 {
-    return &m_denBO;
+    return m_denBO;
 }
 
-QOpenGLBuffer *BaseSphParticle::GetMassBO()
+QOpenGLBuffer &BaseSphParticle::GetMassBO()
 {
-    return &m_massBO;
+    return m_massBO;
 }
 
-QOpenGLBuffer *BaseSphParticle::GetPressBO()
+QOpenGLBuffer &BaseSphParticle::GetPressBO()
 {
-    return &m_pressBO;
+    return m_pressBO;
 }
