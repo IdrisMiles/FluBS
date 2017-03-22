@@ -320,12 +320,11 @@ void FluidSystem::StepSimulation()
 
     sph::ComputeParticleVolume(m_fluidSolverProperty, m_activeRigids);
     sph::ComputeDensity(m_fluidSolverProperty, m_fluid, true, m_container, m_staticRigids, m_activeRigids);
-    sph::ComputeDensity(m_fluidSolverProperty, m_algae, true, m_container, m_staticRigids, m_activeRigids, m_fluid);
     cudaThreadSynchronize();
 
     sph::ComputePressure(m_fluidSolverProperty, m_fluid);
-    sph::ComputePressure(m_fluidSolverProperty, m_algae, m_fluid);
     cudaThreadSynchronize();
+    sph::ComputePressure(m_fluidSolverProperty, m_algae, m_fluid);
 
 
     //----------------------------------------------------------------------
@@ -356,7 +355,7 @@ void FluidSystem::StepSimulation()
 
     // Handle boundaries - In theory don't need to do this anymore
     sph::HandleBoundaries(m_fluidSolverProperty, m_algae);
-    sph::HandleBoundaries(m_fluidSolverProperty, m_fluid);
+//    sph::HandleBoundaries(m_fluidSolverProperty, m_fluid);
     cudaThreadSynchronize();
 
 

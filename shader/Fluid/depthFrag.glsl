@@ -2,6 +2,7 @@
 
 in vec3 fVel;
 in float fDen;
+in vec3 fPos;
 in vec2 fTexCoord;
 
 layout (location = 0) out vec4 oDepth;
@@ -9,6 +10,7 @@ layout (location = 0) out vec4 oDepth;
 uniform float near = 0.1f;
 uniform float far = 30.0f;
 uniform float uRestDen = 1000.0f;
+uniform float uRad = 0.2f;
 
 float LinearizeDepth(float depth, float near, float far)
 {
@@ -37,8 +39,9 @@ void main()
         return;
     }
 
-    z = sqrt(z2) / 10.0f;
+    z = sqrt(z2) * uRad;
 
-    oDepth = vec4(vec3((LinearizeDepth(gl_FragCoord.z, near, far)/*-z*/)/far), 1.0);
+    oDepth = vec4(vec3((LinearizeDepth(gl_FragCoord.z, near, far)-z)/far), 1.0);
+//    oDepth = vec4(fPos + vec3(0.0f, 0.0f, z*0.2f), 1.0f);
 
 }

@@ -82,11 +82,14 @@ namespace sphGPU_Kernels
                                    float *pressure,
                                    const uint *cellOcc,
                                    const uint *cellPartIdx,
+                                   const float3 *fluidPos,
                                    const float *fluidPressure,
                                    const float *fluidDensity,
+                                   const float fluidParticleMass,
                                    const uint *fluidCellOcc,
                                    const uint *fluidCellPartIdx,
-                                   const uint numPoints);
+                                   const uint numPoints,
+                                   const float smoothingLength);
 
     //--------------------------------------------------------------------------------------------------------------------
 

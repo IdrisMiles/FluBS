@@ -448,6 +448,72 @@ __global__ void sphGPU_Kernels::ComputePressure_kernel(float *pressure,
 
 }
 
+__global__ void sphGPU_Kernels::SamplePressure(const float3* samplePoints,
+                                               float *pressure,
+                                               const uint *cellOcc,
+                                               const uint *cellPartIdx,
+                                               const float3 *fluidPos,
+                                               const float *fluidPressure,
+                                               const float *fluidDensity,
+                                               const float fluidParticleMass,
+                                               const uint *fluidCellOcc,
+                                               const uint *fluidCellPartIdx,
+                                               const uint numPoints,
+                                               const float smoothingLength)
+{
+    int thisCellIdx = blockIdx.x + (blockIdx.y * gridDim.x) + (blockIdx.z * gridDim.x * gridDim.y);
+    int thisParticleGlobalIdx = fluidCellPartIdx[thisCellIdx] + threadIdx.x;
+
+
+
+    if((thisParticleGlobalIdx < numPoints) && (threadIdx.x < fluidCellOcc[thisCellIdx]) && (thisCellIdx < gridDim.x * gridDim.y * gridDim.z))
+    {
+        int neighCellIdx;
+        int neighCellOcc;
+        int neighCellPartIdx;
+        int neighParticleGlobalIdx;
+
+        int x, y, z;
+        int xMin = ((blockIdx.x==0)?0:-1);
+        int yMin = ((blockIdx.y==0)?0:-1);
+        int zMin = ((blockIdx.z==0)?0:-1);
+        int xMax = ((blockIdx.x==gridDim.x-1)?0:1);
+        int yMax = ((blockIdx.y==gridDim.y-1)?0:1);
+        int zMax = ((blockIdx.z==gridDim.z-1)?0:1);
+
+        int neighLocalIdx;
+        float accPressue = 0.0f;
+        float3 thisPos = samplePoints[thisParticleGlobalIdx];
+
+        for(z = zMin; z <= zMax; z++)
+        {
+            for(y = yMin; y <= yMax; y++)
+            {
+                for(x = xMin; x <= xMax; x++)
+                {
+                    neighCellIdx = thisCellIdx + x + (y*gridDim.x) + (z*gridDim.x*gridDim.y);
+
+                    neighCellOcc = fluidCellOcc[neighCellIdx];
+                    neighCellPartIdx = fluidCellPartIdx[neighCellIdx];
+                    for(neighLocalIdx=0; neighLocalIdx<neighCellOcc; neighLocalIdx++)
+                    {
+                        neighParticleGlobalIdx = neighCellPartIdx + neighLocalIdx;
+
+                        float3 neighPos = fluidPos[neighParticleGlobalIdx];
+                        float W = Poly6Kernel_Kernel(length(thisPos-neighPos), smoothingLength);
+                        float invDen = 1.0f / fluidDensity[neighParticleGlobalIdx];
+                        accPressue += invDen * W * fluidPressure[neighParticleGlobalIdx];
+                    }
+                }
+            }
+        }
+
+        accPressue *= fluidParticleMass;
+
+        pressure[thisParticleGlobalIdx] = accPressue;
+    }
+}
+
 //--------------------------------------------------------------------------------------------------------------------
 
 __global__ void sphGPU_Kernels::ComputePressureForce_kernel(float3 *pressureForce,
@@ -1505,21 +1571,22 @@ __global__ void sphGPU_Kernels::ComputeBioluminescence(const float *pressure,
         float currIllum = illumination[idx];
         float beta = 0.01f;
         float press = pressure[idx];
-        float deltaPress = fabs(press - prevPressure[idx]);
+        float prevPress = prevPressure[idx];
+        prevPressure[idx] = press;
+        float deltaPress = fabs(press - prevPress);
 
-        float deltaIllum = deltaPress - beta;
-        deltaIllum = (deltaIllum <= 0.0f) ? -0.01f : 0.01;
+        float deltaIllum = (deltaPress > beta) ? 0.001 : -0.0001f;
 
         currIllum += deltaIllum;
         currIllum = (currIllum < 0.0f) ? 0.0f : currIllum;
-        currIllum = (currIllum > 1.0f) ? 1.0f : currIllum;
+        currIllum = (currIllum > 0.02f) ? 0.02f : currIllum;
 
         illumination[idx] = currIllum;
-        if(currIllum > 0.0f)
-        {
-//            printf("%f\n", illumination[idx]);
-        }
-        prevPressure[idx] = press;
+//        if(deltaPress > 0.0f)
+//        {
+//            printf("%f\n", deltaPress);
+//        }
+
     }
 
 }

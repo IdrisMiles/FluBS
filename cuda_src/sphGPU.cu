@@ -163,6 +163,26 @@ void sphGPU::SortParticlesByHash(uint *hash, float3 *position, float3 *velocity,
 
 //--------------------------------------------------------------------------------------------------------------------
 
+void sphGPU::SortParticlesByHash(uint *hash,
+                                 float3 *position,
+                                 float3 *velocity,
+                                 float *prevPressure,
+                                 float *illum,
+                                 const uint numPoints)
+{
+    thrust::device_ptr<uint> hashPtr = thrust::device_pointer_cast(hash);
+    thrust::device_ptr<float3> posPtr = thrust::device_pointer_cast(position);
+    thrust::device_ptr<float3> velPtr = thrust::device_pointer_cast(velocity);
+    thrust::device_ptr<float> prevPressPtr = thrust::device_pointer_cast(prevPressure);
+    thrust::device_ptr<float> illumPtr = thrust::device_pointer_cast(illum);
+
+    thrust::sort_by_key(hashPtr,
+                        hashPtr + numPoints,
+                        thrust::make_zip_iterator(thrust::make_tuple(posPtr, velPtr, prevPressPtr, illumPtr)));
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
 void sphGPU::ComputeParticleScatterIds(uint *cellOccupancy, uint *cellParticleIdx, const uint numCells)
 {
     thrust::device_ptr<uint> cellOccPtr = thrust::device_pointer_cast(cellOccupancy);
@@ -297,16 +317,30 @@ void sphGPU::SamplePressure(const uint maxCellOcc,
                             float *pressure,
                             const uint *cellOcc,
                             const uint *cellPartIdx,
+                            const float3 *fluidPos,
                             const float *fluidPressure,
                             const float *fluidDensity,
+                            const float fluidParticleMass,
                             const uint *fluidCellOcc,
                             const uint *fluidCellPartIdx,
-                            const uint numPoints)
+                            const uint numPoints,
+                            const float smoothingLength)
 {
     dim3 gridDim = dim3(gridRes, gridRes, gridRes);
     uint blockSize = std::min(maxCellOcc, 1024u);
 
-//    sphGPU_Kernels
+    sphGPU_Kernels::SamplePressure<<<gridDim, blockSize>>>(samplePoints,
+                                                           pressure,
+                                                           cellOcc,
+                                                           cellPartIdx,
+                                                           fluidPos,
+                                                           fluidPressure,
+                                                           fluidDensity,
+                                                           fluidParticleMass,
+                                                           fluidCellOcc,
+                                                           fluidCellPartIdx,
+                                                           numPoints,
+                                                           smoothingLength);
 }
 
 

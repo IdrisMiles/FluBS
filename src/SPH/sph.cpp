@@ -169,6 +169,18 @@ void sph::SortParticlesByHash(std::shared_ptr<BaseSphParticle> _sphParticles)
 
 //--------------------------------------------------------------------------------------------------------------------
 
+void sph::SortParticlesByHash(std::shared_ptr<Algae> _sphParticles)
+{
+    sphGPU::SortParticlesByHash(_sphParticles->GetParticleHashIdPtr(),
+                                _sphParticles->GetPositionPtr(),
+                                _sphParticles->GetVelocityPtr(),
+                                _sphParticles->GetPrevPressurePtr(),
+                                _sphParticles->GetIlluminationPtr(),
+                                _sphParticles->GetProperty()->numParticles);
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
 void sph::ComputeParticleScatterIds(std::shared_ptr<FluidSolverProperty> _solverProps,
                                     std::shared_ptr<BaseSphParticle> _sphParticles)
 {
@@ -362,6 +374,22 @@ void sph::ComputePressure(std::shared_ptr<FluidSolverProperty> _solverProps,
                           std::shared_ptr<Fluid> _fluid)
 {
     auto algaeProps =  _algae->GetProperty();
+    auto fluidProps =  _fluid->GetProperty();
+
+    sphGPU::SamplePressure(_algae->GetMaxCellOcc(),
+                           _solverProps->gridResolution,
+                           _algae->GetPositionPtr(),
+                           _algae->GetPressurePtr(),
+                           _algae->GetCellOccupancyPtr(),
+                           _algae->GetCellParticleIdxPtr(),
+                           _fluid->GetPositionPtr(),
+                           _fluid->GetPressurePtr(),
+                           _fluid->GetDensityPtr(),
+                           fluidProps->particleMass,
+                           _fluid->GetCellOccupancyPtr(),
+                           _fluid->GetCellParticleIdxPtr(),
+                           algaeProps->numParticles,
+                           algaeProps->smoothingLength);
 
 //    sphGPU::ComputePressureFluid(_fluid->GetMaxCellOcc(),
 //                                 _solverProps->gridResolution,

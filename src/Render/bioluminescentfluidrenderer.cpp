@@ -71,6 +71,7 @@ void BioluminescentFluidRenderer::Draw()
     glFuncs->glDisable(GL_DEPTH_TEST);
     glFuncs->glEnable(GL_BLEND);
     glFuncs->glBlendFunc(GL_ONE, GL_ONE);
+    glFuncs->glBlendEquation(GL_FUNC_ADD);
     m_vao.bind();
     glFuncs->glDrawArrays(GL_POINTS, 0, m_sphParticles->GetProperty()->numParticles);
     m_vao.release();
@@ -84,6 +85,8 @@ void BioluminescentFluidRenderer::Draw()
     // Algae stuff
     // Render Depth
     m_depthShader.bind();
+    glFuncs->glUniform1f(m_depthShader.uniformLocation("uRad"), m_algaeParticles->GetProperty()->particleRadius);
+    glFuncs->glUniform1f(m_depthShader.uniformLocation("uRestDen"), m_algaeParticles->GetProperty()->restDensity);
     m_algaeDepthFBO->bind();
     glFuncs->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glFuncs->glEnable(GL_DEPTH_TEST);
@@ -115,7 +118,8 @@ void BioluminescentFluidRenderer::Draw()
     glFuncs->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glFuncs->glDisable(GL_DEPTH_TEST);
     glFuncs->glEnable(GL_BLEND);
-    glFuncs->glBlendFunc(GL_ONE, GL_ONE);
+    glFuncs->glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
+    glFuncs->glBlendEquation(GL_FUNC_ADD);
     m_algaeVao.bind();
     glFuncs->glDrawArrays(GL_POINTS, 0, m_algaeParticles->GetProperty()->numParticles);
     m_algaeVao.release();
@@ -194,8 +198,8 @@ void BioluminescentFluidRenderer::SetShaderUniforms(const glm::mat4 &_projMat,
     glFuncs->glUniformMatrix4fv(m_biolumIntensityShader.uniformLocation("uProjMatrix"), 1, false, &_projMat[0][0]);
     glFuncs->glUniformMatrix4fv(m_biolumIntensityShader.uniformLocation("uMVMatrix"), 1, false, &(_modelMat*_viewMat)[0][0]);
     glFuncs->glUniform3fv(m_biolumIntensityShader.uniformLocation("uCameraPos"), 1, &_camPos[0]);
-    glFuncs->glUniform1f(m_biolumIntensityShader.uniformLocation("uRad"), m_sphParticles->GetProperty()->particleRadius);
-    glFuncs->glUniform1f(m_biolumIntensityShader.uniformLocation("uRestDen"), m_sphParticles->GetProperty()->restDensity);
+    glFuncs->glUniform1f(m_biolumIntensityShader.uniformLocation("uRad"), m_algaeParticles->GetProperty()->particleRadius);
+    glFuncs->glUniform1f(m_biolumIntensityShader.uniformLocation("uRestDen"), m_algaeParticles->GetProperty()->restDensity);
     m_biolumIntensityShader.release();
 
     m_bioluminescentShader.bind();
@@ -297,11 +301,13 @@ void BioluminescentFluidRenderer::InitAlgaeVAO()
     m_algaePosBO->release();
 
 
+    m_biolumIntensityShader.bind();
     // Setup our algae illumination buffer object.
     m_algaeIllumBO->bind();
-    glFuncs->glEnableVertexAttribArray(m_algaeIllumAttrLoc);
-    glFuncs->glVertexAttribPointer(m_algaeIllumAttrLoc, 1, GL_FLOAT, GL_FALSE, 1 * sizeof(GLfloat), 0);
+    glFuncs->glEnableVertexAttribArray(m_biolumIntensityShader.attributeLocation("vBio"));
+    glFuncs->glVertexAttribPointer(m_biolumIntensityShader.attributeLocation("vBio"), 1, GL_FLOAT, GL_FALSE, 1 * sizeof(float), 0);
     m_algaeIllumBO->release();
+    m_biolumIntensityShader.release();
 
     printf("%i", m_algaeIllumAttrLoc);
 

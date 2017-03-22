@@ -46,44 +46,7 @@ void main()
         discard;
     }
 
-//    float h = 0.004f;
-//    vec3 d = vec3(0.0f);
 
-//    d += depth.rgb;
-
-//    vec3 neighDepth;
-//    float range = 0.9;
-//    int numIterations = 20;
-//    for(int i=0; i<numIterations; i++)
-//    {
-//        neighDepth = texture2D(uDepthTex, fUV.xy + vec2(h, 0.0f)).rgb;
-//        d += abs(neighDepth.r - depth.r) < range ? neighDepth : depth.rgb;
-
-//        neighDepth = texture2D(uDepthTex, fUV.xy + vec2(-h, 0.0f)).rgb;
-//        d += abs(neighDepth.r - depth.r) < range ? neighDepth : depth.rgb;
-
-//        neighDepth = texture2D(uDepthTex, fUV.xy + vec2(0.0f, h)).rgb;
-//        d += abs(neighDepth.r - depth.r) < range ? neighDepth : depth.rgb;
-
-//        neighDepth = texture2D(uDepthTex, fUV.xy + vec2(0.0f, -h)).rgb;
-//        d += abs(neighDepth.r - depth.r) < range ? neighDepth : depth.rgb;
-
-//        neighDepth = texture2D(uDepthTex, fUV.xy + vec2(h, h)).rgb;
-//        d += abs(neighDepth.r - depth.r) < range ? neighDepth : depth.rgb;
-
-//        neighDepth = texture2D(uDepthTex, fUV.xy + vec2(-h, h)).rgb;
-//        d += abs(neighDepth.r - depth.r) < range ? neighDepth : depth.rgb;
-
-//        neighDepth = texture2D(uDepthTex, fUV.xy + vec2(h, -h)).rgb;
-//        d += abs(neighDepth.r - depth.r) < range ? neighDepth : depth.rgb;
-
-//        neighDepth = texture2D(uDepthTex, fUV.xy + vec2(-h, -h)).rgb;
-//        d += abs(neighDepth.r - depth.r) < range ? neighDepth : depth.rgb;
-//        h*=1.05;
-//    }
-
-//    fragColor = vec4(d / (float(8*numIterations)+1.0f), 1.0f);
-
-    fragColor.xyz = vec3(BilateralFilter(depth.r, 0.005, 10, 0.2, 0.005));
+    fragColor.xyz = vec3(depth.r, depth.g, BilateralFilter(depth.b, 0.005, 10, 0.02, 0.2));
     fragColor.a = 1.0f;
 }

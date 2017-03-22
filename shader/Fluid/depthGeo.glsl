@@ -5,9 +5,11 @@ layout(triangle_strip, max_vertices = 4) out;
 
 in vec3 gVel[];
 in float gDen[];
+in vec3 gPos[];
 
 out vec3 fVel;
 out float fDen;
+out vec3 fPos;
 out vec2 fTexCoord;
 
 uniform mat4 uProjMatrix;
@@ -29,6 +31,7 @@ void main()
     fTexCoord = vec2(0.0, 0.0);
     fVel = gVel[0];
     fDen = gDen[0];
+    fPos = viewPos.xyz;
     EmitVertex();
 
     // Top left
@@ -36,6 +39,7 @@ void main()
     fTexCoord = vec2(0.0, 1.0);
     fVel = gVel[0];
     fDen = gDen[0];
+    fPos = viewPos.xyz;
     EmitVertex();
 
     // Bottom right
@@ -43,6 +47,7 @@ void main()
     fTexCoord = vec2(1.0, 0.0);
     fVel = gVel[0];
     fDen = gDen[0];
+    fPos = viewPos.xyz;
     EmitVertex();
 
     // Top right
@@ -50,6 +55,7 @@ void main()
     fTexCoord = vec2(1.0, 1.0);
     fVel = gVel[0];
     fDen = gDen[0];
+    fPos = viewPos.xyz;
     EmitVertex();
 
     EndPrimitive();

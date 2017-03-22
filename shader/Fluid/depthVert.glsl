@@ -6,11 +6,13 @@ layout(location = 2) in float vDen;
 
 out vec3 gVel;
 out float gDen;
+out vec3 gPos;
 
 
 void main()
 {
     gVel = vVel;
     gDen = vDen;
+    gPos = vPos;
    gl_Position = vec4(vPos,1.0);
 }

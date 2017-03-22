@@ -89,6 +89,15 @@ namespace sphGPU
 
     //--------------------------------------------------------------------------------------------------------------------
 
+    void SortParticlesByHash(uint *hash,
+                             float3 *position,
+                             float3 *velocity,
+                             float *prevPressure,
+                             float *illum,
+                             const uint numPoints);
+
+    //--------------------------------------------------------------------------------------------------------------------
+
     void ComputeParticleScatterIds(uint *cellOccupancy,
                                    uint *cellParticleIdx,
                                    const uint numCells);
@@ -176,11 +185,14 @@ namespace sphGPU
                         float *pressure,
                         const uint *cellOcc,
                         const uint *cellPartIdx,
+                        const float3 *fluidPos,
                         const float *fluidPressure,
                         const float *fluidDensity,
+                        const float fluidParticleMass,
                         const uint *fluidCellOcc,
                         const uint *fluidCellPartIdx,
-                        const uint numPoints);
+                        const uint numPoints,
+                        const float smoothingLength);
 
     //--------------------------------------------------------------------------------------------------------------------
 

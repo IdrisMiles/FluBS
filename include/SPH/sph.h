@@ -72,6 +72,7 @@ namespace sph
     // Sort Particle functions
 
     void SortParticlesByHash(std::shared_ptr<BaseSphParticle> _sphParticles);
+    void SortParticlesByHash(std::shared_ptr<Algae> _sphParticles);
 
     template<typename T>
     void SortParticlesByHash(std::vector<T> _sphParticles)
