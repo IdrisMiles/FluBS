@@ -22,8 +22,8 @@ void main()
 {
     if(fDen < 0.5f*uRestDen)
     {
-        discard;
-        return;
+//        discard;
+//        return;
     }
 
     float x = 2.0f * (fTexCoord.x - 0.5f);

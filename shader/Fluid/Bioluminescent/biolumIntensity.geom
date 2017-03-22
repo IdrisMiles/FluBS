@@ -3,14 +3,14 @@
 layout(points) in;
 layout(triangle_strip, max_vertices = 4) out;
 
-in vec3 gPos[];
 in vec3 gVel[];
 in float gDen[];
+in float gBio[];
 
-out vec3 fPos;
 out vec3 fVel;
 out float fDen;
 out vec2 fTexCoord;
+out float fBio;
 
 uniform mat4 uProjMatrix;
 uniform mat4 uMVMatrix;
@@ -29,33 +29,33 @@ void main()
     // Bottom left
     gl_Position = uProjMatrix * (viewPos - up - right);
     fTexCoord = vec2(0.0, 0.0);
-    fPos = gPos[0];
     fVel = gVel[0];
     fDen = gDen[0];
+    fBio = gBio[0];
     EmitVertex();
 
     // Top left
     gl_Position = uProjMatrix * (viewPos + up - right);
     fTexCoord = vec2(0.0, 1.0);
-    fPos = gPos[0];
     fVel = gVel[0];
     fDen = gDen[0];
+    fBio = gBio[0];
     EmitVertex();
 
     // Bottom right
     gl_Position = uProjMatrix * (viewPos - up + right);
     fTexCoord = vec2(1.0, 0.0);
-    fPos = gPos[0];
     fVel = gVel[0];
     fDen = gDen[0];
+    fBio = gBio[0];
     EmitVertex();
 
     // Top right
     gl_Position = uProjMatrix * (viewPos + up + right);
     fTexCoord = vec2(1.0, 1.0);
-    fPos = gPos[0];
     fVel = gVel[0];
     fDen = gDen[0];
+    fBio = gBio[0];
     EmitVertex();
 
     EndPrimitive();
