@@ -17,12 +17,16 @@ namespace sphGPU_Kernels
                                         const uint gridRes,
                                         const float cellWidth);
 
+    //--------------------------------------------------------------------------------------------------------------------
+
     __global__ void ComputeVolume_kernel(float *volume,
                                          const uint *cellOcc,
                                          const uint *cellPartIdx,
                                          const float3 *particles,
                                          const uint numPoints,
                                          const float smoothingLength);
+
+    //--------------------------------------------------------------------------------------------------------------------
 
     __global__ void ComputeDensity_kernel(float *density,
                                           const float mass,
@@ -32,6 +36,8 @@ namespace sphGPU_Kernels
                                           const uint numPoints,
                                           const float smoothingLength,
                                           const bool accumulate);
+
+    //--------------------------------------------------------------------------------------------------------------------
 
     __global__ void ComputeDensityFluidRigid_kernel(const uint numPoints,
                                                     const float fluidRestDensity,
@@ -46,6 +52,8 @@ namespace sphGPU_Kernels
                                                     const float smoothingLength,
                                                     const bool accumulate);
 
+    //--------------------------------------------------------------------------------------------------------------------
+
     __global__ void ComputeDensityFluidFluid_kernel(const uint numPoints,
                                                     float *fluidDensity,
                                                     const uint *fluidCellOcc,
@@ -58,6 +66,8 @@ namespace sphGPU_Kernels
                                                     const float smoothingLength,
                                                     const bool accumulate);
 
+    //--------------------------------------------------------------------------------------------------------------------
+
     __global__ void ComputePressure_kernel(float *pressure,
                                            float *density,
                                            const float restDensity,
@@ -65,6 +75,20 @@ namespace sphGPU_Kernels
                                            const uint *cellOcc,
                                            const uint *cellPartIdx,
                                            const uint numPoints);
+
+    //--------------------------------------------------------------------------------------------------------------------
+
+    __global__ void SamplePressure(const float3* samplePoints,
+                                   float *pressure,
+                                   const uint *cellOcc,
+                                   const uint *cellPartIdx,
+                                   const float *fluidPressure,
+                                   const float *fluidDensity,
+                                   const uint *fluidCellOcc,
+                                   const uint *fluidCellPartIdx,
+                                   const uint numPoints);
+
+    //--------------------------------------------------------------------------------------------------------------------
 
     __global__ void ComputePressureForce_kernel(float3 *pressureForce,
                                                 const float *pressure,
@@ -76,6 +100,8 @@ namespace sphGPU_Kernels
                                                 const uint numPoints,
                                                 const float smoothingLength,
                                                 const bool accumulate);
+
+    //--------------------------------------------------------------------------------------------------------------------
 
     __global__ void ComputePressureForceFluidFluid_kernel(float3 *pressureForce,
                                                           const float *pressure,
@@ -94,6 +120,8 @@ namespace sphGPU_Kernels
                                                           const float smoothingLength,
                                                           const bool accumulate);
 
+    //--------------------------------------------------------------------------------------------------------------------
+
     __global__ void ComputePressureForceFluidRigid_kernel(float3 *pressureForce,
                                                           const float *pressure,
                                                           const float *density,
@@ -110,6 +138,8 @@ namespace sphGPU_Kernels
                                                           const float smoothingLength,
                                                           const bool accumulate);
 
+    //--------------------------------------------------------------------------------------------------------------------
+
     __global__ void ComputeViscousForce_kernel(float3 *viscForce,
                                                const float viscCoeff,
                                                const float3 *velocity,
@@ -121,6 +151,8 @@ namespace sphGPU_Kernels
                                                const uint numPoints,
                                                const float smoothingLength);
 
+    //--------------------------------------------------------------------------------------------------------------------
+
     __global__ void ComputeSurfaceTensionForce_kernel(float3 *surfaceTensionForce,
                                                       const float surfaceTension,
                                                       const float surfaceThreshold,
@@ -131,6 +163,8 @@ namespace sphGPU_Kernels
                                                       const uint *cellPartIdx,
                                                       const uint numPoints,
                                                       const float smoothingLength);
+
+    //--------------------------------------------------------------------------------------------------------------------
 
     __global__ void ComputeForce_kernel(/*float3 *force,*/
                                         float3 *pressureForce,
@@ -151,6 +185,8 @@ namespace sphGPU_Kernels
                                         const float smoothingLength,
                                         const bool accumulate);
 
+    //--------------------------------------------------------------------------------------------------------------------
+
     __global__ void ComputeTotalForce_kernel(const bool accumulatePressure,
                                              const bool accumulateViscous,
                                              const bool accumulateSurfTen,
@@ -170,16 +206,22 @@ namespace sphGPU_Kernels
                                              const uint numPoints,
                                              const float smoothingLength);
 
+    //--------------------------------------------------------------------------------------------------------------------
+
     __global__ void Integrate_kernel(float3 *force,
                                      float3 *particles,
                                      float3 *velocities,
                                      const float _dt,
                                      const uint numPoints);
 
+    //--------------------------------------------------------------------------------------------------------------------
+
     __global__ void HandleBoundaries_Kernel(float3 *particles,
                                             float3 *velocities,
                                             const float boundary,
                                             const uint numPoints);
+
+    //--------------------------------------------------------------------------------------------------------------------
 
     __global__ void InitParticleAsCube_Kernel(float3 *particles,
                                               float3 *velocities,

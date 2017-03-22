@@ -31,7 +31,7 @@ protected:
     virtual void Init();
     virtual void InitGL();
     virtual void InitShader();
-    virtual void InitVAO();
+    virtual void InitFluidVAO();
     virtual void CleanUpGL();
 
     std::shared_ptr<BaseSphParticle> m_sphParticles;

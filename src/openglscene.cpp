@@ -284,6 +284,10 @@ void OpenGLScene::initializeGL()
     m_fluidRenderer->SetCubeMap(m_skyboxTex);
     m_fluidRenderer->SetSphParticles(m_fluid);
 
+    m_bioRenderer = std::shared_ptr<BioluminescentFluidRenderer>(new BioluminescentFluidRenderer(width(), height()));
+    m_bioRenderer->SetCubeMap(m_skyboxTex);
+    m_bioRenderer->SetSphParticles(m_fluid, m_algae);
+
 
     m_sphRenderers.push_back(std::shared_ptr<SphParticleRenderer>(new SphParticleRenderer()));
     m_sphRenderers.back()->SetSphParticles(m_fluid);
@@ -332,12 +336,15 @@ void OpenGLScene::paintGL()
 //    m_fluidRenderer->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, glm::mat4(normalMatrix), m_lightPos, camPos);
 //    m_fluidRenderer->Draw();
 
+    m_bioRenderer->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, glm::mat4(normalMatrix), m_lightPos, camPos);
+    m_bioRenderer->Draw();
 
-    for(auto &&sr: m_sphRenderers)
-    {
-        sr->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, normalMatrix, m_lightPos, camPos);
-        sr->Draw();
-    }
+
+//    for(auto &&sr: m_sphRenderers)
+//    {
+//        sr->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, normalMatrix, m_lightPos, camPos);
+//        sr->Draw();
+//    }
 
 
     //---------------------------------------------------------------------------------------
@@ -383,6 +390,7 @@ void OpenGLScene::ResetSim()
 void OpenGLScene::resizeGL(int w, int h)
 {
     m_fluidRenderer->SetFrameSize(w, h);
+    m_bioRenderer->SetFrameSize(w, h);
     m_projMat = glm::perspective(45.0f, GLfloat(w) / h, 0.1f, 1000.0f);
 }
 

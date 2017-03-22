@@ -29,9 +29,10 @@ HEADERS  += $$PWD/include/*.h               \
             $$PWD/include/Cache/*.h         \
             $$PWD/json/src/json.hpp
 
-OTHER_FILES +=  shader/* \
-                shader/Fluid/* \
-                shader/Skybox/*
+OTHER_FILES +=  shader/*        \
+                shader/Fluid/*  \
+                shader/Skybox/* \
+                shader/Fluid/Bioluminescent/*
 
 INCLUDEPATH +=  $$PWD/include \
                 /usr/local/include \

@@ -12,6 +12,7 @@ Algae::Algae(std::shared_ptr<AlgaeProperty> _property):
     m_densityMapped = false;
     m_massMapped = false;
     m_pressureMapped = false;
+    m_illumMapped = false;
 
     Init();
 }
@@ -28,6 +29,7 @@ Algae::Algae(std::shared_ptr<AlgaeProperty> _property, Mesh _mesh):
     m_densityMapped = false;
     m_massMapped = false;
     m_pressureMapped = false;
+    m_illumMapped = false;
 
     Init();
     InitAlgaeAsMesh();
@@ -67,6 +69,7 @@ void Algae::MapCudaGLResources()
     GetDensityPtr();
     GetMassPtr();
     GetPressurePtr();
+    GetIlluminationPtr();
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -78,6 +81,7 @@ void Algae::ReleaseCudaGLResources()
     ReleaseDensityPtr();
     ReleaseMassPtr();
     ReleasePressurePtr();
+    ReleaseIlluminationPtr();
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -102,6 +106,7 @@ void Algae::InitCUDAMemory()
     cudaGraphicsGLRegisterBuffer(&m_denBO_CUDA, m_denBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
     cudaGraphicsGLRegisterBuffer(&m_massBO_CUDA, m_massBO.bufferId(),cudaGraphicsMapFlagsReadOnly);
     cudaGraphicsGLRegisterBuffer(&m_pressBO_CUDA, m_pressBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
+    cudaGraphicsGLRegisterBuffer(&m_illumBO_CUDA, m_illumBO.bufferId(),cudaGraphicsMapFlagsNone);//WriteDiscard);
 
     // particle forces
     cudaMalloc(&d_pressureForcePtr, m_property->numParticles * sizeof(float3));
@@ -114,7 +119,6 @@ void Algae::InitCUDAMemory()
 
     cudaMalloc(&d_prevPressurePtr, m_property->numParticles * sizeof(float));
     cudaMalloc(&d_energyPtr, m_property->numParticles * sizeof(float));
-    cudaMalloc(&d_illuminationPtr, m_property->numParticles * sizeof(float));
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -162,6 +166,13 @@ void Algae::InitVAO()
     m_pressBO.bind();
     m_pressBO.allocate(m_property->numParticles * sizeof(float));
     m_pressBO.release();
+
+
+    // Set up illum buffer object
+    m_illumBO.create();
+    m_illumBO.bind();
+    m_illumBO.allocate(m_property->numParticles * sizeof(float));
+    m_illumBO.release();
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -184,7 +195,6 @@ void Algae::CleanUpCUDAMemory()
     cudaFree(d_cellOccupancyPtr);
     cudaFree(d_cellParticleIdxPtr);
     cudaFree(d_prevPressurePtr);
-    cudaFree(d_illuminationPtr);
     cudaFree(d_energyPtr);
 }
 
@@ -206,6 +216,9 @@ void Algae::CleanUpGL()
 
     cudaGraphicsUnregisterResource(m_pressBO_CUDA);
     m_pressBO.destroy();
+
+    cudaGraphicsUnregisterResource(m_illumBO_CUDA);
+    m_illumBO.destroy();
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -239,14 +252,34 @@ void Algae::ReleaseEnergyPtr()
 
 float *Algae::GetIlluminationPtr()
 {
-    return d_illuminationPtr;
+    if(!m_illumMapped)
+    {
+        size_t numBytesIllum;
+        cudaGraphicsMapResources(1, &m_illumBO_CUDA, 0);
+        cudaGraphicsResourceGetMappedPointer((void **)&d_illumPtr, &numBytesIllum, m_illumBO_CUDA);
+
+        m_illumMapped = true;
+    }
+
+    return d_illumPtr;
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
 void Algae::ReleaseIlluminationPtr()
 {
+    if(m_illumMapped)
+    {
+        cudaGraphicsUnmapResources(1, &m_illumBO_CUDA, 0);
+        m_illumMapped = false;
+    }
+}
 
+//--------------------------------------------------------------------------------------------------------------------
+
+QOpenGLBuffer &Algae::GetIllumBO()
+{
+    return m_illumBO;
 }
 
 //--------------------------------------------------------------------------------------------------------------------

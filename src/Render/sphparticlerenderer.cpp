@@ -81,7 +81,7 @@ void SphParticleRenderer::Init()
 void SphParticleRenderer::InitGL()
 {
     InitShader();
-    InitVAO();
+    InitFluidVAO();
 }
 
 void SphParticleRenderer::InitShader()
@@ -111,7 +111,7 @@ void SphParticleRenderer::InitShader()
 
 }
 
-void SphParticleRenderer::InitVAO()
+void SphParticleRenderer::InitFluidVAO()
 {
     QOpenGLFunctions *glFuncs = QOpenGLContext::currentContext()->functions();
 

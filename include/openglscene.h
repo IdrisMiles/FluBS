@@ -19,6 +19,7 @@
 #include "FluidSystem/fluidsystem.h"
 #include "Render/fluidrenderer.h"
 #include "Render/rigidrenderer.h"
+#include "Render/bioluminescentfluidrenderer.h"
 
 #include "Mesh/meshloader.h"
 #include "Mesh/rendermesh.h"
@@ -108,6 +109,7 @@ private:
     Mesh m_activeRigidMesh;
 
     std::shared_ptr<FluidRenderer> m_fluidRenderer;
+    std::shared_ptr<BioluminescentFluidRenderer> m_bioRenderer;
     std::vector<std::shared_ptr<SphParticleRenderer>> m_sphRenderers;
 
     QTimer *m_drawTimer;

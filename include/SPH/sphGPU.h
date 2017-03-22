@@ -170,6 +170,20 @@ namespace sphGPU
 
     //--------------------------------------------------------------------------------------------------------------------
 
+    void SamplePressure(const uint maxCellOcc,
+                        const uint gridRes,
+                        const float3* samplePoints,
+                        float *pressure,
+                        const uint *cellOcc,
+                        const uint *cellPartIdx,
+                        const float *fluidPressure,
+                        const float *fluidDensity,
+                        const uint *fluidCellOcc,
+                        const uint *fluidCellPartIdx,
+                        const uint numPoints);
+
+    //--------------------------------------------------------------------------------------------------------------------
+
     void ComputePressureForceFluid(const uint maxCellOcc,
                               const uint gridRes,
                               float3 *pressureForce,

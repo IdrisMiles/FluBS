@@ -72,13 +72,9 @@ public:
 
 
     QOpenGLBuffer &GetPosBO();
-
     QOpenGLBuffer &GetVelBO();
-
     QOpenGLBuffer &GetDenBO();
-
     QOpenGLBuffer &GetMassBO();
-
     QOpenGLBuffer &GetPressBO();
 
 

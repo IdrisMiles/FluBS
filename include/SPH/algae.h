@@ -35,6 +35,8 @@ public:
     float *GetIlluminationPtr();
     void ReleaseIlluminationPtr();
 
+    QOpenGLBuffer &GetIllumBO();
+
 protected:
     void InitAlgaeAsMesh();
     virtual void Init();
@@ -51,7 +53,11 @@ protected:
 
     float *d_prevPressurePtr;
     float *d_energyPtr;
-    float *d_illuminationPtr;
+    float *d_illumPtr;
+
+    bool m_illumMapped;
+    QOpenGLBuffer m_illumBO;
+    cudaGraphicsResource *m_illumBO_CUDA;
 };
 
 #endif // ALGAE_H

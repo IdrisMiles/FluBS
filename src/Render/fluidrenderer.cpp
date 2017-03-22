@@ -56,7 +56,7 @@ void FluidRenderer::Draw()
     m_smoothDepthShader.bind();
     m_smoothDepthFBO->bind();
     glFuncs->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    m_fluidShader.setUniformValue("uDepthTex", 0);
+    m_smoothDepthShader.setUniformValue("uDepthTex", 0);
     glFuncs->glActiveTexture(GL_TEXTURE0);
     glFuncs->glBindTexture(GL_TEXTURE_2D, m_depthFBO->texture());
     m_quadVAO.bind();
@@ -83,15 +83,16 @@ void FluidRenderer::Draw()
 
 
     // Render Fluid
+    int texId = 0;
     m_fluidShader.bind();
-    m_fluidShader.setUniformValue("uDepthTex", 0);
-    glFuncs->glActiveTexture(GL_TEXTURE0);
+    m_fluidShader.setUniformValue("uDepthTex", texId);
+    glFuncs->glActiveTexture(GL_TEXTURE0 + texId++);
     glFuncs->glBindTexture(GL_TEXTURE_2D, m_smoothDepthFBO->texture());
-    m_fluidShader.setUniformValue("uThicknessTex", 1);
-    glFuncs->glActiveTexture(GL_TEXTURE0+1);
+    m_fluidShader.setUniformValue("uThicknessTex", texId);
+    glFuncs->glActiveTexture(GL_TEXTURE0+ texId++);
     glFuncs->glBindTexture(GL_TEXTURE_2D, m_thicknessFBO->texture());
-    m_fluidShader.setUniformValue("uCubeMapTex", 2);
-    glFuncs->glActiveTexture(GL_TEXTURE0+2);
+    m_fluidShader.setUniformValue("uCubeMapTex", texId);
+    glFuncs->glActiveTexture(GL_TEXTURE0+ texId++);
     glFuncs->glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubeMapTex->textureId());
     m_quadVAO.bind();
     glFuncs->glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -177,7 +178,8 @@ void FluidRenderer::Init()
 void FluidRenderer::InitGL()
 {
     InitShader();
-    InitVAO();
+    InitFluidVAO();
+    InitQuadVAO();
     InitFBOs();
 }
 
@@ -194,7 +196,7 @@ void FluidRenderer::InitShader()
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void FluidRenderer::InitVAO()
+void FluidRenderer::InitFluidVAO()
 {
     QOpenGLFunctions *glFuncs = QOpenGLContext::currentContext()->functions();
 
@@ -239,9 +241,13 @@ void FluidRenderer::InitVAO()
 
     m_shaderProg.release();
 
+}
 
-    //-----------------------------------------------------------------------
-    // Fullscreen quad
+
+void FluidRenderer::InitQuadVAO()
+{
+    QOpenGLFunctions *glFuncs = QOpenGLContext::currentContext()->functions();
+
     m_fluidShader.bind();
     m_quadVAO.create();
     m_quadVAO.bind();

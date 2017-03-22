@@ -29,7 +29,8 @@ protected:
     virtual void Init();
     virtual void InitGL();
     virtual void InitShader();
-    virtual void InitVAO();
+    virtual void InitFluidVAO();
+    virtual void InitQuadVAO();
     virtual void CleanUpGL();
 
     virtual void InitFBOs();

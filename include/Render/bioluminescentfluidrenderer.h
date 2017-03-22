@@ -25,24 +25,31 @@ protected:
     virtual void Init();
     virtual void InitGL();
     virtual void InitShader();
+    virtual void InitQuadVAO();
     virtual void InitAlgaeVAO();
     virtual void CleanUpGL();
 
     virtual void InitFBOs();
+    void CreateBiolumIntensityShader();
     void CreateBioluminescentShader();
 
 
     std::shared_ptr<Algae> m_algaeParticles;
 
+    QOpenGLShaderProgram m_biolumIntensityShader;
+    QOpenGLShaderProgram m_bioluminescentShader;
+
+    std::shared_ptr<QOpenGLFramebufferObject> m_algaeDepthFBO;
+    std::shared_ptr<QOpenGLFramebufferObject> m_algaeSmoothDepthFBO;
+    std::shared_ptr<QOpenGLFramebufferObject> m_algaeThicknessFBO;
+
     QOpenGLVertexArrayObject m_algaeVao;
     std::shared_ptr<QOpenGLBuffer> m_algaePosBO;
-    std::shared_ptr<QOpenGLBuffer> m_illuminationBO;
+    std::shared_ptr<QOpenGLBuffer> m_algaeIllumBO;
 
     GLuint m_algaePosAttrLoc;
     GLuint m_algaeIllumAttrLoc;
 
-    std::shared_ptr<QOpenGLFramebufferObject> m_algaeDepthFBO;
-    std::shared_ptr<QOpenGLFramebufferObject> m_algaeThicknessFBO;
 
 };
 
