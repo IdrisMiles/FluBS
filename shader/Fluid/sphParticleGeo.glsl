@@ -29,7 +29,7 @@ void main()
     // Bottom left
     gl_Position = uProjMatrix * (viewPos - up - right);
     fTexCoord = vec2(0.0, 0.0);
-    fPos = gPos[0];
+    fPos = viewPos.xyz;
     fVel = gVel[0];
     fDen = gDen[0];
     EmitVertex();
@@ -37,7 +37,7 @@ void main()
     // Top left
     gl_Position = uProjMatrix * (viewPos + up - right);
     fTexCoord = vec2(0.0, 1.0);
-    fPos = gPos[0];
+    fPos = viewPos.xyz;
     fVel = gVel[0];
     fDen = gDen[0];
     EmitVertex();
@@ -45,7 +45,7 @@ void main()
     // Bottom right
     gl_Position = uProjMatrix * (viewPos - up + right);
     fTexCoord = vec2(1.0, 0.0);
-    fPos = gPos[0];
+    fPos = viewPos.xyz;
     fVel = gVel[0];
     fDen = gDen[0];
     EmitVertex();
@@ -53,7 +53,7 @@ void main()
     // Top right
     gl_Position = uProjMatrix * (viewPos + up + right);
     fTexCoord = vec2(1.0, 1.0);
-    fPos = gPos[0];
+    fPos = viewPos.xyz;
     fVel = gVel[0];
     fDen = gDen[0];
     EmitVertex();

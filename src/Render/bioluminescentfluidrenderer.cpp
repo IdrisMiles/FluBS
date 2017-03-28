@@ -134,6 +134,10 @@ void BioluminescentFluidRenderer::Draw()
     // Render Bioluminescent Fluid
     int texId = 0;
     m_bioluminescentShader.bind();
+    glFuncs->glEnable(GL_DEPTH_TEST);
+    glFuncs->glEnable(GL_BLEND);
+    glFuncs->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glFuncs->glBlendEquation(GL_FUNC_ADD);
 
     m_bioluminescentShader.setUniformValue("uDepthTex", texId);
     glFuncs->glActiveTexture(GL_TEXTURE0 + texId++);
@@ -158,6 +162,7 @@ void BioluminescentFluidRenderer::Draw()
     m_quadVAO.bind();
     glFuncs->glDrawArrays(GL_TRIANGLES, 0, 6);
     m_quadVAO.release();
+    glFuncs->glDisable(GL_BLEND);
     m_bioluminescentShader.release();
 }
 
@@ -177,7 +182,7 @@ void BioluminescentFluidRenderer::SetShaderUniforms(const glm::mat4 &_projMat,
 
     m_depthShader.bind();
     glFuncs->glUniformMatrix4fv(m_depthShader.uniformLocation("uProjMatrix"), 1, false, &_projMat[0][0]);
-    glFuncs->glUniformMatrix4fv(m_depthShader.uniformLocation("uMVMatrix"), 1, false, &(_modelMat*_viewMat)[0][0]);
+    glFuncs->glUniformMatrix4fv(m_depthShader.uniformLocation("uMVMatrix"), 1, false, &(_viewMat*_modelMat)[0][0]);
     glFuncs->glUniform3fv(m_depthShader.uniformLocation("uCameraPos"), 1, &_camPos[0]);
     glFuncs->glUniform1f(m_depthShader.uniformLocation("uRad"), m_sphParticles->GetProperty()->particleRadius);
     glFuncs->glUniform1f(m_depthShader.uniformLocation("uRestDen"), m_sphParticles->GetProperty()->restDensity);
@@ -188,7 +193,7 @@ void BioluminescentFluidRenderer::SetShaderUniforms(const glm::mat4 &_projMat,
 
     m_thicknessShader.bind();
     glFuncs->glUniformMatrix4fv(m_thicknessShader.uniformLocation("uProjMatrix"), 1, false, &_projMat[0][0]);
-    glFuncs->glUniformMatrix4fv(m_thicknessShader.uniformLocation("uMVMatrix"), 1, false, &(_modelMat*_viewMat)[0][0]);
+    glFuncs->glUniformMatrix4fv(m_thicknessShader.uniformLocation("uMVMatrix"), 1, false, &(_viewMat*_modelMat)[0][0]);
     glFuncs->glUniform3fv(m_thicknessShader.uniformLocation("uCameraPos"), 1, &_camPos[0]);
     glFuncs->glUniform1f(m_thicknessShader.uniformLocation("uRad"), m_sphParticles->GetProperty()->particleRadius);
     glFuncs->glUniform1f(m_thicknessShader.uniformLocation("uRestDen"), m_sphParticles->GetProperty()->restDensity);
@@ -196,7 +201,7 @@ void BioluminescentFluidRenderer::SetShaderUniforms(const glm::mat4 &_projMat,
 
     m_biolumIntensityShader.bind();
     glFuncs->glUniformMatrix4fv(m_biolumIntensityShader.uniformLocation("uProjMatrix"), 1, false, &_projMat[0][0]);
-    glFuncs->glUniformMatrix4fv(m_biolumIntensityShader.uniformLocation("uMVMatrix"), 1, false, &(_modelMat*_viewMat)[0][0]);
+    glFuncs->glUniformMatrix4fv(m_biolumIntensityShader.uniformLocation("uMVMatrix"), 1, false, &(_viewMat*_modelMat)[0][0]);
     glFuncs->glUniform3fv(m_biolumIntensityShader.uniformLocation("uCameraPos"), 1, &_camPos[0]);
     glFuncs->glUniform1f(m_biolumIntensityShader.uniformLocation("uRad"), m_algaeParticles->GetProperty()->particleRadius);
     glFuncs->glUniform1f(m_biolumIntensityShader.uniformLocation("uRestDen"), m_algaeParticles->GetProperty()->restDensity);
@@ -204,11 +209,14 @@ void BioluminescentFluidRenderer::SetShaderUniforms(const glm::mat4 &_projMat,
 
     m_bioluminescentShader.bind();
     glFuncs->glUniform3f(m_bioluminescentShader.uniformLocation("uCameraPos"), _camPos.x, _camPos.y, _camPos.z);
+    glFuncs->glUniform3fv(m_bioluminescentShader.uniformLocation("uLightPos"), 1, &_lightPos[0]);
+    glFuncs->glUniformMatrix4fv(m_bioluminescentShader.uniformLocation("uInvPVMatrix"), 1, false, &(glm::inverse(_projMat*_viewMat))[0][0]);
+    glFuncs->glUniformMatrix3fv(m_bioluminescentShader.uniformLocation("uNormalMatrix"), 1, true, &(_normalMat)[0][0]);
     m_bioluminescentShader.release();
 
     m_shaderProg.bind();
     glFuncs->glUniformMatrix4fv(m_shaderProg.uniformLocation("uProjMatrix"), 1, false, &_projMat[0][0]);
-    glFuncs->glUniformMatrix4fv(m_shaderProg.uniformLocation("uMVMatrix"), 1, false, &(_modelMat*_viewMat)[0][0]);
+    glFuncs->glUniformMatrix4fv(m_shaderProg.uniformLocation("uMVMatrix"), 1, false, &(_viewMat*_modelMat)[0][0]);
     glFuncs->glUniform3fv(m_shaderProg.uniformLocation("uCameraPos"), 1, &_camPos[0]);
     glFuncs->glUniform1f(m_shaderProg.uniformLocation("uRad"), m_sphParticles->GetProperty()->particleRadius);
     glFuncs->glUniform3fv(m_shaderProg.uniformLocation("uLightPos"), 1, &_lightPos[0]);
@@ -354,6 +362,7 @@ void BioluminescentFluidRenderer::InitFBOs()
 {
     QOpenGLFramebufferObjectFormat fboFormat;
     fboFormat.setAttachment(QOpenGLFramebufferObject::Attachment::Depth);
+    fboFormat.setInternalTextureFormat(QOpenGLTexture::RGBA32F);
 
     m_depthFBO.reset(new QOpenGLFramebufferObject(m_width, m_height, fboFormat));
     m_smoothDepthFBO.reset(new QOpenGLFramebufferObject(m_width, m_height, fboFormat));

@@ -1582,10 +1582,6 @@ __global__ void sphGPU_Kernels::ComputeBioluminescence(const float *pressure,
         currIllum = (currIllum > 0.02f) ? 0.02f : currIllum;
 
         illumination[idx] = currIllum;
-//        if(deltaPress > 0.0f)
-//        {
-//            printf("%f\n", deltaPress);
-//        }
 
     }
 

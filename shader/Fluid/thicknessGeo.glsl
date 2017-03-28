@@ -20,8 +20,8 @@ void main()
 
     vec3 Pos = gl_in[0].gl_Position.xyz;
 
-    vec4 right = vec4(uRad, 0.0f, 0.0f, 0.0f);
-    vec4 up = vec4(0.0f, uRad, 0.0f, 0.0f);
+    vec4 right = vec4(1.5f*uRad, 0.0f, 0.0f, 0.0f);
+    vec4 up = vec4(0.0f, 1.5f*uRad, 0.0f, 0.0f);
     vec4 viewPos = uMVMatrix * vec4(Pos, 1.0);
 
     // Bottom left

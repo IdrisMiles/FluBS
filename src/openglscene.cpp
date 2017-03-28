@@ -140,7 +140,7 @@ void OpenGLScene::initializeGL()
     m_projMat = glm::perspective(45.0f, GLfloat(width()) / height(), 0.1f, 1000.0f);
 
     // Light position is fixed.
-    m_lightPos = glm::vec3(0, 0, 70);
+    m_lightPos = glm::vec3(30, 100, 70);
 
 
     //---------------------------------------------------------------------------------------
@@ -289,9 +289,9 @@ void OpenGLScene::initializeGL()
     m_bioRenderer->SetSphParticles(m_fluid, m_algae);
 
 
-    m_sphRenderers.push_back(std::shared_ptr<SphParticleRenderer>(new SphParticleRenderer()));
-    m_sphRenderers.back()->SetSphParticles(m_fluid);
-    m_sphRenderers.back()->SetColour(glm::vec3(0.2f, 0.4f, 1.0f));
+//    m_sphRenderers.push_back(std::shared_ptr<SphParticleRenderer>(new SphParticleRenderer()));
+//    m_sphRenderers.back()->SetSphParticles(m_fluid);
+//    m_sphRenderers.back()->SetColour(glm::vec3(0.2f, 0.4f, 1.0f));
 
     m_sphRenderers.push_back(std::shared_ptr<SphParticleRenderer>(new SphParticleRenderer()));
     m_sphRenderers.back()->SetSphParticles(m_staticRigid);
@@ -301,9 +301,9 @@ void OpenGLScene::initializeGL()
     m_sphRenderers.back()->SetSphParticles(m_activeRigid);
     m_sphRenderers.back()->SetColour(glm::vec3(0.9f, 0.4f, 0.2f));
 
-    m_sphRenderers.push_back(std::shared_ptr<SphParticleRenderer>(new SphParticleRenderer()));
-    m_sphRenderers.back()->SetSphParticles(m_algae);
-    m_sphRenderers.back()->SetColour(glm::vec3(0.2f, 1.0f, 0.3f));
+//    m_sphRenderers.push_back(std::shared_ptr<SphParticleRenderer>(new SphParticleRenderer()));
+//    m_sphRenderers.back()->SetSphParticles(m_algae);
+//    m_sphRenderers.back()->SetColour(glm::vec3(0.2f, 1.0f, 0.3f));
 
     //---------------------------------------------------------------------------------------
     // Start simulation and drawing rimers
@@ -324,7 +324,7 @@ void OpenGLScene::paintGL()
     m_modelMat = glm::translate(m_modelMat, glm::vec3(0.05f*(m_zDis/250.0f)*m_xDis, -0.05f*(m_zDis/250.0f)*m_yDis, -0.1f*m_zDis));
     m_modelMat = glm::rotate(m_modelMat, glm::radians(m_xRot/16.0f), glm::vec3(1,0,0));
     m_modelMat = glm::rotate(m_modelMat, glm::radians(m_yRot/16.0f), glm::vec3(0,1,0));
-    glm::mat3 normalMatrix =  glm::inverse(glm::mat3(m_modelMat));
+    glm::mat3 normalMatrix =  glm::mat3(m_modelMat);
     glm::vec3 camPos = glm::vec3(glm::inverse((m_modelMat)) * glm::vec4(0.0f,0.0f, 0.0f,1.0f));
 
     //---------------------------------------------------------------------------------------
@@ -336,15 +336,16 @@ void OpenGLScene::paintGL()
 //    m_fluidRenderer->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, normalMatrix, m_lightPos, camPos);
 //    m_fluidRenderer->Draw();
 
+
+
+    for(auto &&sr: m_sphRenderers)
+    {
+        sr->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, normalMatrix, m_lightPos, camPos);
+        sr->Draw();
+    }
+
     m_bioRenderer->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, normalMatrix, m_lightPos, camPos);
     m_bioRenderer->Draw();
-
-
-//    for(auto &&sr: m_sphRenderers)
-//    {
-//        sr->SetShaderUniforms(m_projMat, m_viewMat, m_modelMat, normalMatrix, m_lightPos, camPos);
-//        sr->Draw();
-//    }
 
 
     //---------------------------------------------------------------------------------------
@@ -504,7 +505,7 @@ void OpenGLScene::DrawSkybox()
     m_skyboxShader.bind();
     glFuncs->glDepthMask(GL_FALSE);
     glFuncs->glUniformMatrix4fv(m_skyboxShader.uniformLocation("uProjMatrix"), 1, false, &m_projMat[0][0]);
-    glm::mat4 mv = glm::mat4(glm::mat3(m_modelMat*m_viewMat));
+    glm::mat4 mv = glm::mat4(glm::mat3(m_viewMat*m_modelMat));
     glFuncs->glUniformMatrix4fv(m_skyboxShader.uniformLocation("uViewMatrix"), 1, false, &mv[0][0]);
     m_skyboxShader.setUniformValue("uSkyboxTex", 0);
     glFuncs->glActiveTexture(GL_TEXTURE0);

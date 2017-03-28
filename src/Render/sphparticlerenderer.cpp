@@ -29,8 +29,8 @@ void SphParticleRenderer::Draw()
 {
     QOpenGLFunctions *glFuncs = QOpenGLContext::currentContext()->functions();
 
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_FRONT_AND_BACK);
+
+    glFuncs->glEnable(GL_DEPTH_TEST);
 
     m_shaderProg.bind();
     m_vao.bind();
