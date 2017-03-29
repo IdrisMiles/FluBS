@@ -13,16 +13,13 @@ void main()
 {
     float x = 2.0f * (fTexCoord.x - 0.5f);
     float y = 2.0f * (fTexCoord.y - 0.5f);
-    float z2 = 1.0 - ((x*x)+(y*y));
+    float z2 = ((x*x)+(y*y));
 
-    if(z2 < 0.0f)
+    if(z2 > 1.0f)
     {
-//        oDepth = vec4(vec3(0.0f), 0.0f);
         discard;
         return;
     }
 
-    oDepth = vec4(vec3(fBio, fBio, fBio), 1.0);
-//    oDepth = vec4(vec3(0.005f, 0.005f, 0.005f), 1.0f);
-//    oDepth = vec4(vec3(0.0f), 1.0f);
+    oDepth = vec4(vec3(fBio, fBio, fBio), 1.0f);
 }

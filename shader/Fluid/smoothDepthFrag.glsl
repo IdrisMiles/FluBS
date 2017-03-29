@@ -46,14 +46,18 @@ void main()
         discard;
     }
 
+//    float rad = 0.0005f;//  depth.b;
+//    int dim = 10;
+//    float smoothR = 0.02f;
+//    float smoothS = 0.002f;
+
     float rad = 0.001f;
     int dim = 5;
-    float smoothR = 0.02f;
-    float smoothS = 0.01f;
+    float smoothR = 0.2f;
+    float smoothS = 0.005f;
 
-    float smoothDepth = BilateralFilter(depth.b, rad, dim, smoothR, smoothS);
-    fragColor.xyz = vec3(depth.r, depth.g, smoothDepth);
+    float smoothDepth = BilateralFilter(depth.r, rad, dim, smoothR, smoothS);
+    fragColor.xyz = vec3(smoothDepth, depth.g, depth.b);
     fragColor.a = 1.0f;
-    gl_FragDepth = depth.g;
 
 }

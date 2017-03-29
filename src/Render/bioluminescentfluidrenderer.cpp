@@ -184,7 +184,7 @@ void BioluminescentFluidRenderer::SetShaderUniforms(const glm::mat4 &_projMat,
     glFuncs->glUniformMatrix4fv(m_depthShader.uniformLocation("uProjMatrix"), 1, false, &_projMat[0][0]);
     glFuncs->glUniformMatrix4fv(m_depthShader.uniformLocation("uMVMatrix"), 1, false, &(_viewMat*_modelMat)[0][0]);
     glFuncs->glUniform3fv(m_depthShader.uniformLocation("uCameraPos"), 1, &_camPos[0]);
-    glFuncs->glUniform1f(m_depthShader.uniformLocation("uRad"), m_sphParticles->GetProperty()->particleRadius);
+    glFuncs->glUniform1f(m_depthShader.uniformLocation("uRad"), 1.5f*m_sphParticles->GetProperty()->particleRadius);
     glFuncs->glUniform1f(m_depthShader.uniformLocation("uRestDen"), m_sphParticles->GetProperty()->restDensity);
     m_depthShader.release();
 
@@ -195,7 +195,7 @@ void BioluminescentFluidRenderer::SetShaderUniforms(const glm::mat4 &_projMat,
     glFuncs->glUniformMatrix4fv(m_thicknessShader.uniformLocation("uProjMatrix"), 1, false, &_projMat[0][0]);
     glFuncs->glUniformMatrix4fv(m_thicknessShader.uniformLocation("uMVMatrix"), 1, false, &(_viewMat*_modelMat)[0][0]);
     glFuncs->glUniform3fv(m_thicknessShader.uniformLocation("uCameraPos"), 1, &_camPos[0]);
-    glFuncs->glUniform1f(m_thicknessShader.uniformLocation("uRad"), m_sphParticles->GetProperty()->particleRadius);
+    glFuncs->glUniform1f(m_thicknessShader.uniformLocation("uRad"), 1.5f*m_sphParticles->GetProperty()->particleRadius);
     glFuncs->glUniform1f(m_thicknessShader.uniformLocation("uRestDen"), m_sphParticles->GetProperty()->restDensity);
     m_thicknessShader.release();
 

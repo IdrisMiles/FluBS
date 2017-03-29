@@ -35,6 +35,35 @@ vec3 ScreenToWorld(vec2 _uv, float _depth)
 
 //-----------------------------------------------------------------------------------------------------------------
 
+float Fresnel(in vec3 I, in vec3 N, in float ior)
+{
+    float kr;
+    float cosi = clamp(dot(I, N), -1.0f, 1.0f);
+    float etai = 1, etat = ior;
+    if (cosi > 0) { float tmp = etat; etat = etai; etai = tmp;}
+    // Compute sini using Snell's law
+    float sint = etai / etat * sqrt(max(0.f, 1 - cosi * cosi));
+    // Total internal reflection
+    if (sint >= 1)
+    {
+        kr = 1;
+    }
+    else
+    {
+        float cost = sqrt(max(0.f, 1 - sint * sint));
+        cosi = abs(cosi);
+        float Rs = ((etat * cosi) - (etai * cost)) / ((etat * cosi) + (etai * cost));
+        float Rp = ((etai * cosi) - (etat * cost)) / ((etai * cosi) + (etat * cost));
+        kr = (Rs * Rs + Rp * Rp) / 2;
+    }
+
+    return kr;
+    // As a consequence of the conservation of energy, transmittance is given by:
+    // kt = 1 - kr;
+}
+
+//-----------------------------------------------------------------------------------------------------------------
+
 void main()
 {
     vec4 depth = texture2D(uDepthTex, fUV);
@@ -55,36 +84,40 @@ void main()
         algaeDepth.rgb = vec3(0.0f);
         algaeThickness.rgb = vec3(0.0f);
     }
+    else
+    {
+        algaeThickness.r = 0.2;
+    }
 
-    float biolumAtten = 1.0f - clamp(((1.0f - depth.b) - (1.0f - algaeDepth.b)), 0.0f, 1.0f);
+    float biolumAtten = 1.0f - clamp(((1.0f - depth.r) - (1.0f - algaeDepth.r)), 0.0f, 1.0f);
     float biolumIntensity = algaeThickness.r;
     vec3 biolumColour = abs(biolumAtten * biolumIntensity) * vec3(1.0f, 1.0f, 1.0f);
 
 
     //------------------------------------------------------------
     // Get position
-    vec3 pos = ScreenToWorld(fUV, depth.b);
+    vec3 pos = ScreenToWorld(fUV, depth.r);
 
 
     //------------------------------------------------------------
     // Get normal
     float h = 0.005f;
 
-    vec3 ddx = ScreenToWorld(fUV + vec2(h, 0.0f), texture2D(uDepthTex, fUV + vec2(h, 0.0f)).b) - pos;
-    vec3 ddx2 = pos - ScreenToWorld(fUV + vec2(-h, 0.0f), texture2D(uDepthTex, fUV + vec2(-h, 0.0f)).b);
+    vec3 ddx = ScreenToWorld(fUV + vec2(h, 0.0f), texture2D(uDepthTex, fUV + vec2(h, 0.0f)).r) - pos;
+    vec3 ddx2 = pos - ScreenToWorld(fUV + vec2(-h, 0.0f), texture2D(uDepthTex, fUV + vec2(-h, 0.0f)).r);
     if(abs(ddx.z) > abs(ddx2.z))
     {
         ddx = ddx2;
     }
 
-    vec3 ddy = ScreenToWorld(fUV + vec2(0.0f, h), texture2D(uDepthTex, fUV + vec2(0.0f, h)).b) - pos;
-    vec3 ddy2 = pos - ScreenToWorld(fUV + vec2(0.0f, -h), texture2D(uDepthTex, fUV + vec2(0.0f, -h)).b);
+    vec3 ddy = ScreenToWorld(fUV + vec2(0.0f, h), texture2D(uDepthTex, fUV + vec2(0.0f, h)).r) - pos;
+    vec3 ddy2 = pos - ScreenToWorld(fUV + vec2(0.0f, -h), texture2D(uDepthTex, fUV + vec2(0.0f, -h)).r);
     if(abs(ddy.z) > abs(ddy2.z))
     {
         ddy = ddy2;
     }
 
-    vec3 normal = uNormalMatrix * normalize(cross(ddx, ddy));
+    vec3 normal = uNormalMatrix * -normalize(cross(ddx, ddy));
 
 
     //------------------------------------------------------------
@@ -99,35 +132,47 @@ void main()
 
 
     //------------------------------------------------------------
-    // Diffuse and Spec Shading
-    vec3 diffuse = uFluidColour * dot(normal, light);
-
-
-    //------------------------------------------------------------
     // Get reflected ray and colour
     vec3 reflectRay = reflect(eye, normal);
-//    reflectRay = (nDotE < 0.0f) ? -reflectRay : reflectRay;
     vec3 reflectColour = textureCube(uCubeMapTex, reflectRay).rgb;
 
 
     //------------------------------------------------------------
     // Get refracted ray and colour
-    vec3 refractRay = refract(eye, normal, 1.3f);
+    vec3 refractRay = refract(-eye, normal, 1.333f);
     vec3 refractColour = textureCube(uCubeMapTex, refractRay).rgb;
-    float attenuation = thickness.r;
+    float attenuation = clamp(thickness.r, 0.0f, 1.0f);
+
+
+    //------------------------------------------------------------
+    // Get frenel
+    float fresnelReflect = Fresnel(-eye, normal, 1.333f);
+    float fresnelRefract = 1.0f - fresnelReflect;
+
+
+    //------------------------------------------------------------
+    // Diffuse and Spec Shading
+    vec3 diffuse = vec3(1.0f) * dot(normal, light);
+    vec3 specular = vec3(0.3f) * pow(clamp(dot(reflectRay, light), 0.0f, 1.0f), 4);
 
 
     //------------------------------------------------------------
     // final colour
-    fragColor.rgb = (reflectColour*0.4f) + ((1.0f - attenuation) * refractColour) + (uFluidColour * attenuation) + biolumColour;
+    fragColor.rgb = (fresnelReflect * diffuse * reflectColour) + ((1.0f - attenuation) * fresnelRefract * refractColour) + (attenuation * uFluidColour) + specular + biolumColour;
+
     fragColor.a = (attenuation);
+    gl_FragDepth = depth.g;
+
+
+    //------------------------------------------------------------
+    // Debug shading
 //    fragColor.rgb = normal;
 //    fragColor.rgb = diffuse;
+//    fragColor.rgb = specular;
 //    fragColor.rgb = reflectColour;
 //    fragColor.rgb = refractColour;
-//    fragColor.rgb = vec3(depth.g);
+//    fragColor.rgb = vec3(depth.b);
 //    fragColor.rgb = thickness.rgb;
 //    fragColor.rgb = algaeThickness.rgb;
-//    fragColor.rgb = algaeDepth.rgb;
-    gl_FragDepth = depth.g;
+
 }

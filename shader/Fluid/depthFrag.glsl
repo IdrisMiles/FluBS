@@ -23,11 +23,11 @@ float LinearizeDepth(float depth, float near, float far)
 
 void main()
 {
-    if(fDen < 0.5f*uRestDen)
-    {
+//    if(fDen < 0.5f*uRestDen)
+//    {
 //        discard;
 //        return;
-    }
+//    }
 
 
     float x = 2.0f * (fTexCoord.x - 0.5f);
@@ -44,11 +44,8 @@ void main()
     vec4 pixelPos = vec4(fPos + (vec3(x, y, z)*uRad), 1.0f);
     vec4 clipSpacePos = uProjMatrix * pixelPos;
     float depth = clipSpacePos.z / clipSpacePos.w;
-    gl_FragDepth = depth;
     float invW = 1.0f/clipSpacePos.w;
 
-//    oDepth = vec4(vec3((LinearizeDepth(gl_FragCoord.z, near, far)+(z*uRad))/far), 1.0);
-//    oDepth = vec4(vec3(LinearizeDepth(gl_FragDepth, near, far)/(far-near)), 1.0);
-    oDepth = vec4(vec3(depth, gl_FragDepth, depth), 1.0);
-
+    oDepth = vec4(depth, depth, gl_FragCoord.w /*invW*/, 1.0);
+//    gl_FragDepth = depth;
 }
