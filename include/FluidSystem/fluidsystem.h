@@ -1,11 +1,13 @@
 #ifndef FLUIDSYSTEM_H
 #define FLUIDSYSTEM_H
 
+
+#include "FluidSystem/fluidsolverproperty.h"
+#include "SPH/sph.h"
 #include "SPH/fluid.h"
 #include "SPH/rigid.h"
 #include "SPH/fluidproperty.h"
-#include "FluidSystem/fluidsolverproperty.h"
-#include "SPH/sph.h"
+#include "Cache/cachesystem.h"
 
 
 /// @author Idris Miles
@@ -31,7 +33,9 @@ public:
 
     virtual void InitialiseSim();
     virtual void ResetSim();
-    virtual void StepSimulation();
+    virtual void StepSim();
+
+    void CacheFrame();
 
 
 
@@ -49,6 +53,11 @@ private:
     std::shared_ptr<FluidSolverProperty> m_fluidSolverProperty;
     Poly6Kernel *m_poly6Kernel;
     SpikyKernel *m_spikyKernel;
+
+    int m_frame;
+    bool m_cache;
+    CacheSystem m_fluidCache;
+    CacheSystem m_algaeCache;
 
 };
 

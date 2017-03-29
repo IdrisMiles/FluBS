@@ -13,6 +13,8 @@
 #include <glm/glm.hpp>
 #include <memory>
 
+#include "cuda_inc/helper_cuda.h"
+
 #include "SPH/sphparticlepropeprty.h"
 #include "FluidSystem/fluidsolverproperty.h"
 #include "Mesh/mesh.h"
@@ -78,6 +80,11 @@ public:
     QOpenGLBuffer &GetPressBO();
 
 
+    virtual void GetPositions(std::vector<glm::vec3> &_pos);
+    virtual void GetVelocities(std::vector<glm::vec3> &_vel);
+    virtual void GetParticleIds(std::vector<int> &_ids);
+
+
 protected:
     virtual void Init();
     virtual void InitCUDAMemory();
@@ -87,6 +94,8 @@ protected:
     virtual void CleanUpCUDAMemory();
     virtual void CleanUpGL();
 
+
+    bool m_init;
 
     // Simulation Data
     Mesh m_mesh;
@@ -102,6 +111,7 @@ protected:
     float3* d_externalForcePtr;
     float3* d_totalForcePtr;
 
+    unsigned int* d_particleIdPtr;
     unsigned int* d_particleHashIdPtr;
     unsigned int* d_cellOccupancyPtr;
     unsigned int* d_cellParticleIdxPtr;

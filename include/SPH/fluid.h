@@ -33,6 +33,12 @@ public:
     float *GetDensityErrPtr();
 
 
+
+    virtual void GetPositions(std::vector<glm::vec3> &_pos);
+    virtual void GetVelocities(std::vector<glm::vec3> &_vel);
+    virtual void GetParticleIds(std::vector<int> &_ids);
+
+
 protected:
     void InitFluidAsMesh();
     virtual void Init();

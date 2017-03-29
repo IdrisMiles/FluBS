@@ -192,89 +192,7 @@ void FluidSystem::ResetSim()
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void FluidSystem::ResetRigid(std::shared_ptr<Rigid> _rigid)
-{
-    // If this is a static rigid we only have to compute all this once
-    sph::ResetProperties(m_fluidSolverProperty, _rigid);
-    cudaThreadSynchronize();
-
-    // Get particle hash IDs
-    sph::ComputeHash(m_fluidSolverProperty, _rigid);
-    cudaThreadSynchronize();
-
-    // Sort particles
-    sph::SortParticlesByHash(_rigid);
-
-    // Get Cell particle indexes - scatter addresses
-    sph::ComputeParticleScatterIds(m_fluidSolverProperty, _rigid);
-
-    // Find max cell occupancy
-    uint maxCellOcc;
-    sph::ComputeMaxCellOccupancy(m_fluidSolverProperty, _rigid, maxCellOcc);
-    cudaThreadSynchronize();
-
-    // compute rigid particle volumes
-    sph::ComputeParticleVolume(m_fluidSolverProperty, _rigid);
-
-
-    _rigid->ReleaseCudaGLResources();
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void FluidSystem::ResetFluid(std::shared_ptr<Fluid> _fluid)
-{
-    sph::ResetProperties(m_fluidSolverProperty, _fluid);
-    cudaThreadSynchronize();
-    sph::InitFluidAsCube(m_fluidSolverProperty, _fluid);
-    cudaThreadSynchronize();
-    _fluid->ReleaseCudaGLResources();
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void FluidSystem::ResetAlgae(std::shared_ptr<Algae> _algae)
-{
-    sph::ResetProperties(m_fluidSolverProperty, _algae);
-    cudaThreadSynchronize();
-    sph::InitFluidAsCube(m_fluidSolverProperty, _algae);
-    cudaThreadSynchronize();
-    _algae->ReleaseCudaGLResources();
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void FluidSystem::GenerateDefaultContainer()
-{
-    auto rigidProps = std::shared_ptr<RigidProperty>(new RigidProperty());
-
-    Mesh boundary = Mesh();
-    float dim = 0.95f* m_fluidSolverProperty->gridResolution*m_fluidSolverProperty->gridCellWidth;
-    float rad = rigidProps->particleRadius;
-    int numRigidAxis = ceil(dim / (rad*2.0f));
-    for(int z=0; z<numRigidAxis; z++)
-    {
-        for(int y=0; y<numRigidAxis; y++)
-        {
-            for(int x=0; x<numRigidAxis; x++)
-            {
-                if(x==0 || x==numRigidAxis-1 || y==0 || z==0 || z==numRigidAxis-1)
-                {
-                    glm::vec3 pos((x*rad*2.0f)-(dim*0.5f), (y*rad*2.0f)-(dim*0.5f), (z*rad*2.0f)-(dim*0.5f));
-                    boundary.verts.push_back(pos);
-                }
-            }
-        }
-    }
-
-    rigidProps->numParticles = boundary.verts.size();
-    auto container = std::shared_ptr<Rigid>(new Rigid(rigidProps, boundary));
-    SetContainer(container);
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void FluidSystem::StepSimulation()
+void FluidSystem::StepSim()
 {
     if(!(m_fluid->GetProperty())->play)
     {
@@ -425,3 +343,105 @@ void FluidSystem::StepSimulation()
 
 //--------------------------------------------------------------------------------------------------------------------
 
+void FluidSystem::CacheFrame()
+{
+    std::vector<glm::vec3> pos;
+    std::vector<glm::vec3> vel;
+    std::vector<float> illum;
+    std::vector<int> id;
+
+    m_fluid->GetPositions(pos);
+    m_fluid->GetVelocities(vel);
+    m_fluidCache.CachePoints(0, false, pos, vel, illum, id);
+    m_fluidCache.WriteCache(0);
+
+
+    m_algae->GetPositions(pos);
+    m_algae->GetVelocities(vel);
+    m_algaeCache.CachePoints(0, false, pos, vel, illum, id);
+    m_algaeCache.WriteCache(0);
+
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void FluidSystem::GenerateDefaultContainer()
+{
+    auto rigidProps = std::shared_ptr<RigidProperty>(new RigidProperty());
+
+    Mesh boundary = Mesh();
+    float dim = 0.95f* m_fluidSolverProperty->gridResolution*m_fluidSolverProperty->gridCellWidth;
+    float rad = rigidProps->particleRadius;
+    int numRigidAxis = ceil(dim / (rad*2.0f));
+    for(int z=0; z<numRigidAxis; z++)
+    {
+        for(int y=0; y<numRigidAxis; y++)
+        {
+            for(int x=0; x<numRigidAxis; x++)
+            {
+                if(x==0 || x==numRigidAxis-1 || y==0 || z==0 || z==numRigidAxis-1)
+                {
+                    glm::vec3 pos((x*rad*2.0f)-(dim*0.5f), (y*rad*2.0f)-(dim*0.5f), (z*rad*2.0f)-(dim*0.5f));
+                    boundary.verts.push_back(pos);
+                }
+            }
+        }
+    }
+
+    rigidProps->numParticles = boundary.verts.size();
+    auto container = std::shared_ptr<Rigid>(new Rigid(rigidProps, boundary));
+    SetContainer(container);
+}
+
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void FluidSystem::ResetRigid(std::shared_ptr<Rigid> _rigid)
+{
+    // If this is a static rigid we only have to compute all this once
+    sph::ResetProperties(m_fluidSolverProperty, _rigid);
+    cudaThreadSynchronize();
+
+    // Get particle hash IDs
+    sph::ComputeHash(m_fluidSolverProperty, _rigid);
+    cudaThreadSynchronize();
+
+    // Sort particles
+    sph::SortParticlesByHash(_rigid);
+
+    // Get Cell particle indexes - scatter addresses
+    sph::ComputeParticleScatterIds(m_fluidSolverProperty, _rigid);
+
+    // Find max cell occupancy
+    uint maxCellOcc;
+    sph::ComputeMaxCellOccupancy(m_fluidSolverProperty, _rigid, maxCellOcc);
+    cudaThreadSynchronize();
+
+    // compute rigid particle volumes
+    sph::ComputeParticleVolume(m_fluidSolverProperty, _rigid);
+
+
+    _rigid->ReleaseCudaGLResources();
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void FluidSystem::ResetFluid(std::shared_ptr<Fluid> _fluid)
+{
+    sph::ResetProperties(m_fluidSolverProperty, _fluid);
+    cudaThreadSynchronize();
+    sph::InitFluidAsCube(m_fluidSolverProperty, _fluid);
+    cudaThreadSynchronize();
+    _fluid->ReleaseCudaGLResources();
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void FluidSystem::ResetAlgae(std::shared_ptr<Algae> _algae)
+{
+    sph::ResetProperties(m_fluidSolverProperty, _algae);
+    cudaThreadSynchronize();
+    sph::InitFluidAsCube(m_fluidSolverProperty, _algae);
+    cudaThreadSynchronize();
+    _algae->ReleaseCudaGLResources();
+}

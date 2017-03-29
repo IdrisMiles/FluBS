@@ -8,7 +8,7 @@
 
 #include "Mesh/meshloader.h"
 #include "MeshSampler/meshsampler.h"
-#include "Cache/cachesystem.h"
+
 
 OpenGLScene::OpenGLScene(QWidget *parent) : QOpenGLWidget(parent),
     m_xRot(0),
@@ -150,7 +150,6 @@ void OpenGLScene::initializeGL()
 
     //---------------------------------------------------------------------------------------
     // Set up simulation here
-//    CacheSystem cs;
 
     auto fluidProps = std::shared_ptr<FluidProperty>(new FluidProperty());
     auto algaeProps = std::shared_ptr<AlgaeProperty>(new AlgaeProperty(64000, 1.0f, 0.1f, 998.36f));
@@ -354,13 +353,6 @@ void OpenGLScene::paintGL()
 
 void OpenGLScene::UpdateSim()
 {
-    static double time = 0.0;
-    static double t1 = 0.0;
-    static double t2 = 0.0;
-    struct timeval tim;
-
-    gettimeofday(&tim, NULL);
-    t1=tim.tv_sec+(tim.tv_usec/1000000.0);
 
 //   static float i=0.0f;
 //   i+=0.1f;
@@ -373,13 +365,7 @@ void OpenGLScene::UpdateSim()
 //   }
 //   m_activeRigid->UpdateMesh(tmp);
 
-    m_fluidSystem->StepSimulation();
-
-
-    gettimeofday(&tim, NULL);
-    t2=tim.tv_sec+(tim.tv_usec/1000000.0);
-    time += 10*(t2-t1);
-//    std::cout<<"fps: "<<1.0/(t2-t1)<<"\n";
+    m_fluidSystem->StepSim();
 
 }
 

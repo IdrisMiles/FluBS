@@ -134,7 +134,7 @@ void BioluminescentFluidRenderer::Draw()
     // Render Bioluminescent Fluid
     int texId = 0;
     m_bioluminescentShader.bind();
-    glFuncs->glEnable(GL_DEPTH_TEST);
+//    glFuncs->glEnable(GL_DEPTH_TEST);
     glFuncs->glEnable(GL_BLEND);
     glFuncs->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glFuncs->glBlendEquation(GL_FUNC_ADD);

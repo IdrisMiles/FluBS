@@ -53,7 +53,8 @@ UI_DIR += ./ui
 # CUDA stuff
 #--------------------------------------------------------------------------
 
-HEADERS += $$PWD/cuda_inc/*.cuh
+HEADERS +=  $$PWD/cuda_inc/*.cuh \
+            $$PWD/cuda_inc/*.h
 
 INCLUDEPATH +=  ./cuda_inc \
                 ./include

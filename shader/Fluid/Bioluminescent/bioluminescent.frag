@@ -4,6 +4,7 @@
 in vec2 fUV;
 
 uniform vec3 uCameraPos;
+uniform vec3 uBioColour = vec3(1.0f, 1.0f, 1.0f);
 uniform vec3 uFluidColour = vec3(0.1f,0.4f,0.9f);
 uniform vec3 uLightColour = vec3(1.0f, 1.0f, 1.0f);
 uniform vec3 uLightPos;
@@ -84,14 +85,10 @@ void main()
         algaeDepth.rgb = vec3(0.0f);
         algaeThickness.rgb = vec3(0.0f);
     }
-    else
-    {
-        algaeThickness.r = 0.2;
-    }
 
-    float biolumAtten = 1.0f - clamp(((1.0f - depth.r) - (1.0f - algaeDepth.r)), 0.0f, 1.0f);
-    float biolumIntensity = algaeThickness.r;
-    vec3 biolumColour = abs(biolumAtten * biolumIntensity) * vec3(1.0f, 1.0f, 1.0f);
+    float biolumAtten = 1.0f;// - clamp(((1.0f - depth.r) - (1.0f - algaeDepth.r)), 0.0f, 1.0f);
+    float biolumIntensity = clamp(algaeThickness.r, 0.0f, 1.0f);
+    vec3 biolumColour = abs(biolumAtten * biolumIntensity) * uBioColour;
 
 
     //------------------------------------------------------------
@@ -117,7 +114,7 @@ void main()
         ddy = ddy2;
     }
 
-    vec3 normal = uNormalMatrix * -normalize(cross(ddx, ddy));
+    vec3 normal = uNormalMatrix * normalize(cross(ddx, ddy));
 
 
     //------------------------------------------------------------

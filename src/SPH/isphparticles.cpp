@@ -1,7 +1,8 @@
 #include "SPH/isphparticles.h"
 
 
-BaseSphParticle::BaseSphParticle()
+BaseSphParticle::BaseSphParticle():
+    m_init(false)
 {
 
 }
@@ -34,6 +35,8 @@ void BaseSphParticle::Init()
 
     InitGL();
     InitCUDAMemory();
+
+    m_init = true;
 
 }
 
@@ -374,3 +377,39 @@ QOpenGLBuffer &BaseSphParticle::GetPressBO()
 {
     return m_pressBO;
 }
+
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void BaseSphParticle::GetPositions(std::vector<glm::vec3> &_pos)
+{
+    if(!m_init || this->m_property == nullptr)
+    {
+        return;
+    }
+
+    _pos.resize(this->m_property->numParticles);
+    checkCudaErrors(cudaMemcpy(&_pos[0], GetPositionPtr(), this->m_property->numParticles * sizeof(float3), cudaMemcpyDeviceToHost));
+    ReleasePositionPtr();
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void BaseSphParticle::GetVelocities(std::vector<glm::vec3> &_vel)
+{
+    if(!m_init || this->m_property == nullptr)
+    {
+        return;
+    }
+    _vel.resize(this->m_property->numParticles);
+    checkCudaErrors(cudaMemcpy(&_vel[0], GetVelocityPtr(), this->m_property->numParticles * sizeof(float3), cudaMemcpyDeviceToHost));
+    ReleaseVelocityPtr();
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void BaseSphParticle::GetParticleIds(std::vector<int> &_ids)
+{
+}
+
+//--------------------------------------------------------------------------------------------------------------------

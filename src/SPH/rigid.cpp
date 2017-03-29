@@ -55,6 +55,7 @@ void Rigid::Init()
     InitGL();
     InitCUDAMemory();
 
+    m_init = true;
 }
 
 void Rigid::InitCUDAMemory()
@@ -180,12 +181,52 @@ float *Rigid::GetVolumePtr()
     return d_volumePtr;
 }
 
+//------------------------------------------------------------------------
+
 void Rigid::ReleaseVolumePtr()
 {
 
 }
 
+//------------------------------------------------------------------------
+
 RigidProperty *Rigid::GetProperty()
 {
     return m_property.get();
 }
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void Rigid::GetPositions(std::vector<glm::vec3> &_pos)
+{
+    if(!m_init || this->m_property == nullptr)
+    {
+        return;
+    }
+
+    _pos.resize(this->m_property->numParticles);
+    checkCudaErrors(cudaMemcpy(&_pos[0], GetPositionPtr(), this->m_property->numParticles * sizeof(float3), cudaMemcpyDeviceToHost));
+    ReleasePositionPtr();
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void Rigid::GetVelocities(std::vector<glm::vec3> &_vel)
+{
+    if(!m_init || this->m_property == nullptr)
+    {
+        return;
+    }
+    _vel.resize(this->m_property->numParticles);
+    checkCudaErrors(cudaMemcpy(&_vel[0], GetVelocityPtr(), this->m_property->numParticles * sizeof(float3), cudaMemcpyDeviceToHost));
+    ReleaseVelocityPtr();
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void Rigid::GetParticleIds(std::vector<int> &_ids)
+{
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+

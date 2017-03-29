@@ -115,7 +115,6 @@ private:
     QTimer *m_drawTimer;
     QTimer *m_simTimer;
 
-
 };
 
 #endif // OPENGLSCENE_H
