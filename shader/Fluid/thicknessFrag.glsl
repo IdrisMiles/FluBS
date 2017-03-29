@@ -6,7 +6,7 @@ in vec2 fTexCoord;
 
 layout (location = 0) out vec4 oDepth;
 
-uniform float particleThickness = 0.05f;
+uniform float particleThickness = 0.01f;
 uniform float uRestDen = 1000.0f;
 
 void main()

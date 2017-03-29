@@ -1581,7 +1581,7 @@ __global__ void sphGPU_Kernels::ComputeBioluminescence(const float *pressure,
         currIllum = (currIllum < 0.0f) ? 0.0f : currIllum;
         currIllum = (currIllum > 0.02f) ? 0.02f : currIllum;
 
-        illumination[idx] = 0.02f;//currIllum;
+        illumination[idx] = 0.04f;//currIllum;
 
     }
 

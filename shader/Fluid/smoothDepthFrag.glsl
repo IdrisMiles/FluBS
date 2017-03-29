@@ -44,6 +44,7 @@ void main()
     if(depth.a < 0.1f)
     {
         discard;
+        return;
     }
 
 //    float rad = 0.0005f;//  depth.b;

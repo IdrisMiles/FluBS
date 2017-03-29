@@ -21,5 +21,5 @@ void main()
         return;
     }
 
-    oDepth = vec4(vec3(fBio, fBio, fBio), 1.0f);
+    oDepth = vec4(vec3(fBio, fBio, fBio), fBio /*1.0f*/);
 }

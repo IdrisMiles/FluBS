@@ -79,7 +79,7 @@ void main()
     vec4 algaeDepth = texture2D(uAlgaeDepthTex, fUV).rgba;
     vec4 algaeThickness = texture2D(uAlgaeThicknessTex, fUV).rgba;
 
-    if(algaeDepth.a <= 0.1f || algaeThickness.r <= 0.0001f)// || algaeThickness.a <= 0.0001f)
+    if(algaeDepth.a <= 0.1f || algaeThickness.r <= 0.0001f)
     {
         algaeDepth.rgb = vec3(0.0f);
         algaeThickness.rgb = vec3(0.0f);
@@ -133,7 +133,7 @@ void main()
 
     //------------------------------------------------------------
     // Get reflected ray and colour
-    vec3 reflectRay = reflect(eye, normal);
+    vec3 reflectRay = reflect(-eye, normal);
     vec3 reflectColour = textureCube(uCubeMapTex, reflectRay).rgb;
 
 
