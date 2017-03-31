@@ -7,7 +7,6 @@
 #include "SPH/fluid.h"
 #include "SPH/rigid.h"
 #include "SPH/fluidproperty.h"
-#include "Cache/cachesystem.h"
 
 
 /// @author Idris Miles
@@ -35,8 +34,6 @@ public:
     virtual void ResetSim();
     virtual void StepSim();
 
-    void CacheFrame();
-
 
 
 private:
@@ -56,8 +53,6 @@ private:
 
     int m_frame;
     bool m_cache;
-    CacheSystem m_fluidCache;
-    CacheSystem m_algaeCache;
 
 };
 

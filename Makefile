@@ -852,18 +852,20 @@ moc/moc_mainwindow.cpp: ../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QMainWindo
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qtimer.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qbasictimer.h \
 		include/FluidSystem/fluidsystem.h \
-		include/SPH/fluid.h \
+		include/FluidSystem/fluidsolverproperty.h \
+		include/SPH/sph.h \
 		include/SPH/isphparticles.h \
 		cuda_inc/helper_cuda.h \
 		cuda_inc/helper_string.h \
-		include/FluidSystem/fluidsolverproperty.h \
 		include/Mesh/mesh.h \
+		include/SPH/fluid.h \
 		include/SPH/rigid.h \
 		include/SPH/rigidproperty.h \
-		include/SPH/sph.h \
 		include/SPH/algae.h \
 		include/SPH/algaeproperty.h \
 		include/SPH/sphGPU.h \
+		include/Cache/cachesystem.h \
+		json/src/json.hpp \
 		include/Render/fluidrenderer.h \
 		include/Render/sphparticlerenderer.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFramebufferObject \
@@ -901,8 +903,6 @@ moc/moc_mainwindow.cpp: ../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QMainWindo
 		../../../dev/include/assimp/config.h \
 		../../../dev/include/assimp/postprocess.h \
 		include/Mesh/rendermesh.h \
-		include/Cache/cachesystem.h \
-		json/src/json.hpp \
 		include/mainwindow.h \
 		../../../Qt5.7.0/5.7/gcc_64/bin/moc
 	/home/idris/Qt5.7.0/5.7/gcc_64/bin/moc $(DEFINES) -I/home/idris/Qt5.7.0/5.7/gcc_64/mkspecs/linux-g++ -I/home/idris/uni/major/dev -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I/home/idris/uni/major/dev/cuda_inc -I/home/idris/uni/major/dev/include -I'/home/idris/uni/major/dev/$(CUDA_PATH)/include' -I'/home/idris/uni/major/dev/$(CUDA_PATH)/include/cuda' -I/home/idris/Qt5.7.0/5.7/gcc_64/include -I/home/idris/Qt5.7.0/5.7/gcc_64/include/QtOpenGL -I/home/idris/Qt5.7.0/5.7/gcc_64/include/QtWidgets -I/home/idris/Qt5.7.0/5.7/gcc_64/include/QtGui -I/home/idris/Qt5.7.0/5.7/gcc_64/include/QtCore -I/usr/include/c++/5 -I/usr/include/x86_64-linux-gnu/c++/5 -I/usr/include/c++/5/backward -I/usr/lib/gcc/x86_64-linux-gnu/5/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include include/mainwindow.h -o moc/moc_mainwindow.cpp
@@ -1036,20 +1036,22 @@ moc/moc_openglscene.cpp: ../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QOpenGLWi
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qtimer.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qbasictimer.h \
 		include/FluidSystem/fluidsystem.h \
-		include/SPH/fluid.h \
-		include/SPH/fluidproperty.h \
-		include/SPH/sphparticlepropeprty.h \
+		include/FluidSystem/fluidsolverproperty.h \
+		include/SPH/sph.h \
 		include/SPH/isphparticles.h \
 		cuda_inc/helper_cuda.h \
 		cuda_inc/helper_string.h \
-		include/FluidSystem/fluidsolverproperty.h \
+		include/SPH/sphparticlepropeprty.h \
 		include/Mesh/mesh.h \
+		include/SPH/fluid.h \
+		include/SPH/fluidproperty.h \
 		include/SPH/rigid.h \
 		include/SPH/rigidproperty.h \
-		include/SPH/sph.h \
 		include/SPH/algae.h \
 		include/SPH/algaeproperty.h \
 		include/SPH/sphGPU.h \
+		include/Cache/cachesystem.h \
+		json/src/json.hpp \
 		include/Render/fluidrenderer.h \
 		include/Render/sphparticlerenderer.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFramebufferObject \
@@ -1087,8 +1089,6 @@ moc/moc_openglscene.cpp: ../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QOpenGLWi
 		../../../dev/include/assimp/config.h \
 		../../../dev/include/assimp/postprocess.h \
 		include/Mesh/rendermesh.h \
-		include/Cache/cachesystem.h \
-		json/src/json.hpp \
 		include/openglscene.h \
 		../../../Qt5.7.0/5.7/gcc_64/bin/moc
 	/home/idris/Qt5.7.0/5.7/gcc_64/bin/moc $(DEFINES) -I/home/idris/Qt5.7.0/5.7/gcc_64/mkspecs/linux-g++ -I/home/idris/uni/major/dev -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I/home/idris/uni/major/dev/cuda_inc -I/home/idris/uni/major/dev/include -I'/home/idris/uni/major/dev/$(CUDA_PATH)/include' -I'/home/idris/uni/major/dev/$(CUDA_PATH)/include/cuda' -I/home/idris/Qt5.7.0/5.7/gcc_64/include -I/home/idris/Qt5.7.0/5.7/gcc_64/include/QtOpenGL -I/home/idris/Qt5.7.0/5.7/gcc_64/include/QtWidgets -I/home/idris/Qt5.7.0/5.7/gcc_64/include/QtGui -I/home/idris/Qt5.7.0/5.7/gcc_64/include/QtCore -I/usr/include/c++/5 -I/usr/include/x86_64-linux-gnu/c++/5 -I/usr/include/c++/5/backward -I/usr/lib/gcc/x86_64-linux-gnu/5/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include include/openglscene.h -o moc/moc_openglscene.cpp
@@ -1392,18 +1392,20 @@ obj/main.o: src/main.cpp include/mainwindow.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qtimer.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qbasictimer.h \
 		include/FluidSystem/fluidsystem.h \
-		include/SPH/fluid.h \
+		include/FluidSystem/fluidsolverproperty.h \
+		include/SPH/sph.h \
 		include/SPH/isphparticles.h \
 		cuda_inc/helper_cuda.h \
 		cuda_inc/helper_string.h \
-		include/FluidSystem/fluidsolverproperty.h \
 		include/Mesh/mesh.h \
+		include/SPH/fluid.h \
 		include/SPH/rigid.h \
 		include/SPH/rigidproperty.h \
-		include/SPH/sph.h \
 		include/SPH/algae.h \
 		include/SPH/algaeproperty.h \
 		include/SPH/sphGPU.h \
+		include/Cache/cachesystem.h \
+		json/src/json.hpp \
 		include/Render/fluidrenderer.h \
 		include/Render/sphparticlerenderer.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFramebufferObject \
@@ -1441,8 +1443,6 @@ obj/main.o: src/main.cpp include/mainwindow.h \
 		../../../dev/include/assimp/config.h \
 		../../../dev/include/assimp/postprocess.h \
 		include/Mesh/rendermesh.h \
-		include/Cache/cachesystem.h \
-		json/src/json.hpp \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QApplication \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qapplication.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qcoreapplication.h \
@@ -1614,18 +1614,20 @@ obj/mainwindow.o: src/mainwindow.cpp include/mainwindow.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qtimer.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qbasictimer.h \
 		include/FluidSystem/fluidsystem.h \
-		include/SPH/fluid.h \
+		include/FluidSystem/fluidsolverproperty.h \
+		include/SPH/sph.h \
 		include/SPH/isphparticles.h \
 		cuda_inc/helper_cuda.h \
 		cuda_inc/helper_string.h \
-		include/FluidSystem/fluidsolverproperty.h \
 		include/Mesh/mesh.h \
+		include/SPH/fluid.h \
 		include/SPH/rigid.h \
 		include/SPH/rigidproperty.h \
-		include/SPH/sph.h \
 		include/SPH/algae.h \
 		include/SPH/algaeproperty.h \
 		include/SPH/sphGPU.h \
+		include/Cache/cachesystem.h \
+		json/src/json.hpp \
 		include/Render/fluidrenderer.h \
 		include/Render/sphparticlerenderer.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFramebufferObject \
@@ -1663,8 +1665,6 @@ obj/mainwindow.o: src/mainwindow.cpp include/mainwindow.h \
 		../../../dev/include/assimp/config.h \
 		../../../dev/include/assimp/postprocess.h \
 		include/Mesh/rendermesh.h \
-		include/Cache/cachesystem.h \
-		json/src/json.hpp \
 		ui/ui_mainwindow.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QVariant \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QAction \
@@ -1831,20 +1831,22 @@ obj/openglscene.o: src/openglscene.cpp include/openglscene.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qtimer.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qbasictimer.h \
 		include/FluidSystem/fluidsystem.h \
-		include/SPH/fluid.h \
-		include/SPH/fluidproperty.h \
-		include/SPH/sphparticlepropeprty.h \
+		include/FluidSystem/fluidsolverproperty.h \
+		include/SPH/sph.h \
 		include/SPH/isphparticles.h \
 		cuda_inc/helper_cuda.h \
 		cuda_inc/helper_string.h \
-		include/FluidSystem/fluidsolverproperty.h \
+		include/SPH/sphparticlepropeprty.h \
 		include/Mesh/mesh.h \
+		include/SPH/fluid.h \
+		include/SPH/fluidproperty.h \
 		include/SPH/rigid.h \
 		include/SPH/rigidproperty.h \
-		include/SPH/sph.h \
 		include/SPH/algae.h \
 		include/SPH/algaeproperty.h \
 		include/SPH/sphGPU.h \
+		include/Cache/cachesystem.h \
+		json/src/json.hpp \
 		include/Render/fluidrenderer.h \
 		include/Render/sphparticlerenderer.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFramebufferObject \
@@ -1882,8 +1884,6 @@ obj/openglscene.o: src/openglscene.cpp include/openglscene.h \
 		../../../dev/include/assimp/config.h \
 		../../../dev/include/assimp/postprocess.h \
 		include/Mesh/rendermesh.h \
-		include/Cache/cachesystem.h \
-		json/src/json.hpp \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QMouseEvent \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QImage \
 		include/MeshSampler/meshsampler.h \
@@ -2027,9 +2027,8 @@ obj/rendermesh.o: src/Mesh/rendermesh.cpp include/Mesh/rendermesh.h \
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/rendermesh.o src/Mesh/rendermesh.cpp
 
 obj/fluidsystem.o: src/FluidSystem/fluidsystem.cpp include/FluidSystem/fluidsystem.h \
-		include/SPH/fluid.h \
-		include/SPH/fluidproperty.h \
-		include/SPH/sphparticlepropeprty.h \
+		include/FluidSystem/fluidsolverproperty.h \
+		include/SPH/sph.h \
 		include/SPH/isphparticles.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLBuffer \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglbuffer.h \
@@ -2062,14 +2061,17 @@ obj/fluidsystem.o: src/FluidSystem/fluidsystem.cpp include/FluidSystem/fluidsyst
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglext.h \
 		cuda_inc/helper_cuda.h \
 		cuda_inc/helper_string.h \
-		include/FluidSystem/fluidsolverproperty.h \
+		include/SPH/sphparticlepropeprty.h \
 		include/Mesh/mesh.h \
+		include/SPH/fluid.h \
+		include/SPH/fluidproperty.h \
 		include/SPH/rigid.h \
 		include/SPH/rigidproperty.h \
-		include/SPH/sph.h \
 		include/SPH/algae.h \
 		include/SPH/algaeproperty.h \
-		include/SPH/sphGPU.h
+		include/SPH/sphGPU.h \
+		include/Cache/cachesystem.h \
+		json/src/json.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/fluidsystem.o src/FluidSystem/fluidsystem.cpp
 
 obj/algae.o: src/SPH/algae.cpp include/SPH/algae.h \

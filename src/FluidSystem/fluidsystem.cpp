@@ -343,28 +343,6 @@ void FluidSystem::StepSim()
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void FluidSystem::CacheFrame()
-{
-    std::vector<glm::vec3> pos;
-    std::vector<glm::vec3> vel;
-    std::vector<float> illum;
-    std::vector<int> id;
-
-    m_fluid->GetPositions(pos);
-    m_fluid->GetVelocities(vel);
-    m_fluidCache.CachePoints(0, false, pos, vel, illum, id);
-    m_fluidCache.WriteCache(0);
-
-
-    m_algae->GetPositions(pos);
-    m_algae->GetVelocities(vel);
-    m_algaeCache.CachePoints(0, false, pos, vel, illum, id);
-    m_algaeCache.WriteCache(0);
-
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
 void FluidSystem::GenerateDefaultContainer()
 {
     auto rigidProps = std::shared_ptr<RigidProperty>(new RigidProperty());
