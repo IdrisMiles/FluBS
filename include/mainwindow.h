@@ -6,6 +6,8 @@
 #include <QMainWindow>
 #include "Widget/fluidpropertywidgetOld.h"
 #include "Widget/fluidpropertywidget.h"
+#include "Widget/algaepropertywidget.h"
+#include "Widget/rigidpropertywidget.h"
 
 namespace Ui {
 class MainWindow;
@@ -26,6 +28,8 @@ private:
     Ui::MainWindow *ui;
     std::shared_ptr<FluidPropertyWidgetOld> m_fluidPropertWidget;
     FluidPropertyWidget *m_fpw;
+    AlgaePropertyWidget *m_apw;
+    RigidPropertyWidget *m_rpw;
 
 };
 

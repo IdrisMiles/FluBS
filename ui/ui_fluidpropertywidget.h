@@ -18,6 +18,7 @@
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
+#include <QtWidgets/QSpacerItem>
 #include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -31,11 +32,12 @@ public:
     QLabel *viscosityLabel;
     QLabel *surfaceTensionLabel;
     QDoubleSpinBox *doubleSpinBox;
-    QLabel *gasStiffnessLabel;
     QDoubleSpinBox *doubleSpinBox_2;
+    QLabel *gasStiffnessLabel;
     QDoubleSpinBox *doubleSpinBox_3;
     QDoubleSpinBox *doubleSpinBox_4;
     QFrame *line;
+    QSpacerItem *verticalSpacer;
 
     void setupUi(QWidget *FluidPropertyWidget)
     {
@@ -67,15 +69,15 @@ public:
 
         gridLayout_2->addWidget(doubleSpinBox, 3, 1, 1, 1);
 
-        gasStiffnessLabel = new QLabel(layout);
-        gasStiffnessLabel->setObjectName(QStringLiteral("gasStiffnessLabel"));
-
-        gridLayout_2->addWidget(gasStiffnessLabel, 2, 0, 1, 1);
-
         doubleSpinBox_2 = new QDoubleSpinBox(layout);
         doubleSpinBox_2->setObjectName(QStringLiteral("doubleSpinBox_2"));
 
         gridLayout_2->addWidget(doubleSpinBox_2, 2, 1, 1, 1);
+
+        gasStiffnessLabel = new QLabel(layout);
+        gasStiffnessLabel->setObjectName(QStringLiteral("gasStiffnessLabel"));
+
+        gridLayout_2->addWidget(gasStiffnessLabel, 2, 0, 1, 1);
 
         doubleSpinBox_3 = new QDoubleSpinBox(layout);
         doubleSpinBox_3->setObjectName(QStringLiteral("doubleSpinBox_3"));
@@ -93,6 +95,10 @@ public:
         line->setFrameShadow(QFrame::Sunken);
 
         gridLayout_2->addWidget(line, 0, 0, 1, 2);
+
+        verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+
+        gridLayout_2->addItem(verticalSpacer, 6, 0, 1, 1);
 
 
         retranslateUi(FluidPropertyWidget);

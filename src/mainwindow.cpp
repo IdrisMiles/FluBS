@@ -18,10 +18,14 @@ MainWindow::MainWindow(QWidget *parent) :
     // setup property widgets
     m_fluidPropertWidget = std::shared_ptr<FluidPropertyWidgetOld>(new FluidPropertyWidgetOld(this));
     m_fpw = new FluidPropertyWidget(this);
+    m_apw = new AlgaePropertyWidget(this);
+    m_rpw = new RigidPropertyWidget(this);
 
     // setup properties tab widgets
     ui->properties->addTab(m_fluidPropertWidget.get(), tr("Fluid"));
     ui->properties->addTab(m_fpw, tr("Fluid new"));
+    ui->properties->addTab(m_apw, tr("Algae"));
+    ui->properties->addTab(m_rpw, tr("Rigid"));
     ui->gridLayout->addWidget(ui->properties, 0, 2, 2, 1 );
 
 
