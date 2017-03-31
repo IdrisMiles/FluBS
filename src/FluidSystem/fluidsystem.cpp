@@ -194,14 +194,15 @@ void FluidSystem::ResetSim()
 
 void FluidSystem::StepSim()
 {
-    if(!(m_fluid->GetProperty())->play)
-    {
-        return;
-    }
-
     if(m_container == nullptr)
     {
         GenerateDefaultContainer();
+    }
+
+
+    if(m_fluid == nullptr || m_algae == nullptr || m_container == nullptr)
+    {
+        return;
     }
 
 

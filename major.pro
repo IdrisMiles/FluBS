@@ -44,7 +44,7 @@ LIBS += -L/usr/local/lib -L/usr/lib -lGL -lGLU -lGLEW \
 
 OBJECTS_DIR = ./obj
 MOC_DIR = ./moc
-FORMS    += ./form/mainwindow.ui
+FORMS    += ./form/*.ui
 
 UI_DIR += ./ui
 

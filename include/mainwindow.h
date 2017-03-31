@@ -4,10 +4,8 @@
 
 // Qt includes
 #include <QMainWindow>
+#include "Widget/fluidpropertywidgetOld.h"
 #include "Widget/fluidpropertywidget.h"
-#include "openglscene.h"
-
-
 
 namespace Ui {
 class MainWindow;
@@ -26,8 +24,9 @@ public slots:
 
 private:
     Ui::MainWindow *ui;
-    OpenGLScene *m_scene;
-    std::shared_ptr<FluidPropertyWidget> m_fluidPropertWidget;
+    std::shared_ptr<FluidPropertyWidgetOld> m_fluidPropertWidget;
+    FluidPropertyWidget *m_fpw;
+
 };
 
 #endif // MAINWINDOW_H

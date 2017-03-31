@@ -108,7 +108,6 @@ private:
     std::shared_ptr<FluidSystem> m_fluidSystem;
     Mesh m_activeRigidMesh;
 
-    std::shared_ptr<FluidRenderer> m_fluidRenderer;
     std::shared_ptr<BioluminescentFluidRenderer> m_bioRenderer;
     std::vector<std::shared_ptr<SphParticleRenderer>> m_sphRenderers;
 

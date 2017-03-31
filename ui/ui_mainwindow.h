@@ -17,9 +17,13 @@
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
+#include <QtWidgets/QSpacerItem>
 #include <QtWidgets/QStatusBar>
+#include <QtWidgets/QTabWidget>
 #include <QtWidgets/QToolBar>
 #include <QtWidgets/QWidget>
+#include "include/testtimeline.h"
+#include "openglscene.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -28,6 +32,11 @@ class Ui_MainWindow
 public:
     QWidget *centralWidget;
     QGridLayout *gridLayout;
+    OpenGLScene *scene;
+    QSpacerItem *verticalSpacer;
+    QSpacerItem *horizontalSpacer;
+    QTabWidget *properties;
+    TestTimeLine *timeline;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -43,6 +52,32 @@ public:
         gridLayout->setSpacing(6);
         gridLayout->setContentsMargins(11, 11, 11, 11);
         gridLayout->setObjectName(QStringLiteral("gridLayout"));
+        scene = new OpenGLScene(centralWidget);
+        scene->setObjectName(QStringLiteral("scene"));
+
+        gridLayout->addWidget(scene, 0, 0, 1, 1);
+
+        verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+
+        gridLayout->addItem(verticalSpacer, 1, 0, 1, 1);
+
+        horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+        gridLayout->addItem(horizontalSpacer, 0, 1, 1, 1);
+
+        properties = new QTabWidget(centralWidget);
+        properties->setObjectName(QStringLiteral("properties"));
+        properties->setTabPosition(QTabWidget::East);
+
+        gridLayout->addWidget(properties, 0, 2, 1, 1);
+
+        timeline = new TestTimeLine(centralWidget);
+        timeline->setObjectName(QStringLiteral("timeline"));
+        timeline->setFrameShape(QFrame::StyledPanel);
+        timeline->setFrameShadow(QFrame::Raised);
+
+        gridLayout->addWidget(timeline, 2, 0, 1, 4);
+
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
@@ -56,6 +91,9 @@ public:
         MainWindow->setStatusBar(statusBar);
 
         retranslateUi(MainWindow);
+
+        properties->setCurrentIndex(-1);
+
 
         QMetaObject::connectSlotsByName(MainWindow);
     } // setupUi

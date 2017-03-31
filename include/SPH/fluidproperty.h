@@ -16,14 +16,12 @@ public:
                   float _gasStiffness = 100.0f,
                   float _viscosity = 0.1f,
                   float _smoothingLength = 1.2f,
-                  float3 _gravity = make_float3(0.0f, -9.8f, 0.0f),
-                  bool _play = false):
+                  float3 _gravity = make_float3(0.0f, -9.8f, 0.0f)):
         SphParticleProperty(_numParticles, _particleMass, _particleRadius, _restDensity, _smoothingLength, _gravity),
         surfaceTension(_surfaceTension),
         surfaceThreshold(_surfaceThreshold),
         gasStiffness(_gasStiffness),
-        viscosity(_viscosity),
-        play(_play)
+        viscosity(_viscosity)
     {
 
         float dia = 2.0f * particleRadius;
@@ -37,7 +35,6 @@ public:
     float gasStiffness;
     float viscosity;
 
-    bool play;
 };
 
 #endif // FLUIDPROPERTY_H

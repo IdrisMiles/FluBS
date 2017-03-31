@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SphParticlePropertyWidget</class>
+ <widget class="QWidget" name="SphParticlePropertyWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="1" column="0">
+    <widget class="QLabel" name="particleMassLabel">
+     <property name="text">
+      <string>Particle Mass</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="numParticlesLabel">
+     <property name="text">
+      <string>Number of Particles</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QSpinBox" name="numParticles"/>
+   </item>
+   <item row="4" column="1">
+    <widget class="QDoubleSpinBox" name="smoothingLength"/>
+   </item>
+   <item row="2" column="1">
+    <widget class="QDoubleSpinBox" name="particleRadius"/>
+   </item>
+   <item row="3" column="1">
+    <widget class="QDoubleSpinBox" name="restDensity"/>
+   </item>
+   <item row="1" column="1">
+    <widget class="QDoubleSpinBox" name="particleMass"/>
+   </item>
+   <item row="4" column="0">
+    <widget class="QLabel" name="smoothingLengthLabel">
+     <property name="text">
+      <string>Smoothing Length</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="particleRadiusLabel">
+     <property name="text">
+      <string>Particle Radius</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QLabel" name="restDensityLabel">
+     <property name="text">
+      <string>Rest Density</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
