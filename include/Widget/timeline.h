@@ -5,12 +5,27 @@
 
 class TimeLine : public QTimeLine
 {
-public:
     Q_OBJECT
+
+public:
+
+    enum CacheState
+    {
+        NotCached,
+        Cached,
+        StaleCache
+    };
+
     TimeLine(int duration = 1000, QObject *parent = nullptr);
     ~TimeLine();
 
+    void SetFrameRange(int start, int end);
+
+
+protected:
+
 private:
+    std::vector<CacheState> frameCacheStates;
 
 };
 

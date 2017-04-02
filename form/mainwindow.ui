@@ -55,7 +55,7 @@
      </widget>
     </item>
     <item row="2" column="0" colspan="4">
-     <widget class="TestTimeLine" name="timeline">
+     <widget class="TimeLineWidget" name="timeline">
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
       </property>
@@ -89,9 +89,9 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>TestTimeLine</class>
+   <class>TimeLineWidget</class>
    <extends>QFrame</extends>
-   <header>include/testtimeline.h</header>
+   <header>include/Widget/timelinewidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

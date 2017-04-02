@@ -22,7 +22,7 @@
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QToolBar>
 #include <QtWidgets/QWidget>
-#include "include/testtimeline.h"
+#include "include/Widget/timelinewidget.h"
 #include "openglscene.h"
 
 QT_BEGIN_NAMESPACE
@@ -36,7 +36,7 @@ public:
     QSpacerItem *verticalSpacer;
     QSpacerItem *horizontalSpacer;
     QTabWidget *properties;
-    TestTimeLine *timeline;
+    TimeLineWidget *timeline;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -71,7 +71,7 @@ public:
 
         gridLayout->addWidget(properties, 0, 2, 1, 1);
 
-        timeline = new TestTimeLine(centralWidget);
+        timeline = new TimeLineWidget(centralWidget);
         timeline->setObjectName(QStringLiteral("timeline"));
         timeline->setFrameShape(QFrame::StyledPanel);
         timeline->setFrameShadow(QFrame::Raised);

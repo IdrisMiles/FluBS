@@ -29,8 +29,6 @@ OpenGLScene::OpenGLScene(QWidget *parent) : QOpenGLWidget(parent),
     m_drawTimer = new QTimer(this);
     connect(m_drawTimer, SIGNAL(timeout()), this, SLOT(update()));
 
-    m_simTimer = new QTimer(this);
-    connect(m_simTimer, SIGNAL(timeout()), this, SLOT(UpdateSim()));
 }
 
 
@@ -277,7 +275,6 @@ void OpenGLScene::initializeGL()
     //---------------------------------------------------------------------------------------
     // Start simulation and drawing rimers
     m_drawTimer->start(16);
-    m_simTimer->start(16);
 
 }
 
@@ -318,20 +315,7 @@ void OpenGLScene::paintGL()
 
 void OpenGLScene::UpdateSim()
 {
-
-//   static float i=0.0f;
-//   i+=0.1f;
-//   Mesh tmp = Mesh();
-//   glm::mat4 t = glm::rotate(glm::mat4(1.0f), glm::radians(i), glm::vec3(0.0f, 1.0f, 0.0f));
-//   for(auto &v: m_activeRigidMesh.verts)
-//   {
-//       glm::vec3 vert = glm::vec3(t * glm::vec4(v, 1.0f));
-//       tmp.verts.push_back(vert + glm::vec3(5.0f + 5.0f*sin(glm::radians(i)), 0.0f, 0.0f));
-//   }
-//   m_activeRigid->UpdateMesh(tmp);
-
-//    m_fluidSystem->StepSim();
-
+    m_fluidSystem->StepSim();
 }
 
 void OpenGLScene::ResetSim()

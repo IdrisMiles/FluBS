@@ -1,9 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include <QTimeLine>
-#include <QProgressBar>
-QTimeLine *timeLine;
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -22,17 +20,17 @@ MainWindow::MainWindow(QWidget *parent) :
     m_rpw = new RigidPropertyWidget(this);
 
     // setup properties tab widgets
-    ui->properties->addTab(m_fluidPropertWidget.get(), tr("Fluid"));
-    ui->properties->addTab(m_fpw, tr("Fluid new"));
-    ui->properties->addTab(m_apw, tr("Algae"));
-    ui->properties->addTab(m_rpw, tr("Rigid"));
+    ui->properties->addTab(m_fluidPropertWidget.get(), "Fluid");
+    ui->properties->addTab(m_fpw, "Fluid new");
+    ui->properties->addTab(m_apw, "Algae");
+    ui->properties->addTab(m_rpw, "Rigid");
     ui->gridLayout->addWidget(ui->properties, 0, 2, 2, 1 );
 
 
     // setup openglscene widget
     connect(ui->scene, SIGNAL(FluidInitialised(std::shared_ptr<FluidProperty>)), this, SLOT(NewFluidInitialised(std::shared_ptr<FluidProperty>)));
     connect(m_fluidPropertWidget.get(), SIGNAL(ResetSim()), ui->scene, SLOT(ResetSim()));
-
+    connect(ui->timeline, &TimeLineWidget::FrameChanged, ui->scene, &OpenGLScene::UpdateSim);
 
 }
 

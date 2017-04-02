@@ -14,3 +14,13 @@ AlgaePropertyWidget::~AlgaePropertyWidget()
 {
     delete ui;
 }
+
+void AlgaePropertyWidget::SetProperty(std::shared_ptr<AlgaeProperty> _algaeProperty)
+{
+    m_property = _algaeProperty;
+}
+
+AlgaeProperty *AlgaePropertyWidget::GetProperty()
+{
+    return m_property.get();
+}

@@ -112,7 +112,6 @@ private:
     std::vector<std::shared_ptr<SphParticleRenderer>> m_sphRenderers;
 
     QTimer *m_drawTimer;
-    QTimer *m_simTimer;
 
 };
 

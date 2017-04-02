@@ -14,3 +14,14 @@ RigidPropertyWidget::~RigidPropertyWidget()
 {
     delete ui;
 }
+
+
+void RigidPropertyWidget::SetProperty(std::shared_ptr<RigidProperty> _rigidProperty)
+{
+    m_property = _rigidProperty;
+}
+
+RigidProperty *RigidPropertyWidget::GetProperty()
+{
+    return m_property.get();
+}
