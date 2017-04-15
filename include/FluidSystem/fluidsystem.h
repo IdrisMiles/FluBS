@@ -24,11 +24,17 @@ public:
     FluidSystem(const FluidSystem &_FluidSystem);
     ~FluidSystem();
 
+    void SetFluidSolverProperty(std::shared_ptr<FluidSolverProperty> _fluidSolverProperty);
     void SetContainer(std::shared_ptr<Rigid> _container);
     void AddFluid(std::shared_ptr<Fluid> _fluid);
     void AddRigid(std::shared_ptr<Rigid> _rigid);
     void AddAlgae(std::shared_ptr<Algae> _algae);
-    void AddFluidSolverProperty(std::shared_ptr<FluidSolverProperty> _fluidSolverProperty);
+
+    std::shared_ptr<FluidSolverProperty> GetProperty();
+    std::shared_ptr<Fluid> GetFluid();
+    std::shared_ptr<Algae> GetAlgae();
+    std::vector<std::shared_ptr<Rigid>> GetActiveRigids();
+    std::vector<std::shared_ptr<Rigid>> GetStaticRigids();
 
     virtual void InitialiseSim();
     virtual void ResetSim();

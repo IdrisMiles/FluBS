@@ -2,67 +2,97 @@
 #define CACHESYSTEM_H
 
 #include <vector>
-#include "json/src/json.hpp"
+
 #include <glm/glm.hpp>
 
+#include "json/src/json.hpp"
+
+#include "FluidSystem/fluidsystem.h"
+
+
 using json = nlohmann::json;
+
+namespace glm {
+
+void to_json(json& j, const glm::vec3& v);
+
+void from_json(const json& j, glm::vec3& v);
+
+}
+
+
 
 class CacheSystem
 {
 public:
-    CacheSystem();
+    CacheSystem(const int _numFrames = 100);
     ~CacheSystem();
 
-    void CachePoints(const int _frame,
-                     const bool _append,
-                     const std::vector<glm::vec3> &_pos,
-                     const std::vector<glm::vec3> &_vel,
-                     const std::vector<float> &_illum,
-                     const std::vector<int> &_id);
+    void Cache(const int _frame,
+               std::shared_ptr<FluidSystem> _fluidSystem);
+
+    void Load(const int _frame,
+              std::shared_ptr<FluidSystem> _fluidSystem);
 
     void WriteCache(const int _frame = -1);
 
-    void ReadPoints(const int _frame,
-                    std::vector<glm::vec3> &_pos,
-                    std::vector<glm::vec3> &_vel,
-                    std::vector<float> &_illum,
-                    std::vector<int> &_id);
+    bool IsFrameCached(const int _frame);
 
+    void ClearCache(const int frame = -1);
 
 
 private:
-    void CacheGlmVec3(const int _frame, const bool _append, const std::string _id, const std::vector<glm::vec3> &_vec);
+    const struct DataId{
+        std::string pos = "p";
+        std::string vel = "v";
+        std::string particlId = "id";
+        std::string bioluminescentIntensoty = "bio";
+        std::string mass = "mass";
+        std::string radius = "radius";
 
-    template<typename T>
-    void CachePod(const int _frame, const bool _append, const std::string _id, const std::vector<T> &_vec);
+        std::string deltaTime = "dt";
+        std::string solveIterations = "solve iterations";
+        std::string gridRes = "grid res";
+        std::string cellWidth = "cell width";
+    } m_dataId;
+
+    void Cache(const int _frame,
+               const std::string &_object,
+               std::shared_ptr<FluidSystem> _fluidSystem);
+
+    void Cache(const int _frame,
+               const std::string &_object,
+               const std::shared_ptr<Fluid> _fluid);
+
+    void Cache(const int _frame,
+               const std::string &_object,
+               const std::shared_ptr<Algae> _algae);
+
+    void Cache(const int _frame,
+               const std::string &_object,
+               const std::shared_ptr<Rigid> _rigid);
+
+    void Load(const int _frame,
+               const std::string &_object,
+               std::shared_ptr<FluidSystem> _fluidSystem);
+
+    void Load(const int _frame,
+               const std::string &_object,
+               const std::shared_ptr<Fluid> _fluid);
+
+    void Load(const int _frame,
+               const std::string &_object,
+               const std::shared_ptr<Algae> _algae);
+
+    void Load(const int _frame,
+               const std::string &_object,
+               const std::shared_ptr<Rigid> _rigid);
 
 
     std::vector<json> m_cachedFrames;
 
 };
 
-
-//--------------------------------------------------------------------------------------------------------------------
-
-template<typename T>
-void CacheSystem::CachePod(const int _frame, const bool _append, const std::string _id, const std::vector<T> &_vec)
-{
-    if(_append)
-    {
-        for(auto &v : _vec)
-        {
-            m_cachedFrames[_frame][_id].push_back(json(v));
-        }
-    }
-    else
-    {
-        m_cachedFrames[_frame][_id] = json::array();
-        for(auto &v : _vec)
-        {
-            m_cachedFrames[_frame][_id].push_back(json(v));
-        }
-    }
-}
 
 
 #endif // CACHESYSTEM_H

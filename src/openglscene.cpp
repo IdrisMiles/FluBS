@@ -34,6 +34,7 @@ OpenGLScene::OpenGLScene(QWidget *parent) : QOpenGLWidget(parent),
 
 OpenGLScene::~OpenGLScene()
 {
+    m_cache.WriteCache();
     cleanup();
 }
 
@@ -311,6 +312,24 @@ void OpenGLScene::paintGL()
 
     //---------------------------------------------------------------------------------------
 
+}
+
+
+void OpenGLScene::OnFrameChanged(int frame)
+{
+    if(m_cache.IsFrameCached(frame))
+    {
+        m_cache.Load(frame, m_fluidSystem);
+        emit FrameLoaded(frame);
+    }
+    else
+    {
+        m_fluidSystem->StepSim();
+        emit FrameSimmed(frame);
+
+        m_cache.Cache(frame, m_fluidSystem);
+        emit FrameCached(frame);
+    }
 }
 
 void OpenGLScene::UpdateSim()

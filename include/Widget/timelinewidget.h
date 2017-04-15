@@ -19,9 +19,11 @@ public:
 
 public slots:
     void OnFrameChanged(int frame);
+    void OnFrameCached(int frame);
 
 signals:
     void FrameChanged(int);
+    void FrameCached(int);
 
 protected:
 

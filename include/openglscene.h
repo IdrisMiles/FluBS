@@ -13,10 +13,15 @@
 #include <QOpenGLFunctions>
 #include <QTimer>
 
+#include <Cache/cachesystem.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 
+
+
 #include "FluidSystem/fluidsystem.h"
+
 #include "Render/fluidrenderer.h"
 #include "Render/rigidrenderer.h"
 #include "Render/bioluminescentfluidrenderer.h"
@@ -48,6 +53,7 @@ public slots:
     void cleanup();
     void UpdateSim();
     void ResetSim();
+    void OnFrameChanged(int frame);
 
 signals:
     void xRotationChanged(int angle);
@@ -57,6 +63,9 @@ signals:
     void yTranslationChanged(int y);
     void zTranslationChanged(int z);
     void FluidInitialised(std::shared_ptr<FluidProperty> _fluidProperty);
+    void FrameCached(int frame);
+    void FrameSimmed(int frame);
+    void FrameLoaded(int frame);
 
 protected:
     void initializeGL() Q_DECL_OVERRIDE;
@@ -108,10 +117,14 @@ private:
     std::shared_ptr<FluidSystem> m_fluidSystem;
     Mesh m_activeRigidMesh;
 
+    // Rendering
     std::shared_ptr<BioluminescentFluidRenderer> m_bioRenderer;
     std::vector<std::shared_ptr<SphParticleRenderer>> m_sphRenderers;
 
     QTimer *m_drawTimer;
+
+    // simulation cache
+    CacheSystem m_cache;
 
 };
 

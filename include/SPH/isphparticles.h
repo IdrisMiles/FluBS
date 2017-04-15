@@ -23,7 +23,7 @@
 class BaseSphParticle
 {
 public:
-    BaseSphParticle();
+    BaseSphParticle(std::shared_ptr<SphParticleProperty> _property = nullptr);
     virtual ~BaseSphParticle();
 
     virtual void SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps);
@@ -80,9 +80,13 @@ public:
     QOpenGLBuffer &GetPressBO();
 
 
-    virtual void GetPositions(std::vector<glm::vec3> &_pos);
-    virtual void GetVelocities(std::vector<glm::vec3> &_vel);
-    virtual void GetParticleIds(std::vector<int> &_ids);
+    void GetPositions(std::vector<glm::vec3> &_pos);
+    void GetVelocities(std::vector<glm::vec3> &_vel);
+    void GetParticleIds(std::vector<int> &_ids);
+
+    void SetPositions(const std::vector<glm::vec3> &_pos);
+    void SetVelocities(const std::vector<glm::vec3> &_vel);
+    void SetParticleIds(const std::vector<int> &_ids);
 
 
 protected:

@@ -1,7 +1,8 @@
 #include "SPH/isphparticles.h"
+#include <assert.h>
 
-
-BaseSphParticle::BaseSphParticle():
+BaseSphParticle::BaseSphParticle(std::shared_ptr<SphParticleProperty> _property):
+    m_property(_property),
     m_init(false)
 {
 
@@ -409,6 +410,32 @@ void BaseSphParticle::GetVelocities(std::vector<glm::vec3> &_vel)
 //--------------------------------------------------------------------------------------------------------------------
 
 void BaseSphParticle::GetParticleIds(std::vector<int> &_ids)
+{
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void BaseSphParticle::SetPositions(const std::vector<glm::vec3> &_pos)
+{
+    assert(_pos.size() == m_property->numParticles);
+
+    cudaMemcpy(GetPositionPtr(), &_pos[0], m_property->numParticles * sizeof(float3), cudaMemcpyHostToDevice);
+    ReleasePositionPtr();
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void BaseSphParticle::SetVelocities(const std::vector<glm::vec3> &_vel)
+{
+    assert(_vel.size() == m_property->numParticles);
+
+    cudaMemcpy(GetVelocityPtr(), &_vel[0], m_property->numParticles * sizeof(float3), cudaMemcpyHostToDevice);
+    ReleaseVelocityPtr();
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void BaseSphParticle::SetParticleIds(const std::vector<int> &_ids)
 {
 }
 

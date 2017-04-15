@@ -30,7 +30,8 @@ MainWindow::MainWindow(QWidget *parent) :
     // setup openglscene widget
     connect(ui->scene, SIGNAL(FluidInitialised(std::shared_ptr<FluidProperty>)), this, SLOT(NewFluidInitialised(std::shared_ptr<FluidProperty>)));
     connect(m_fluidPropertWidget.get(), SIGNAL(ResetSim()), ui->scene, SLOT(ResetSim()));
-    connect(ui->timeline, &TimeLineWidget::FrameChanged, ui->scene, &OpenGLScene::UpdateSim);
+//    connect(ui->timeline, &TimeLineWidget::FrameChanged, ui->scene, &OpenGLScene::UpdateSim);
+    connect(ui->timeline, &TimeLineWidget::FrameChanged, ui->scene, &OpenGLScene::OnFrameChanged);
 
 }
 

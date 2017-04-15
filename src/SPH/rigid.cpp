@@ -1,7 +1,7 @@
 #include "SPH/rigid.h"
 
 Rigid::Rigid(std::shared_ptr<RigidProperty> _rigidProperty, Mesh _mesh):
-    BaseSphParticle()
+    BaseSphParticle(_rigidProperty)
 {
     m_property = _rigidProperty;
     m_mesh = _mesh;
@@ -196,37 +196,6 @@ RigidProperty *Rigid::GetProperty()
 }
 
 //--------------------------------------------------------------------------------------------------------------------
-
-void Rigid::GetPositions(std::vector<glm::vec3> &_pos)
-{
-    if(!m_init || this->m_property == nullptr)
-    {
-        return;
-    }
-
-    _pos.resize(this->m_property->numParticles);
-    checkCudaErrors(cudaMemcpy(&_pos[0], GetPositionPtr(), this->m_property->numParticles * sizeof(float3), cudaMemcpyDeviceToHost));
-    ReleasePositionPtr();
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void Rigid::GetVelocities(std::vector<glm::vec3> &_vel)
-{
-    if(!m_init || this->m_property == nullptr)
-    {
-        return;
-    }
-    _vel.resize(this->m_property->numParticles);
-    checkCudaErrors(cudaMemcpy(&_vel[0], GetVelocityPtr(), this->m_property->numParticles * sizeof(float3), cudaMemcpyDeviceToHost));
-    ReleaseVelocityPtr();
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void Rigid::GetParticleIds(std::vector<int> &_ids)
-{
-}
 
 //--------------------------------------------------------------------------------------------------------------------
 

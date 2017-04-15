@@ -100,3 +100,9 @@ void TimeLineWidget::OnFrameChanged(int frame)
 {
     emit FrameChanged(frame);
 }
+
+
+void TimeLineWidget::OnFrameCached(int frame)
+{
+
+}

@@ -21,11 +21,15 @@ public:
 
     void SetFrameRange(int start, int end);
 
+public slots:
+    void OnFrameCached(int frame);
+    void OnFrameCacheStale(int frame);
+
 
 protected:
 
 private:
-    std::vector<CacheState> frameCacheStates;
+    std::vector<CacheState> m_frameCacheStates;
 
 };
 

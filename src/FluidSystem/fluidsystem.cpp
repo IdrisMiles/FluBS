@@ -151,10 +151,46 @@ void FluidSystem::AddAlgae(std::shared_ptr<Algae> _algae)
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void FluidSystem::AddFluidSolverProperty(std::shared_ptr<FluidSolverProperty> _fluidSolverProperty)
+void FluidSystem::SetFluidSolverProperty(std::shared_ptr<FluidSolverProperty> _fluidSolverProperty)
 {
     m_fluidSolverProperty = _fluidSolverProperty;
 }
+
+//--------------------------------------------------------------------------------------------------------------------
+
+std::shared_ptr<FluidSolverProperty> FluidSystem::GetProperty()
+{
+    return m_fluidSolverProperty;
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+std::shared_ptr<Fluid> FluidSystem::GetFluid()
+{
+    return m_fluid;
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+std::shared_ptr<Algae> FluidSystem::GetAlgae()
+{
+    return m_algae;
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+std::vector<std::shared_ptr<Rigid>> FluidSystem::GetActiveRigids()
+{
+    return m_activeRigids;
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+std::vector<std::shared_ptr<Rigid>> FluidSystem::GetStaticRigids()
+{
+    return m_staticRigids;
+}
+
 
 //--------------------------------------------------------------------------------------------------------------------
 

@@ -5,6 +5,7 @@
 
 
 Algae::Algae(std::shared_ptr<AlgaeProperty> _property):
+    BaseSphParticle(_property),
     m_property(_property)
 {
     m_positionMapped = false;
@@ -286,35 +287,16 @@ QOpenGLBuffer &Algae::GetIllumBO()
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void Algae::GetPositions(std::vector<glm::vec3> &_pos)
+void Algae::GetBioluminescentIntensities(std::vector<float> &_bio)
 {
     if(!m_init || this->m_property == nullptr)
     {
         return;
     }
 
-    _pos.resize(this->m_property->numParticles);
-    checkCudaErrors(cudaMemcpy(&_pos[0], GetPositionPtr(), this->m_property->numParticles * sizeof(float3), cudaMemcpyDeviceToHost));
-    ReleasePositionPtr();
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void Algae::GetVelocities(std::vector<glm::vec3> &_vel)
-{
-    if(!m_init || this->m_property == nullptr)
-    {
-        return;
-    }
-    _vel.resize(this->m_property->numParticles);
-    checkCudaErrors(cudaMemcpy(&_vel[0], GetVelocityPtr(), this->m_property->numParticles * sizeof(float3), cudaMemcpyDeviceToHost));
-    ReleaseVelocityPtr();
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void Algae::GetParticleIds(std::vector<int> &_ids)
-{
+    _bio.resize(this->m_property->numParticles);
+    checkCudaErrors(cudaMemcpy(&_bio[0], GetIlluminationPtr(), this->m_property->numParticles * sizeof(float), cudaMemcpyDeviceToHost));
+    ReleaseIlluminationPtr();
 }
 
 //--------------------------------------------------------------------------------------------------------------------
