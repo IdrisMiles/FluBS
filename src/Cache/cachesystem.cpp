@@ -263,7 +263,11 @@ void CacheSystem::Load(const int _frame,
                        const std::string &_object,
                        std::shared_ptr<FluidSystem> _fluidSystem)
 {
-
+    auto props = _fluidSystem->GetProperty();
+    props->deltaTime        = m_cachedFrames[_frame][_object][m_dataId.deltaTime];
+    props->solveIterations  = m_cachedFrames[_frame][_object][m_dataId.solveIterations];
+    props->gridResolution   = m_cachedFrames[_frame][_object][m_dataId.gridRes];
+    props->gridCellWidth    = m_cachedFrames[_frame][_object][m_dataId.cellWidth];
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -297,7 +301,24 @@ void CacheSystem::Load(const int _frame,
                        const std::string &_object,
                        const std::shared_ptr<Algae> _algae)
 {
+    std::vector<glm::vec3> pos;
+    std::vector<glm::vec3> vel;
+    std::vector<int> id;
+    std::vector<float> bio;
+    auto props = _algae->GetProperty();
 
+    pos = m_cachedFrames[_frame][_object].at(m_dataId.pos).get<std::vector<glm::vec3>>();
+    vel = m_cachedFrames[_frame][_object].at(m_dataId.vel).get<std::vector<glm::vec3>>();
+    id = m_cachedFrames[_frame][_object].at(m_dataId.particlId).get<std::vector<int>>();
+    bio = m_cachedFrames[_frame][_object].at(m_dataId.bioluminescentIntensoty).get<std::vector<float>>();
+
+    props->particleMass = m_cachedFrames[_frame][_object][m_dataId.mass];
+    props->particleRadius = m_cachedFrames[_frame][_object][m_dataId.radius];
+
+    _algae->SetPositions(pos);
+    _algae->SetVelocities(vel);
+    _algae->SetParticleIds(id);
+//    _algae->SetParticleIds(bio);
 }
 
 //--------------------------------------------------------------------------------------------------------------------

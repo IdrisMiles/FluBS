@@ -38,6 +38,7 @@ public:
     QOpenGLBuffer &GetIllumBO();
 
     void GetBioluminescentIntensities(std::vector<float> &_bio);
+    void SetBioluminescentIntensities(const std::vector<float> &_bio);
 
 
 

@@ -301,3 +301,15 @@ void Algae::GetBioluminescentIntensities(std::vector<float> &_bio)
 
 //--------------------------------------------------------------------------------------------------------------------
 
+void Algae::SetBioluminescentIntensities(const std::vector<float> &_bio)
+{
+    assert(_bio.size() == m_property->numParticles);
+
+    cudaMemcpy(GetIlluminationPtr(), &_bio[0], m_property->numParticles * sizeof(float), cudaMemcpyHostToDevice);
+    ReleaseIlluminationPtr();
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+
+//--------------------------------------------------------------------------------------------------------------------
