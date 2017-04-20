@@ -31,11 +31,11 @@ public:
     QLabel *surfaceThresholdLabel;
     QLabel *viscosityLabel;
     QLabel *surfaceTensionLabel;
-    QDoubleSpinBox *doubleSpinBox;
-    QDoubleSpinBox *doubleSpinBox_2;
+    QDoubleSpinBox *viscosity;
+    QDoubleSpinBox *gasStiffness;
     QLabel *gasStiffnessLabel;
-    QDoubleSpinBox *doubleSpinBox_3;
-    QDoubleSpinBox *doubleSpinBox_4;
+    QDoubleSpinBox *surfaceTension;
+    QDoubleSpinBox *surfaceThreshold;
     QFrame *line;
     QSpacerItem *verticalSpacer;
 
@@ -64,30 +64,33 @@ public:
 
         gridLayout_2->addWidget(surfaceTensionLabel, 4, 0, 1, 1);
 
-        doubleSpinBox = new QDoubleSpinBox(layout);
-        doubleSpinBox->setObjectName(QStringLiteral("doubleSpinBox"));
+        viscosity = new QDoubleSpinBox(layout);
+        viscosity->setObjectName(QStringLiteral("viscosity"));
+        viscosity->setSingleStep(0.01);
 
-        gridLayout_2->addWidget(doubleSpinBox, 3, 1, 1, 1);
+        gridLayout_2->addWidget(viscosity, 3, 1, 1, 1);
 
-        doubleSpinBox_2 = new QDoubleSpinBox(layout);
-        doubleSpinBox_2->setObjectName(QStringLiteral("doubleSpinBox_2"));
+        gasStiffness = new QDoubleSpinBox(layout);
+        gasStiffness->setObjectName(QStringLiteral("gasStiffness"));
+        gasStiffness->setMaximum(1000);
 
-        gridLayout_2->addWidget(doubleSpinBox_2, 2, 1, 1, 1);
+        gridLayout_2->addWidget(gasStiffness, 2, 1, 1, 1);
 
         gasStiffnessLabel = new QLabel(layout);
         gasStiffnessLabel->setObjectName(QStringLiteral("gasStiffnessLabel"));
 
         gridLayout_2->addWidget(gasStiffnessLabel, 2, 0, 1, 1);
 
-        doubleSpinBox_3 = new QDoubleSpinBox(layout);
-        doubleSpinBox_3->setObjectName(QStringLiteral("doubleSpinBox_3"));
+        surfaceTension = new QDoubleSpinBox(layout);
+        surfaceTension->setObjectName(QStringLiteral("surfaceTension"));
+        surfaceTension->setSingleStep(0.01);
 
-        gridLayout_2->addWidget(doubleSpinBox_3, 4, 1, 1, 1);
+        gridLayout_2->addWidget(surfaceTension, 4, 1, 1, 1);
 
-        doubleSpinBox_4 = new QDoubleSpinBox(layout);
-        doubleSpinBox_4->setObjectName(QStringLiteral("doubleSpinBox_4"));
+        surfaceThreshold = new QDoubleSpinBox(layout);
+        surfaceThreshold->setObjectName(QStringLiteral("surfaceThreshold"));
 
-        gridLayout_2->addWidget(doubleSpinBox_4, 5, 1, 1, 1);
+        gridLayout_2->addWidget(surfaceThreshold, 5, 1, 1, 1);
 
         line = new QFrame(layout);
         line->setObjectName(QStringLiteral("line"));

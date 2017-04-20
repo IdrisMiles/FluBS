@@ -29,16 +29,44 @@
     </widget>
    </item>
    <item row="0" column="1">
-    <widget class="QSpinBox" name="numParticles"/>
+    <widget class="QSpinBox" name="numParticles">
+     <property name="maximum">
+      <number>1000000</number>
+     </property>
+     <property name="value">
+      <number>16000</number>
+     </property>
+    </widget>
    </item>
    <item row="4" column="1">
-    <widget class="QDoubleSpinBox" name="smoothingLength"/>
+    <widget class="QDoubleSpinBox" name="smoothingLength">
+     <property name="singleStep">
+      <double>0.010000000000000</double>
+     </property>
+     <property name="value">
+      <double>0.200000000000000</double>
+     </property>
+    </widget>
    </item>
    <item row="2" column="1">
-    <widget class="QDoubleSpinBox" name="particleRadius"/>
+    <widget class="QDoubleSpinBox" name="particleRadius">
+     <property name="singleStep">
+      <double>0.010000000000000</double>
+     </property>
+     <property name="value">
+      <double>0.200000000000000</double>
+     </property>
+    </widget>
    </item>
    <item row="3" column="1">
-    <widget class="QDoubleSpinBox" name="restDensity"/>
+    <widget class="QDoubleSpinBox" name="restDensity">
+     <property name="maximum">
+      <double>10000.000000000000000</double>
+     </property>
+     <property name="value">
+      <double>998.000000000000000</double>
+     </property>
+    </widget>
    </item>
    <item row="1" column="1">
     <widget class="QDoubleSpinBox" name="particleMass"/>

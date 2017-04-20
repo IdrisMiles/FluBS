@@ -248,7 +248,10 @@ void OpenGLScene::initializeGL()
     m_fluidSystem->AddRigid(m_staticRigid);
     m_fluidSystem->AddAlgae(m_algae);
 
+    emit FluidSystemInitialised(fluidSolverProps);
     emit FluidInitialised(fluidProps);
+    emit RigidInitialised(staticRigidProps);
+    emit AlgaeInitialised(algaeProps);
 
     m_fluidSystem->InitialiseSim();
 
@@ -319,7 +322,7 @@ void OpenGLScene::OnFrameChanged(int frame)
 {
     if(m_cache.IsFrameCached(frame))
     {
-        m_cache.Load(frame, m_fluidSystem);
+//        m_cache.Load(frame, m_fluidSystem);
         emit FrameLoaded(frame);
     }
     else

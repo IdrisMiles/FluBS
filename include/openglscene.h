@@ -62,7 +62,10 @@ signals:
     void xTranslationChanged(int x);
     void yTranslationChanged(int y);
     void zTranslationChanged(int z);
+    void FluidSystemInitialised(std::shared_ptr<FluidSolverProperty> _fluidSolverProperty);
     void FluidInitialised(std::shared_ptr<FluidProperty> _fluidProperty);
+    void RigidInitialised(std::shared_ptr<RigidProperty> _rigidProperty);
+    void AlgaeInitialised(std::shared_ptr<AlgaeProperty> _algarProperty);
     void FrameCached(int frame);
     void FrameSimmed(int frame);
     void FrameLoaded(int frame);

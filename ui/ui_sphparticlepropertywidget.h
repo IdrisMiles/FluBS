@@ -56,21 +56,29 @@ public:
 
         numParticles = new QSpinBox(SphParticlePropertyWidget);
         numParticles->setObjectName(QStringLiteral("numParticles"));
+        numParticles->setMaximum(1000000);
+        numParticles->setValue(16000);
 
         gridLayout->addWidget(numParticles, 0, 1, 1, 1);
 
         smoothingLength = new QDoubleSpinBox(SphParticlePropertyWidget);
         smoothingLength->setObjectName(QStringLiteral("smoothingLength"));
+        smoothingLength->setSingleStep(0.01);
+        smoothingLength->setValue(0.2);
 
         gridLayout->addWidget(smoothingLength, 4, 1, 1, 1);
 
         particleRadius = new QDoubleSpinBox(SphParticlePropertyWidget);
         particleRadius->setObjectName(QStringLiteral("particleRadius"));
+        particleRadius->setSingleStep(0.01);
+        particleRadius->setValue(0.2);
 
         gridLayout->addWidget(particleRadius, 2, 1, 1, 1);
 
         restDensity = new QDoubleSpinBox(SphParticlePropertyWidget);
         restDensity->setObjectName(QStringLiteral("restDensity"));
+        restDensity->setMaximum(10000);
+        restDensity->setValue(998);
 
         gridLayout->addWidget(restDensity, 3, 1, 1, 1);
 

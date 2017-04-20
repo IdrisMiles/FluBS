@@ -1,9 +1,10 @@
 #include "include/Widget/rigidpropertywidget.h"
 #include "ui_rigidpropertywidget.h"
 
-RigidPropertyWidget::RigidPropertyWidget(QWidget *parent) :
+RigidPropertyWidget::RigidPropertyWidget(QWidget *parent, std::shared_ptr<RigidProperty> _property) :
     SphParticlePropertyWidget(parent),
-    ui(new Ui::RigidPropertyWidget)
+    ui(new Ui::RigidPropertyWidget),
+    m_property(_property)
 {
     ui->setupUi(this);
 
@@ -12,6 +13,7 @@ RigidPropertyWidget::RigidPropertyWidget(QWidget *parent) :
 
 RigidPropertyWidget::~RigidPropertyWidget()
 {
+    m_property = nullptr;
     delete ui;
 }
 
@@ -24,4 +26,16 @@ void RigidPropertyWidget::SetProperty(std::shared_ptr<RigidProperty> _rigidPrope
 RigidProperty *RigidPropertyWidget::GetProperty()
 {
     return m_property.get();
+}
+
+//-----------------------------------------------------------------------------------------------------------
+
+void RigidPropertyWidget::OnPropertyChanged()
+{
+    if(m_property != nullptr)
+    {
+
+        emit PropertyChanged(m_property);
+    }
+
 }

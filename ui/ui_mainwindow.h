@@ -13,6 +13,7 @@
 #include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QFrame>
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QMainWindow>
@@ -21,6 +22,7 @@
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QToolBar>
+#include <QtWidgets/QTreeWidget>
 #include <QtWidgets/QWidget>
 #include "include/Widget/timelinewidget.h"
 #include "openglscene.h"
@@ -32,11 +34,14 @@ class Ui_MainWindow
 public:
     QWidget *centralWidget;
     QGridLayout *gridLayout;
-    OpenGLScene *scene;
     QSpacerItem *verticalSpacer;
     QSpacerItem *horizontalSpacer;
-    QTabWidget *properties;
+    OpenGLScene *scene;
     TimeLineWidget *timeline;
+    QFrame *propertyGroup;
+    QGridLayout *gridLayout_2;
+    QTabWidget *properties;
+    QTreeWidget *outliner;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -52,11 +57,6 @@ public:
         gridLayout->setSpacing(6);
         gridLayout->setContentsMargins(11, 11, 11, 11);
         gridLayout->setObjectName(QStringLiteral("gridLayout"));
-        scene = new OpenGLScene(centralWidget);
-        scene->setObjectName(QStringLiteral("scene"));
-
-        gridLayout->addWidget(scene, 0, 0, 1, 1);
-
         verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
         gridLayout->addItem(verticalSpacer, 1, 0, 1, 1);
@@ -65,18 +65,39 @@ public:
 
         gridLayout->addItem(horizontalSpacer, 0, 1, 1, 1);
 
-        properties = new QTabWidget(centralWidget);
-        properties->setObjectName(QStringLiteral("properties"));
-        properties->setTabPosition(QTabWidget::East);
+        scene = new OpenGLScene(centralWidget);
+        scene->setObjectName(QStringLiteral("scene"));
 
-        gridLayout->addWidget(properties, 0, 2, 1, 1);
+        gridLayout->addWidget(scene, 0, 0, 1, 1);
 
         timeline = new TimeLineWidget(centralWidget);
         timeline->setObjectName(QStringLiteral("timeline"));
         timeline->setFrameShape(QFrame::StyledPanel);
         timeline->setFrameShadow(QFrame::Raised);
 
-        gridLayout->addWidget(timeline, 2, 0, 1, 4);
+        gridLayout->addWidget(timeline, 2, 0, 1, 3);
+
+        propertyGroup = new QFrame(centralWidget);
+        propertyGroup->setObjectName(QStringLiteral("propertyGroup"));
+        propertyGroup->setFrameShape(QFrame::StyledPanel);
+        propertyGroup->setFrameShadow(QFrame::Raised);
+        gridLayout_2 = new QGridLayout(propertyGroup);
+        gridLayout_2->setSpacing(6);
+        gridLayout_2->setContentsMargins(11, 11, 11, 11);
+        gridLayout_2->setObjectName(QStringLiteral("gridLayout_2"));
+        properties = new QTabWidget(propertyGroup);
+        properties->setObjectName(QStringLiteral("properties"));
+        properties->setTabPosition(QTabWidget::East);
+
+        gridLayout_2->addWidget(properties, 1, 0, 1, 1);
+
+        outliner = new QTreeWidget(propertyGroup);
+        outliner->setObjectName(QStringLiteral("outliner"));
+
+        gridLayout_2->addWidget(outliner, 0, 0, 1, 1);
+
+
+        gridLayout->addWidget(propertyGroup, 0, 2, 1, 1);
 
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
@@ -101,6 +122,8 @@ public:
     void retranslateUi(QMainWindow *MainWindow)
     {
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "MainWindow", 0));
+        QTreeWidgetItem *___qtreewidgetitem = outliner->headerItem();
+        ___qtreewidgetitem->setText(0, QApplication::translate("MainWindow", "Scene Outliner", 0));
     } // retranslateUi
 
 };

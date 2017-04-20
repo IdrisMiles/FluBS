@@ -4,7 +4,7 @@
 
 // Qt includes
 #include <QMainWindow>
-#include "Widget/fluidpropertywidgetOld.h"
+#include "Widget/solverpropertywidget.h"
 #include "Widget/fluidpropertywidget.h"
 #include "Widget/algaepropertywidget.h"
 #include "Widget/rigidpropertywidget.h"
@@ -22,14 +22,13 @@ public:
     ~MainWindow();
 
 public slots:
-    void NewFluidInitialised(std::shared_ptr<FluidProperty> _fluidProperty);
+    void OnFluidSystemInitialised(std::shared_ptr<FluidSolverProperty> _fluidSolverProperty);
+    void OnFluidInitialised(std::shared_ptr<FluidProperty> _fluidProperty);
+    void OnRigidInitialised(std::shared_ptr<RigidProperty> _rigidProperty);
+    void OnAlgaeInitialised(std::shared_ptr<AlgaeProperty> _algaeProperty);
 
 private:
     Ui::MainWindow *ui;
-    std::shared_ptr<FluidPropertyWidgetOld> m_fluidPropertWidget;
-    FluidPropertyWidget *m_fpw;
-    AlgaePropertyWidget *m_apw;
-    RigidPropertyWidget *m_rpw;
 
 };
 

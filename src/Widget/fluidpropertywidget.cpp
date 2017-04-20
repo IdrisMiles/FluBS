@@ -1,6 +1,8 @@
 #include "include/Widget/fluidpropertywidget.h"
 #include "ui_fluidpropertywidget.h"
 
+//-----------------------------------------------------------------------------------------------------------
+
 FluidPropertyWidget::FluidPropertyWidget(QWidget *parent, std::shared_ptr<FluidProperty> _property) :
     SphParticlePropertyWidget(parent, _property),
     ui(new Ui::FluidPropertyWidget),
@@ -10,19 +12,55 @@ FluidPropertyWidget::FluidPropertyWidget(QWidget *parent, std::shared_ptr<FluidP
 
     AddWidgetToGridLayout(ui->layout, 0, 1, 2);
 
+    connect(ui->gasStiffness, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &FluidPropertyWidget::OnPropertyChanged);
+    connect(ui->viscosity, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &FluidPropertyWidget::OnPropertyChanged);
+    connect(ui->surfaceTension, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &FluidPropertyWidget::OnPropertyChanged);
+    connect(ui->surfaceThreshold, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &FluidPropertyWidget::OnPropertyChanged);
+
 }
+
+//-----------------------------------------------------------------------------------------------------------
 
 FluidPropertyWidget::~FluidPropertyWidget()
 {
+    m_property = nullptr;
     delete ui;
 }
 
-void FluidPropertyWidget::SetProperty(std::shared_ptr<FluidProperty> _fluidProperty)
+//-----------------------------------------------------------------------------------------------------------
+
+void FluidPropertyWidget::SetProperty(std::shared_ptr<FluidProperty> _property)
 {
-    m_property = _fluidProperty;
+    ui->surfaceTension->setValue((double)_property->surfaceTension);
+    ui->surfaceThreshold->setValue((double)_property->surfaceThreshold);
+    ui->viscosity->setValue((double)_property->viscosity);
+    ui->gasStiffness->setValue((double)_property->gasStiffness);
+
+    m_property = _property;
 }
+
+//-----------------------------------------------------------------------------------------------------------
 
 FluidProperty *FluidPropertyWidget::GetProperty()
 {
     return m_property.get();
+}
+
+//-----------------------------------------------------------------------------------------------------------
+
+void FluidPropertyWidget::OnPropertyChanged()
+{
+    if(m_property != nullptr)
+    {
+        m_property->surfaceTension = ui->surfaceTension->value();
+        m_property->surfaceThreshold = ui->surfaceThreshold->value();
+        m_property->viscosity = ui->viscosity->value();
+        m_property->gasStiffness = ui->gasStiffness->value();
+
+
+        float dia = 2.0f * m_property->particleRadius;
+        m_property->particleMass = m_property->restDensity * (dia * dia * dia);
+    }
+
+    emit PropertyChanged(m_property);
 }
