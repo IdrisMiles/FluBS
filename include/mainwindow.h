@@ -22,7 +22,7 @@ public:
     ~MainWindow();
 
 public slots:
-    void OnFluidSystemInitialised(std::shared_ptr<FluidSolverProperty> _fluidSolverProperty);
+    void OnFluidSystemInitialised(std::shared_ptr<FluidSystem> _fluidSystem);
     void OnFluidInitialised(std::shared_ptr<FluidProperty> _fluidProperty);
     void OnRigidInitialised(std::shared_ptr<RigidProperty> _rigidProperty);
     void OnAlgaeInitialised(std::shared_ptr<AlgaeProperty> _algaeProperty);

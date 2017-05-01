@@ -20,6 +20,7 @@ Fluid::Fluid(std::shared_ptr<FluidProperty> _fluidProperty):
 //--------------------------------------------------------------------------------------------------------------------
 
 Fluid::Fluid(std::shared_ptr<FluidProperty> _fluidProperty, Mesh _mesh):
+    BaseSphParticle(_fluidProperty),
     m_property(_fluidProperty)
 {
     m_mesh = _mesh;
@@ -39,17 +40,29 @@ Fluid::Fluid(std::shared_ptr<FluidProperty> _fluidProperty, Mesh _mesh):
 Fluid::~Fluid()
 {
     m_property = nullptr;
-    CleanUpGL();
-    CleanUpCUDAMemory();
+
+    CleanUp();
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
 void Fluid::SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps)
 {
+    if(m_setupSolveSpecsInit)
+    {
+        checkCudaErrorsMsg(cudaFree(d_cellOccupancyPtr), "Free cell occ memory in setupSolverSpecs");
+        checkCudaErrorsMsg(cudaFree(d_cellParticleIdxPtr), "Free cell particle Idx memory in setupSolverSpecs");
+
+        m_setupSolveSpecsInit = false;
+    }
+
     const uint numCells = _solverProps->gridResolution * _solverProps->gridResolution * _solverProps->gridResolution;
-    cudaMalloc(&d_cellOccupancyPtr, numCells * sizeof(unsigned int));
-    cudaMalloc(&d_cellParticleIdxPtr, numCells * sizeof(unsigned int));
+    checkCudaErrorsMsg(cudaMalloc(&d_cellOccupancyPtr, numCells * sizeof(unsigned int)), "Allocate cell Occ memory in setupSolverSpecs");
+    checkCudaErrorsMsg(cudaMalloc(&d_cellParticleIdxPtr, numCells * sizeof(unsigned int)), "Allcoate cell particle Idx memory in setupSolverSpecs");
+
+
+    getLastCudaError("SetUpSolveSpecs");
+    m_setupSolveSpecsInit = true;
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -77,25 +90,25 @@ void Fluid::InitCUDAMemory()
 {
 
     // particle properties
-    cudaGraphicsGLRegisterBuffer(&m_posBO_CUDA, m_posBO.bufferId(),cudaGraphicsMapFlagsNone);
-    cudaGraphicsGLRegisterBuffer(&m_velBO_CUDA, m_velBO.bufferId(),cudaGraphicsMapFlagsNone);
-    cudaGraphicsGLRegisterBuffer(&m_denBO_CUDA, m_denBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
-    cudaGraphicsGLRegisterBuffer(&m_massBO_CUDA, m_massBO.bufferId(),cudaGraphicsMapFlagsReadOnly);
-    cudaGraphicsGLRegisterBuffer(&m_pressBO_CUDA, m_pressBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
+    checkCudaErrorsMsg(cudaGraphicsGLRegisterBuffer(&m_posBO_CUDA, m_posBO.bufferId(),cudaGraphicsMapFlagsNone),"");
+    checkCudaErrorsMsg(cudaGraphicsGLRegisterBuffer(&m_velBO_CUDA, m_velBO.bufferId(),cudaGraphicsMapFlagsNone),"");
+    checkCudaErrorsMsg(cudaGraphicsGLRegisterBuffer(&m_denBO_CUDA, m_denBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard),"");
+    checkCudaErrorsMsg(cudaGraphicsGLRegisterBuffer(&m_massBO_CUDA, m_massBO.bufferId(),cudaGraphicsMapFlagsReadOnly),"");
+    checkCudaErrorsMsg(cudaGraphicsGLRegisterBuffer(&m_pressBO_CUDA, m_pressBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard),"");
 
     // particle forces
-    cudaMalloc(&d_pressureForcePtr, m_property->numParticles * sizeof(float3));
-    cudaMalloc(&d_viscousForcePtr, m_property->numParticles * sizeof(float3));
-    cudaMalloc(&d_surfaceTensionForcePtr, m_property->numParticles * sizeof(float3));
-    cudaMalloc(&d_gravityForcePtr, m_property->numParticles * sizeof(float3));
-    cudaMalloc(&d_externalForcePtr, m_property->numParticles * sizeof(float3));
-    cudaMalloc(&d_totalForcePtr, m_property->numParticles * sizeof(float3));
-    cudaMalloc(&d_predictPositionPtr, m_property->numParticles * sizeof(float3));
-    cudaMalloc(&d_predictVelocityPtr, m_property->numParticles * sizeof(float3));
-    cudaMalloc(&d_densityErrPtr, m_property->numParticles * sizeof(float));
+    checkCudaErrorsMsg(cudaMalloc(&d_pressureForcePtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_viscousForcePtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_surfaceTensionForcePtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_gravityForcePtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_externalForcePtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_totalForcePtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_predictPositionPtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_predictVelocityPtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_densityErrPtr, m_property->numParticles * sizeof(float)),"");
 
     // particle hash
-    cudaMalloc(&d_particleHashIdPtr, m_property->numParticles * sizeof(unsigned int));
+    checkCudaErrorsMsg(cudaMalloc(&d_particleHashIdPtr, m_property->numParticles * sizeof(unsigned int)),"");
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -149,7 +162,7 @@ void Fluid::InitVAO()
 void Fluid::InitFluidAsMesh()
 {
     GetPositionPtr();
-    cudaMemcpy(d_positionPtr, &m_mesh.verts[0], m_property->numParticles * sizeof(float3), cudaMemcpyHostToDevice);
+    checkCudaErrorsMsg(cudaMemcpy(d_positionPtr, &m_mesh.verts[0], m_property->numParticles * sizeof(float3), cudaMemcpyHostToDevice),"");
     ReleaseCudaGLResources();
 }
 
@@ -157,36 +170,36 @@ void Fluid::InitFluidAsMesh()
 
 void Fluid::CleanUpCUDAMemory()
 {
-    cudaFree(d_viscousForcePtr);
-    cudaFree(d_surfaceTensionForcePtr);
-    cudaFree(d_gravityForcePtr);
-    cudaFree(d_externalForcePtr);
-    cudaFree(d_totalForcePtr);
-    cudaFree(d_particleHashIdPtr);
-    cudaFree(d_cellOccupancyPtr);
-    cudaFree(d_cellParticleIdxPtr);
-    cudaFree(d_predictPositionPtr);
-    cudaFree(d_predictVelocityPtr);
-    cudaFree(d_densityErrPtr);
+    checkCudaErrorsMsg(cudaFree(d_viscousForcePtr),"");
+    checkCudaErrorsMsg(cudaFree(d_surfaceTensionForcePtr),"");
+    checkCudaErrorsMsg(cudaFree(d_gravityForcePtr),"");
+    checkCudaErrorsMsg(cudaFree(d_externalForcePtr),"");
+    checkCudaErrorsMsg(cudaFree(d_totalForcePtr),"");
+    checkCudaErrorsMsg(cudaFree(d_particleHashIdPtr),"");
+    checkCudaErrorsMsg(cudaFree(d_cellOccupancyPtr),"");
+    checkCudaErrorsMsg(cudaFree(d_cellParticleIdxPtr),"");
+    checkCudaErrorsMsg(cudaFree(d_predictPositionPtr),"");
+    checkCudaErrorsMsg(cudaFree(d_predictVelocityPtr),"");
+    checkCudaErrorsMsg(cudaFree(d_densityErrPtr),"");
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
 void Fluid::CleanUpGL()
 {
-    cudaGraphicsUnregisterResource(m_posBO_CUDA);
+    checkCudaErrorsMsg(cudaGraphicsUnregisterResource(m_posBO_CUDA),"");
     m_posBO.destroy();
 
-    cudaGraphicsUnregisterResource(m_velBO_CUDA);
+    checkCudaErrorsMsg(cudaGraphicsUnregisterResource(m_velBO_CUDA),"");
     m_velBO.destroy();
 
-    cudaGraphicsUnregisterResource(m_denBO_CUDA);
+    checkCudaErrorsMsg(cudaGraphicsUnregisterResource(m_denBO_CUDA),"");
     m_denBO.destroy();
 
-    cudaGraphicsUnregisterResource(m_massBO_CUDA);
+    checkCudaErrorsMsg(cudaGraphicsUnregisterResource(m_massBO_CUDA),"");
     m_massBO.destroy();
 
-    cudaGraphicsUnregisterResource(m_pressBO_CUDA);
+    checkCudaErrorsMsg(cudaGraphicsUnregisterResource(m_pressBO_CUDA),"");
     m_pressBO.destroy();
 }
 
@@ -247,6 +260,64 @@ float *Fluid::GetDensityErrPtr()
     return d_densityErrPtr;
 }
 
+
 //--------------------------------------------------------------------------------------------------------------------
+
+void Fluid::GetPositions(std::vector<glm::vec3> &_pos)
+{
+    if(!m_init || this->m_property == nullptr)
+    {
+        return;
+    }
+
+    _pos.resize(this->m_property->numParticles);
+    checkCudaErrors(cudaMemcpy(&_pos[0], GetPositionPtr(), m_property->numParticles * sizeof(float3), cudaMemcpyDeviceToHost));
+    ReleasePositionPtr();
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void Fluid::GetVelocities(std::vector<glm::vec3> &_vel)
+{
+    if(!m_init || this->m_property == nullptr)
+    {
+        return;
+    }
+    _vel.resize(this->m_property->numParticles);
+    checkCudaErrors(cudaMemcpy(&_vel[0], GetVelocityPtr(), m_property->numParticles * sizeof(float3), cudaMemcpyDeviceToHost));
+    ReleaseVelocityPtr();
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void Fluid::GetParticleIds(std::vector<int> &_ids)
+{
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void Fluid::SetPositions(const std::vector<glm::vec3> &_pos)
+{
+    assert(_pos.size() == m_property->numParticles);
+
+    cudaMemcpy(GetPositionPtr(), &_pos[0], m_property->numParticles * sizeof(float3), cudaMemcpyHostToDevice);
+    ReleasePositionPtr();
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void Fluid::SetVelocities(const std::vector<glm::vec3> &_vel)
+{
+    assert(_vel.size() == m_property->numParticles);
+
+    cudaMemcpy(GetVelocityPtr(), &_vel[0], m_property->numParticles * sizeof(float3), cudaMemcpyHostToDevice);
+    ReleaseVelocityPtr();
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void Fluid::SetParticleIds(const std::vector<int> &_ids)
+{
+}
 
 //--------------------------------------------------------------------------------------------------------------------

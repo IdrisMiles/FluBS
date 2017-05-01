@@ -76,6 +76,11 @@ public:
 
         deltaTime = new QDoubleSpinBox(SolverPropertyWidget);
         deltaTime->setObjectName(QStringLiteral("deltaTime"));
+        deltaTime->setDecimals(5);
+        deltaTime->setMinimum(0.001);
+        deltaTime->setMaximum(1);
+        deltaTime->setSingleStep(0.0001);
+        deltaTime->setValue(0.005);
 
         gridLayout->addWidget(deltaTime, 3, 1, 1, 1);
 

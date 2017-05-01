@@ -52,6 +52,17 @@ signals:
     /// @brief Qt Signal to communicate that the FluidProperty has changed to other classes
     void PropertyChanged(std::shared_ptr<SphParticleProperty> _property);
 
+protected:
+    void SetNumParticles(const int _numParticles);
+    void SetParticleMass(const float _particlesMass);
+    void SetParticleRadius(const float _particlesRadius);
+    void SetRestDensity(const float _restDensity);
+
+    int GetNumParticles();
+    float GetParticleMass();
+    float GetParticleRadius();
+    float GetRestDensity();
+
 private:
     Ui::SphParticlePropertyWidget *ui;
     int m_numRow;

@@ -17,7 +17,7 @@ public:
                   bool _kinematic = false):
         SphParticleProperty(_numParticles, _particleMass, _particleRadius, _restDensity, _smoothingLength, _gravity),
         m_static(_static),
-        m_kinematic(_kinematic)
+        kinematic(_kinematic)
     {
 
         float dia = 2.0f * particleRadius;
@@ -27,7 +27,7 @@ public:
     ~RigidProperty(){}
 
     bool m_static;
-    bool m_kinematic;
+    bool kinematic;
 };
 
 

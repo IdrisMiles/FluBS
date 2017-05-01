@@ -248,7 +248,7 @@ void OpenGLScene::initializeGL()
     m_fluidSystem->AddRigid(m_staticRigid);
     m_fluidSystem->AddAlgae(m_algae);
 
-    emit FluidSystemInitialised(fluidSolverProps);
+    emit FluidSystemInitialised(m_fluidSystem);
     emit FluidInitialised(fluidProps);
     emit RigidInitialised(staticRigidProps);
     emit AlgaeInitialised(algaeProps);

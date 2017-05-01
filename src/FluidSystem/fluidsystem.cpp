@@ -153,7 +153,34 @@ void FluidSystem::AddAlgae(std::shared_ptr<Algae> _algae)
 
 void FluidSystem::SetFluidSolverProperty(std::shared_ptr<FluidSolverProperty> _fluidSolverProperty)
 {
+    std::cout<<"FluidSystem Set solver props\n";
     m_fluidSolverProperty = _fluidSolverProperty;
+
+
+    if(m_container != nullptr)
+    {
+        m_container->SetupSolveSpecs(m_fluidSolverProperty);
+    }
+
+    if(m_fluid != nullptr)
+    {
+        m_fluid->SetupSolveSpecs(m_fluidSolverProperty);
+    }
+
+    if(m_algae != nullptr)
+    {
+        m_algae->SetupSolveSpecs(m_fluidSolverProperty);
+    }
+
+    for(auto &r : m_activeRigids)
+    {
+        r->SetupSolveSpecs(m_fluidSolverProperty);
+    }
+
+    for(auto &r : m_staticRigids)
+    {
+        r->SetupSolveSpecs(m_fluidSolverProperty);
+    }
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -242,127 +269,94 @@ void FluidSystem::StepSim()
     }
 
 
-    //----------------------------------------------------------------------
-    // Call sph API to do funky stuff here
+    for(int i=0; i<m_fluidSolverProperty->solveIterations; i++)
+    {
+        //----------------------------------------------------------------------
+        // Call sph API to do funky stuff here
 
-    sph::ResetProperties(m_fluidSolverProperty, m_fluid, m_algae, m_activeRigids);
-    cudaThreadSynchronize();
-
-
-    //----------------------------------------------------------------------
-
-    sph::ComputeHash(m_fluidSolverProperty, m_fluid);
-    sph::ComputeHash(m_fluidSolverProperty, m_algae);
-    sph::ComputeHash(m_fluidSolverProperty, m_activeRigids);
-    cudaThreadSynchronize();
-
-    sph::SortParticlesByHash(m_fluid);
-    sph::SortParticlesByHash(m_algae);
-    sph::SortParticlesByHash(m_activeRigids);
-
-    sph::ComputeParticleScatterIds(m_fluidSolverProperty, m_fluid);
-    sph::ComputeParticleScatterIds(m_fluidSolverProperty, m_algae);
-    sph::ComputeParticleScatterIds(m_fluidSolverProperty, m_activeRigids);
-
-    uint maxCellOcc;
-    sph::ComputeMaxCellOccupancy(m_fluidSolverProperty, m_fluid, maxCellOcc);
-    sph::ComputeMaxCellOccupancy(m_fluidSolverProperty, m_algae, maxCellOcc);
-    sph::ComputeMaxCellOccupancy(m_fluidSolverProperty, m_activeRigids, maxCellOcc);
-    cudaThreadSynchronize();
+        sph::ResetProperties(m_fluidSolverProperty, m_fluid, m_algae, m_activeRigids);
+        cudaThreadSynchronize();
+        getLastCudaError("sph::ResetProperties");
 
 
-    //----------------------------------------------------------------------
+        //----------------------------------------------------------------------
 
-    sph::ComputeParticleVolume(m_fluidSolverProperty, m_activeRigids);
-    sph::ComputeDensity(m_fluidSolverProperty, m_fluid, true, m_container, m_staticRigids, m_activeRigids);
-    cudaThreadSynchronize();
+        sph::ComputeHash(m_fluidSolverProperty, m_fluid);
+        sph::ComputeHash(m_fluidSolverProperty, m_algae);
+        sph::ComputeHash(m_fluidSolverProperty, m_activeRigids);
+        cudaThreadSynchronize();
+        getLastCudaError("sph::ComputeHash");
 
-    sph::ComputePressure(m_fluidSolverProperty, m_fluid);
-    cudaThreadSynchronize();
-    sph::ComputePressure(m_fluidSolverProperty, m_algae, m_fluid);
+        sph::SortParticlesByHash(m_fluid);
+        sph::SortParticlesByHash(m_algae);
+        sph::SortParticlesByHash(m_activeRigids);
 
+        sph::ComputeParticleScatterIds(m_fluidSolverProperty, m_fluid);
+        sph::ComputeParticleScatterIds(m_fluidSolverProperty, m_algae);
+        sph::ComputeParticleScatterIds(m_fluidSolverProperty, m_activeRigids);
 
-    //----------------------------------------------------------------------
-
-    sph::ComputePressureForce(m_fluidSolverProperty, m_fluid, true, m_container, m_staticRigids, m_activeRigids);
-    sph::ComputeViscForce(m_fluidSolverProperty, m_fluid);
-    sph::ComputeSurfaceTensionForce(m_fluidSolverProperty, m_fluid);
-    cudaThreadSynchronize();
-
-    sph::ComputeTotalForce(m_fluidSolverProperty, m_fluid);
-    cudaThreadSynchronize();
-
-
-    //----------------------------------------------------------------------
-
-//    sph::ComputeAdvectionForce(m_fluidSolverProperty, m_algae, m_fluid, true);
-    sph::AdvectParticle(m_fluidSolverProperty, m_algae, m_fluid);
-    sph::ComputeBioluminescence(m_fluidSolverProperty, m_algae);
-    cudaThreadSynchronize();
+        uint maxCellOcc;
+        sph::ComputeMaxCellOccupancy(m_fluidSolverProperty, m_fluid, maxCellOcc);
+        sph::ComputeMaxCellOccupancy(m_fluidSolverProperty, m_algae, maxCellOcc);
+        sph::ComputeMaxCellOccupancy(m_fluidSolverProperty, m_activeRigids, maxCellOcc);
+        cudaThreadSynchronize();
+        getLastCudaError("sph::ComputeMaxCellOccupancy");
 
 
-    //----------------------------------------------------------------------
+        //----------------------------------------------------------------------
 
-    sph::Integrate(m_fluidSolverProperty, m_algae);
-    sph::Integrate(m_fluidSolverProperty, m_fluid);
-    cudaThreadSynchronize();
+        sph::ComputeParticleVolume(m_fluidSolverProperty, m_activeRigids);
+        getLastCudaError("sph::ComputeParticleVolume");
+        sph::ComputeDensity(m_fluidSolverProperty, m_fluid, true, m_container, m_staticRigids, m_activeRigids);
+        cudaThreadSynchronize();
+        getLastCudaError("sph::ComputeDensity");
 
-
-    // Handle boundaries - In theory don't need to do this anymore
-    sph::HandleBoundaries(m_fluidSolverProperty, m_algae);
-//    sph::HandleBoundaries(m_fluidSolverProperty, m_fluid);
-    cudaThreadSynchronize();
-
-
-
+        sph::ComputePressure(m_fluidSolverProperty, m_fluid);
+        cudaThreadSynchronize();
+        sph::ComputePressure(m_fluidSolverProperty, m_algae, m_fluid);
+        getLastCudaError("sph::Compute Pressure");
 
 
-    //----------------------------------------------------------------------
+        //----------------------------------------------------------------------
 
-//    sph::ResetProperties(m_fluidSolverProperty, m_fluid);
-//    cudaThreadSynchronize();
+        sph::ComputePressureForce(m_fluidSolverProperty, m_fluid, true, m_container, m_staticRigids, m_activeRigids);
+        sph::ComputeViscForce(m_fluidSolverProperty, m_fluid);
+        sph::ComputeSurfaceTensionForce(m_fluidSolverProperty, m_fluid);
+        cudaThreadSynchronize();
+        getLastCudaError("Compute Forces");
 
-//    sph::ComputeHash(m_fluidSolverProperty, m_fluid);
-//    cudaThreadSynchronize();
+        sph::ComputeTotalForce(m_fluidSolverProperty, m_fluid);
+        cudaThreadSynchronize();
+        getLastCudaError("Compute Total Force");
 
-//    sph::SortParticlesByHash(m_fluid);
 
-//    sph::ComputeParticleScatterIds(m_fluidSolverProperty, m_fluid);
+        //----------------------------------------------------------------------
 
-//    sph::ComputeMaxCellOccupancy(m_fluidSolverProperty, m_fluid, maxCellOcc);
-//    cudaThreadSynchronize();
+    //    sph::ComputeAdvectionForce(m_fluidSolverProperty, m_algae, m_fluid, true);
+        sph::AdvectParticle(m_fluidSolverProperty, m_algae, m_fluid);
+        sph::ComputeBioluminescence(m_fluidSolverProperty, m_algae);
+        cudaThreadSynchronize();
+        getLastCudaError("Compute Algae stuff");
 
-//    for(int i=0;i<3;i++)
-//    {
-//    sph::ResetTotalForce(m_fluidSolverProperty, m_fluid);
 
-//    sph::ComputeDensity(m_fluidSolverProperty, m_fluid);
-//    sph::ComputeDensity(m_fluid, m_container, m_fluidSolverProperty, true);
-//    for(auto &&r : m_staticRigids)
-//    {
-//        sph::ComputeDensity(m_fluid, r, m_fluidSolverProperty, true);
-//    }
-//    cudaThreadSynchronize();
+        //----------------------------------------------------------------------
 
-//    sph::ComputePressure(m_fluidSolverProperty, m_fluid);
-//    cudaThreadSynchronize();
+        sph::Integrate(m_fluidSolverProperty, m_algae);
+        sph::Integrate(m_fluidSolverProperty, m_fluid);
+        cudaThreadSynchronize();
+        getLastCudaError("Integrate");
 
-//    sph::ComputePressureForce(m_fluidSolverProperty, m_fluid);
-//    sph::ComputePressureForce(m_fluid, m_container, m_fluidSolverProperty, true);
-//    for(auto &&r : m_staticRigids)
-//    {
-//        sph::ComputePressureForce(m_fluid, r, m_fluidSolverProperty, true);
-//    }
-//    cudaThreadSynchronize();
 
-//    sph::ComputeTotalForce(m_fluidSolverProperty, m_fluid, true, false, false, false, false);
-//    cudaThreadSynchronize();
+        // Handle boundaries - In theory don't need to do this anymore
+        sph::HandleBoundaries(m_fluidSolverProperty, m_algae);
+    //    sph::HandleBoundaries(m_fluidSolverProperty, m_fluid);
+        cudaThreadSynchronize();
+        getLastCudaError("Handle Boundaries");
 
-//    sph::Integrate(m_fluidSolverProperty, m_fluid);
-//    cudaThreadSynchronize();
-//    }
+        //----------------------------------------------------------------------
 
-    //----------------------------------------------------------------------
+    }
+
 
     // Clean up
     m_fluid->ReleaseCudaGLResources();

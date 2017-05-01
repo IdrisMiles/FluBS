@@ -9,6 +9,7 @@
 
 #include <memory>
 
+#include "FluidSystem/fluidsystem.h"
 #include "FluidSystem/fluidsolverproperty.h"
 
 

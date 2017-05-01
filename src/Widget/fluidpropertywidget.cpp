@@ -12,10 +12,15 @@ FluidPropertyWidget::FluidPropertyWidget(QWidget *parent, std::shared_ptr<FluidP
 
     AddWidgetToGridLayout(ui->layout, 0, 1, 2);
 
+    SetProperty(_property);
+
+
+
     connect(ui->gasStiffness, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &FluidPropertyWidget::OnPropertyChanged);
     connect(ui->viscosity, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &FluidPropertyWidget::OnPropertyChanged);
     connect(ui->surfaceTension, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &FluidPropertyWidget::OnPropertyChanged);
     connect(ui->surfaceThreshold, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &FluidPropertyWidget::OnPropertyChanged);
+
 
 }
 
@@ -31,12 +36,20 @@ FluidPropertyWidget::~FluidPropertyWidget()
 
 void FluidPropertyWidget::SetProperty(std::shared_ptr<FluidProperty> _property)
 {
-    ui->surfaceTension->setValue((double)_property->surfaceTension);
-    ui->surfaceThreshold->setValue((double)_property->surfaceThreshold);
-    ui->viscosity->setValue((double)_property->viscosity);
-    ui->gasStiffness->setValue((double)_property->gasStiffness);
+    if(_property != nullptr)
+    {
+        SetNumParticles(_property->numParticles);
+        SetParticleMass(_property->particleMass);
+        SetParticleRadius(_property->particleRadius);
+        SetRestDensity(_property->restDensity);
 
-    m_property = _property;
+        ui->surfaceTension->setValue((double)_property->surfaceTension);
+        ui->surfaceThreshold->setValue((double)_property->surfaceThreshold);
+        ui->viscosity->setValue((double)_property->viscosity);
+        ui->gasStiffness->setValue((double)_property->gasStiffness);
+
+        m_property = _property;
+    }
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -50,8 +63,19 @@ FluidProperty *FluidPropertyWidget::GetProperty()
 
 void FluidPropertyWidget::OnPropertyChanged()
 {
+    if(m_property == nullptr)
+    {
+        m_property = std::shared_ptr<FluidProperty>(new FluidProperty());
+    }
+
     if(m_property != nullptr)
     {
+
+        m_property->numParticles = GetNumParticles();
+        m_property->particleMass = GetParticleMass();
+        m_property->particleRadius = GetParticleRadius();
+        m_property->restDensity = GetRestDensity();
+
         m_property->surfaceTension = ui->surfaceTension->value();
         m_property->surfaceThreshold = ui->surfaceThreshold->value();
         m_property->viscosity = ui->viscosity->value();

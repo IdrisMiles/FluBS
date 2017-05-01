@@ -41,17 +41,26 @@ Algae::Algae(std::shared_ptr<AlgaeProperty> _property, Mesh _mesh):
 Algae::~Algae()
 {
     m_property = nullptr;
-    CleanUpGL();
-    CleanUpCUDAMemory();
+    CleanUp();
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
 void Algae::SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps)
 {
+    if(m_setupSolveSpecsInit)
+    {
+        checkCudaErrorsMsg(cudaFree(d_cellOccupancyPtr),"");
+        checkCudaErrorsMsg(cudaFree(d_cellParticleIdxPtr),"");
+
+        m_setupSolveSpecsInit = false;
+    }
+
     const uint numCells = _solverProps->gridResolution * _solverProps->gridResolution * _solverProps->gridResolution;
-    cudaMalloc(&d_cellOccupancyPtr, numCells * sizeof(unsigned int));
-    cudaMalloc(&d_cellParticleIdxPtr, numCells * sizeof(unsigned int));
+    checkCudaErrorsMsg(cudaMalloc(&d_cellOccupancyPtr, numCells * sizeof(unsigned int)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_cellParticleIdxPtr, numCells * sizeof(unsigned int)),"");
+
+    m_setupSolveSpecsInit = true;
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -308,6 +317,67 @@ void Algae::SetBioluminescentIntensities(const std::vector<float> &_bio)
     cudaMemcpy(GetIlluminationPtr(), &_bio[0], m_property->numParticles * sizeof(float), cudaMemcpyHostToDevice);
     ReleaseIlluminationPtr();
 }
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void Algae::GetPositions(std::vector<glm::vec3> &_pos)
+{
+    if(!m_init || this->m_property == nullptr)
+    {
+        return;
+    }
+
+    _pos.resize(this->m_property->numParticles);
+    checkCudaErrors(cudaMemcpy(&_pos[0], GetPositionPtr(), this->m_property->numParticles * sizeof(float3), cudaMemcpyDeviceToHost));
+    ReleasePositionPtr();
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void Algae::GetVelocities(std::vector<glm::vec3> &_vel)
+{
+    if(!m_init || this->m_property == nullptr)
+    {
+        return;
+    }
+    _vel.resize(this->m_property->numParticles);
+    checkCudaErrors(cudaMemcpy(&_vel[0], GetVelocityPtr(), this->m_property->numParticles * sizeof(float3), cudaMemcpyDeviceToHost));
+    ReleaseVelocityPtr();
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void Algae::GetParticleIds(std::vector<int> &_ids)
+{
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void Algae::SetPositions(const std::vector<glm::vec3> &_pos)
+{
+    assert(_pos.size() == m_property->numParticles);
+
+    cudaMemcpy(GetPositionPtr(), &_pos[0], m_property->numParticles * sizeof(float3), cudaMemcpyHostToDevice);
+    ReleasePositionPtr();
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void Algae::SetVelocities(const std::vector<glm::vec3> &_vel)
+{
+    assert(_vel.size() == m_property->numParticles);
+
+    cudaMemcpy(GetVelocityPtr(), &_vel[0], m_property->numParticles * sizeof(float3), cudaMemcpyHostToDevice);
+    ReleaseVelocityPtr();
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void Algae::SetParticleIds(const std::vector<int> &_ids)
+{
+}
+
+//--------------------------------------------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------------------------------------------
 

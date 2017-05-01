@@ -625,7 +625,7 @@ void sph::Integrate(std::shared_ptr<FluidSolverProperty> _solverProps,
                       _particles->GetTotalForcePtr(),
                       _particles->GetPositionPtr(),
                       _particles->GetVelocityPtr(),
-                      _solverProps->deltaTime,
+                      _solverProps->deltaTime/_solverProps->solveIterations,
                       fluidProps->numParticles);
 }
 
@@ -697,7 +697,7 @@ void sph::AdvectParticle(std::shared_ptr<FluidSolverProperty> _solverProps,
                            _advector->GetCellParticleIdxPtr(),
                            particleProps->numParticles,
                            particleProps->smoothingLength,
-                           _solverProps->deltaTime);
+                           _solverProps->deltaTime/_solverProps->solveIterations);
 }
 
 //--------------------------------------------------------------------------------------------------------------------

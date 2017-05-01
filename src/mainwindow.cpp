@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     // setup openglscene widget
-    connect(ui->scene, SIGNAL(FluidSystemInitialised(std::shared_ptr<FluidSolverProperty>)), this, SLOT(OnFluidSystemInitialised(std::shared_ptr<FluidSolverProperty>)));
+    connect(ui->scene, SIGNAL(FluidSystemInitialised(std::shared_ptr<FluidSystem>)), this, SLOT(OnFluidSystemInitialised(std::shared_ptr<FluidSystem>)));
     connect(ui->scene, SIGNAL(FluidInitialised(std::shared_ptr<FluidProperty>)), this, SLOT(OnFluidInitialised(std::shared_ptr<FluidProperty>)));
     connect(ui->scene, SIGNAL(RigidInitialised(std::shared_ptr<RigidProperty>)), this, SLOT(OnRigidInitialised(std::shared_ptr<RigidProperty>)));
     connect(ui->scene, SIGNAL(AlgaeInitialised(std::shared_ptr<AlgaeProperty>)), this, SLOT(OnAlgaeInitialised(std::shared_ptr<AlgaeProperty>)));
@@ -37,23 +37,32 @@ MainWindow::~MainWindow()
 
 //---------------------------------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::OnFluidSystemInitialised(std::shared_ptr<FluidSolverProperty> _fluidSolverProperty)
+void MainWindow::OnFluidSystemInitialised(std::shared_ptr<FluidSystem> _fluidSystem)
 {
-    if(_fluidSolverProperty != nullptr)
+    if(_fluidSystem != nullptr)
     {
-        auto solverPropWidget = new SolverPropertyWidget(ui->properties, _fluidSolverProperty);
+        auto solverPropWidget = new SolverPropertyWidget(ui->properties, _fluidSystem->GetProperty());
         int tabId = ui->properties->addTab(solverPropWidget, "Solver");
-        solverPropWidget->SetProperty(_fluidSolverProperty);
+
 
         auto item = new QTreeWidgetItem();
-        item->setText(0,"Solver");
+        QString outlinerObjectName = "Solver";
+        item->setText(0,outlinerObjectName);
         ui->outliner->addTopLevelItem(item);
 
-        connect(ui->outliner, &QTreeWidget::itemClicked, ui->properties, [this, tabId](QTreeWidgetItem* clickedItem, int column){
-            if(clickedItem->text(column) == "Solver")
+
+        connect(ui->outliner, &QTreeWidget::itemClicked, ui->properties, [this, tabId, outlinerObjectName](QTreeWidgetItem* clickedItem, int column){
+            if(clickedItem->text(column) == outlinerObjectName)
             {
                 ui->properties->setCurrentIndex(tabId);
             }
+        });
+
+
+        auto fluidSystem = _fluidSystem.get();
+        connect(solverPropWidget, &SolverPropertyWidget::PropertyChanged, [this, fluidSystem](std::shared_ptr<FluidSolverProperty> _newProperties){
+            std::cout<<"mainWindow connection solver props changed\n";
+            fluidSystem->SetFluidSolverProperty(_newProperties);
         });
     }
 }
@@ -64,14 +73,16 @@ void MainWindow::OnFluidInitialised(std::shared_ptr<FluidProperty> _fluidPropert
 {
     if(_fluidProperty != nullptr)
     {
+        // create a new fluid property widget
         auto fluidPropWidget = new FluidPropertyWidget(ui->properties, _fluidProperty);
         int tabId = ui->properties->addTab(fluidPropWidget, "Fluid");
-        fluidPropWidget->SetProperty(_fluidProperty);
 
+        // add fluid to outliner
         auto item = new QTreeWidgetItem();
         item->setText(0,"Fluid");
         ui->outliner->addTopLevelItem(item);
 
+        // connect outliner to fluid properties widget
         connect(ui->outliner, &QTreeWidget::itemClicked, ui->properties, [this, tabId](QTreeWidgetItem* clickedItem, int column){
             if(clickedItem->text(column) == "Fluid")
             {

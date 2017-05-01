@@ -29,6 +29,8 @@ public:
     virtual void SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps);
 
     virtual SphParticleProperty *GetProperty();
+    virtual void SetProperty(std::shared_ptr<SphParticleProperty> _property);
+    virtual void SetProperty(SphParticleProperty _property);
 
     virtual void MapCudaGLResources();
     virtual void ReleaseCudaGLResources();
@@ -80,13 +82,13 @@ public:
     QOpenGLBuffer &GetPressBO();
 
 
-    void GetPositions(std::vector<glm::vec3> &_pos);
-    void GetVelocities(std::vector<glm::vec3> &_vel);
-    void GetParticleIds(std::vector<int> &_ids);
+    virtual void GetPositions(std::vector<glm::vec3> &_pos);
+    virtual void GetVelocities(std::vector<glm::vec3> &_vel);
+    virtual void GetParticleIds(std::vector<int> &_ids);
 
-    void SetPositions(const std::vector<glm::vec3> &_pos);
-    void SetVelocities(const std::vector<glm::vec3> &_vel);
-    void SetParticleIds(const std::vector<int> &_ids);
+    virtual void SetPositions(const std::vector<glm::vec3> &_pos);
+    virtual void SetVelocities(const std::vector<glm::vec3> &_vel);
+    virtual void SetParticleIds(const std::vector<int> &_ids);
 
 
 protected:
@@ -95,11 +97,13 @@ protected:
     virtual void InitGL();
     virtual void InitVAO();
 
+    virtual void CleanUp();
     virtual void CleanUpCUDAMemory();
     virtual void CleanUpGL();
 
 
     bool m_init;
+    bool m_setupSolveSpecsInit;
 
     // Simulation Data
     Mesh m_mesh;

@@ -9,6 +9,16 @@ SolverPropertyWidget::SolverPropertyWidget(QWidget *parent, std::shared_ptr<Flui
     m_property(_property)
 {
     ui->setupUi(this);
+
+    SetProperty(_property);
+
+
+    connect(ui->deltaTime, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &SolverPropertyWidget::OnPropertyChanged);
+    connect(ui->gridCellSize, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &SolverPropertyWidget::OnPropertyChanged);
+    connect(ui->gridRes, QOverload<int>::of(&QSpinBox::valueChanged), this, &SolverPropertyWidget::OnPropertyChanged);
+    connect(ui->smoothingLength, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &SolverPropertyWidget::OnPropertyChanged);
+    connect(ui->solveIterations, QOverload<int>::of(&QSpinBox::valueChanged), this, &SolverPropertyWidget::OnPropertyChanged);
+
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -23,7 +33,16 @@ SolverPropertyWidget::~SolverPropertyWidget()
 
 void SolverPropertyWidget::SetProperty(std::shared_ptr<FluidSolverProperty> _property)
 {
-    m_property = _property;
+    if(_property != nullptr)
+    {
+        ui->deltaTime->setValue(_property->deltaTime);
+        ui->gridCellSize->setValue(_property->gridCellWidth);
+        ui->gridRes->setValue(_property->gridResolution);
+        ui->smoothingLength->setValue(_property->smoothingLength);
+        ui->solveIterations->setValue(_property->solveIterations);
+
+        m_property = _property;
+    }
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -40,6 +59,11 @@ void SolverPropertyWidget::OnPropertyChanged()
 {
     if(m_property != nullptr)
     {
+        m_property->deltaTime = ui->deltaTime->value();
+        m_property->gridCellWidth = ui->gridCellSize->value();
+        m_property->gridResolution = ui->gridRes->value();
+        m_property->smoothingLength = ui->smoothingLength->value();
+        m_property->solveIterations = ui->solveIterations->value();
 
         emit PropertyChanged(m_property);
     }

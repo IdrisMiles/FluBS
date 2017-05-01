@@ -3,22 +3,36 @@
 
 BaseSphParticle::BaseSphParticle(std::shared_ptr<SphParticleProperty> _property):
     m_property(_property),
-    m_init(false)
+    m_init(false),
+    m_setupSolveSpecsInit(false)
 {
 
 }
 
 BaseSphParticle::~BaseSphParticle()
 {
+    m_property = nullptr;
 
+    CleanUpCUDAMemory();
+    CleanUpGL();
 }
 
 
 void BaseSphParticle::SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps)
 {
+    if(m_setupSolveSpecsInit)
+    {
+        checkCudaErrorsMsg(cudaFree(d_cellOccupancyPtr),"");
+        checkCudaErrorsMsg(cudaFree(d_cellParticleIdxPtr),"");
+
+        m_setupSolveSpecsInit = false;
+    }
+
     const uint numCells = _solverProps->gridResolution * _solverProps->gridResolution * _solverProps->gridResolution;
-    cudaMalloc(&d_cellOccupancyPtr, numCells * sizeof(unsigned int));
-    cudaMalloc(&d_cellParticleIdxPtr, numCells * sizeof(unsigned int));
+    checkCudaErrorsMsg(cudaMalloc(&d_cellOccupancyPtr, numCells * sizeof(unsigned int)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_cellParticleIdxPtr, numCells * sizeof(unsigned int)),"");
+
+    m_setupSolveSpecsInit = true;
 }
 
 SphParticleProperty* BaseSphParticle::GetProperty()
@@ -27,13 +41,46 @@ SphParticleProperty* BaseSphParticle::GetProperty()
 }
 
 
+void BaseSphParticle::SetProperty(std::shared_ptr<SphParticleProperty> _property)
+{
+    m_property = _property;
+}
+
+void BaseSphParticle::SetProperty(SphParticleProperty _property)
+{
+    m_property->gravity = _property.gravity;
+
+    if(m_property->particleMass != _property.particleMass)
+    {
+        m_property->particleMass = _property.particleMass;
+    }
+
+    if(m_property->particleRadius != _property.particleRadius)
+    {
+        m_property->particleRadius = _property.particleRadius;
+    }
+
+    if(m_property->restDensity != _property.restDensity)
+    {
+        m_property->restDensity = _property.restDensity;
+    }
+
+    if(m_property->numParticles != _property.numParticles)
+    {
+        m_property->numParticles = _property.numParticles;
+
+        // need to re-allocate gpu memory
+        CleanUp();
+        Init();
+    }
+}
+
+
 //---------------------------------------------------------------------------------------------------------------
 
 
 void BaseSphParticle::Init()
 {
-    cudaSetDevice(0);
-
     InitGL();
     InitCUDAMemory();
 
@@ -103,6 +150,14 @@ void BaseSphParticle::InitVAO()
     m_pressBO.allocate(m_property->numParticles * sizeof(float));
     m_pressBO.release();
 
+}
+
+void BaseSphParticle::CleanUp()
+{
+    CleanUpCUDAMemory();
+    CleanUpGL();
+
+    m_init = false;
 }
 
 void BaseSphParticle::CleanUpCUDAMemory()
@@ -419,7 +474,7 @@ void BaseSphParticle::SetPositions(const std::vector<glm::vec3> &_pos)
 {
     assert(_pos.size() == m_property->numParticles);
 
-    cudaMemcpy(GetPositionPtr(), &_pos[0], m_property->numParticles * sizeof(float3), cudaMemcpyHostToDevice);
+    checkCudaErrors(cudaMemcpy(GetPositionPtr(), &_pos[0], m_property->numParticles * sizeof(float3), cudaMemcpyHostToDevice));
     ReleasePositionPtr();
 }
 
@@ -429,7 +484,7 @@ void BaseSphParticle::SetVelocities(const std::vector<glm::vec3> &_vel)
 {
     assert(_vel.size() == m_property->numParticles);
 
-    cudaMemcpy(GetVelocityPtr(), &_vel[0], m_property->numParticles * sizeof(float3), cudaMemcpyHostToDevice);
+    checkCudaErrors(cudaMemcpy(GetVelocityPtr(), &_vel[0], m_property->numParticles * sizeof(float3), cudaMemcpyHostToDevice));
     ReleaseVelocityPtr();
 }
 

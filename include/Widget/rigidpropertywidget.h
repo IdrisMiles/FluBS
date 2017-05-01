@@ -18,7 +18,7 @@ public:
     explicit RigidPropertyWidget(QWidget *parent = 0, std::shared_ptr<RigidProperty> _property = nullptr);
     ~RigidPropertyWidget();
 
-    virtual void SetProperty(std::shared_ptr<RigidProperty> _rigidProperty);
+    virtual void SetProperty(std::shared_ptr<RigidProperty> _property);
     virtual RigidProperty *GetProperty();
 
 signals:

@@ -9,6 +9,7 @@ RigidPropertyWidget::RigidPropertyWidget(QWidget *parent, std::shared_ptr<RigidP
     ui->setupUi(this);
 
     AddWidgetToGridLayout(ui->layout, 0, 1, 2);
+    SetProperty(_property);
 }
 
 RigidPropertyWidget::~RigidPropertyWidget()
@@ -18,9 +19,20 @@ RigidPropertyWidget::~RigidPropertyWidget()
 }
 
 
-void RigidPropertyWidget::SetProperty(std::shared_ptr<RigidProperty> _rigidProperty)
+void RigidPropertyWidget::SetProperty(std::shared_ptr<RigidProperty> _property)
 {
-    m_property = _rigidProperty;
+    if(_property != nullptr)
+    {
+        SetNumParticles(_property->numParticles);
+        SetParticleMass(_property->particleMass);
+        SetParticleRadius(_property->particleRadius);
+        SetRestDensity(_property->restDensity);
+
+        ui->kinematic->setChecked(_property->kinematic);
+        ui->static_2->setChecked(_property->m_static);
+
+        m_property = _property;
+    }
 }
 
 RigidProperty *RigidPropertyWidget::GetProperty()
@@ -32,8 +44,20 @@ RigidProperty *RigidPropertyWidget::GetProperty()
 
 void RigidPropertyWidget::OnPropertyChanged()
 {
+    if(m_property == nullptr)
+    {
+        m_property = std::shared_ptr<RigidProperty>(new RigidProperty());
+    }
+
     if(m_property != nullptr)
     {
+        m_property->kinematic = ui->kinematic->isChecked();
+        m_property->m_static = ui->static_2->isChecked();
+
+        m_property->numParticles = GetNumParticles();
+        m_property->particleMass = GetParticleMass();
+        m_property->particleRadius = GetParticleRadius();
+        m_property->restDensity = GetRestDensity();
 
         emit PropertyChanged(m_property);
     }

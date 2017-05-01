@@ -18,7 +18,7 @@ public:
     explicit AlgaePropertyWidget(QWidget *parent = 0, std::shared_ptr<AlgaeProperty> _algaeProperty = nullptr);
     ~AlgaePropertyWidget();
 
-    virtual void SetProperty(std::shared_ptr<AlgaeProperty> _algaeProperty);
+    virtual void SetProperty(std::shared_ptr<AlgaeProperty> _property);
     virtual AlgaeProperty *GetProperty();
 
 
