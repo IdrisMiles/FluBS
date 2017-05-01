@@ -15,7 +15,7 @@ public:
 
     void UpdateMesh(Mesh &_mesh);
 
-    virtual void SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps);
+    virtual void SetupSolveSpecs(const FluidSolverProperty &_solverProps);
 
     virtual RigidProperty* GetProperty();
 

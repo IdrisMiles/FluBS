@@ -46,7 +46,7 @@ Fluid::~Fluid()
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void Fluid::SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps)
+void Fluid::SetupSolveSpecs(const FluidSolverProperty &_solverProps)
 {
     if(m_setupSolveSpecsInit)
     {
@@ -56,7 +56,7 @@ void Fluid::SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps)
         m_setupSolveSpecsInit = false;
     }
 
-    const uint numCells = _solverProps->gridResolution * _solverProps->gridResolution * _solverProps->gridResolution;
+    const uint numCells = _solverProps.gridResolution * _solverProps.gridResolution * _solverProps.gridResolution;
     checkCudaErrorsMsg(cudaMalloc(&d_cellOccupancyPtr, numCells * sizeof(unsigned int)), "Allocate cell Occ memory in setupSolverSpecs");
     checkCudaErrorsMsg(cudaMalloc(&d_cellParticleIdxPtr, numCells * sizeof(unsigned int)), "Allcoate cell particle Idx memory in setupSolverSpecs");
 

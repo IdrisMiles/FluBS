@@ -46,7 +46,7 @@ Algae::~Algae()
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void Algae::SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps)
+void Algae::SetupSolveSpecs(const FluidSolverProperty &_solverProps)
 {
     if(m_setupSolveSpecsInit)
     {
@@ -56,7 +56,7 @@ void Algae::SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps)
         m_setupSolveSpecsInit = false;
     }
 
-    const uint numCells = _solverProps->gridResolution * _solverProps->gridResolution * _solverProps->gridResolution;
+    const uint numCells = _solverProps.gridResolution * _solverProps.gridResolution * _solverProps.gridResolution;
     checkCudaErrorsMsg(cudaMalloc(&d_cellOccupancyPtr, numCells * sizeof(unsigned int)),"");
     checkCudaErrorsMsg(cudaMalloc(&d_cellParticleIdxPtr, numCells * sizeof(unsigned int)),"");
 

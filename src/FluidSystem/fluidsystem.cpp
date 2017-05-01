@@ -8,16 +8,17 @@
 
 //--------------------------------------------------------------------------------------------------------------------
 
-FluidSystem::FluidSystem(std::shared_ptr<FluidSolverProperty> _fluidSolverProperty)
+FluidSystem::FluidSystem(FluidSolverProperty _fluidSolverProperty)
 {
-    if(_fluidSolverProperty != nullptr)
-    {
-        m_fluidSolverProperty = _fluidSolverProperty;
-    }
-    else
-    {
-        m_fluidSolverProperty.reset(new FluidSolverProperty());
-    }
+    m_fluidSolverProperty = _fluidSolverProperty;
+//    if(_fluidSolverProperty != nullptr)
+//    {
+//        m_fluidSolverProperty = _fluidSolverProperty;
+//    }
+//    else
+//    {
+//        m_fluidSolverProperty.reset(new FluidSolverProperty());
+//    }
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -35,7 +36,6 @@ FluidSystem::FluidSystem(const FluidSystem &_FluidSystem)
 FluidSystem::~FluidSystem()
 {
     m_fluid = nullptr;
-    m_fluidSolverProperty = nullptr;
     m_staticRigids.clear();
     m_activeRigids.clear();
 }
@@ -151,7 +151,7 @@ void FluidSystem::AddAlgae(std::shared_ptr<Algae> _algae)
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void FluidSystem::SetFluidSolverProperty(std::shared_ptr<FluidSolverProperty> _fluidSolverProperty)
+void FluidSystem::SetFluidSolverProperty(FluidSolverProperty _fluidSolverProperty)
 {
     std::cout<<"FluidSystem Set solver props\n";
     m_fluidSolverProperty = _fluidSolverProperty;
@@ -185,7 +185,7 @@ void FluidSystem::SetFluidSolverProperty(std::shared_ptr<FluidSolverProperty> _f
 
 //--------------------------------------------------------------------------------------------------------------------
 
-std::shared_ptr<FluidSolverProperty> FluidSystem::GetProperty()
+FluidSolverProperty FluidSystem::GetProperty() const
 {
     return m_fluidSolverProperty;
 }
@@ -269,7 +269,7 @@ void FluidSystem::StepSim()
     }
 
 
-    for(int i=0; i<m_fluidSolverProperty->solveIterations; i++)
+    for(int i=0; i<m_fluidSolverProperty.solveIterations; i++)
     {
         //----------------------------------------------------------------------
         // Call sph API to do funky stuff here
@@ -379,7 +379,7 @@ void FluidSystem::GenerateDefaultContainer()
     auto rigidProps = std::shared_ptr<RigidProperty>(new RigidProperty());
 
     Mesh boundary = Mesh();
-    float dim = 0.95f* m_fluidSolverProperty->gridResolution*m_fluidSolverProperty->gridCellWidth;
+    float dim = 0.95f* m_fluidSolverProperty.gridResolution*m_fluidSolverProperty.gridCellWidth;
     float rad = rigidProps->particleRadius;
     int numRigidAxis = ceil(dim / (rad*2.0f));
     for(int z=0; z<numRigidAxis; z++)

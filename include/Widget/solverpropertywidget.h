@@ -22,21 +22,21 @@ class SolverPropertyWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit SolverPropertyWidget(QWidget *parent = 0, std::shared_ptr<FluidSolverProperty> _property = nullptr);
+    explicit SolverPropertyWidget(QWidget *parent = 0, FluidSolverProperty _property = FluidSolverProperty());
     virtual ~SolverPropertyWidget();
 
 
 
     /// @brief Setter for the m_property attribute
-    virtual void SetProperty(std::shared_ptr<FluidSolverProperty> _property);
+    virtual void SetProperty(const FluidSolverProperty &_property);
 
     /// @brief Geter for the m_property attribute
-    virtual FluidSolverProperty *GetProperty();
+    virtual FluidSolverProperty GetProperty() const;
 
 
 signals:
     /// @brief Qt Signal to communicate that the FluidProperty has changed to other classes
-    void PropertyChanged(std::shared_ptr<FluidSolverProperty> _property);
+    void PropertyChanged(const FluidSolverProperty &_property);
 
 public slots:
     /// @brief Qt Slot to be connected to any changes on this widget, emits PropertyChanged(m_property)
@@ -45,7 +45,7 @@ public slots:
 private:
     Ui::SolverPropertyWidget *ui;
 
-    std::shared_ptr<FluidSolverProperty> m_property;
+    FluidSolverProperty m_property;
 
 
 };

@@ -16,7 +16,7 @@ public:
 
     virtual ~Algae();
 
-    virtual void SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps);
+    virtual void SetupSolveSpecs(const FluidSolverProperty &_solverProps);
 
     virtual AlgaeProperty *GetProperty();
 

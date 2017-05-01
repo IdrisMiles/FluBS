@@ -15,7 +15,7 @@ public:
     Fluid(std::shared_ptr<FluidProperty> _rigidProperty, Mesh _mesh);
     virtual ~Fluid();
 
-    virtual void SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps);
+    virtual void SetupSolveSpecs(const FluidSolverProperty &_solverProps);
 
     virtual FluidProperty *GetProperty();
 

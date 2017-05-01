@@ -60,7 +60,7 @@ void MainWindow::OnFluidSystemInitialised(std::shared_ptr<FluidSystem> _fluidSys
 
 
         auto fluidSystem = _fluidSystem.get();
-        connect(solverPropWidget, &SolverPropertyWidget::PropertyChanged, [this, fluidSystem](std::shared_ptr<FluidSolverProperty> _newProperties){
+        connect(solverPropWidget, &SolverPropertyWidget::PropertyChanged, [this, fluidSystem](const FluidSolverProperty &_newProperties){
             std::cout<<"mainWindow connection solver props changed\n";
             fluidSystem->SetFluidSolverProperty(_newProperties);
         });

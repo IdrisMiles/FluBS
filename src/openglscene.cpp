@@ -155,7 +155,7 @@ void OpenGLScene::initializeGL()
 
     auto fluidProps = std::shared_ptr<FluidProperty>(new FluidProperty());
     auto algaeProps = std::shared_ptr<AlgaeProperty>(new AlgaeProperty(64000, 1.0f, 0.1f, 998.36f));
-    auto fluidSolverProps = std::shared_ptr<FluidSolverProperty>(new FluidSolverProperty());
+    FluidSolverProperty fluidSolverProps;
     auto containerProps = std::shared_ptr<RigidProperty>(new RigidProperty());
     auto staticRigidProps = std::shared_ptr<RigidProperty>(new RigidProperty());
 
@@ -166,7 +166,7 @@ void OpenGLScene::initializeGL()
 
     // rigid container
     Mesh boundary = Mesh();
-    float dim = 0.95f* fluidSolverProps->gridResolution*fluidSolverProps->gridCellWidth;
+    float dim = 0.95f* fluidSolverProps.gridResolution*fluidSolverProps.gridCellWidth;
     float rad = containerProps->particleRadius;
     int numRigidAxis = ceil(dim / (rad*2.0f));
     for(int z=0; z<numRigidAxis; z++)
@@ -189,7 +189,7 @@ void OpenGLScene::initializeGL()
 
     // rigid static
     Mesh staticRigidMesh = Mesh();
-    dim = 0.95f* fluidSolverProps->gridResolution*fluidSolverProps->gridCellWidth;
+    dim = 0.95f* fluidSolverProps.gridResolution*fluidSolverProps.gridCellWidth;
     rad = staticRigidProps->particleRadius;
     numRigidAxis = ceil((dim*0.1) / (rad*2.0f));
     // cube

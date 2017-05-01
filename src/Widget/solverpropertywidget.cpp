@@ -3,7 +3,7 @@
 
 //-----------------------------------------------------------------------------------------------------------
 
-SolverPropertyWidget::SolverPropertyWidget(QWidget *parent, std::shared_ptr<FluidSolverProperty> _property) :
+SolverPropertyWidget::SolverPropertyWidget(QWidget *parent, FluidSolverProperty _property) :
     QWidget(parent),
     ui(new Ui::SolverPropertyWidget),
     m_property(_property)
@@ -25,31 +25,30 @@ SolverPropertyWidget::SolverPropertyWidget(QWidget *parent, std::shared_ptr<Flui
 
 SolverPropertyWidget::~SolverPropertyWidget()
 {
-    m_property = nullptr;
     delete ui;
 }
 
 //-----------------------------------------------------------------------------------------------------------
 
-void SolverPropertyWidget::SetProperty(std::shared_ptr<FluidSolverProperty> _property)
+void SolverPropertyWidget::SetProperty(const FluidSolverProperty &_property)
 {
-    if(_property != nullptr)
-    {
-        ui->deltaTime->setValue(_property->deltaTime);
-        ui->gridCellSize->setValue(_property->gridCellWidth);
-        ui->gridRes->setValue(_property->gridResolution);
-        ui->smoothingLength->setValue(_property->smoothingLength);
-        ui->solveIterations->setValue(_property->solveIterations);
+//    if(_property != nullptr)
+//    {
+        ui->deltaTime->setValue(_property.deltaTime);
+        ui->gridCellSize->setValue(_property.gridCellWidth);
+        ui->gridRes->setValue(_property.gridResolution);
+        ui->smoothingLength->setValue(_property.smoothingLength);
+        ui->solveIterations->setValue(_property.solveIterations);
 
         m_property = _property;
-    }
+//    }
 }
 
 //-----------------------------------------------------------------------------------------------------------
 
-FluidSolverProperty *SolverPropertyWidget::GetProperty()
+FluidSolverProperty SolverPropertyWidget::GetProperty() const
 {
-    return m_property.get();
+    return m_property;
 }
 
 
@@ -57,15 +56,15 @@ FluidSolverProperty *SolverPropertyWidget::GetProperty()
 
 void SolverPropertyWidget::OnPropertyChanged()
 {
-    if(m_property != nullptr)
-    {
-        m_property->deltaTime = ui->deltaTime->value();
-        m_property->gridCellWidth = ui->gridCellSize->value();
-        m_property->gridResolution = ui->gridRes->value();
-        m_property->smoothingLength = ui->smoothingLength->value();
-        m_property->solveIterations = ui->solveIterations->value();
+//    if(m_property != nullptr)
+//    {
+        m_property.deltaTime = ui->deltaTime->value();
+        m_property.gridCellWidth = ui->gridCellSize->value();
+        m_property.gridResolution = ui->gridRes->value();
+        m_property.smoothingLength = ui->smoothingLength->value();
+        m_property.solveIterations = ui->solveIterations->value();
 
         emit PropertyChanged(m_property);
-    }
+//    }
 
 }

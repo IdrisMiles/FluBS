@@ -197,10 +197,10 @@ void CacheSystem::Cache(const int _frame,
                         std::shared_ptr<FluidSystem> _fluidSystem)
 {
     auto props = _fluidSystem->GetProperty();
-    m_cachedFrames[_frame][_object][m_dataId.deltaTime] = props->deltaTime;
-    m_cachedFrames[_frame][_object][m_dataId.solveIterations] = props->solveIterations;
-    m_cachedFrames[_frame][_object][m_dataId.gridRes] = props->gridResolution;
-    m_cachedFrames[_frame][_object][m_dataId.cellWidth] = props->gridCellWidth;
+    m_cachedFrames[_frame][_object][m_dataId.deltaTime] = props.deltaTime;
+    m_cachedFrames[_frame][_object][m_dataId.solveIterations] = props.solveIterations;
+    m_cachedFrames[_frame][_object][m_dataId.gridRes] = props.gridResolution;
+    m_cachedFrames[_frame][_object][m_dataId.cellWidth] = props.gridCellWidth;
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -264,10 +264,10 @@ void CacheSystem::Load(const int _frame,
                        std::shared_ptr<FluidSystem> _fluidSystem)
 {
     auto props = _fluidSystem->GetProperty();
-    props->deltaTime        = m_cachedFrames[_frame][_object][m_dataId.deltaTime];
-    props->solveIterations  = m_cachedFrames[_frame][_object][m_dataId.solveIterations];
-    props->gridResolution   = m_cachedFrames[_frame][_object][m_dataId.gridRes];
-    props->gridCellWidth    = m_cachedFrames[_frame][_object][m_dataId.cellWidth];
+    props.deltaTime        = m_cachedFrames[_frame][_object][m_dataId.deltaTime];
+    props.solveIterations  = m_cachedFrames[_frame][_object][m_dataId.solveIterations];
+    props.gridResolution   = m_cachedFrames[_frame][_object][m_dataId.gridRes];
+    props.gridCellWidth    = m_cachedFrames[_frame][_object][m_dataId.cellWidth];
 }
 
 //--------------------------------------------------------------------------------------------------------------------
