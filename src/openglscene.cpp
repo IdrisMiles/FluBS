@@ -280,6 +280,8 @@ void OpenGLScene::initializeGL()
     // Start simulation and drawing rimers
     m_drawTimer->start(16);
 
+    ResetSim();
+
 }
 
 void OpenGLScene::paintGL()
@@ -322,7 +324,7 @@ void OpenGLScene::OnFrameChanged(int frame)
 {
     if(m_cache.IsFrameCached(frame))
     {
-//        m_cache.Load(frame, m_fluidSystem);
+        m_cache.Load(frame, m_fluidSystem);
         emit FrameLoaded(frame);
     }
     else
@@ -332,6 +334,8 @@ void OpenGLScene::OnFrameChanged(int frame)
 
         m_cache.Cache(frame, m_fluidSystem);
         emit FrameCached(frame);
+
+        m_cache.WriteCache(frame);
     }
 }
 

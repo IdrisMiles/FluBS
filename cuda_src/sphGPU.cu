@@ -608,6 +608,16 @@ void sphGPU::InitFluidAsCube(float3 *particles, float3 *velocities, float *densi
 }
 
 //--------------------------------------------------------------------------------------------------------------------
+
+void sphGPU::InitAlgaeIllumination(float *illum,
+                                   const unsigned int numPoints)
+{
+    thrust::device_ptr<float> illumPtr = thrust::device_pointer_cast(illum);
+
+    thrust::fill(illumPtr, illumPtr+numPoints, 0.0f);
+}
+
+//--------------------------------------------------------------------------------------------------------------------
 // Algae functions
 void sphGPU::ComputeAdvectionForce(const uint maxCellOcc,
                                    const uint gridRes,

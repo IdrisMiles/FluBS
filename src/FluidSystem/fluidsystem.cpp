@@ -11,14 +11,6 @@
 FluidSystem::FluidSystem(FluidSolverProperty _fluidSolverProperty)
 {
     m_fluidSolverProperty = _fluidSolverProperty;
-//    if(_fluidSolverProperty != nullptr)
-//    {
-//        m_fluidSolverProperty = _fluidSolverProperty;
-//    }
-//    else
-//    {
-//        m_fluidSolverProperty.reset(new FluidSolverProperty());
-//    }
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -451,6 +443,8 @@ void FluidSystem::ResetAlgae(std::shared_ptr<Algae> _algae)
     sph::ResetProperties(m_fluidSolverProperty, _algae);
     cudaThreadSynchronize();
     sph::InitFluidAsCube(m_fluidSolverProperty, _algae);
+    cudaThreadSynchronize();
+    sph::InitAlgaeIllumination(m_fluidSolverProperty, _algae);
     cudaThreadSynchronize();
     _algae->ReleaseCudaGLResources();
 }

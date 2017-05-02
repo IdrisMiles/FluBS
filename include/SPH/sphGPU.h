@@ -11,6 +11,7 @@ namespace sphGPU
 
     //--------------------------------------------------------------------------------------------------------------------
 
+    // BaseSPHParticle Reset
     void ResetProperties(float3 *pressureForce,
                          float3 *externalForce,
                          float3 *totalForce,
@@ -26,6 +27,7 @@ namespace sphGPU
 
     //--------------------------------------------------------------------------------------------------------------------
 
+    // Rigid Reset
     void ResetProperties(float3 *pressureForce,
                          float3 *externalForce,
                          float3 *totalForce,
@@ -42,6 +44,7 @@ namespace sphGPU
 
     //--------------------------------------------------------------------------------------------------------------------
 
+    // Fluid Reset
     void ResetProperties(float3 *pressureForce,
                          float3 *viscousForce,
                          float3 *surfTenForce,
@@ -70,6 +73,11 @@ namespace sphGPU
                          const unsigned int numParticles,
                          const unsigned int numPartsPerAxis,
                          const float scale);
+
+    //--------------------------------------------------------------------------------------------------------------------
+
+    void InitAlgaeIllumination(float *illum,
+                               const unsigned int numPoints);
 
     //--------------------------------------------------------------------------------------------------------------------
 

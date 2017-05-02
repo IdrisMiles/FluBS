@@ -21,6 +21,15 @@ void from_json(const json& j, glm::vec3& v);
 }
 
 
+enum CacheStatus
+{
+    NOTCACHED = 0x00,
+    DIRTY = 0x01,
+    CACHED = 0x02,
+    MEMORY = 0x04,
+    DISK = 0x08
+};
+
 
 class CacheSystem
 {
@@ -90,6 +99,7 @@ private:
 
 
     std::vector<json> m_cachedFrames;
+    std::vector<bool> m_isFrameCached;
 
 };
 

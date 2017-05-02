@@ -120,6 +120,11 @@ void Algae::InitCUDAMemory()
     cudaGraphicsGLRegisterBuffer(&m_pressBO_CUDA, m_pressBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
     cudaGraphicsGLRegisterBuffer(&m_illumBO_CUDA, m_illumBO.bufferId(),cudaGraphicsMapFlagsNone);//WriteDiscard);
 
+    // Initialise some cuda memory
+//    cudaMemset(GetIlluminationPtr(), make_float3(0.0f, 0.0f, 0.0f), m_property->numParticles * sizeof(float3));
+//    cudaMemset(GetIlluminationPtr(), make_float3(0.0f, 0.0f, 0.0f), m_property->numParticles * sizeof(float3));
+//    cudaMemset(GetIlluminationPtr(), 0.0f, m_property->numParticles * sizeof(float));
+
     // particle forces
     cudaMalloc(&d_pressureForcePtr, m_property->numParticles * sizeof(float3));
     cudaMalloc(&d_gravityForcePtr, m_property->numParticles * sizeof(float3));

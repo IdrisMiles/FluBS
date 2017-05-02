@@ -144,6 +144,15 @@ void sph::InitFluidAsCube(const FluidSolverProperty &_solverProps,
 
 //--------------------------------------------------------------------------------------------------------------------
 
+void sph::InitAlgaeIllumination(const FluidSolverProperty &_solverProps,
+                                std::shared_ptr<Algae> _algae)
+{
+    auto algaeProps = _algae->GetProperty();
+    sphGPU::InitAlgaeIllumination(_algae->GetIlluminationPtr(), algaeProps->numParticles);
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
 void sph::ComputeHash(const FluidSolverProperty &_solverProps,
                       std::shared_ptr<BaseSphParticle> _fluid)
 {
