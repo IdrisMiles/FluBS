@@ -69,6 +69,7 @@ signals:
     void FrameCached(int frame);
     void FrameSimmed(int frame);
     void FrameLoaded(int frame);
+    void FrameFinished(int frame);
 
 protected:
     void initializeGL() Q_DECL_OVERRIDE;

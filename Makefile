@@ -703,30 +703,30 @@ compiler_cuda_make_all: cuda_obj/poly6kernel_cuda.o cuda_obj/smoothingKernel_cud
 compiler_cuda_clean:
 	-$(DEL_FILE) cuda_obj/poly6kernel_cuda.o cuda_obj/smoothingKernel_cuda.o cuda_obj/smoothkernel_cuda.o cuda_obj/sphGPU_cuda.o cuda_obj/sphGPU_Kernels_cuda.o cuda_obj/spikykernel_cuda.o cuda_obj/vec_ops_cuda.o
 cuda_obj/poly6kernel_cuda.o: cuda_src/poly6kernel.cu
-	/usr/bin/nvcc -m64 -arch=sm_50 -c -o cuda_obj/poly6kernel_cuda.o cuda_src/poly6kernel.cu -ccbin g++ --use_fast_math --compiler-options -fno-strict-aliasing --ptxas-options=-v -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I./cuda_inc -I./include -I$(CUDA_PATH)/include -I$(CUDA_PATH)/include/cuda
+	/usr/bin/nvcc -m64 -arch=sm_50 -c -o cuda_obj/poly6kernel_cuda.o cuda_src/poly6kernel.cu -ccbin g++ --compiler-options -fno-strict-aliasing --ptxas-options=-v -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I./cuda_inc -I./include -I$(CUDA_PATH)/include -I$(CUDA_PATH)/include/cuda
 
 cuda_obj/smoothingKernel_cuda.o: cuda_src/smoothingKernel.cu
-	/usr/bin/nvcc -m64 -arch=sm_50 -c -o cuda_obj/smoothingKernel_cuda.o cuda_src/smoothingKernel.cu -ccbin g++ --use_fast_math --compiler-options -fno-strict-aliasing --ptxas-options=-v -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I./cuda_inc -I./include -I$(CUDA_PATH)/include -I$(CUDA_PATH)/include/cuda
+	/usr/bin/nvcc -m64 -arch=sm_50 -c -o cuda_obj/smoothingKernel_cuda.o cuda_src/smoothingKernel.cu -ccbin g++ --compiler-options -fno-strict-aliasing --ptxas-options=-v -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I./cuda_inc -I./include -I$(CUDA_PATH)/include -I$(CUDA_PATH)/include/cuda
 
 cuda_obj/smoothkernel_cuda.o: cuda_src/smoothkernel.cu
-	/usr/bin/nvcc -m64 -arch=sm_50 -c -o cuda_obj/smoothkernel_cuda.o cuda_src/smoothkernel.cu -ccbin g++ --use_fast_math --compiler-options -fno-strict-aliasing --ptxas-options=-v -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I./cuda_inc -I./include -I$(CUDA_PATH)/include -I$(CUDA_PATH)/include/cuda
+	/usr/bin/nvcc -m64 -arch=sm_50 -c -o cuda_obj/smoothkernel_cuda.o cuda_src/smoothkernel.cu -ccbin g++ --compiler-options -fno-strict-aliasing --ptxas-options=-v -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I./cuda_inc -I./include -I$(CUDA_PATH)/include -I$(CUDA_PATH)/include/cuda
 
 cuda_obj/sphGPU_cuda.o: include/SPH/sphGPU.h \
 		cuda_inc/sphGPU_Kernels.cuh \
 		cuda_src/sphGPU.cu
-	/usr/bin/nvcc -m64 -arch=sm_50 -c -o cuda_obj/sphGPU_cuda.o cuda_src/sphGPU.cu -ccbin g++ --use_fast_math --compiler-options -fno-strict-aliasing --ptxas-options=-v -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I./cuda_inc -I./include -I$(CUDA_PATH)/include -I$(CUDA_PATH)/include/cuda
+	/usr/bin/nvcc -m64 -arch=sm_50 -c -o cuda_obj/sphGPU_cuda.o cuda_src/sphGPU.cu -ccbin g++ --compiler-options -fno-strict-aliasing --ptxas-options=-v -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I./cuda_inc -I./include -I$(CUDA_PATH)/include -I$(CUDA_PATH)/include/cuda
 
 cuda_obj/sphGPU_Kernels_cuda.o: cuda_inc/sphGPU_Kernels.cuh \
 		cuda_inc/vec_ops.cuh \
 		cuda_inc/smoothingKernel.cuh \
 		cuda_src/sphGPU_Kernels.cu
-	/usr/bin/nvcc -m64 -arch=sm_50 -c -o cuda_obj/sphGPU_Kernels_cuda.o cuda_src/sphGPU_Kernels.cu -ccbin g++ --use_fast_math --compiler-options -fno-strict-aliasing --ptxas-options=-v -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I./cuda_inc -I./include -I$(CUDA_PATH)/include -I$(CUDA_PATH)/include/cuda
+	/usr/bin/nvcc -m64 -arch=sm_50 -c -o cuda_obj/sphGPU_Kernels_cuda.o cuda_src/sphGPU_Kernels.cu -ccbin g++ --compiler-options -fno-strict-aliasing --ptxas-options=-v -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I./cuda_inc -I./include -I$(CUDA_PATH)/include -I$(CUDA_PATH)/include/cuda
 
 cuda_obj/spikykernel_cuda.o: cuda_src/spikykernel.cu
-	/usr/bin/nvcc -m64 -arch=sm_50 -c -o cuda_obj/spikykernel_cuda.o cuda_src/spikykernel.cu -ccbin g++ --use_fast_math --compiler-options -fno-strict-aliasing --ptxas-options=-v -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I./cuda_inc -I./include -I$(CUDA_PATH)/include -I$(CUDA_PATH)/include/cuda
+	/usr/bin/nvcc -m64 -arch=sm_50 -c -o cuda_obj/spikykernel_cuda.o cuda_src/spikykernel.cu -ccbin g++ --compiler-options -fno-strict-aliasing --ptxas-options=-v -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I./cuda_inc -I./include -I$(CUDA_PATH)/include -I$(CUDA_PATH)/include/cuda
 
 cuda_obj/vec_ops_cuda.o: cuda_src/vec_ops.cu
-	/usr/bin/nvcc -m64 -arch=sm_50 -c -o cuda_obj/vec_ops_cuda.o cuda_src/vec_ops.cu -ccbin g++ --use_fast_math --compiler-options -fno-strict-aliasing --ptxas-options=-v -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I./cuda_inc -I./include -I$(CUDA_PATH)/include -I$(CUDA_PATH)/include/cuda
+	/usr/bin/nvcc -m64 -arch=sm_50 -c -o cuda_obj/vec_ops_cuda.o cuda_src/vec_ops.cu -ccbin g++ --compiler-options -fno-strict-aliasing --ptxas-options=-v -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I./cuda_inc -I./include -I$(CUDA_PATH)/include -I$(CUDA_PATH)/include/cuda
 
 compiler_rcc_make_all:
 compiler_rcc_clean:
@@ -851,15 +851,31 @@ moc/moc_mainwindow.cpp: ../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QMainWindo
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QPushButton \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qpushbutton.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractbutton.h \
+		include/FluidSystem/fluidsystem.h \
 		include/FluidSystem/fluidsolverproperty.h \
+		include/SPH/sph.h \
+		include/SPH/isphparticles.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLBuffer \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglbuffer.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengl.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qt_windows.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengles2ext.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglext.h \
+		cuda_inc/helper_cuda.h \
+		cuda_inc/helper_string.h \
+		include/SPH/sphparticlepropeprty.h \
+		include/Mesh/mesh.h \
+		include/SPH/fluid.h \
+		include/SPH/fluidproperty.h \
+		include/SPH/rigid.h \
+		include/SPH/rigidproperty.h \
+		include/SPH/algae.h \
+		include/SPH/algaeproperty.h \
+		include/SPH/sphGPU.h \
 		include/Widget/fluidpropertywidget.h \
 		include/Widget/sphparticlepropertywidget.h \
-		include/SPH/sphparticlepropeprty.h \
-		include/SPH/fluidproperty.h \
 		include/Widget/algaepropertywidget.h \
-		include/SPH/algaeproperty.h \
 		include/Widget/rigidpropertywidget.h \
-		include/SPH/rigidproperty.h \
 		include/mainwindow.h \
 		../../../Qt5.7.0/5.7/gcc_64/bin/moc
 	/home/idris/Qt5.7.0/5.7/gcc_64/bin/moc $(DEFINES) -I/home/idris/Qt5.7.0/5.7/gcc_64/mkspecs/linux-g++ -I/home/idris/uni/major/dev -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I/home/idris/uni/major/dev/cuda_inc -I/home/idris/uni/major/dev/include -I'/home/idris/uni/major/dev/$(CUDA_PATH)/include' -I'/home/idris/uni/major/dev/$(CUDA_PATH)/include/cuda' -I/home/idris/Qt5.7.0/5.7/gcc_64/include -I/home/idris/Qt5.7.0/5.7/gcc_64/include/QtOpenGL -I/home/idris/Qt5.7.0/5.7/gcc_64/include/QtWidgets -I/home/idris/Qt5.7.0/5.7/gcc_64/include/QtGui -I/home/idris/Qt5.7.0/5.7/gcc_64/include/QtCore -I/usr/include/c++/5 -I/usr/include/x86_64-linux-gnu/c++/5 -I/usr/include/c++/5/backward -I/usr/lib/gcc/x86_64-linux-gnu/5/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include include/mainwindow.h -o moc/moc_mainwindow.cpp
@@ -1476,7 +1492,27 @@ moc/moc_solverpropertywidget.cpp: ../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qpushbutton.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractbutton.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qicon.h \
+		include/FluidSystem/fluidsystem.h \
 		include/FluidSystem/fluidsolverproperty.h \
+		include/SPH/sph.h \
+		include/SPH/isphparticles.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLBuffer \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglbuffer.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengl.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qt_windows.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengles2ext.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglext.h \
+		cuda_inc/helper_cuda.h \
+		cuda_inc/helper_string.h \
+		include/SPH/sphparticlepropeprty.h \
+		include/Mesh/mesh.h \
+		include/SPH/fluid.h \
+		include/SPH/fluidproperty.h \
+		include/SPH/rigid.h \
+		include/SPH/rigidproperty.h \
+		include/SPH/algae.h \
+		include/SPH/algaeproperty.h \
+		include/SPH/sphGPU.h \
 		include/Widget/solverpropertywidget.h \
 		../../../Qt5.7.0/5.7/gcc_64/bin/moc
 	/home/idris/Qt5.7.0/5.7/gcc_64/bin/moc $(DEFINES) -I/home/idris/Qt5.7.0/5.7/gcc_64/mkspecs/linux-g++ -I/home/idris/uni/major/dev -I/home/idris/uni/major/dev/include -I/usr/local/include -I/usr/include -I/home/idris/dev/include -I/home/idris/uni/major/dev/cuda_inc -I/home/idris/uni/major/dev/include -I'/home/idris/uni/major/dev/$(CUDA_PATH)/include' -I'/home/idris/uni/major/dev/$(CUDA_PATH)/include/cuda' -I/home/idris/Qt5.7.0/5.7/gcc_64/include -I/home/idris/Qt5.7.0/5.7/gcc_64/include/QtOpenGL -I/home/idris/Qt5.7.0/5.7/gcc_64/include/QtWidgets -I/home/idris/Qt5.7.0/5.7/gcc_64/include/QtGui -I/home/idris/Qt5.7.0/5.7/gcc_64/include/QtCore -I/usr/include/c++/5 -I/usr/include/x86_64-linux-gnu/c++/5 -I/usr/include/c++/5/backward -I/usr/lib/gcc/x86_64-linux-gnu/5/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include include/Widget/solverpropertywidget.h -o moc/moc_solverpropertywidget.cpp
@@ -2196,15 +2232,31 @@ obj/main.o: src/main.cpp include/mainwindow.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QPushButton \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qpushbutton.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractbutton.h \
+		include/FluidSystem/fluidsystem.h \
 		include/FluidSystem/fluidsolverproperty.h \
+		include/SPH/sph.h \
+		include/SPH/isphparticles.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLBuffer \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglbuffer.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengl.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qt_windows.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengles2ext.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglext.h \
+		cuda_inc/helper_cuda.h \
+		cuda_inc/helper_string.h \
+		include/SPH/sphparticlepropeprty.h \
+		include/Mesh/mesh.h \
+		include/SPH/fluid.h \
+		include/SPH/fluidproperty.h \
+		include/SPH/rigid.h \
+		include/SPH/rigidproperty.h \
+		include/SPH/algae.h \
+		include/SPH/algaeproperty.h \
+		include/SPH/sphGPU.h \
 		include/Widget/fluidpropertywidget.h \
 		include/Widget/sphparticlepropertywidget.h \
-		include/SPH/sphparticlepropeprty.h \
-		include/SPH/fluidproperty.h \
 		include/Widget/algaepropertywidget.h \
-		include/SPH/algaeproperty.h \
 		include/Widget/rigidpropertywidget.h \
-		include/SPH/rigidproperty.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QApplication \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qapplication.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qcoreapplication.h \
@@ -2341,15 +2393,31 @@ obj/mainwindow.o: src/mainwindow.cpp include/mainwindow.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QPushButton \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qpushbutton.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractbutton.h \
+		include/FluidSystem/fluidsystem.h \
 		include/FluidSystem/fluidsolverproperty.h \
+		include/SPH/sph.h \
+		include/SPH/isphparticles.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLBuffer \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglbuffer.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengl.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qt_windows.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengles2ext.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglext.h \
+		cuda_inc/helper_cuda.h \
+		cuda_inc/helper_string.h \
+		include/SPH/sphparticlepropeprty.h \
+		include/Mesh/mesh.h \
+		include/SPH/fluid.h \
+		include/SPH/fluidproperty.h \
+		include/SPH/rigid.h \
+		include/SPH/rigidproperty.h \
+		include/SPH/algae.h \
+		include/SPH/algaeproperty.h \
+		include/SPH/sphGPU.h \
 		include/Widget/fluidpropertywidget.h \
 		include/Widget/sphparticlepropertywidget.h \
-		include/SPH/sphparticlepropeprty.h \
-		include/SPH/fluidproperty.h \
 		include/Widget/algaepropertywidget.h \
-		include/SPH/algaeproperty.h \
 		include/Widget/rigidpropertywidget.h \
-		include/SPH/rigidproperty.h \
 		ui/ui_mainwindow.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QVariant \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QAction \
@@ -2401,10 +2469,6 @@ obj/mainwindow.o: src/mainwindow.cpp include/mainwindow.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qopenglwidget.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QSurfaceFormat \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qsurfaceformat.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengl.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qt_windows.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengles2ext.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglext.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLContext \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglcontext.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QObject \
@@ -2419,8 +2483,6 @@ obj/mainwindow.o: src/mainwindow.cpp include/mainwindow.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qgenericmatrix.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLVertexArrayObject \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglvertexarrayobject.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLBuffer \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglbuffer.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLTexture \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengltexture.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFunctions \
@@ -2430,16 +2492,6 @@ obj/mainwindow.o: src/mainwindow.cpp include/mainwindow.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qbasictimer.h \
 		include/Cache/cachesystem.h \
 		json/src/json.hpp \
-		include/FluidSystem/fluidsystem.h \
-		include/SPH/sph.h \
-		include/SPH/isphparticles.h \
-		cuda_inc/helper_cuda.h \
-		cuda_inc/helper_string.h \
-		include/Mesh/mesh.h \
-		include/SPH/fluid.h \
-		include/SPH/rigid.h \
-		include/SPH/algae.h \
-		include/SPH/sphGPU.h \
 		include/Render/fluidrenderer.h \
 		include/Render/sphparticlerenderer.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFramebufferObject \
@@ -4046,7 +4098,27 @@ obj/solverpropertywidget.o: src/Widget/solverpropertywidget.cpp include/Widget/s
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qpushbutton.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractbutton.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qicon.h \
+		include/FluidSystem/fluidsystem.h \
 		include/FluidSystem/fluidsolverproperty.h \
+		include/SPH/sph.h \
+		include/SPH/isphparticles.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLBuffer \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglbuffer.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengl.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qt_windows.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengles2ext.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglext.h \
+		cuda_inc/helper_cuda.h \
+		cuda_inc/helper_string.h \
+		include/SPH/sphparticlepropeprty.h \
+		include/Mesh/mesh.h \
+		include/SPH/fluid.h \
+		include/SPH/fluidproperty.h \
+		include/SPH/rigid.h \
+		include/SPH/rigidproperty.h \
+		include/SPH/algae.h \
+		include/SPH/algaeproperty.h \
+		include/SPH/sphGPU.h \
 		ui/ui_solverpropertywidget.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QVariant \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QAction \

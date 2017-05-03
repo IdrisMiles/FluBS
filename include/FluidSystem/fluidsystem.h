@@ -43,9 +43,14 @@ public:
 
 
 private:
+    void InitRigid(std::shared_ptr<Rigid> _rigid);
+    void InitFluid(std::shared_ptr<Fluid> _fluid);
+    void InitAlgae(std::shared_ptr<Algae> _algae);
+
     void ResetRigid(std::shared_ptr<Rigid> _rigid);
     void ResetFluid(std::shared_ptr<Fluid> _fluid);
     void ResetAlgae(std::shared_ptr<Algae> _algae);
+
     void GenerateDefaultContainer();
 
     std::shared_ptr<Algae> m_algae;

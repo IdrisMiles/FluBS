@@ -1,5 +1,7 @@
 #include "include/Widget/timeline.h"
 
+//------------------------------------------------------------------------------------
+
 TimeLine::TimeLine(int duration, QObject *parent) : QTimeLine(duration, parent)
 {
     m_frameCacheStates.resize(endFrame() - startFrame(), CacheState::NotCached);
@@ -9,13 +11,25 @@ TimeLine::TimeLine(int duration, QObject *parent) : QTimeLine(duration, parent)
         m_frameCacheStates[frame] = Cached;
     });
 
+
+    // connect on frame changed
+    // if play every frame set
+    // - save current state
+    // - pause
+
+    // connect receiving a frame finished signal
+    // - resume saved state
+
 }
 
+//------------------------------------------------------------------------------------
 
 TimeLine::~TimeLine()
 {
 
 }
+
+//------------------------------------------------------------------------------------
 
 void TimeLine::SetFrameRange(int start, int end)
 {
@@ -23,52 +37,20 @@ void TimeLine::SetFrameRange(int start, int end)
     setFrameRange(start, end);
 }
 
-
+//------------------------------------------------------------------------------------
 
 void TimeLine::OnFrameCached(int frame)
 {
-    if(frame = -1)
-    {
-        for(auto &c : m_frameCacheStates)
-        {
-            c = CacheState::Cached;
-        }
-        return;
-    }
-
-    if(frame < m_frameCacheStates.size())
-    {
-        m_frameCacheStates[frame] = CacheState::Cached;
-    }
-    else
-    {
-        while(frame >= m_frameCacheStates.size())
-        {
-            m_frameCacheStates.push_back(CacheState::NotCached);
-        }
-    }
 }
+
+//------------------------------------------------------------------------------------
 
 void TimeLine::OnFrameCacheStale(int frame)
 {
-    if(frame = -1)
-    {
-        for(auto &c : m_frameCacheStates)
-        {
-            c = CacheState::StaleCache;
-        }
-        return;
-    }
+}
 
-    if(frame < m_frameCacheStates.size())
-    {
-        m_frameCacheStates[frame] = CacheState::StaleCache;
-    }
-    else
-    {
-        while(frame >= m_frameCacheStates.size())
-        {
-            m_frameCacheStates.push_back(CacheState::NotCached);
-        }
-    }
+//------------------------------------------------------------------------------------
+
+void TimeLine::OnFrameFinished(int frame)
+{
 }

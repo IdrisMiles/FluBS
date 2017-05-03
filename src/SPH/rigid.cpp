@@ -88,6 +88,9 @@ void Rigid::InitCUDAMemory()
 
     // particle hash
     cudaMalloc(&d_particleHashIdPtr, m_property->numParticles * sizeof(unsigned int));
+
+    // particle Id
+    cudaMallocManaged(&d_particleIdPtr, m_property->numParticles * sizeof(unsigned int));
 }
 
 void Rigid::InitGL()
@@ -237,7 +240,17 @@ void Rigid::GetVelocities(std::vector<glm::vec3> &_vel)
 
 void Rigid::GetParticleIds(std::vector<int> &_ids)
 {
+    if(!m_init || this->m_property == nullptr)
+    {
+        return;
+    }
+    _ids.resize(this->m_property->numParticles);
+    checkCudaErrors(cudaMemcpy(&_ids[0], GetParticleIdPtr(), this->m_property->numParticles * sizeof(unsigned int), cudaMemcpyDeviceToHost));
+    ReleaseParticleIdPtr();
 }
+
+//--------------------------------------------------------------------------------------------------------------------
+
 
 //--------------------------------------------------------------------------------------------------------------------
 
@@ -263,6 +276,9 @@ void Rigid::SetVelocities(const std::vector<glm::vec3> &_vel)
 
 void Rigid::SetParticleIds(const std::vector<int> &_ids)
 {
+    assert(_ids.size() == m_property->numParticles);
+    checkCudaErrors(cudaMemcpy(GetParticleIdPtr(), &_ids[0], m_property->numParticles * sizeof(unsigned int), cudaMemcpyHostToDevice));
+    ReleaseParticleIdPtr();
 }
 
 //--------------------------------------------------------------------------------------------------------------------

@@ -215,16 +215,16 @@ std::vector<std::shared_ptr<Rigid>> FluidSystem::GetStaticRigids()
 
 void FluidSystem::InitialiseSim()
 {
-    ResetFluid(m_fluid);
-    ResetAlgae(m_algae);
-    ResetRigid(m_container);
+    InitFluid(m_fluid);
+    InitAlgae(m_algae);
+    InitRigid(m_container);
     for(auto &&r : m_staticRigids)
     {
-        ResetRigid(r);
+        InitRigid(r);
     }
     for(auto &&r : m_activeRigids)
     {
-        ResetRigid(r);
+        InitRigid(r);
     }
 }
 
@@ -421,6 +421,7 @@ void FluidSystem::ResetRigid(std::shared_ptr<Rigid> _rigid)
     // compute rigid particle volumes
     sph::ComputeParticleVolume(m_fluidSolverProperty, _rigid);
 
+    sph::InitSphParticleIds(_rigid);
 
     _rigid->ReleaseCudaGLResources();
 }
@@ -432,6 +433,7 @@ void FluidSystem::ResetFluid(std::shared_ptr<Fluid> _fluid)
     sph::ResetProperties(m_fluidSolverProperty, _fluid);
     cudaThreadSynchronize();
     sph::InitFluidAsCube(m_fluidSolverProperty, _fluid);
+    sph::InitSphParticleIds(_fluid);
     cudaThreadSynchronize();
     _fluid->ReleaseCudaGLResources();
 }
@@ -445,6 +447,65 @@ void FluidSystem::ResetAlgae(std::shared_ptr<Algae> _algae)
     sph::InitFluidAsCube(m_fluidSolverProperty, _algae);
     cudaThreadSynchronize();
     sph::InitAlgaeIllumination(m_fluidSolverProperty, _algae);
+    sph::InitSphParticleIds(_algae);
     cudaThreadSynchronize();
     _algae->ReleaseCudaGLResources();
 }
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void FluidSystem::InitRigid(std::shared_ptr<Rigid> _rigid)
+{
+    // If this is a static rigid we only have to compute all this once
+    sph::ResetProperties(m_fluidSolverProperty, _rigid);
+    cudaThreadSynchronize();
+
+    // Get particle hash IDs
+    sph::ComputeHash(m_fluidSolverProperty, _rigid);
+    cudaThreadSynchronize();
+
+    // Sort particles
+    sph::SortParticlesByHash(_rigid);
+
+    // Get Cell particle indexes - scatter addresses
+    sph::ComputeParticleScatterIds(m_fluidSolverProperty, _rigid);
+
+    // Find max cell occupancy
+    uint maxCellOcc;
+    sph::ComputeMaxCellOccupancy(m_fluidSolverProperty, _rigid, maxCellOcc);
+    cudaThreadSynchronize();
+
+    // compute rigid particle volumes
+    sph::ComputeParticleVolume(m_fluidSolverProperty, _rigid);
+
+    sph::InitSphParticleIds(_rigid);
+
+    _rigid->ReleaseCudaGLResources();
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void FluidSystem::InitFluid(std::shared_ptr<Fluid> _fluid)
+{
+    sph::ResetProperties(m_fluidSolverProperty, _fluid);
+    cudaThreadSynchronize();
+    sph::InitFluidAsCube(m_fluidSolverProperty, _fluid);
+    sph::InitSphParticleIds(_fluid);
+    cudaThreadSynchronize();
+    _fluid->ReleaseCudaGLResources();
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void FluidSystem::InitAlgae(std::shared_ptr<Algae> _algae)
+{
+    sph::ResetProperties(m_fluidSolverProperty, _algae);
+    cudaThreadSynchronize();
+    sph::InitFluidAsCube(m_fluidSolverProperty, _algae);
+    cudaThreadSynchronize();
+    sph::InitAlgaeIllumination(m_fluidSolverProperty, _algae);
+    sph::InitSphParticleIds(_algae);
+    cudaThreadSynchronize();
+    _algae->ReleaseCudaGLResources();
+}
+

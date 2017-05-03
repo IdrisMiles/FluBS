@@ -24,6 +24,7 @@ public:
 public slots:
     void OnFrameCached(int frame);
     void OnFrameCacheStale(int frame);
+    void OnFrameFinished(int frame);
 
 
 protected:

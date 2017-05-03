@@ -153,6 +153,13 @@ void sph::InitAlgaeIllumination(const FluidSolverProperty &_solverProps,
 
 //--------------------------------------------------------------------------------------------------------------------
 
+void sph::InitSphParticleIds(std::shared_ptr<BaseSphParticle> _sphParticles)
+{
+    sphGPU::InitSphParticleIds(_sphParticles->GetParticleIdPtr(), _sphParticles->GetProperty()->numParticles);
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
 void sph::ComputeHash(const FluidSolverProperty &_solverProps,
                       std::shared_ptr<BaseSphParticle> _fluid)
 {
@@ -173,6 +180,7 @@ void sph::SortParticlesByHash(std::shared_ptr<BaseSphParticle> _sphParticles)
     sphGPU::SortParticlesByHash(_sphParticles->GetParticleHashIdPtr(),
                                 _sphParticles->GetPositionPtr(),
                                 _sphParticles->GetVelocityPtr(),
+                                _sphParticles->GetParticleIdPtr(),
                                 _sphParticles->GetProperty()->numParticles);
 }
 
@@ -183,6 +191,7 @@ void sph::SortParticlesByHash(std::shared_ptr<Algae> _sphParticles)
     sphGPU::SortParticlesByHash(_sphParticles->GetParticleHashIdPtr(),
                                 _sphParticles->GetPositionPtr(),
                                 _sphParticles->GetVelocityPtr(),
+                                _sphParticles->GetParticleIdPtr(),
                                 _sphParticles->GetPrevPressurePtr(),
                                 _sphParticles->GetIlluminationPtr(),
                                 _sphParticles->GetProperty()->numParticles);

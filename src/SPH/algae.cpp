@@ -134,6 +134,9 @@ void Algae::InitCUDAMemory()
     // particle hash
     cudaMalloc(&d_particleHashIdPtr, m_property->numParticles * sizeof(unsigned int));
 
+    // particle Id
+    cudaMallocManaged(&d_particleIdPtr, m_property->numParticles * sizeof(unsigned int));
+
     cudaMalloc(&d_prevPressurePtr, m_property->numParticles * sizeof(float));
     cudaMalloc(&d_energyPtr, m_property->numParticles * sizeof(float));
 }
@@ -354,7 +357,16 @@ void Algae::GetVelocities(std::vector<glm::vec3> &_vel)
 
 void Algae::GetParticleIds(std::vector<int> &_ids)
 {
+    if(!m_init || this->m_property == nullptr)
+    {
+        return;
+    }
+    _ids.resize(this->m_property->numParticles);
+    checkCudaErrors(cudaMemcpy(&_ids[0], GetParticleIdPtr(), this->m_property->numParticles * sizeof(unsigned int), cudaMemcpyDeviceToHost));
+    ReleaseParticleIdPtr();
 }
+
+//--------------------------------------------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------------------------------------------
 
@@ -380,8 +392,10 @@ void Algae::SetVelocities(const std::vector<glm::vec3> &_vel)
 
 void Algae::SetParticleIds(const std::vector<int> &_ids)
 {
+    assert(_ids.size() == m_property->numParticles);
+    checkCudaErrors(cudaMemcpy(GetParticleIdPtr(), &_ids[0], m_property->numParticles * sizeof(unsigned int), cudaMemcpyHostToDevice));
+    ReleaseParticleIdPtr();
 }
-
 //--------------------------------------------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------------------------------------------

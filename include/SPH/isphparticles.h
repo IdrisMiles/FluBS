@@ -71,6 +71,9 @@ public:
     unsigned int *GetCellParticleIdxPtr();
     void ReleaseCellParticleIdxPtr();
 
+    unsigned int *GetParticleIdPtr();
+    void ReleaseParticleIdPtr();
+
     unsigned int GetMaxCellOcc();
     void SetMaxCellOcc(const unsigned int _maxCellOcc);
 

@@ -280,8 +280,6 @@ void OpenGLScene::initializeGL()
     // Start simulation and drawing rimers
     m_drawTimer->start(16);
 
-    ResetSim();
-
 }
 
 void OpenGLScene::paintGL()
@@ -322,6 +320,11 @@ void OpenGLScene::paintGL()
 
 void OpenGLScene::OnFrameChanged(int frame)
 {
+    if (frame < 0)
+    {
+        return;
+    }
+
     if(m_cache.IsFrameCached(frame))
     {
         m_cache.Load(frame, m_fluidSystem);
@@ -329,6 +332,12 @@ void OpenGLScene::OnFrameChanged(int frame)
     }
     else
     {
+        // check previous frame was cached, if not then need to sim previous frame
+        if(!m_cache.IsFrameCached(frame-1))
+        {
+            OnFrameChanged(frame-1);
+        }
+
         m_fluidSystem->StepSim();
         emit FrameSimmed(frame);
 
@@ -337,6 +346,8 @@ void OpenGLScene::OnFrameChanged(int frame)
 
         m_cache.WriteCache(frame);
     }
+
+    emit FrameFinished(frame);
 }
 
 void OpenGLScene::UpdateSim()

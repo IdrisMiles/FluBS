@@ -10,6 +10,7 @@
 #include <thrust/scan.h>
 #include <thrust/reduce.h>
 #include <thrust/extrema.h>
+#include <thrust/sequence.h>
 
 #include <algorithm>
 
@@ -150,15 +151,16 @@ void sphGPU::ParticleHash(uint *hash, uint *cellOcc, float3 *particles, const ui
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void sphGPU::SortParticlesByHash(uint *hash, float3 *position, float3 *velocity, const uint numPoints)
+void sphGPU::SortParticlesByHash(uint *hash, float3 *position, float3 *velocity, uint *particleId, const uint numPoints)
 {
     thrust::device_ptr<uint> hashPtr = thrust::device_pointer_cast(hash);
     thrust::device_ptr<float3> posPtr = thrust::device_pointer_cast(position);
     thrust::device_ptr<float3> velPtr = thrust::device_pointer_cast(velocity);
+    thrust::device_ptr<uint> particleIdPtr = thrust::device_pointer_cast(particleId);
 
     thrust::sort_by_key(hashPtr,
                         hashPtr + numPoints,
-                        thrust::make_zip_iterator(thrust::make_tuple(posPtr, velPtr)));
+                        thrust::make_zip_iterator(thrust::make_tuple(posPtr, velPtr, particleIdPtr)));
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -166,6 +168,7 @@ void sphGPU::SortParticlesByHash(uint *hash, float3 *position, float3 *velocity,
 void sphGPU::SortParticlesByHash(uint *hash,
                                  float3 *position,
                                  float3 *velocity,
+                                 uint *particleId,
                                  float *prevPressure,
                                  float *illum,
                                  const uint numPoints)
@@ -173,12 +176,13 @@ void sphGPU::SortParticlesByHash(uint *hash,
     thrust::device_ptr<uint> hashPtr = thrust::device_pointer_cast(hash);
     thrust::device_ptr<float3> posPtr = thrust::device_pointer_cast(position);
     thrust::device_ptr<float3> velPtr = thrust::device_pointer_cast(velocity);
+    thrust::device_ptr<uint> particleIdPtr = thrust::device_pointer_cast(particleId);
     thrust::device_ptr<float> prevPressPtr = thrust::device_pointer_cast(prevPressure);
     thrust::device_ptr<float> illumPtr = thrust::device_pointer_cast(illum);
 
     thrust::sort_by_key(hashPtr,
                         hashPtr + numPoints,
-                        thrust::make_zip_iterator(thrust::make_tuple(posPtr, velPtr, prevPressPtr, illumPtr)));
+                        thrust::make_zip_iterator(thrust::make_tuple(posPtr, velPtr, particleIdPtr, prevPressPtr, illumPtr)));
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -615,6 +619,15 @@ void sphGPU::InitAlgaeIllumination(float *illum,
     thrust::device_ptr<float> illumPtr = thrust::device_pointer_cast(illum);
 
     thrust::fill(illumPtr, illumPtr+numPoints, 0.0f);
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void sphGPU::InitSphParticleIds(unsigned int *particleId,
+                                const unsigned int numPoints)
+{
+    thrust::device_ptr<unsigned int> particleIdPtr = thrust::device_pointer_cast(particleId);
+    thrust::sequence(particleIdPtr, particleIdPtr+numPoints, 0);
 }
 
 //--------------------------------------------------------------------------------------------------------------------

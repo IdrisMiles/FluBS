@@ -54,6 +54,8 @@ namespace sph
     void InitAlgaeIllumination(const FluidSolverProperty &_solverProps,
                                std::shared_ptr<Algae> _algae);
 
+    void InitSphParticleIds(std::shared_ptr<BaseSphParticle> _sphParticles);
+
 
     //--------------------------------------------------------------------------------------------------------------------
     // Compute Particle Hash functions

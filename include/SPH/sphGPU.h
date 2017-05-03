@@ -81,6 +81,11 @@ namespace sphGPU
 
     //--------------------------------------------------------------------------------------------------------------------
 
+    void InitSphParticleIds(unsigned int *particleId,
+                            const unsigned int numPoints);
+
+    //--------------------------------------------------------------------------------------------------------------------
+
     void ParticleHash(unsigned int *hash,
                       unsigned int *cellOcc,
                       float3 *particles,
@@ -93,6 +98,7 @@ namespace sphGPU
     void SortParticlesByHash(uint *hash,
                              float3 *position,
                              float3 *velocity,
+                             uint *particleId,
                              const uint numPoints);
 
     //--------------------------------------------------------------------------------------------------------------------
@@ -100,6 +106,7 @@ namespace sphGPU
     void SortParticlesByHash(uint *hash,
                              float3 *position,
                              float3 *velocity,
+                             uint *particleId,
                              float *prevPressure,
                              float *illum,
                              const uint numPoints);
