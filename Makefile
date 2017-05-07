@@ -2418,117 +2418,7 @@ obj/mainwindow.o: src/mainwindow.cpp include/mainwindow.h \
 		include/Widget/sphparticlepropertywidget.h \
 		include/Widget/algaepropertywidget.h \
 		include/Widget/rigidpropertywidget.h \
-		ui/ui_mainwindow.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QVariant \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QAction \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qaction.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qactiongroup.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QApplication \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qapplication.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qcoreapplication.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qeventloop.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qdesktopwidget.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qguiapplication.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qinputmethod.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QButtonGroup \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qbuttongroup.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QFrame \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QHeaderView \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qheaderview.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractitemview.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractscrollarea.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qabstractitemmodel.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qitemselectionmodel.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractitemdelegate.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qstyleoption.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qslider.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractslider.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qstyle.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qtabbar.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qrubberband.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QMenuBar \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qmenubar.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qmenu.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QSpacerItem \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QStatusBar \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qstatusbar.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QTabWidget \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QToolBar \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qtoolbar.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QTreeWidget \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qtreewidget.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qtreeview.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qtreewidgetitemiterator.h \
-		include/Widget/timelinewidget.h \
-		include/Widget/timeline.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QTimeLine \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qtimeline.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qeasingcurve.h \
-		include/openglscene.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QOpenGLWidget \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qopenglwidget.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QSurfaceFormat \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qsurfaceformat.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLContext \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglcontext.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QObject \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QScopedPointer \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglversionfunctions.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLShaderProgram \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglshaderprogram.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qvector3d.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qvector4d.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qmatrix4x4.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qquaternion.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qgenericmatrix.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLVertexArrayObject \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglvertexarrayobject.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLTexture \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopengltexture.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFunctions \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglfunctions.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QTimer \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qtimer.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qbasictimer.h \
-		include/Cache/cachesystem.h \
-		json/src/json.hpp \
-		include/Render/fluidrenderer.h \
-		include/Render/sphparticlerenderer.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/QOpenGLFramebufferObject \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qopenglframebufferobject.h \
-		include/Render/rigidrenderer.h \
-		include/Render/bioluminescentfluidrenderer.h \
-		include/Mesh/meshloader.h \
-		../../../dev/include/assimp/scene.h \
-		../../../dev/include/assimp/types.h \
-		../../../dev/include/assimp/defs.h \
-		../../../dev/include/assimp/vector3.h \
-		../../../dev/include/assimp/Compiler/pushpack1.h \
-		../../../dev/include/assimp/Compiler/poppack1.h \
-		../../../dev/include/assimp/vector2.h \
-		../../../dev/include/assimp/color4.h \
-		../../../dev/include/assimp/matrix3x3.h \
-		../../../dev/include/assimp/matrix4x4.h \
-		../../../dev/include/assimp/quaternion.h \
-		../../../dev/include/assimp/vector2.inl \
-		../../../dev/include/assimp/vector3.inl \
-		../../../dev/include/assimp/color4.inl \
-		../../../dev/include/assimp/quaternion.inl \
-		../../../dev/include/assimp/matrix3x3.inl \
-		../../../dev/include/assimp/matrix4x4.inl \
-		../../../dev/include/assimp/texture.h \
-		../../../dev/include/assimp/mesh.h \
-		../../../dev/include/assimp/light.h \
-		../../../dev/include/assimp/camera.h \
-		../../../dev/include/assimp/material.h \
-		../../../dev/include/assimp/material.inl \
-		../../../dev/include/assimp/anim.h \
-		../../../dev/include/assimp/metadata.h \
-		../../../dev/include/assimp/Compiler/pstdint.h \
-		../../../dev/include/assimp/Importer.hpp \
-		../../../dev/include/assimp/config.h \
-		../../../dev/include/assimp/postprocess.h \
-		include/Mesh/rendermesh.h
+		ui/ui_mainwindow.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/mainwindow.o src/mainwindow.cpp
 
 obj/openglscene.o: src/openglscene.cpp include/openglscene.h \
@@ -3644,50 +3534,7 @@ obj/algaepropertywidget.o: src/Widget/algaepropertywidget.cpp include/Widget/alg
 		include/Widget/sphparticlepropertywidget.h \
 		include/SPH/sphparticlepropeprty.h \
 		include/SPH/algaeproperty.h \
-		ui/ui_algaepropertywidget.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QVariant \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QAction \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qaction.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qicon.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qactiongroup.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QApplication \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qapplication.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qcoreapplication.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qeventloop.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qdesktopwidget.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qguiapplication.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qinputmethod.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QButtonGroup \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qbuttongroup.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QDoubleSpinBox \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qspinbox.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractspinbox.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qvalidator.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qregularexpression.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QFrame \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qframe.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QGridLayout \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qgridlayout.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qlayout.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qlayoutitem.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qboxlayout.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QHeaderView \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qheaderview.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractitemview.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractscrollarea.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qabstractitemmodel.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qitemselectionmodel.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractitemdelegate.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qstyleoption.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qslider.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractslider.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qstyle.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qtabbar.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qtabwidget.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qrubberband.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QLabel \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qlabel.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QSpacerItem
+		ui/ui_algaepropertywidget.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/algaepropertywidget.o src/Widget/algaepropertywidget.cpp
 
 obj/fluidpropertywidget.o: src/Widget/fluidpropertywidget.cpp include/Widget/fluidpropertywidget.h \
@@ -3791,50 +3638,7 @@ obj/fluidpropertywidget.o: src/Widget/fluidpropertywidget.cpp include/Widget/flu
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qtouchdevice.h \
 		include/SPH/sphparticlepropeprty.h \
 		include/SPH/fluidproperty.h \
-		ui/ui_fluidpropertywidget.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QVariant \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QAction \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qaction.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qicon.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qactiongroup.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QApplication \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qapplication.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qcoreapplication.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qeventloop.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qdesktopwidget.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qguiapplication.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qinputmethod.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QButtonGroup \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qbuttongroup.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QDoubleSpinBox \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qspinbox.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractspinbox.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qvalidator.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qregularexpression.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QFrame \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qframe.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QGridLayout \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qgridlayout.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qlayout.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qlayoutitem.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qboxlayout.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QHeaderView \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qheaderview.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractitemview.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractscrollarea.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qabstractitemmodel.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qitemselectionmodel.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractitemdelegate.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qstyleoption.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qslider.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractslider.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qstyle.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qtabbar.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qtabwidget.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qrubberband.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QLabel \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qlabel.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QSpacerItem
+		ui/ui_fluidpropertywidget.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/fluidpropertywidget.o src/Widget/fluidpropertywidget.cpp
 
 obj/rigidpropertywidget.o: src/Widget/rigidpropertywidget.cpp include/Widget/rigidpropertywidget.h \
@@ -3938,49 +3742,7 @@ obj/rigidpropertywidget.o: src/Widget/rigidpropertywidget.cpp include/Widget/rig
 		include/Widget/sphparticlepropertywidget.h \
 		include/SPH/sphparticlepropeprty.h \
 		include/SPH/rigidproperty.h \
-		ui/ui_rigidpropertywidget.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QVariant \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QAction \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qaction.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qicon.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qactiongroup.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QApplication \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qapplication.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qcoreapplication.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qeventloop.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qdesktopwidget.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qguiapplication.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qinputmethod.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QButtonGroup \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qbuttongroup.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QCheckBox \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qcheckbox.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractbutton.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QFrame \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qframe.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QGridLayout \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qgridlayout.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qlayout.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qlayoutitem.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qboxlayout.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QHeaderView \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qheaderview.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractitemview.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractscrollarea.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qabstractitemmodel.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qitemselectionmodel.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractitemdelegate.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qstyleoption.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractspinbox.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qvalidator.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qregularexpression.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qslider.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractslider.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qstyle.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qtabbar.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qtabwidget.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qrubberband.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QSpacerItem
+		ui/ui_rigidpropertywidget.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/rigidpropertywidget.o src/Widget/rigidpropertywidget.cpp
 
 obj/solverpropertywidget.o: src/Widget/solverpropertywidget.cpp include/Widget/solverpropertywidget.h \
@@ -4119,35 +3881,7 @@ obj/solverpropertywidget.o: src/Widget/solverpropertywidget.cpp include/Widget/s
 		include/SPH/algae.h \
 		include/SPH/algaeproperty.h \
 		include/SPH/sphGPU.h \
-		ui/ui_solverpropertywidget.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QVariant \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QAction \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qaction.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qactiongroup.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QApplication \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qapplication.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qcoreapplication.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qeventloop.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qdesktopwidget.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qguiapplication.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qinputmethod.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QButtonGroup \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qbuttongroup.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QHeaderView \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qheaderview.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractitemview.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractscrollarea.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qabstractitemmodel.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qitemselectionmodel.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractitemdelegate.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qstyleoption.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qslider.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractslider.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qstyle.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qtabbar.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qtabwidget.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qrubberband.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QSpinBox
+		ui/ui_solverpropertywidget.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/solverpropertywidget.o src/Widget/solverpropertywidget.cpp
 
 obj/sphparticlepropertywidget.o: src/Widget/sphparticlepropertywidget.cpp include/Widget/sphparticlepropertywidget.h \
@@ -4249,49 +3983,7 @@ obj/sphparticlepropertywidget.o: src/Widget/sphparticlepropertywidget.cpp includ
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qvector2d.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qtouchdevice.h \
 		include/SPH/sphparticlepropeprty.h \
-		ui/ui_sphparticlepropertywidget.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QVariant \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QAction \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qaction.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qicon.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qactiongroup.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QApplication \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qapplication.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qcoreapplication.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qeventloop.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qdesktopwidget.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qguiapplication.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qinputmethod.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QButtonGroup \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qbuttongroup.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QDoubleSpinBox \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qspinbox.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractspinbox.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qvalidator.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qregularexpression.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QGridLayout \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qgridlayout.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qlayout.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qlayoutitem.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qboxlayout.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QHeaderView \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qheaderview.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractitemview.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractscrollarea.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qframe.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qabstractitemmodel.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qitemselectionmodel.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractitemdelegate.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qstyleoption.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qslider.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractslider.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qstyle.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qtabbar.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qtabwidget.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qrubberband.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QLabel \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qlabel.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QSpinBox
+		ui/ui_sphparticlepropertywidget.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/sphparticlepropertywidget.o src/Widget/sphparticlepropertywidget.cpp
 
 obj/timeline.o: src/Widget/timeline.cpp include/Widget/timeline.h \
@@ -4453,52 +4145,9 @@ obj/timelinewidget.o: src/Widget/timelinewidget.cpp include/Widget/timelinewidge
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qtimeline.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qeasingcurve.h \
 		ui/ui_timelinewidget.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/QVariant \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QAction \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qaction.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qicon.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qactiongroup.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QApplication \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qapplication.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qcoreapplication.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qeventloop.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qdesktopwidget.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qguiapplication.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qinputmethod.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QButtonGroup \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qbuttongroup.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QDoubleSpinBox \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qspinbox.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractspinbox.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qvalidator.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qregularexpression.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QGridLayout \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qgridlayout.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qlayout.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qlayoutitem.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qboxlayout.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QHeaderView \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qheaderview.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractitemview.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractscrollarea.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qabstractitemmodel.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qitemselectionmodel.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractitemdelegate.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qstyleoption.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qslider.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractslider.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QStyle \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qstyle.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qtabbar.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qtabwidget.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qrubberband.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QLabel \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qlabel.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QPushButton \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qpushbutton.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractbutton.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QSlider \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QSpinBox \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QStyle
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qicon.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/timelinewidget.o src/Widget/timelinewidget.cpp
 
 obj/cachesystem.o: src/Cache/cachesystem.cpp include/Cache/cachesystem.h \

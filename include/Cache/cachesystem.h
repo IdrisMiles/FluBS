@@ -97,6 +97,9 @@ private:
                const std::string &_object,
                const std::shared_ptr<Rigid> _rigid);
 
+    void LoadFromFile(const std::string _file,
+                      json &_object);
+
 
     std::vector<json> m_cachedFrames;
     std::vector<bool> m_isFrameCached;

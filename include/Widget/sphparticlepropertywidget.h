@@ -30,7 +30,7 @@ class SphParticlePropertyWidget : public QWidget
 
 public:
     /// @brief constructor
-    explicit SphParticlePropertyWidget(QWidget *parent = 0, std::shared_ptr<SphParticleProperty> _property = nullptr);
+    explicit SphParticlePropertyWidget(QWidget *parent = 0, SphParticleProperty *_property = nullptr);
 
     /// @brief destructor
     virtual ~SphParticlePropertyWidget();
@@ -39,7 +39,7 @@ public:
     void AddWidgetToGridLayout(QWidget *w, int col = 0, int rowSpan = 1, int colSpan = 1);
 
     /// @brief Setter for the m_property attribute
-    virtual void SetProperty(std::shared_ptr<SphParticleProperty> _property);
+    virtual void SetProperty(SphParticleProperty *_property);
 
     /// @brief Geter for the m_property attribute
     virtual SphParticleProperty *GetProperty();
@@ -50,7 +50,7 @@ public slots:
 
 signals:
     /// @brief Qt Signal to communicate that the FluidProperty has changed to other classes
-    void PropertyChanged(std::shared_ptr<SphParticleProperty> _property);
+    void PropertyChanged(SphParticleProperty *_property);
 
 protected:
     void SetNumParticles(const int _numParticles);
@@ -67,7 +67,7 @@ private:
     Ui::SphParticlePropertyWidget *ui;
     int m_numRow;
 
-    std::shared_ptr<SphParticleProperty> m_property;
+    SphParticleProperty *m_property;
 };
 
 //-----------------------------------------------------------------------------------------------------------

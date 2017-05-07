@@ -10,6 +10,8 @@
 #include "MeshSampler/meshsampler.h"
 
 
+//------------------------------------------------------------------------------------------------------------
+
 OpenGLScene::OpenGLScene(QWidget *parent) : QOpenGLWidget(parent),
     m_xRot(0),
     m_yRot(0),
@@ -32,6 +34,9 @@ OpenGLScene::OpenGLScene(QWidget *parent) : QOpenGLWidget(parent),
 }
 
 
+//------------------------------------------------------------------------------------------------------------
+
+
 OpenGLScene::~OpenGLScene()
 {
     m_cache.WriteCache();
@@ -39,15 +44,22 @@ OpenGLScene::~OpenGLScene()
 }
 
 
+//------------------------------------------------------------------------------------------------------------
+
+
 QSize OpenGLScene::minimumSizeHint() const
 {
     return QSize(50, 50);
 }
 
+//------------------------------------------------------------------------------------------------------------
+
 QSize OpenGLScene::sizeHint() const
 {
     return QSize(400, 400);
 }
+
+//------------------------------------------------------------------------------------------------------------
 
 static void qNormalizeAngle(int &angle)
 {
@@ -56,6 +68,8 @@ static void qNormalizeAngle(int &angle)
     while (angle > 360 * 16)
         angle -= 360 * 16;
 }
+
+//------------------------------------------------------------------------------------------------------------
 
 void OpenGLScene::setXTranslation(int x)
 {
@@ -66,6 +80,8 @@ void OpenGLScene::setXTranslation(int x)
     }
 }
 
+//------------------------------------------------------------------------------------------------------------
+
 void OpenGLScene::setYTranslation(int y)
 {
     if (y != m_yDis) {
@@ -75,6 +91,8 @@ void OpenGLScene::setYTranslation(int y)
     }
 }
 
+//------------------------------------------------------------------------------------------------------------
+
 void OpenGLScene::setZTranslation(int z)
 {
     if (z != m_zDis) {
@@ -83,6 +101,8 @@ void OpenGLScene::setZTranslation(int z)
         update();
     }
 }
+
+//------------------------------------------------------------------------------------------------------------
 
 void OpenGLScene::setXRotation(int angle)
 {
@@ -94,6 +114,8 @@ void OpenGLScene::setXRotation(int angle)
     }
 }
 
+//------------------------------------------------------------------------------------------------------------
+
 void OpenGLScene::setYRotation(int angle)
 {
     qNormalizeAngle(angle);
@@ -103,6 +125,8 @@ void OpenGLScene::setYRotation(int angle)
         update();
     }
 }
+
+//------------------------------------------------------------------------------------------------------------
 
 void OpenGLScene::setZRotation(int angle)
 {
@@ -114,6 +138,8 @@ void OpenGLScene::setZRotation(int angle)
     }
 }
 
+//------------------------------------------------------------------------------------------------------------
+
 void OpenGLScene::cleanup()
 {
     makeCurrent();
@@ -122,7 +148,7 @@ void OpenGLScene::cleanup()
     doneCurrent();
 }
 
-
+//------------------------------------------------------------------------------------------------------------
 
 void OpenGLScene::initializeGL()
 {
@@ -249,9 +275,9 @@ void OpenGLScene::initializeGL()
     m_fluidSystem->AddAlgae(m_algae);
 
     emit FluidSystemInitialised(m_fluidSystem);
-    emit FluidInitialised(fluidProps);
-    emit RigidInitialised(staticRigidProps);
-    emit AlgaeInitialised(algaeProps);
+    emit FluidInitialised(m_fluid);
+    emit RigidInitialised(m_staticRigid);
+    emit AlgaeInitialised(m_algae);
 
     m_fluidSystem->InitialiseSim();
 
@@ -281,6 +307,8 @@ void OpenGLScene::initializeGL()
     m_drawTimer->start(16);
 
 }
+
+//------------------------------------------------------------------------------------------------------------
 
 void OpenGLScene::paintGL()
 {
@@ -317,6 +345,7 @@ void OpenGLScene::paintGL()
 
 }
 
+//------------------------------------------------------------------------------------------------------------
 
 void OpenGLScene::OnFrameChanged(int frame)
 {
@@ -350,15 +379,28 @@ void OpenGLScene::OnFrameChanged(int frame)
     emit FrameFinished(frame);
 }
 
+//------------------------------------------------------------------------------------------------------------
+
+void OpenGLScene::OnPropertiesChanged()
+{
+    m_cache.ClearCache(-1);
+}
+
+//------------------------------------------------------------------------------------------------------------
+
 void OpenGLScene::UpdateSim()
 {
     m_fluidSystem->StepSim();
 }
 
+//------------------------------------------------------------------------------------------------------------
+
 void OpenGLScene::ResetSim()
 {
     m_fluidSystem->ResetSim();
 }
+
+//------------------------------------------------------------------------------------------------------------
 
 void OpenGLScene::resizeGL(int w, int h)
 {
@@ -366,10 +408,14 @@ void OpenGLScene::resizeGL(int w, int h)
     m_projMat = glm::perspective(45.0f, GLfloat(w) / h, 0.1f, 1000.0f);
 }
 
+//------------------------------------------------------------------------------------------------------------
+
 void OpenGLScene::mousePressEvent(QMouseEvent *event)
 {
     m_lastPos = event->pos();
 }
+
+//------------------------------------------------------------------------------------------------------------
 
 void OpenGLScene::mouseMoveEvent(QMouseEvent *event)
 {
@@ -389,6 +435,8 @@ void OpenGLScene::mouseMoveEvent(QMouseEvent *event)
     }
     m_lastPos = event->pos();
 }
+
+//------------------------------------------------------------------------------------------------------------
 
 void OpenGLScene::CreateSkybox()
 {
@@ -469,6 +517,8 @@ void OpenGLScene::CreateSkybox()
     m_skyboxTex->setData(0, 0, QOpenGLTexture::CubeMapNegativeZ, QOpenGLTexture::RGBA, QOpenGLTexture::UInt8, QImage("tex/skybox/front.jpg").mirrored().bits());
 }
 
+//------------------------------------------------------------------------------------------------------------
+
 void OpenGLScene::DrawSkybox()
 {
     QOpenGLFunctions *glFuncs = QOpenGLContext::currentContext()->functions();
@@ -487,3 +537,7 @@ void OpenGLScene::DrawSkybox()
     glFuncs->glDepthMask(GL_TRUE);
     m_skyboxShader.release();
 }
+
+//------------------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------------------

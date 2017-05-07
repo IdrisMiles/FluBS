@@ -3,7 +3,7 @@
 
 //-----------------------------------------------------------------------------------------------------------
 
-SphParticlePropertyWidget::SphParticlePropertyWidget(QWidget *parent, std::shared_ptr<SphParticleProperty> _property) :
+SphParticlePropertyWidget::SphParticlePropertyWidget(QWidget *parent, SphParticleProperty *_property) :
     QWidget(parent),
     ui(new Ui::SphParticlePropertyWidget),
     m_numRow(5),
@@ -31,7 +31,7 @@ void SphParticlePropertyWidget::AddWidgetToGridLayout(QWidget *w, int col, int r
 
 //-----------------------------------------------------------------------------------------------------------
 
-void SphParticlePropertyWidget::SetProperty(std::shared_ptr<SphParticleProperty> _property)
+void SphParticlePropertyWidget::SetProperty(SphParticleProperty *_property)
 {
     if(_property != nullptr)
     {
@@ -47,7 +47,7 @@ void SphParticlePropertyWidget::SetProperty(std::shared_ptr<SphParticleProperty>
 
 SphParticleProperty *SphParticlePropertyWidget::GetProperty()
 {
-    return m_property.get();
+    return m_property;
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ void SphParticlePropertyWidget::OnPropertyChanged()
 {
     if(m_property == nullptr)
     {
-        m_property = std::shared_ptr<SphParticleProperty>(new SphParticleProperty());
+        m_property = new SphParticleProperty();
     }
 
     if(m_property != nullptr)

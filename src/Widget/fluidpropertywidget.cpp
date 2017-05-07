@@ -3,7 +3,7 @@
 
 //-----------------------------------------------------------------------------------------------------------
 
-FluidPropertyWidget::FluidPropertyWidget(QWidget *parent, std::shared_ptr<FluidProperty> _property) :
+FluidPropertyWidget::FluidPropertyWidget(QWidget *parent, FluidProperty *_property) :
     SphParticlePropertyWidget(parent, _property),
     ui(new Ui::FluidPropertyWidget),
     m_property(_property)
@@ -34,7 +34,7 @@ FluidPropertyWidget::~FluidPropertyWidget()
 
 //-----------------------------------------------------------------------------------------------------------
 
-void FluidPropertyWidget::SetProperty(std::shared_ptr<FluidProperty> _property)
+void FluidPropertyWidget::SetProperty(FluidProperty *_property)
 {
     if(_property != nullptr)
     {
@@ -56,7 +56,7 @@ void FluidPropertyWidget::SetProperty(std::shared_ptr<FluidProperty> _property)
 
 FluidProperty *FluidPropertyWidget::GetProperty()
 {
-    return m_property.get();
+    return m_property;
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -65,7 +65,7 @@ void FluidPropertyWidget::OnPropertyChanged()
 {
     if(m_property == nullptr)
     {
-        m_property = std::shared_ptr<FluidProperty>(new FluidProperty());
+        m_property = new FluidProperty();
     }
 
     if(m_property != nullptr)

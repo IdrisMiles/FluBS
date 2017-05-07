@@ -20,9 +20,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // setup openglscene widget
     connect(ui->scene, SIGNAL(FluidSystemInitialised(std::shared_ptr<FluidSystem>)), this, SLOT(OnFluidSystemInitialised(std::shared_ptr<FluidSystem>)));
-    connect(ui->scene, SIGNAL(FluidInitialised(std::shared_ptr<FluidProperty>)), this, SLOT(OnFluidInitialised(std::shared_ptr<FluidProperty>)));
-    connect(ui->scene, SIGNAL(RigidInitialised(std::shared_ptr<RigidProperty>)), this, SLOT(OnRigidInitialised(std::shared_ptr<RigidProperty>)));
-    connect(ui->scene, SIGNAL(AlgaeInitialised(std::shared_ptr<AlgaeProperty>)), this, SLOT(OnAlgaeInitialised(std::shared_ptr<AlgaeProperty>)));
+    connect(ui->scene, SIGNAL(FluidInitialised(std::shared_ptr<Fluid>)), this, SLOT(OnFluidInitialised(std::shared_ptr<Fluid>)));
+    connect(ui->scene, SIGNAL(RigidInitialised(std::shared_ptr<Rigid>)), this, SLOT(OnRigidInitialised(std::shared_ptr<Rigid>)));
+    connect(ui->scene, SIGNAL(AlgaeInitialised(std::shared_ptr<Algae>)), this, SLOT(OnAlgaeInitialised(std::shared_ptr<Algae>)));
 
     connect(ui->timeline, &TimeLineWidget::FrameChanged, ui->scene, &OpenGLScene::OnFrameChanged);
 
@@ -41,16 +41,18 @@ void MainWindow::OnFluidSystemInitialised(std::shared_ptr<FluidSystem> _fluidSys
 {
     if(_fluidSystem != nullptr)
     {
+        // create property widget
         auto solverPropWidget = new SolverPropertyWidget(ui->properties, _fluidSystem->GetProperty());
         int tabId = ui->properties->addTab(solverPropWidget, "Solver");
 
-
+        // create outliner item
         auto item = new QTreeWidgetItem();
         QString outlinerObjectName = "Solver";
         item->setText(0,outlinerObjectName);
         ui->outliner->addTopLevelItem(item);
 
 
+        // connect outliner to properties tab
         connect(ui->outliner, &QTreeWidget::itemClicked, ui->properties, [this, tabId, outlinerObjectName](QTreeWidgetItem* clickedItem, int column){
             if(clickedItem->text(column) == outlinerObjectName)
             {
@@ -59,22 +61,25 @@ void MainWindow::OnFluidSystemInitialised(std::shared_ptr<FluidSystem> _fluidSys
         });
 
 
+        // connect fluid system property changed to fluid system properties
         auto fluidSystem = _fluidSystem.get();
         connect(solverPropWidget, &SolverPropertyWidget::PropertyChanged, [this, fluidSystem](const FluidSolverProperty &_newProperties){
-            std::cout<<"mainWindow connection solver props changed\n";
             fluidSystem->SetFluidSolverProperty(_newProperties);
         });
+
+        // connect fluid system property changed to openglscene in order ot clear cache
+        connect(solverPropWidget, &SolverPropertyWidget::PropertyChanged, ui->scene, &OpenGLScene::OnPropertiesChanged);
     }
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::OnFluidInitialised(std::shared_ptr<FluidProperty> _fluidProperty)
+void MainWindow::OnFluidInitialised(std::shared_ptr<Fluid> _fluid)
 {
-    if(_fluidProperty != nullptr)
+    if(_fluid != nullptr)
     {
         // create a new fluid property widget
-        auto fluidPropWidget = new FluidPropertyWidget(ui->properties, _fluidProperty);
+        auto fluidPropWidget = new FluidPropertyWidget(ui->properties, _fluid->GetProperty());
         int tabId = ui->properties->addTab(fluidPropWidget, "Fluid");
 
         // add fluid to outliner
@@ -89,18 +94,21 @@ void MainWindow::OnFluidInitialised(std::shared_ptr<FluidProperty> _fluidPropert
                 ui->properties->setCurrentIndex(tabId);
             }
         });
+
+        // connect fluid property changed to openglscene in order ot clear cache
+        connect(fluidPropWidget, &FluidPropertyWidget::PropertyChanged, ui->scene, &OpenGLScene::OnPropertiesChanged);
     }
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::OnRigidInitialised(std::shared_ptr<RigidProperty> _rigidProperty)
+void MainWindow::OnRigidInitialised(std::shared_ptr<Rigid> _rigid)
 {
-    if(_rigidProperty != nullptr)
+    if(_rigid != nullptr)
     {
-        auto rigidPropWidget = new RigidPropertyWidget(ui->properties, _rigidProperty);
+        auto rigidPropWidget = new RigidPropertyWidget(ui->properties, _rigid->GetProperty());
         int tabId = ui->properties->addTab(rigidPropWidget, "Rigid");
-        rigidPropWidget->SetProperty(_rigidProperty);
+
 
         auto item = new QTreeWidgetItem();
         item->setText(0,"Rigid");
@@ -112,18 +120,21 @@ void MainWindow::OnRigidInitialised(std::shared_ptr<RigidProperty> _rigidPropert
                 ui->properties->setCurrentIndex(tabId);
             }
         });
+
+        // connect rigid property changed to openglscene in order ot clear cache
+        connect(rigidPropWidget, &RigidPropertyWidget::PropertyChanged, ui->scene, &OpenGLScene::OnPropertiesChanged);
     }
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::OnAlgaeInitialised(std::shared_ptr<AlgaeProperty> _algaeProperty)
+void MainWindow::OnAlgaeInitialised(std::shared_ptr<Algae> _algae)
 {
-    if(_algaeProperty != nullptr)
+    if(_algae != nullptr)
     {
-        auto algaePropWidget = new AlgaePropertyWidget(ui->properties, _algaeProperty);
+        auto algaePropWidget = new AlgaePropertyWidget(ui->properties, _algae->GetProperty());
         int tabId = ui->properties->addTab(algaePropWidget, "Algae");
-        algaePropWidget->SetProperty(_algaeProperty);
+
 
         auto item = new QTreeWidgetItem();
         item->setText(0,"Algae");
@@ -135,6 +146,9 @@ void MainWindow::OnAlgaeInitialised(std::shared_ptr<AlgaeProperty> _algaePropert
                 ui->properties->setCurrentIndex(tabId);
             }
         });
+
+        // connect algae property changed to openglscene in order ot clear cache
+        connect(algaePropWidget, &AlgaePropertyWidget::PropertyChanged, ui->scene, &OpenGLScene::OnPropertiesChanged);
     }
 }
 

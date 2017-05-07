@@ -54,6 +54,7 @@ public slots:
     void UpdateSim();
     void ResetSim();
     void OnFrameChanged(int frame);
+    void OnPropertiesChanged();
 
 signals:
     void xRotationChanged(int angle);
@@ -63,13 +64,14 @@ signals:
     void yTranslationChanged(int y);
     void zTranslationChanged(int z);
     void FluidSystemInitialised(std::shared_ptr<FluidSystem> _fluidSolver);
-    void FluidInitialised(std::shared_ptr<FluidProperty> _fluidProperty);
-    void RigidInitialised(std::shared_ptr<RigidProperty> _rigidProperty);
-    void AlgaeInitialised(std::shared_ptr<AlgaeProperty> _algarProperty);
+    void FluidInitialised(std::shared_ptr<Fluid> _fluid);
+    void RigidInitialised(std::shared_ptr<Rigid> _rigid);
+    void AlgaeInitialised(std::shared_ptr<Algae> _algar);
     void FrameCached(int frame);
     void FrameSimmed(int frame);
     void FrameLoaded(int frame);
     void FrameFinished(int frame);
+    void CacheCleared();
 
 protected:
     void initializeGL() Q_DECL_OVERRIDE;

@@ -23,9 +23,9 @@ public:
 
 public slots:
     void OnFluidSystemInitialised(std::shared_ptr<FluidSystem> _fluidSystem);
-    void OnFluidInitialised(std::shared_ptr<FluidProperty> _fluidProperty);
-    void OnRigidInitialised(std::shared_ptr<RigidProperty> _rigidProperty);
-    void OnAlgaeInitialised(std::shared_ptr<AlgaeProperty> _algaeProperty);
+    void OnFluidInitialised(std::shared_ptr<Fluid> _fluid);
+    void OnRigidInitialised(std::shared_ptr<Rigid> _rigid);
+    void OnAlgaeInitialised(std::shared_ptr<Algae> _algae);
 
 private:
     Ui::MainWindow *ui;

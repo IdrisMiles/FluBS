@@ -3,7 +3,7 @@
 
 //-----------------------------------------------------------------------------------------------------------
 
-AlgaePropertyWidget::AlgaePropertyWidget(QWidget *parent, std::shared_ptr<AlgaeProperty> _property) :
+AlgaePropertyWidget::AlgaePropertyWidget(QWidget *parent, AlgaeProperty *_property) :
     SphParticlePropertyWidget(parent),
     ui(new Ui::AlgaePropertyWidget),
     m_property(_property)
@@ -24,7 +24,7 @@ AlgaePropertyWidget::~AlgaePropertyWidget()
 
 //-----------------------------------------------------------------------------------------------------------
 
-void AlgaePropertyWidget::SetProperty(std::shared_ptr<AlgaeProperty> _property)
+void AlgaePropertyWidget::SetProperty(AlgaeProperty *_property)
 {
     if(_property != nullptr)
     {
@@ -42,7 +42,7 @@ void AlgaePropertyWidget::SetProperty(std::shared_ptr<AlgaeProperty> _property)
 
 AlgaeProperty *AlgaePropertyWidget::GetProperty()
 {
-    return m_property.get();
+    return m_property;
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -51,7 +51,7 @@ void AlgaePropertyWidget::OnPropertyChanged()
 {
     if(m_property == nullptr)
     {
-        m_property = std::shared_ptr<AlgaeProperty>(new AlgaeProperty());
+        m_property = new AlgaeProperty();
     }
 
     if(m_property != nullptr)
