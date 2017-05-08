@@ -15,13 +15,27 @@ namespace sphGPU
     void ResetProperties(float3 *pressureForce,
                          float3 *externalForce,
                          float3 *totalForce,
-//                         float * mass,
                          float *density,
                          float *pressure,
                          uint *hash,
                          uint *cellOcc,
                          uint *cellPartIdx,
-//                         const float massValue,
+                         const uint numCells,
+                         const uint numPoints);
+
+    //--------------------------------------------------------------------------------------------------------------------
+
+    // Algae Reset
+    void ResetProperties(float3 *pressureForce,
+                         float3 *externalForce,
+                         float3 *totalForce,
+                         float *density,
+                         float *pressure,
+                         float *prevPressure,
+                         float *bioIllum,
+                         uint *hash,
+                         uint *cellOcc,
+                         uint *cellPartIdx,
                          const uint numCells,
                          const uint numPoints);
 
@@ -31,14 +45,12 @@ namespace sphGPU
     void ResetProperties(float3 *pressureForce,
                          float3 *externalForce,
                          float3 *totalForce,
-//                         float * mass,
                          float *density,
                          float *pressure,
                          float *volume,
                          uint *hash,
                          uint *cellOcc,
                          uint *cellPartIdx,
-//                         const float massValue,
                          const uint numCells,
                          const uint numPoints);
 

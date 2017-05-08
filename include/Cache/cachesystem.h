@@ -2,6 +2,9 @@
 #define CACHESYSTEM_H
 
 #include <vector>
+#include <thread>
+#include <utility>
+#include <functional>
 
 #include <glm/glm.hpp>
 
@@ -9,6 +12,12 @@
 
 #include "FluidSystem/fluidsystem.h"
 
+
+#define IS_CACHED(status) (status & CacheStatus::CACHED)
+#define IS_CACHED_TO_MEMORY(status) (status & CacheStatus::MEMORY)
+#define IS_CACHED_TO_DISK(status) (status & CacheStatus::DISK)
+#define IS_NOT_CACHED(status) (status & CacheStatus::NOTCACHED)
+#define IS_DIRTY(status) (status & CacheStatus::DIRTY)
 
 using json = nlohmann::json;
 
@@ -20,28 +29,26 @@ void from_json(const json& j, glm::vec3& v);
 
 }
 
-
+typedef uint8_t foo;
 enum CacheStatus
 {
-    NOTCACHED = 0x00,
-    DIRTY = 0x01,
-    CACHED = 0x02,
-    MEMORY = 0x04,
-    DISK = 0x08
+    NOTCACHED = (1<<0), // 00000001
+    DIRTY = (1<<1),     // 00000010
+    CACHED = (1<<2),    // 00000100
+    MEMORY = (1<<3),    // 00001000
+    DISK = (1<<4),      // 00010000
 };
 
 
 class CacheSystem
 {
 public:
-    CacheSystem(const int _numFrames = 100);
+    CacheSystem(const int _numFrames = 10);
     ~CacheSystem();
 
-    void Cache(const int _frame,
-               std::shared_ptr<FluidSystem> _fluidSystem);
+    void Cache(const int _frame, std::shared_ptr<FluidSystem> _fluidSystem);
 
-    void Load(const int _frame,
-              std::shared_ptr<FluidSystem> _fluidSystem);
+    void Load(const int _frame, std::shared_ptr<FluidSystem> _fluidSystem);
 
     void WriteCache(const int _frame = -1);
 
@@ -65,44 +72,34 @@ private:
         std::string cellWidth = "cell width";
     } m_dataId;
 
-    void Cache(const int _frame,
-               const std::string &_object,
-               std::shared_ptr<FluidSystem> _fluidSystem);
+    void Cache(json &_frame, const std::string &_object, std::shared_ptr<FluidSystem> _fluidSystem);
 
-    void Cache(const int _frame,
-               const std::string &_object,
-               const std::shared_ptr<Fluid> _fluid);
+    void Cache(json &_frame, const std::string &_object, const std::shared_ptr<Fluid> _fluid);
 
-    void Cache(const int _frame,
-               const std::string &_object,
-               const std::shared_ptr<Algae> _algae);
+    void Cache(json &_frame, const std::string &_object, const std::shared_ptr<Algae> _algae);
 
-    void Cache(const int _frame,
-               const std::string &_object,
-               const std::shared_ptr<Rigid> _rigid);
+    void Cache(json &_frame, const std::string &_object, const std::shared_ptr<Rigid> _rigid);
 
-    void Load(const int _frame,
-               const std::string &_object,
-               std::shared_ptr<FluidSystem> _fluidSystem);
+    void Load(const json &_frame, const std::string &_object, std::shared_ptr<FluidSystem> _fluidSystem);
 
-    void Load(const int _frame,
-               const std::string &_object,
-               const std::shared_ptr<Fluid> _fluid);
+    void Load(const json &_frame, const std::string &_object, const std::shared_ptr<Fluid> _fluid);
 
-    void Load(const int _frame,
-               const std::string &_object,
-               const std::shared_ptr<Algae> _algae);
+    void Load(const json &_frame, const std::string &_object, const std::shared_ptr<Algae> _algae);
 
-    void Load(const int _frame,
-               const std::string &_object,
-               const std::shared_ptr<Rigid> _rigid);
+    void Load(const json &_frame, const std::string &_object, const std::shared_ptr<Rigid> _rigid);
 
-    void LoadFromFile(const std::string _file,
-                      json &_object);
+
+    void WriteToDisk(const std::string _file, const json &_object);
+
+    void LoadFromMemory(json &_frame, std::shared_ptr<FluidSystem> _fluidSystem);
+
+    void LoadFromDisk(const std::string _file, json &_object);
 
 
     std::vector<json> m_cachedFrames;
-    std::vector<bool> m_isFrameCached;
+    std::vector<foo> m_isFrameCached;
+    std::vector<std::thread> m_threads;
+    int m_threadHead;
 
 };
 

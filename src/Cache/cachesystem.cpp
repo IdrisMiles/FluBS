@@ -26,7 +26,10 @@ void glm::from_json(const json& j, glm::vec3& v)
 CacheSystem::CacheSystem(const int _numFrames)
 {
     m_cachedFrames.resize(_numFrames);
-    m_isFrameCached.resize(_numFrames, false);
+    m_isFrameCached.resize(_numFrames, CacheStatus::NOTCACHED);
+
+    m_threads.resize(std::thread::hardware_concurrency()-1);
+    m_threadHead = 0;
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -38,6 +41,11 @@ CacheSystem::~CacheSystem()
     // destroy
     m_cachedFrames.clear();
     m_isFrameCached.clear();
+
+    if(m_threads[m_threadHead].joinable())
+    {
+        m_threads[m_threadHead].join();
+    }
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -48,21 +56,23 @@ void CacheSystem::Cache(const int _frame,
     // Make sure our container is large enough to hold this frame
     while(m_cachedFrames.size() <= _frame)
     {
+//        std::cout<<"need to sim/cache these frames\n";
         m_cachedFrames.push_back(json());
-        m_isFrameCached.push_back(false);
+        m_isFrameCached.push_back(CacheStatus::NOTCACHED);
     }
 
-    m_isFrameCached[_frame] = true;
+    m_isFrameCached[_frame] |= (CacheStatus::CACHED | CacheStatus::MEMORY);
+    m_isFrameCached[_frame] &= ~(CacheStatus::NOTCACHED | CacheStatus::DIRTY);
 
-    Cache(_frame, "Fluid System", _fluidSystem);
+    Cache(m_cachedFrames[_frame], "Fluid System", _fluidSystem);
 
 
     auto fluid = _fluidSystem->GetFluid();
-    Cache(_frame, "Fluid", fluid);
+    Cache(m_cachedFrames[_frame], "Fluid", fluid);
 
 
     auto algae = _fluidSystem->GetAlgae();
-    Cache(_frame, "Algae", algae);
+    Cache(m_cachedFrames[_frame], "Algae", algae);
 
 
     auto activeRigids = _fluidSystem->GetActiveRigids();
@@ -71,7 +81,7 @@ void CacheSystem::Cache(const int _frame,
         std::stringstream ss;
         ss << std::setw(4) << std::setfill('0') << i;
 
-        Cache(_frame, "Active Rigid"+ss.str(), activeRigids[i]);
+        Cache(m_cachedFrames[_frame], "Active Rigid"+ss.str(), activeRigids[i]);
     }
 
 
@@ -84,29 +94,298 @@ void CacheSystem::Cache(const int _frame,
             std::stringstream ss;
             ss << std::setw(4) << std::setfill('0') << i;
 
-            Cache(_frame, "Static Rigid"+ss.str(), staticRigids[i]);
+            Cache(m_cachedFrames[_frame], "Static Rigid"+ss.str(), staticRigids[i]);
         }
+    }
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void CacheSystem::Load(const int _frame, std::shared_ptr<FluidSystem> _fluidSystem)
+{
+    // Make sure our container holds this frame
+    if(m_cachedFrames.size() <= _frame && m_isFrameCached.size() <= _frame)
+    {
+        return;
+    }
+
+    // Make sure this frame has been cached
+    if(IS_NOT_CACHED(m_isFrameCached[_frame]) || (m_isFrameCached[_frame] & CacheStatus::DIRTY) || m_cachedFrames[_frame].empty())
+    {
+        return;
+    }
+
+
+    // Load cached from disk to memory if necessary
+    if(IS_CACHED(m_isFrameCached[_frame]) && IS_CACHED_TO_DISK(m_isFrameCached[_frame]) && !IS_CACHED_TO_MEMORY(m_isFrameCached[_frame]))
+    {
+        std::stringstream ss;
+        ss << std::setw(4) << std::setfill('0') << _frame;
+        std::string fileName = "data_"+ss.str()+".json";
+
+        std::cout<<"cached to disk not memory\n";
+        LoadFromDisk(fileName, m_cachedFrames[_frame]);
+    }
+
+
+    LoadFromMemory(m_cachedFrames[_frame], _fluidSystem);
+
+}
+
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void CacheSystem::WriteCache(const int _frame)
+{
+    if(_frame == -1)
+    {
+        // cache all frames
+        return;
+    }
+
+    if(_frame >= m_cachedFrames.size() && _frame > m_isFrameCached.size())
+    {
+        return;
+    }
+
+    std::stringstream ss;
+    ss << std::setw(4) << std::setfill('0') << _frame;
+    std::string fileName = "data_"+ss.str()+".json";
+
+
+    if(m_threads[m_threadHead].joinable())
+    {
+        m_threads[m_threadHead].join();
+    }
+
+    m_threads[m_threadHead] = std::thread(&CacheSystem::WriteToDisk, this, fileName, std::ref(m_cachedFrames[_frame]));
+    m_threadHead = (m_threadHead+1)%m_threads.size();
+//    WriteToDisk(fileName, m_cachedFrames[_frame]);
+
+
+    m_isFrameCached[_frame] |= (CacheStatus::CACHED | CacheStatus::DISK);
+    m_isFrameCached[_frame] &= ~(CacheStatus::NOTCACHED | CacheStatus::DIRTY);
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void CacheSystem::WriteToDisk(const std::string _file, const json &_object)
+{
+    std::ofstream ofs(_file);
+    if(ofs.is_open())
+    {
+        ofs << std::setw(4)<< _object << std::endl;
+
+        ofs.close();
+    }
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+bool CacheSystem::IsFrameCached(const int _frame)
+{
+    if(m_cachedFrames.size() <= _frame)
+    {
+        return false;
+    }
+
+    return (m_isFrameCached[_frame] & CacheStatus::CACHED);
+//    return (!m_cachedFrames[_frame].empty());
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void CacheSystem::ClearCache(const int frame)
+{
+    if(frame == -1)
+    {
+        for(auto &cf : m_cachedFrames)
+        {
+            cf.clear();
+        }
+
+        for(auto fr : m_isFrameCached)
+        {
+            fr = CacheStatus::NOTCACHED;
+        }
+    }
+    else if(m_cachedFrames.size() > frame)
+    {
+        m_cachedFrames[frame].clear();
+        m_isFrameCached[frame] = CacheStatus::NOTCACHED;
+    }
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void CacheSystem::Cache(json &_frame, const std::string &_object, std::shared_ptr<FluidSystem> _fluidSystem)
+{
+    auto props = _fluidSystem->GetProperty();
+    _frame[_object][m_dataId.deltaTime] = props.deltaTime;
+    _frame[_object][m_dataId.solveIterations] = props.solveIterations;
+    _frame[_object][m_dataId.gridRes] = props.gridResolution;
+    _frame[_object][m_dataId.cellWidth] = props.gridCellWidth;
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void CacheSystem::Cache(json &_frame, const std::string &_object, const std::shared_ptr<Fluid> _fluid)
+{
+    std::vector<glm::vec3> pos;
+    std::vector<glm::vec3> vel;
+    std::vector<int> id;
+
+    _fluid->GetPositions(pos);
+    _fluid->GetVelocities(vel);
+    _fluid->GetParticleIds(id);
+    auto props = _fluid->GetProperty();
+
+    _frame[_object][m_dataId.pos] = pos;
+    _frame[_object][m_dataId.vel] = vel;
+    _frame[_object][m_dataId.particlId] = id;
+
+    _frame[_object][m_dataId.mass] = props->particleMass;
+    _frame[_object][m_dataId.radius] = props->particleRadius;
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void CacheSystem::Cache(json &_frame, const std::string &_object, const std::shared_ptr<Algae> _algae)
+{
+    std::vector<glm::vec3> pos;
+    std::vector<glm::vec3> vel;
+    std::vector<int> id;
+    std::vector<float> bio;
+    auto props = _algae->GetProperty();
+
+    _algae->GetPositions(pos);
+    _algae->GetVelocities(vel);
+    _algae->GetParticleIds(id);
+    _algae->GetBioluminescentIntensities(bio);
+
+    _frame[_object][m_dataId.pos] = pos;
+    _frame[_object][m_dataId.vel] = vel;
+    _frame[_object][m_dataId.particlId] = id;
+    _frame[_object][m_dataId.bioluminescentIntensoty] = bio;
+
+    _frame[_object][m_dataId.mass] = props->particleMass;
+    _frame[_object][m_dataId.radius] = props->particleRadius;
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void CacheSystem::Cache(json &_frame, const std::string &_object, const std::shared_ptr<Rigid> _rigid)
+{
+
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void CacheSystem::Load(const json &_frame, const std::string &_object, std::shared_ptr<FluidSystem> _fluidSystem)
+{
+    if(_frame[_object].empty())
+    {
+        return;
+    }
+
+    try
+    {
+        auto props = _fluidSystem->GetProperty();
+        props.deltaTime        = _frame[_object][m_dataId.deltaTime];
+        props.solveIterations  = _frame[_object][m_dataId.solveIterations];
+        props.gridResolution   = _frame[_object][m_dataId.gridRes];
+        props.gridCellWidth    = _frame[_object][m_dataId.cellWidth];
+    }
+    catch(std::exception e)
+    {
+        std::cout<<e.what()<<"\t|FluidSystem\n";
+    }
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void CacheSystem::Load(const json &_frame, const std::string &_object, const std::shared_ptr<Fluid> _fluid)
+{
+    if(_frame[_object].empty())
+    {
+        return;
+    }
+
+    std::vector<glm::vec3> pos;
+    std::vector<glm::vec3> vel;
+    std::vector<int> id;
+    auto props = _fluid->GetProperty();
+
+    try
+    {
+        pos = _frame[_object].at(m_dataId.pos).get<std::vector<glm::vec3>>();
+        vel = _frame[_object].at(m_dataId.vel).get<std::vector<glm::vec3>>();
+        id = _frame[_object].at(m_dataId.particlId).get<std::vector<int>>();
+
+        props->particleMass = _frame[_object][m_dataId.mass];
+        props->particleRadius = _frame[_object][m_dataId.radius];
+
+        _fluid->SetPositions(pos);
+        _fluid->SetVelocities(vel);
+        _fluid->SetParticleIds(id);
+    }
+    catch(std::exception e)
+    {
+        std::cout<<e.what()<<"\t|Fluid\n";
+    }
+
+
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void CacheSystem::Load(const json &_frame, const std::string &_object, const std::shared_ptr<Algae> _algae)
+{
+    if(_frame[_object].empty())
+    {
+        return;
+    }
+    std::vector<glm::vec3> pos;
+    std::vector<glm::vec3> vel;
+    std::vector<int> id;
+    std::vector<float> bio;
+    auto props = _algae->GetProperty();
+
+    try
+    {
+        pos = _frame[_object].at(m_dataId.pos).get<std::vector<glm::vec3>>();
+        vel = _frame[_object].at(m_dataId.vel).get<std::vector<glm::vec3>>();
+        id = _frame[_object].at(m_dataId.particlId).get<std::vector<int>>();
+        bio = _frame[_object].at(m_dataId.bioluminescentIntensoty).get<std::vector<float>>();
+
+        props->particleMass = _frame[_object][m_dataId.mass];
+        props->particleRadius = _frame[_object][m_dataId.radius];
+
+        _algae->SetPositions(pos);
+        _algae->SetVelocities(vel);
+        _algae->SetParticleIds(id);
+        _algae->SetBioluminescentIntensities(bio);
+    }
+    catch(std::exception e)
+    {
+        std::cout<<e.what()<<"\t|Algae\n";
     }
 
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void CacheSystem::Load(const int _frame,
-                       std::shared_ptr<FluidSystem> _fluidSystem)
+void CacheSystem::Load(const json &_frame,
+                       const std::string &_object,
+                       const std::shared_ptr<Rigid> _rigid)
 {
-    // Make sure our container is large enough to hold this frame
-    if(m_cachedFrames.size() <= _frame && m_isFrameCached.size() <= _frame)
-    {
-        return;
-    }
 
-    if(!m_isFrameCached[_frame] || m_cachedFrames[_frame].empty())
-    {
-        return;
-    }
+}
 
+//--------------------------------------------------------------------------------------------------------------------
 
+void CacheSystem::LoadFromMemory(json &_frame, std::shared_ptr<FluidSystem> _fluidSystem)
+{
     Load(_frame, "Fluid System", _fluidSystem);
 
 
@@ -129,262 +408,22 @@ void CacheSystem::Load(const int _frame,
 
 
     // Static rigids won't change throughout sim
-//    if(_frame == 0)
-//    {
-        auto staticRigids = _fluidSystem->GetStaticRigids();
-        for (int i=0; i<staticRigids.size(); ++i)
-        {
-            std::stringstream ss;
-            ss << std::setw(4) << std::setfill('0') << i;
-
-            Load(0, "Static Rigid"+ss.str(), staticRigids[i]);
-        }
-//    }
-}
-
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void CacheSystem::WriteCache(const int _frame)
-{
-    if(_frame == -1)
+    auto staticRigids = _fluidSystem->GetStaticRigids();
+    for (int i=0; i<staticRigids.size(); ++i)
     {
-        // cache all frames
-        return;
-    }
+        std::stringstream ss;
+        ss << std::setw(4) << std::setfill('0') << i;
 
-    if(_frame >= m_cachedFrames.size())
-    {
-        return;
-    }
-
-
-    std::stringstream ss;
-    ss << std::setw(4) << std::setfill('0') << _frame;
-    std::ofstream ofs("data_"+ss.str());
-    if(ofs.is_open())
-    {
-        ofs << std::setw(4)<< m_cachedFrames[_frame] << std::endl;
-
-        ofs.close();
-    }
-
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-bool CacheSystem::IsFrameCached(const int _frame)
-{
-    if(m_cachedFrames.size() <= _frame)
-    {
-        return false;
-    }
-
-    return m_isFrameCached[_frame];
-    return (!m_cachedFrames[_frame].empty());
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void CacheSystem::ClearCache(const int frame)
-{
-    if(frame == -1)
-    {
-        for(auto &cf : m_cachedFrames)
-        {
-            cf.clear();
-        }
-
-        for(auto fr : m_isFrameCached)
-        {
-            fr = false;
-        }
-    }
-    else if(m_cachedFrames.size() > frame)
-    {
-        m_cachedFrames[frame].clear();
-        m_isFrameCached[frame] = false;
+        Load(m_cachedFrames[0], "Static Rigid"+ss.str(), staticRigids[i]);
     }
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void CacheSystem::Cache(const int _frame,
-                        const std::string &_object,
-                        std::shared_ptr<FluidSystem> _fluidSystem)
+void CacheSystem::LoadFromDisk(const std::string _file, json &_object)
 {
-    auto props = _fluidSystem->GetProperty();
-    m_cachedFrames[_frame][_object][m_dataId.deltaTime] = props.deltaTime;
-    m_cachedFrames[_frame][_object][m_dataId.solveIterations] = props.solveIterations;
-    m_cachedFrames[_frame][_object][m_dataId.gridRes] = props.gridResolution;
-    m_cachedFrames[_frame][_object][m_dataId.cellWidth] = props.gridCellWidth;
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void CacheSystem::Cache(const int _frame,
-           const std::string &_object,
-           const std::shared_ptr<Fluid> _fluid)
-{
-    std::vector<glm::vec3> pos;
-    std::vector<glm::vec3> vel;
-    std::vector<int> id;
-
-    _fluid->GetPositions(pos);
-    _fluid->GetVelocities(vel);
-    _fluid->GetParticleIds(id);
-    auto props = _fluid->GetProperty();
-
-    m_cachedFrames[_frame][_object][m_dataId.pos] = pos;
-    m_cachedFrames[_frame][_object][m_dataId.vel] = vel;
-    m_cachedFrames[_frame][_object][m_dataId.particlId] = id;
-
-    m_cachedFrames[_frame][_object][m_dataId.mass] = props->particleMass;
-    m_cachedFrames[_frame][_object][m_dataId.radius] = props->particleRadius;
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void CacheSystem::Cache(const int _frame,
-           const std::string &_object,
-           const std::shared_ptr<Algae> _algae)
-{
-    std::vector<glm::vec3> pos;
-    std::vector<glm::vec3> vel;
-    std::vector<int> id;
-    std::vector<float> bio;
-    auto props = _algae->GetProperty();
-
-    _algae->GetPositions(pos);
-    _algae->GetVelocities(vel);
-    _algae->GetParticleIds(id);
-    _algae->GetBioluminescentIntensities(bio);
-
-    m_cachedFrames[_frame][_object][m_dataId.pos] = pos;
-    m_cachedFrames[_frame][_object][m_dataId.vel] = vel;
-    m_cachedFrames[_frame][_object][m_dataId.particlId] = id;
-    m_cachedFrames[_frame][_object][m_dataId.bioluminescentIntensoty] = bio;
-
-    m_cachedFrames[_frame][_object][m_dataId.mass] = props->particleMass;
-    m_cachedFrames[_frame][_object][m_dataId.radius] = props->particleRadius;
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void CacheSystem::Cache(const int _frame,
-                        const std::string &_object,
-                        const std::shared_ptr<Rigid> _rigid)
-{
-
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void CacheSystem::Load(const int _frame,
-                       const std::string &_object,
-                       std::shared_ptr<FluidSystem> _fluidSystem)
-{
-    if(m_cachedFrames[_frame][_object].empty())
-    {
-        return;
-    }
-
-    try
-    {
-        auto props = _fluidSystem->GetProperty();
-        props.deltaTime        = m_cachedFrames[_frame][_object][m_dataId.deltaTime];
-        props.solveIterations  = m_cachedFrames[_frame][_object][m_dataId.solveIterations];
-        props.gridResolution   = m_cachedFrames[_frame][_object][m_dataId.gridRes];
-        props.gridCellWidth    = m_cachedFrames[_frame][_object][m_dataId.cellWidth];
-    }
-    catch(std::exception e)
-    {
-        std::cout<<e.what()<<"\t|FluidSystem\n";
-    }
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void CacheSystem::Load(const int _frame,
-                       const std::string &_object,
-                       const std::shared_ptr<Fluid> _fluid)
-{
-    if(m_cachedFrames[_frame][_object].empty())
-    {
-        return;
-    }
-
-    std::vector<glm::vec3> pos;
-    std::vector<glm::vec3> vel;
-    std::vector<int> id;
-    auto props = _fluid->GetProperty();
-
-    try
-    {
-        pos = m_cachedFrames[_frame][_object].at(m_dataId.pos).get<std::vector<glm::vec3>>();
-        vel = m_cachedFrames[_frame][_object].at(m_dataId.vel).get<std::vector<glm::vec3>>();
-        id = m_cachedFrames[_frame][_object].at(m_dataId.particlId).get<std::vector<int>>();
-
-        props->particleMass = m_cachedFrames[_frame][_object][m_dataId.mass];
-        props->particleRadius = m_cachedFrames[_frame][_object][m_dataId.radius];
-
-        _fluid->SetPositions(pos);
-        _fluid->SetVelocities(vel);
-        _fluid->SetParticleIds(id);
-    }
-    catch(std::exception e)
-    {
-        std::cout<<e.what()<<"\t|Fluid\n";
-    }
-
-
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void CacheSystem::Load(const int _frame,
-                       const std::string &_object,
-                       const std::shared_ptr<Algae> _algae)
-{
-    if(m_cachedFrames[_frame][_object].empty())
-    {
-        return;
-    }
-    std::vector<glm::vec3> pos;
-    std::vector<glm::vec3> vel;
-    std::vector<int> id;
-    std::vector<float> bio;
-    auto props = _algae->GetProperty();
-
-    try
-    {
-        pos = m_cachedFrames[_frame][_object].at(m_dataId.pos).get<std::vector<glm::vec3>>();
-        vel = m_cachedFrames[_frame][_object].at(m_dataId.vel).get<std::vector<glm::vec3>>();
-        id = m_cachedFrames[_frame][_object].at(m_dataId.particlId).get<std::vector<int>>();
-        bio = m_cachedFrames[_frame][_object].at(m_dataId.bioluminescentIntensoty).get<std::vector<float>>();
-
-        props->particleMass = m_cachedFrames[_frame][_object][m_dataId.mass];
-        props->particleRadius = m_cachedFrames[_frame][_object][m_dataId.radius];
-
-        _algae->SetPositions(pos);
-        _algae->SetVelocities(vel);
-        _algae->SetParticleIds(id);
-        _algae->SetBioluminescentIntensities(bio);
-    }
-    catch(std::exception e)
-    {
-        std::cout<<e.what()<<"\t|Algae\n";
-    }
-
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void CacheSystem::Load(const int _frame,
-                       const std::string &_object,
-                       const std::shared_ptr<Rigid> _rigid)
-{
-
+    std::ifstream i(_file);
+    i >> _object;
 }
 
 //--------------------------------------------------------------------------------------------------------------------

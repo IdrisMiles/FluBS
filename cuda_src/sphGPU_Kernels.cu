@@ -74,11 +74,11 @@ __global__ void sphGPU_Kernels::ParticleHash_Kernel(uint *hash,
 //--------------------------------------------------------------------------------------------------------------------
 
 __global__ void sphGPU_Kernels::ComputeVolume_kernel(float *volume,
-                                     const uint *cellOcc,
-                                     const uint *cellPartIdx,
-                                     const float3 *particles,
-                                     const uint numPoints,
-                                     const float smoothingLength)
+                                                     const uint *cellOcc,
+                                                     const uint *cellPartIdx,
+                                                     const float3 *particles,
+                                                     const uint numPoints,
+                                                     const float smoothingLength)
 {
     int thisCellIdx = blockIdx.x + (blockIdx.y * gridDim.x) + (blockIdx.z * gridDim.x * gridDim.y);
     int thisParticleGlobalIdx = cellPartIdx[thisCellIdx] + threadIdx.x;
@@ -1569,19 +1569,27 @@ __global__ void sphGPU_Kernels::ComputeBioluminescence(const float *pressure,
     if(idx < numPoints)
     {
         float currIllum = illumination[idx];
-        float beta = 0.01f;
         float press = pressure[idx];
         float prevPress = prevPressure[idx];
         prevPressure[idx] = press;
         float deltaPress = fabs(press - prevPress);
+        float beta = 100.0f;
 
-        float deltaIllum = (deltaPress > beta) ? 0.001 : -0.0001f;
+        if(deltaPress > beta)
+        {
+//            printf("%f\n",deltaPress);
+        }
+
+        float deltaIllum = ((deltaPress > beta) ? 0.0001 : -0.0001f);
+
+        const float maxIllum = 0.01f;
+        const float minIllum = 0.0f;
 
         currIllum += deltaIllum;
-        currIllum = (currIllum < 0.0f) ? 0.0f : currIllum;
-        currIllum = (currIllum > 0.02f) ? 0.02f : currIllum;
+        currIllum = (currIllum < minIllum) ? minIllum : currIllum;
+        currIllum = (currIllum > maxIllum) ? maxIllum : currIllum;
 
-        illumination[idx] = (isnan(currIllum) ? 0.0f : currIllum);
+        illumination[idx] = (isnan(currIllum) ? minIllum : currIllum);
 
     }
 

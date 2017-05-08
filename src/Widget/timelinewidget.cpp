@@ -46,6 +46,8 @@ TimeLineWidget::TimeLineWidget(QWidget *parent) :
     });
 
     connect(ui->playButton, &QPushButton::clicked, [this](bool checked){
+        m_timeLine->SetSavedState(TimeLine::State::Running);
+
         auto state = m_timeLine->state();
         if(state == TimeLine::State::NotRunning)
         {
@@ -58,6 +60,8 @@ TimeLineWidget::TimeLineWidget(QWidget *parent) :
     });
 
     connect(ui->pauseButton, &QPushButton::clicked, [this](bool checked){
+        m_timeLine->SetSavedState(TimeLine::State::Paused);
+
         auto state = m_timeLine->state();
         if(state == TimeLine::State::Running)
         {
@@ -105,4 +109,9 @@ void TimeLineWidget::OnFrameChanged(int frame)
 void TimeLineWidget::OnFrameCached(int frame)
 {
 
+}
+
+void TimeLineWidget::OnFrameFinished(int frame)
+{
+    m_timeLine->OnFrameFinished(frame);
 }

@@ -39,7 +39,7 @@ OpenGLScene::OpenGLScene(QWidget *parent) : QOpenGLWidget(parent),
 
 OpenGLScene::~OpenGLScene()
 {
-    m_cache.WriteCache();
+//    m_cache.WriteCache();
     cleanup();
 }
 

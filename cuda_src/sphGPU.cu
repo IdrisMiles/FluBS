@@ -50,9 +50,47 @@ void sphGPU::ResetProperties(float3 *pressureForce,
     thrust::fill(totalForcePtr, totalForcePtr+numPoints, make_float3(0.0f,0.0f,0.0f));
     thrust::fill(densityPtr, densityPtr+numPoints, 0.0f);
     thrust::fill(pressurePtr, pressurePtr+numPoints, 0.0f);
-    thrust::fill(hashPtr, hashPtr+numPoints, 0u);
-    thrust::fill(cellOccPtr, cellOccPtr+numCells, 0u);
-    thrust::fill(cellPartIdxPtr, cellPartIdxPtr+numCells, 0u);
+    thrust::fill(hashPtr, hashPtr+numPoints, 0);
+    thrust::fill(cellOccPtr, cellOccPtr+numCells, 0);
+    thrust::fill(cellPartIdxPtr, cellPartIdxPtr+numCells, 0);
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void sphGPU::ResetProperties(float3 *pressureForce,
+                             float3 *externalForce,
+                             float3 *totalForce,
+                             float *density,
+                             float *pressure,
+                             float *prevPressure,
+                             float *bioIllum,
+                             uint *hash,
+                             uint *cellOcc,
+                             uint *cellPartIdx,
+                             const uint numCells,
+                             const uint numPoints)
+{
+    thrust::device_ptr<float3> pressureForcePtr = thrust::device_pointer_cast(pressureForce);
+    thrust::device_ptr<float3> externalForcePtr = thrust::device_pointer_cast(externalForce);
+    thrust::device_ptr<float3> totalForcePtr = thrust::device_pointer_cast(totalForce);
+    thrust::device_ptr<float> densityPtr = thrust::device_pointer_cast(density);
+    thrust::device_ptr<float> pressurePtr = thrust::device_pointer_cast(pressure);
+    thrust::device_ptr<float> prevPressurePtr = thrust::device_pointer_cast(prevPressure);
+    thrust::device_ptr<float> bioIllumPtr = thrust::device_pointer_cast(bioIllum);
+    thrust::device_ptr<uint> hashPtr = thrust::device_pointer_cast(hash);
+    thrust::device_ptr<uint> cellOccPtr = thrust::device_pointer_cast(cellOcc);
+    thrust::device_ptr<uint> cellPartIdxPtr = thrust::device_pointer_cast(cellPartIdx);
+
+    thrust::fill(pressureForcePtr, pressureForcePtr+numPoints, make_float3(0.0f,0.0f,0.0f));
+    thrust::fill(externalForcePtr, externalForcePtr+numPoints, make_float3(0.0f, 0.0f,0.0f));
+    thrust::fill(totalForcePtr, totalForcePtr+numPoints, make_float3(0.0f,0.0f,0.0f));
+    thrust::fill(densityPtr, densityPtr+numPoints, 0.0f);
+    thrust::fill(pressurePtr, pressurePtr+numPoints, 0.0f);
+    thrust::fill(prevPressurePtr, prevPressurePtr+numPoints, 0.0f);
+    thrust::fill(bioIllumPtr, bioIllumPtr+numPoints, 0.0f);
+    thrust::fill(hashPtr, hashPtr+numPoints, 0);
+    thrust::fill(cellOccPtr, cellOccPtr+numCells, 0);
+    thrust::fill(cellPartIdxPtr, cellPartIdxPtr+numCells, 0);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -85,9 +123,9 @@ void sphGPU::ResetProperties(float3 *pressureForce,
     thrust::fill(densityPtr, densityPtr+numPoints, 0.0f);
     thrust::fill(pressurePtr, pressurePtr+numPoints, 0.0f);
     thrust::fill(volumePtr, volumePtr+numPoints, 1.0f);
-    thrust::fill(hashPtr, hashPtr+numPoints, 0u);
-    thrust::fill(cellOccPtr, cellOccPtr+numCells, 0u);
-    thrust::fill(cellPartIdxPtr, cellPartIdxPtr+numCells, 0u);
+    thrust::fill(hashPtr, hashPtr+numPoints, 0);
+    thrust::fill(cellOccPtr, cellOccPtr+numCells, 0);
+    thrust::fill(cellPartIdxPtr, cellPartIdxPtr+numCells, 0);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -127,9 +165,9 @@ void sphGPU::ResetProperties(float3 *pressureForce,
     thrust::fill(densityErrPtr, densityErrPtr+numPoints, 0.0f);
     thrust::fill(densityPtr, densityPtr+numPoints, 0.0f);
     thrust::fill(pressurePtr, pressurePtr+numPoints, 0.0f);
-    thrust::fill(hashPtr, hashPtr+numPoints, 0u);
-    thrust::fill(cellOccPtr, cellOccPtr+numCells, 0u);
-    thrust::fill(cellPartIdxPtr, cellPartIdxPtr+numCells, 0u);
+    thrust::fill(hashPtr, hashPtr+numPoints, 0);
+    thrust::fill(cellOccPtr, cellOccPtr+numCells, 0);
+    thrust::fill(cellPartIdxPtr, cellPartIdxPtr+numCells, 0);
 }
 
 //--------------------------------------------------------------------------------------------------------------------

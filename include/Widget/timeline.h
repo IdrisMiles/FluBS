@@ -20,6 +20,7 @@ public:
     ~TimeLine();
 
     void SetFrameRange(int start, int end);
+    void SetSavedState(TimeLine::State _savedState);
 
 public slots:
     void OnFrameCached(int frame);
@@ -30,6 +31,8 @@ public slots:
 protected:
 
 private:
+    TimeLine::State m_currentState;
+    TimeLine::State m_savedState;
     std::vector<CacheState> m_frameCacheStates;
 
 };
