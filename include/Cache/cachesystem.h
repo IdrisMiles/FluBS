@@ -52,9 +52,13 @@ public:
 
     void WriteCache(const int _frame = -1);
 
+    void CacheOutToDisk(std::string _fileName);
+
     bool IsFrameCached(const int _frame);
 
     void ClearCache(const int frame = -1);
+
+    void SetFrameRange(int start, int end);
 
 
 private:

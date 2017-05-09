@@ -54,15 +54,15 @@ void CacheSystem::Cache(const int _frame,
                         std::shared_ptr<FluidSystem> _fluidSystem)
 {
     // Make sure our container is large enough to hold this frame
-    while(m_cachedFrames.size() <= _frame)
+    if(m_cachedFrames.size() <= _frame)
     {
-//        std::cout<<"need to sim/cache these frames\n";
-        m_cachedFrames.push_back(json());
-        m_isFrameCached.push_back(CacheStatus::NOTCACHED);
+        m_cachedFrames.resize(_frame+50, json());
+        m_isFrameCached.resize(_frame+50, CacheStatus::NOTCACHED);
     }
 
-    m_isFrameCached[_frame] |= (CacheStatus::CACHED | CacheStatus::MEMORY);
+
     m_isFrameCached[_frame] &= ~(CacheStatus::NOTCACHED | CacheStatus::DIRTY);
+    m_isFrameCached[_frame] |= (CacheStatus::CACHED | CacheStatus::MEMORY);
 
     Cache(m_cachedFrames[_frame], "Fluid System", _fluidSystem);
 
@@ -153,18 +153,28 @@ void CacheSystem::WriteCache(const int _frame)
     std::string fileName = "data_"+ss.str()+".json";
 
 
+    // make thread avaiable
     if(m_threads[m_threadHead].joinable())
     {
         m_threads[m_threadHead].join();
     }
 
+    // write cache to disk asynchronously
     m_threads[m_threadHead] = std::thread(&CacheSystem::WriteToDisk, this, fileName, std::ref(m_cachedFrames[_frame]));
     m_threadHead = (m_threadHead+1)%m_threads.size();
-//    WriteToDisk(fileName, m_cachedFrames[_frame]);
 
 
+    // mark frame as cached to disk
     m_isFrameCached[_frame] |= (CacheStatus::CACHED | CacheStatus::DISK);
     m_isFrameCached[_frame] &= ~(CacheStatus::NOTCACHED | CacheStatus::DIRTY);
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void CacheSystem::CacheOutToDisk(std::string _fileName)
+{
+
+
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -189,8 +199,7 @@ bool CacheSystem::IsFrameCached(const int _frame)
         return false;
     }
 
-    return (m_isFrameCached[_frame] & CacheStatus::CACHED);
-//    return (!m_cachedFrames[_frame].empty());
+    return (IS_CACHED(m_isFrameCached[_frame]));
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -204,7 +213,7 @@ void CacheSystem::ClearCache(const int frame)
             cf.clear();
         }
 
-        for(auto fr : m_isFrameCached)
+        for(auto &fr : m_isFrameCached)
         {
             fr = CacheStatus::NOTCACHED;
         }
@@ -214,6 +223,19 @@ void CacheSystem::ClearCache(const int frame)
         m_cachedFrames[frame].clear();
         m_isFrameCached[frame] = CacheStatus::NOTCACHED;
     }
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void CacheSystem::SetFrameRange(int start, int end)
+{
+    assert(start <= end);
+
+    int range = end - start;
+    range = range < 1 ? 1 : range;
+
+    m_cachedFrames.resize(range);
+    m_isFrameCached.resize(range, CacheStatus::NOTCACHED);
 }
 
 //--------------------------------------------------------------------------------------------------------------------

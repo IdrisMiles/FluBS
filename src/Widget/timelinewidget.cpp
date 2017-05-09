@@ -92,6 +92,11 @@ TimeLineWidget::TimeLineWidget(QWidget *parent) :
     connect(m_timeLine.get(), &TimeLine::frameChanged, ui->frame, &QSpinBox::setValue);
     connect(m_timeLine.get(), &TimeLine::frameChanged, this, &TimeLineWidget::OnFrameChanged);
 
+
+    connect(ui->cache, &QCheckBox::clicked, [this](bool checked){
+        emit CacheChecked(checked);
+    });
+
 }
 
 TimeLineWidget::~TimeLineWidget()

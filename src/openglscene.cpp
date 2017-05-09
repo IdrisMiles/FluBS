@@ -5,6 +5,7 @@
 
 #include <QMouseEvent>
 #include <QImage>
+#include <QFileDialog>
 
 #include "Mesh/meshloader.h"
 #include "MeshSampler/meshsampler.h"
@@ -18,7 +19,8 @@ OpenGLScene::OpenGLScene(QWidget *parent) : QOpenGLWidget(parent),
     m_zRot(0),
     m_xDis(0),
     m_yDis(0),
-    m_zDis(400)
+    m_zDis(400),
+    m_isCaching(true)
 {
     QSurfaceFormat format;
     format.setVersion(4, 5);
@@ -57,6 +59,40 @@ QSize OpenGLScene::minimumSizeHint() const
 QSize OpenGLScene::sizeHint() const
 {
     return QSize(400, 400);
+}
+
+//------------------------------------------------------------------------------------------------------------
+
+void OpenGLScene::OnCacheOutSimulation()
+{
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Cache Out"), "./", tr("JSON Files (*.json *.jsn)"));
+
+//    if(m_cache.IsFrameCached(0))
+//    {
+//        m_cache.WriteCache(frame);
+//    }
+//    else
+//    {
+//        // check previous frame was cached, if not then need to sim previous frame
+//        if(!m_cache.IsFrameCached(frame-1))
+//        {
+//            OnFrameChanged(frame-1);
+//        }
+
+//        m_fluidSystem->StepSim();
+
+//        m_cache.Cache(frame, m_fluidSystem);
+//        m_cache.WriteCache(frame);
+//    }
+
+    m_cache.CacheOutToDisk(fileName.toStdString());
+}
+
+//------------------------------------------------------------------------------------------------------------
+
+void OpenGLScene::OnSetFrameRange(int start, int end)
+{
+
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -354,26 +390,34 @@ void OpenGLScene::OnFrameChanged(int frame)
         return;
     }
 
-    if(m_cache.IsFrameCached(frame))
+    if(m_isCaching)
     {
-        m_cache.Load(frame, m_fluidSystem);
-        emit FrameLoaded(frame);
+        if(m_cache.IsFrameCached(frame))
+        {
+            m_cache.Load(frame, m_fluidSystem);
+            emit FrameLoaded(frame);
+        }
+        else
+        {
+            // check previous frame was cached, if not then need to sim previous frame
+            if(!m_cache.IsFrameCached(frame-1))
+            {
+                OnFrameChanged(frame-1);
+            }
+
+            m_fluidSystem->StepSim();
+            emit FrameSimmed(frame);
+
+            m_cache.Cache(frame, m_fluidSystem);
+            emit FrameCached(frame);
+
+            m_cache.WriteCache(frame);
+        }
     }
     else
     {
-        // check previous frame was cached, if not then need to sim previous frame
-        if(!m_cache.IsFrameCached(frame-1))
-        {
-            OnFrameChanged(frame-1);
-        }
-
         m_fluidSystem->StepSim();
         emit FrameSimmed(frame);
-
-        m_cache.Cache(frame, m_fluidSystem);
-        emit FrameCached(frame);
-
-        m_cache.WriteCache(frame);
     }
 
     emit FrameFinished(frame);
@@ -384,6 +428,14 @@ void OpenGLScene::OnFrameChanged(int frame)
 void OpenGLScene::OnPropertiesChanged()
 {
     m_cache.ClearCache(-1);
+}
+
+//------------------------------------------------------------------------------------------------------------
+
+
+void OpenGLScene::OnCacheChecked(bool checked)
+{
+    m_isCaching = checked;
 }
 
 //------------------------------------------------------------------------------------------------------------

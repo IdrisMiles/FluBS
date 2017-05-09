@@ -7,6 +7,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    //-------------------------------------------------------
+    // Widget setup
+
     // setup widget and grid layout
     ui->setupUi(this);
     ui->gridLayout->addWidget(ui->scene, 0, 0, 2, 2);
@@ -17,18 +20,28 @@ MainWindow::MainWindow(QWidget *parent) :
     // setup properties tab widgets
     ui->gridLayout->addWidget(ui->propertyGroup, 0, 2, 2, 1 );
 
+    CreateActions();
+    CreateMenus();
 
-    // setup openglscene widget
+
+    //-------------------------------------------------------
+    // Connections
+
+    // connect openglscene widget
     connect(ui->scene, SIGNAL(FluidSystemInitialised(std::shared_ptr<FluidSystem>)), this, SLOT(OnFluidSystemInitialised(std::shared_ptr<FluidSystem>)));
     connect(ui->scene, SIGNAL(FluidInitialised(std::shared_ptr<Fluid>)), this, SLOT(OnFluidInitialised(std::shared_ptr<Fluid>)));
     connect(ui->scene, SIGNAL(RigidInitialised(std::shared_ptr<Rigid>)), this, SLOT(OnRigidInitialised(std::shared_ptr<Rigid>)));
     connect(ui->scene, SIGNAL(AlgaeInitialised(std::shared_ptr<Algae>)), this, SLOT(OnAlgaeInitialised(std::shared_ptr<Algae>)));
 
+
     connect(ui->timeline, &TimeLineWidget::FrameChanged, ui->scene, &OpenGLScene::OnFrameChanged);
 
+    // connect if caching is set in timeline widget to cachesystem in openglscene
+    connect(ui->timeline, &TimeLineWidget::CacheChecked, ui->scene, &OpenGLScene::OnCacheChecked);
 
     // connect OpenGLScene::FrameFinished with TimeLine
     connect(ui->scene, &OpenGLScene::FrameFinished, ui->timeline, &TimeLineWidget::OnFrameFinished);
+
 
 }
 
@@ -155,5 +168,49 @@ void MainWindow::OnAlgaeInitialised(std::shared_ptr<Algae> _algae)
         connect(algaePropWidget, &AlgaePropertyWidget::PropertyChanged, ui->scene, &OpenGLScene::OnPropertiesChanged);
     }
 }
+
+//---------------------------------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::Cache()
+{
+    ui->scene->OnCacheOutSimulation();
+}
+
+//---------------------------------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::Load()
+{
+
+}
+
+//---------------------------------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::CreateMenus()
+{
+    m_fileMenu = menuBar()->addMenu(tr("&File"));
+    m_fileMenu->addAction(m_cacheAction);
+    m_fileMenu->addAction(m_loadAction);
+
+
+}
+
+//---------------------------------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::CreateActions()
+{
+    m_cacheAction = new QAction(tr("&Cache"), this);
+    connect(m_cacheAction, &QAction::triggered, this, &MainWindow::Cache);
+
+    m_loadAction = new QAction(tr("&Load"), this);
+    connect(m_loadAction, &QAction::triggered, this, &MainWindow::Load);
+
+}
+
+//---------------------------------------------------------------------------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------------------------------------------------------------------------
+
+
 
 //---------------------------------------------------------------------------------------------------------------------------------------------

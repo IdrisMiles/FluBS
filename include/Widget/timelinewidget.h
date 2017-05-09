@@ -23,8 +23,9 @@ public slots:
     void OnFrameFinished(int frame);
 
 signals:
-    void FrameChanged(int);
-    void FrameCached(int);
+    void FrameChanged(int frame);
+    void FrameCached(int frame);
+    void CacheChecked(bool checked);
 
 protected:
 

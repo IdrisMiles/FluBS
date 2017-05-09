@@ -43,6 +43,8 @@ public:
     QSize sizeHint() const Q_DECL_OVERRIDE;
 
 
+
+
 public slots:
     void setXRotation(int angle);
     void setYRotation(int angle);
@@ -55,6 +57,9 @@ public slots:
     void ResetSim();
     void OnFrameChanged(int frame);
     void OnPropertiesChanged();
+    void OnCacheChecked(bool checked);
+    void OnCacheOutSimulation();
+    void OnSetFrameRange(int start, int end);
 
 signals:
     void xRotationChanged(int angle);
@@ -131,6 +136,7 @@ private:
 
     // simulation cache
     CacheSystem m_cache;
+    bool m_isCaching;
 
 };
 
