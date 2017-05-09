@@ -50,9 +50,10 @@ public:
 
     void Load(const int _frame, std::shared_ptr<FluidSystem> _fluidSystem);
 
-    void WriteCache(const int _frame = -1);
+
 
     void CacheOutToDisk(std::string _fileName);
+    void LoadCacheFromDisk(std::vector<std::string> _fileNames);
 
     bool IsFrameCached(const int _frame);
 
@@ -93,16 +94,18 @@ private:
     void Load(const json &_frame, const std::string &_object, const std::shared_ptr<Rigid> _rigid);
 
 
-    void WriteToDisk(const std::string _file, const json &_object);
+    void WriteCacheToDisk(const int _frame = -1);
+    void CacheToDisk(const std::string _file, const json &_object);
 
     void LoadFromMemory(json &_frame, std::shared_ptr<FluidSystem> _fluidSystem);
-
     void LoadFromDisk(const std::string _file, json &_object);
 
 
     std::vector<json> m_cachedFrames;
     std::vector<foo> m_isFrameCached;
     std::vector<std::thread> m_threads;
+    std::string m_cacheDir;
+    std::string m_cacheFileName;
     int m_threadHead;
 
 };

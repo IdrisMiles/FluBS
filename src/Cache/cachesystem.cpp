@@ -25,6 +25,9 @@ void glm::from_json(const json& j, glm::vec3& v)
 
 CacheSystem::CacheSystem(const int _numFrames)
 {
+    m_cacheDir = ".cache_";
+    m_cacheFileName = "data_";
+
     m_cachedFrames.resize(_numFrames);
     m_isFrameCached.resize(_numFrames, CacheStatus::NOTCACHED);
 
@@ -97,6 +100,10 @@ void CacheSystem::Cache(const int _frame,
             Cache(m_cachedFrames[_frame], "Static Rigid"+ss.str(), staticRigids[i]);
         }
     }
+
+
+    // write to disk
+    WriteCacheToDisk(_frame);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -121,7 +128,7 @@ void CacheSystem::Load(const int _frame, std::shared_ptr<FluidSystem> _fluidSyst
     {
         std::stringstream ss;
         ss << std::setw(4) << std::setfill('0') << _frame;
-        std::string fileName = "data_"+ss.str()+".json";
+        std::string fileName = m_cacheDir+m_cacheFileName+ss.str()+".json";
 
         std::cout<<"cached to disk not memory\n";
         LoadFromDisk(fileName, m_cachedFrames[_frame]);
@@ -135,7 +142,7 @@ void CacheSystem::Load(const int _frame, std::shared_ptr<FluidSystem> _fluidSyst
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void CacheSystem::WriteCache(const int _frame)
+void CacheSystem::WriteCacheToDisk(const int _frame)
 {
     if(_frame == -1)
     {
@@ -150,7 +157,7 @@ void CacheSystem::WriteCache(const int _frame)
 
     std::stringstream ss;
     ss << std::setw(4) << std::setfill('0') << _frame;
-    std::string fileName = "data_"+ss.str()+".json";
+    std::string fileName = m_cacheDir+m_cacheFileName+ss.str()+".json";
 
 
     // make thread avaiable
@@ -160,7 +167,7 @@ void CacheSystem::WriteCache(const int _frame)
     }
 
     // write cache to disk asynchronously
-    m_threads[m_threadHead] = std::thread(&CacheSystem::WriteToDisk, this, fileName, std::ref(m_cachedFrames[_frame]));
+    m_threads[m_threadHead] = std::thread(&CacheSystem::CacheToDisk, this, fileName, std::ref(m_cachedFrames[_frame]));
     m_threadHead = (m_threadHead+1)%m_threads.size();
 
 
@@ -173,13 +180,152 @@ void CacheSystem::WriteCache(const int _frame)
 
 void CacheSystem::CacheOutToDisk(std::string _fileName)
 {
+    auto threadFunc = [this, _fileName](int startId, int endId){
+        for(int i=startId; i<endId; i++)
+        {
+            if(!IS_CACHED(m_isFrameCached[i]))
+            {
+                continue;
+            }
 
+            std::stringstream ss;
+            ss << std::setw(4) << std::setfill('0') << i;
+
+            bool notInMemory = false;
+            if(!IS_CACHED_TO_MEMORY(m_isFrameCached[i]) && IS_CACHED_TO_DISK(m_isFrameCached[i]))
+            {
+                std::string fileName = m_cacheDir+m_cacheFileName+ss.str()+".json";
+                LoadFromDisk(fileName, m_cachedFrames[i]);
+                notInMemory = true;
+            }
+
+            if(!IS_CACHED_TO_MEMORY(m_isFrameCached[i]))
+            {
+//                if(IS_CACHED_TO_DISK(m_isFrameCached[i]))
+//                {
+//                    // TODO
+//                    // Just copy file
+//                }
+
+                continue;
+            }
+
+            // write to disk
+            std::string fileName = _fileName+ss.str()+".json";
+            CacheToDisk(fileName, m_cachedFrames[i]);
+
+            if(notInMemory)
+            {
+                m_cachedFrames[i].clear();
+            }
+        }
+    };
+
+    int numThreads = m_threads.size() + 1;
+    int dataSize = m_cachedFrames.size();
+    int chunkSize = dataSize / numThreads;
+    int numBigChunks = dataSize % numThreads;
+    int bigChunkSize = chunkSize + (numBigChunks>0 ? 1 : 0);
+    int startChunk = 0;
+    int threadId=0;
+
+    // join threads in case
+    for(int i=0; i<m_threads.size(); i++)
+    {
+        if(m_threads[i].joinable())
+        {
+            m_threads[i].join();
+        }
+    }
+
+    // multi-threaded cache to disk
+    for(threadId=0; threadId<numBigChunks; threadId++)
+    {
+       m_threads[threadId] = std::thread(threadFunc, startChunk, startChunk+bigChunkSize);
+       startChunk+=bigChunkSize;
+    }
+    for(; threadId<numThreads-1; threadId++)
+    {
+       m_threads[threadId] = std::thread(threadFunc, startChunk, startChunk+chunkSize);
+       startChunk+=chunkSize;
+    }
+    threadFunc(startChunk, m_cachedFrames.size());
+
+
+    // clean up and join threads
+    for(int i=0; i<m_threads.size(); i++)
+    {
+       if(m_threads[i].joinable())
+       {
+           m_threads[i].join();
+       }
+    }
 
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void CacheSystem::WriteToDisk(const std::string _file, const json &_object)
+void CacheSystem::LoadCacheFromDisk(std::vector<std::string> _fileNames)
+{
+    m_cachedFrames.clear();
+    m_isFrameCached.clear();
+
+    m_cachedFrames.resize(_fileNames.size(), json());
+    m_isFrameCached.resize(_fileNames.size(), CacheStatus::NOTCACHED);
+
+    auto threadFunc = [this, _fileNames](int startId, int endId){
+        for(int i=startId; i<endId; i++)
+        {
+            LoadFromDisk(_fileNames[i], m_cachedFrames[i]);
+            m_isFrameCached[i] = (CacheStatus::CACHED | CacheStatus::MEMORY);
+        }
+    };
+
+
+    int numThreads = m_threads.size() + 1;
+    int dataSize = m_cachedFrames.size();
+    int chunkSize = dataSize / numThreads;
+    int numBigChunks = dataSize % numThreads;
+    int bigChunkSize = chunkSize + (numBigChunks>0 ? 1 : 0);
+    int startChunk = 0;
+    int threadId=0;
+
+    // join threads in case
+    for(int i=0; i<m_threads.size(); i++)
+    {
+        if(m_threads[i].joinable())
+        {
+            m_threads[i].join();
+        }
+    }
+
+    // multi-threaded cache to disk
+    for(threadId=0; threadId<numBigChunks; threadId++)
+    {
+       m_threads[threadId] = std::thread(threadFunc, startChunk, startChunk+bigChunkSize);
+       startChunk+=bigChunkSize;
+    }
+    for(; threadId<numThreads-1; threadId++)
+    {
+       m_threads[threadId] = std::thread(threadFunc, startChunk, startChunk+chunkSize);
+       startChunk+=chunkSize;
+    }
+    threadFunc(startChunk, m_cachedFrames.size());
+
+
+    // clean up and join threads
+    for(int i=0; i<m_threads.size(); i++)
+    {
+       if(m_threads[i].joinable())
+       {
+           m_threads[i].join();
+       }
+    }
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void CacheSystem::CacheToDisk(const std::string _file, const json &_object)
 {
     std::ofstream ofs(_file);
     if(ofs.is_open())

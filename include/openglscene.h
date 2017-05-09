@@ -59,6 +59,7 @@ public slots:
     void OnPropertiesChanged();
     void OnCacheChecked(bool checked);
     void OnCacheOutSimulation();
+    void OnLoadSimulation();
     void OnSetFrameRange(int start, int end);
 
 signals:

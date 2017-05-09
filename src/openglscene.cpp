@@ -66,26 +66,31 @@ QSize OpenGLScene::sizeHint() const
 void OpenGLScene::OnCacheOutSimulation()
 {
     QString fileName = QFileDialog::getSaveFileName(this, tr("Cache Out"), "./", tr("JSON Files (*.json *.jsn)"));
-
-//    if(m_cache.IsFrameCached(0))
-//    {
-//        m_cache.WriteCache(frame);
-//    }
-//    else
-//    {
-//        // check previous frame was cached, if not then need to sim previous frame
-//        if(!m_cache.IsFrameCached(frame-1))
-//        {
-//            OnFrameChanged(frame-1);
-//        }
-
-//        m_fluidSystem->StepSim();
-
-//        m_cache.Cache(frame, m_fluidSystem);
-//        m_cache.WriteCache(frame);
-//    }
+    if(fileName.isEmpty() || fileName.isNull())
+    {
+        return;
+    }
 
     m_cache.CacheOutToDisk(fileName.toStdString());
+}
+
+//------------------------------------------------------------------------------------------------------------
+
+void OpenGLScene::OnLoadSimulation()
+{
+    std::vector<QString> qFileNames = QFileDialog::getOpenFileNames(this, tr("Cache Out"), "./", tr("JSON Files (*.json *.jsn)")).toVector().toStdVector();
+    if(qFileNames.empty())
+    {
+        return;
+    }
+
+    std::vector<std::string> fileNames;
+    for(auto &f : qFileNames)
+    {
+        fileNames.push_back(f.toStdString());
+    }
+
+    m_cache.LoadCacheFromDisk(fileNames);
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -410,8 +415,6 @@ void OpenGLScene::OnFrameChanged(int frame)
 
             m_cache.Cache(frame, m_fluidSystem);
             emit FrameCached(frame);
-
-            m_cache.WriteCache(frame);
         }
     }
     else
