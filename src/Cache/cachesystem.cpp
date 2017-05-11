@@ -201,6 +201,7 @@ void CacheSystem::CacheOutToDisk(std::string _fileName, QProgressBar *_progress)
             {
                 std::string fileName = m_cacheDir+m_cacheFileName+ss.str()+".json";
                 LoadFromDisk(fileName, m_cachedFrames[i]);
+                m_isFrameCached[i] |= CacheStatus::MEMORY;
                 notInMemory = true;
             }
 
