@@ -12,13 +12,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // setup widget and grid layout
     ui->setupUi(this);
-    ui->gridLayout->addWidget(ui->scene, 0, 0, 2, 2);
 
-    // setup timeline widget
-    ui->gridLayout->addWidget(ui->timeline, 2, 0, 1, 3);
+    ui->gridLayout->addWidget(ui->scene, 0, 0, 2, 4);
 
     // setup properties tab widgets
-    ui->gridLayout->addWidget(ui->propertyGroup, 0, 2, 2, 1 );
+    ui->gridLayout->addWidget(ui->propertyGroup, 0, 4, 2, 1 );
+
+    // setup timeline widget
+    ui->gridLayout->addWidget(ui->timeline, 2, 0, 1, 5);
+
 
     CreateActions();
     CreateMenus();
@@ -173,14 +175,14 @@ void MainWindow::OnAlgaeInitialised(std::shared_ptr<Algae> _algae)
 
 void MainWindow::Cache()
 {
-    ui->scene->OnCacheOutSimulation();
+    ui->scene->OnCacheOutSimulation(ui->progressBar);
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------------
 
 void MainWindow::Load()
 {
-    ui->scene->OnLoadSimulation();
+    ui->scene->OnLoadSimulation(ui->progressBar);
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------------

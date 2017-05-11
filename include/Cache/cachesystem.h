@@ -6,6 +6,8 @@
 #include <utility>
 #include <functional>
 
+#include <QProgressBar>
+
 #include <glm/glm.hpp>
 
 #include "json/src/json.hpp"
@@ -52,8 +54,8 @@ public:
 
 
 
-    void CacheOutToDisk(std::string _fileName);
-    void LoadCacheFromDisk(std::vector<std::string> _fileNames);
+    void CacheOutToDisk(std::string _fileName, QProgressBar *_progress);
+    void LoadCacheFromDisk(std::vector<std::string> _fileNames, QProgressBar *_progress);
 
     bool IsFrameCached(const int _frame);
 

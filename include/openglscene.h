@@ -12,6 +12,7 @@
 #include <QOpenGLTexture>
 #include <QOpenGLFunctions>
 #include <QTimer>
+#include <QProgressBar>
 
 #include <Cache/cachesystem.h>
 
@@ -58,8 +59,8 @@ public slots:
     void OnFrameChanged(int frame);
     void OnPropertiesChanged();
     void OnCacheChecked(bool checked);
-    void OnCacheOutSimulation();
-    void OnLoadSimulation();
+    void OnCacheOutSimulation(QProgressBar *progress);
+    void OnLoadSimulation(QProgressBar *progress);
     void OnSetFrameRange(int start, int end);
 
 signals:

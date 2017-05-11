@@ -18,6 +18,7 @@
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
+#include <QtWidgets/QProgressBar>
 #include <QtWidgets/QSpacerItem>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QTabWidget>
@@ -34,14 +35,17 @@ class Ui_MainWindow
 public:
     QWidget *centralWidget;
     QGridLayout *gridLayout;
-    QSpacerItem *verticalSpacer;
+    QSpacerItem *horizontalSpacer_2;
+    QSpacerItem *horizontalSpacer_3;
     QSpacerItem *horizontalSpacer;
+    QSpacerItem *verticalSpacer;
     OpenGLScene *scene;
     TimeLineWidget *timeline;
     QFrame *propertyGroup;
     QGridLayout *gridLayout_2;
     QTabWidget *properties;
     QTreeWidget *outliner;
+    QProgressBar *progressBar;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -57,13 +61,21 @@ public:
         gridLayout->setSpacing(6);
         gridLayout->setContentsMargins(11, 11, 11, 11);
         gridLayout->setObjectName(QStringLiteral("gridLayout"));
-        verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+        horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
-        gridLayout->addItem(verticalSpacer, 1, 0, 1, 1);
+        gridLayout->addItem(horizontalSpacer_2, 0, 3, 1, 1);
+
+        horizontalSpacer_3 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+        gridLayout->addItem(horizontalSpacer_3, 0, 2, 1, 1);
 
         horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
         gridLayout->addItem(horizontalSpacer, 0, 1, 1, 1);
+
+        verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+
+        gridLayout->addItem(verticalSpacer, 1, 0, 1, 1);
 
         scene = new OpenGLScene(centralWidget);
         scene->setObjectName(QStringLiteral("scene"));
@@ -75,7 +87,7 @@ public:
         timeline->setFrameShape(QFrame::StyledPanel);
         timeline->setFrameShadow(QFrame::Raised);
 
-        gridLayout->addWidget(timeline, 2, 0, 1, 3);
+        gridLayout->addWidget(timeline, 2, 0, 1, 5);
 
         propertyGroup = new QFrame(centralWidget);
         propertyGroup->setObjectName(QStringLiteral("propertyGroup"));
@@ -97,7 +109,13 @@ public:
         gridLayout_2->addWidget(outliner, 0, 0, 1, 1);
 
 
-        gridLayout->addWidget(propertyGroup, 0, 2, 1, 1);
+        gridLayout->addWidget(propertyGroup, 0, 4, 1, 1);
+
+        progressBar = new QProgressBar(centralWidget);
+        progressBar->setObjectName(QStringLiteral("progressBar"));
+        progressBar->setValue(0);
+
+        gridLayout->addWidget(progressBar, 3, 4, 1, 1);
 
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);

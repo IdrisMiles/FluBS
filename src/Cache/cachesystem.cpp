@@ -5,6 +5,7 @@
 #include <sstream>
 #include <iomanip>
 #include <string>
+#include <mutex>
 
 
 void glm::to_json(json& j, const glm::vec3& v)
@@ -178,9 +179,13 @@ void CacheSystem::WriteCacheToDisk(const int _frame)
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void CacheSystem::CacheOutToDisk(std::string _fileName)
+
+void CacheSystem::CacheOutToDisk(std::string _fileName, QProgressBar *_progress)
 {
-    auto threadFunc = [this, _fileName](int startId, int endId){
+    int counter = 0;
+    std::mutex progressMutex;
+    std::thread::id mainThreadId = std::this_thread::get_id();
+    auto threadFunc = [this, &counter, &progressMutex, _progress, mainThreadId, _fileName](int startId, int endId){
         for(int i=startId; i<endId; i++)
         {
             if(!IS_CACHED(m_isFrameCached[i]))
@@ -218,6 +223,14 @@ void CacheSystem::CacheOutToDisk(std::string _fileName)
             {
                 m_cachedFrames[i].clear();
             }
+
+            progressMutex.lock();
+            counter++;
+            if(std::this_thread::get_id() == mainThreadId)
+            {
+                _progress->setValue(counter);
+            }
+            progressMutex.unlock();
         }
     };
 
@@ -237,6 +250,9 @@ void CacheSystem::CacheOutToDisk(std::string _fileName)
             m_threads[i].join();
         }
     }
+
+    _progress->setMaximum(dataSize);
+
 
     // multi-threaded cache to disk
     for(threadId=0; threadId<numBigChunks; threadId++)
@@ -261,11 +277,12 @@ void CacheSystem::CacheOutToDisk(std::string _fileName)
        }
     }
 
+    _progress->setValue(dataSize);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void CacheSystem::LoadCacheFromDisk(std::vector<std::string> _fileNames)
+void CacheSystem::LoadCacheFromDisk(std::vector<std::string> _fileNames, QProgressBar *_progress)
 {
     m_cachedFrames.clear();
     m_isFrameCached.clear();
@@ -273,11 +290,22 @@ void CacheSystem::LoadCacheFromDisk(std::vector<std::string> _fileNames)
     m_cachedFrames.resize(_fileNames.size(), json());
     m_isFrameCached.resize(_fileNames.size(), CacheStatus::NOTCACHED);
 
-    auto threadFunc = [this, _fileNames](int startId, int endId){
+    int counter = 0;
+    std::mutex progressMutex;
+    std::thread::id mainThreadId = std::this_thread::get_id();
+    auto threadFunc = [this, &counter, &progressMutex, _progress, mainThreadId, _fileNames](int startId, int endId){
         for(int i=startId; i<endId; i++)
         {
             LoadFromDisk(_fileNames[i], m_cachedFrames[i]);
             m_isFrameCached[i] = (CacheStatus::CACHED | CacheStatus::MEMORY);
+
+            progressMutex.lock();
+            counter++;
+            if(std::this_thread::get_id() == mainThreadId)
+            {
+                _progress->setValue(counter);
+            }
+            progressMutex.unlock();
         }
     };
 
@@ -298,6 +326,8 @@ void CacheSystem::LoadCacheFromDisk(std::vector<std::string> _fileNames)
             m_threads[i].join();
         }
     }
+
+    _progress->setMaximum(dataSize);
 
     // multi-threaded cache to disk
     for(threadId=0; threadId<numBigChunks; threadId++)
@@ -321,6 +351,8 @@ void CacheSystem::LoadCacheFromDisk(std::vector<std::string> _fileNames)
            m_threads[i].join();
        }
     }
+
+    _progress->setValue(dataSize);
 }
 
 //--------------------------------------------------------------------------------------------------------------------

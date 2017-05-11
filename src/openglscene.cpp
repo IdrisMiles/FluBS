@@ -63,20 +63,21 @@ QSize OpenGLScene::sizeHint() const
 
 //------------------------------------------------------------------------------------------------------------
 
-void OpenGLScene::OnCacheOutSimulation()
+void OpenGLScene::OnCacheOutSimulation(QProgressBar *progress)
 {
     QString fileName = QFileDialog::getSaveFileName(this, tr("Cache Out"), "./", tr("JSON Files (*.json *.jsn)"));
     if(fileName.isEmpty() || fileName.isNull())
     {
         return;
     }
+    
+    m_cache.CacheOutToDisk(fileName.toStdString(), progress);
 
-    m_cache.CacheOutToDisk(fileName.toStdString());
 }
 
 //------------------------------------------------------------------------------------------------------------
 
-void OpenGLScene::OnLoadSimulation()
+void OpenGLScene::OnLoadSimulation(QProgressBar *progress)
 {
     std::vector<QString> qFileNames = QFileDialog::getOpenFileNames(this, tr("Cache Out"), "./", tr("JSON Files (*.json *.jsn)")).toVector().toStdVector();
     if(qFileNames.empty())
@@ -90,7 +91,7 @@ void OpenGLScene::OnLoadSimulation()
         fileNames.push_back(f.toStdString());
     }
 
-    m_cache.LoadCacheFromDisk(fileNames);
+    m_cache.LoadCacheFromDisk(fileNames, progress);
 }
 
 //------------------------------------------------------------------------------------------------------------
