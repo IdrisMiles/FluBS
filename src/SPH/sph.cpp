@@ -107,8 +107,8 @@ void sph::ResetProperties(const FluidSolverProperty &_solverProps,
                             _algae->GetTotalForcePtr(),
                             _algae->GetDensityPtr(),
                             _algae->GetPressurePtr(),
-                            _algae->GetPrevPressurePtr(),
-                            _algae->GetIlluminationPtr(),
+//                            _algae->GetPrevPressurePtr(),
+//                            _algae->GetIlluminationPtr(),
                             _algae->GetParticleHashIdPtr(),
                             _algae->GetCellOccupancyPtr(),
                             _algae->GetCellParticleIdxPtr(),
@@ -151,6 +151,7 @@ void sph::InitAlgaeIllumination(const FluidSolverProperty &_solverProps,
 {
     auto algaeProps = _algae->GetProperty();
     sphGPU::InitAlgaeIllumination(_algae->GetIlluminationPtr(), algaeProps->numParticles);
+    sphGPU::InitAlgaeIllumination(_algae->GetPrevPressurePtr(), algaeProps->numParticles);
 }
 
 //--------------------------------------------------------------------------------------------------------------------

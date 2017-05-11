@@ -43,7 +43,7 @@ enum CacheStatus
 class CacheSystem
 {
 public:
-    CacheSystem(const int _numFrames = 10);
+    CacheSystem(const int _numFrames = 250);
     ~CacheSystem();
 
     void Cache(const int _frame, std::shared_ptr<FluidSystem> _fluidSystem);

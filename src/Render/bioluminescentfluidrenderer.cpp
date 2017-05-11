@@ -117,8 +117,12 @@ void BioluminescentFluidRenderer::Draw()
     m_algaeThicknessFBO->bind();
     glFuncs->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glFuncs->glDisable(GL_DEPTH_TEST);
+//    glFuncs->glEnable(GL_FRONT_AND_BACK);
     glFuncs->glEnable(GL_BLEND);
-    glFuncs->glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
+//    glFuncs->glBlendFunc(GL_ONE, GL_DST_ALPHA);
+    glFuncs->glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+//    glFuncs->glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
+//    glFuncs->glBlendFunc(GL_ONE, GL_ONE);
     glFuncs->glBlendEquation(GL_FUNC_ADD);
     m_algaeVao.bind();
     glFuncs->glDrawArrays(GL_POINTS, 0, m_algaeParticles->GetProperty()->numParticles);

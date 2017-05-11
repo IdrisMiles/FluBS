@@ -103,7 +103,7 @@ void CacheSystem::Cache(const int _frame,
 
 
     // write to disk
-    WriteCacheToDisk(_frame);
+//    WriteCacheToDisk(_frame);
 }
 
 //--------------------------------------------------------------------------------------------------------------------

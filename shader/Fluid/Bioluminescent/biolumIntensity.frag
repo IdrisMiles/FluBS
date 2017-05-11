@@ -21,5 +21,11 @@ void main()
         return;
     }
 
-    oDepth = vec4(vec3(fBio, fBio, fBio), /*fBio */1.0f);
+//    oDepth = vec4(0.0, 0.0, 0.0, 0.0);
+//    oDepth = vec4(0.1, 0.1, 0.1, 0.1);
+//    oDepth = vec4(0.5, 0.5, 0.5, 0.5);
+//    float c = fBio > 0.0f ? fBio : 0.0f;
+//    oDepth = vec4(vec3(0.5, 0.5, 0.5), fBio);
+//    oDepth = vec4(vec3(fBio, fBio, fBio), 0.5f);
+    oDepth = vec4(vec3(fBio, fBio, fBio), fBio);
 }
