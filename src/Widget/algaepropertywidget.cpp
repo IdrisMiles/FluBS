@@ -12,6 +12,8 @@ AlgaePropertyWidget::AlgaePropertyWidget(QWidget *parent, AlgaeProperty *_proper
 
     AddWidgetToGridLayout(ui->layout, 0, 1, 2);
     SetProperty(_property);
+
+    connect(ui->bioThreshold, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &AlgaePropertyWidget::OnPropertyChanged);
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -32,6 +34,8 @@ void AlgaePropertyWidget::SetProperty(AlgaeProperty *_property)
         SetParticleMass(_property->particleMass);
         SetParticleRadius(_property->particleRadius);
         SetRestDensity(_property->restDensity);
+
+        ui->bioThreshold->setValue(_property->bioluminescenceThreshold);
 
 
         m_property = _property;
@@ -61,6 +65,7 @@ void AlgaePropertyWidget::OnPropertyChanged()
         m_property->particleMass = GetParticleMass();
         m_property->particleRadius = GetParticleRadius();
         m_property->restDensity = GetRestDensity();
+        m_property->bioluminescenceThreshold = ui->bioThreshold->value();
 
         emit PropertyChanged(m_property);
     }

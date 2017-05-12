@@ -1831,6 +1831,7 @@ __global__ void sphGPU_Kernels::AdvectParticle(float3 *pos,
 __global__ void sphGPU_Kernels::ComputeBioluminescence(const float *pressure,
                                                        float *prevPressure,
                                                        float *illumination,
+                                                       const float bioThreshold,
                                                        const uint numPoints)
 {
     uint idx = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -1841,20 +1842,9 @@ __global__ void sphGPU_Kernels::ComputeBioluminescence(const float *pressure,
         float press = pressure[idx];
         float prevPress = prevPressure[idx];
         prevPressure[idx] = press;
-        float deltaPress = fabs(press - prevPress);
-        float beta = 200.0f;
 
-//        if(deltaPress > 0.0f || currIllum > 0.0f)
-//        {
-//        printf("pp: %f, il: %f\n",deltaPress,currIllum);
-//        }
-
-//        if(deltaPress > beta)
-//        {
-////            printf("%f\n",deltaPress);
-//        }
-
-        float deltaIllum = ((deltaPress > beta) ? 0.01 : -0.01f);
+        float deltaPress = /*fabs*/(press - prevPress);
+        float deltaIllum = ((deltaPress > bioThreshold) ? 0.01 : -0.01f);
 
         const float maxIllum = 1.0f;
         const float minIllum = 0.0f;

@@ -80,7 +80,7 @@ void MainWindow::OnFluidSystemInitialised(std::shared_ptr<FluidSystem> _fluidSys
         });
 
 
-        // connect fluid system property changed to fluid system properties
+        // connect fluid system property changed to fluid system
         auto fluidSystem = _fluidSystem.get();
         connect(solverPropWidget, &SolverPropertyWidget::PropertyChanged, [this, fluidSystem](const FluidSolverProperty &_newProperties){
             fluidSystem->SetFluidSolverProperty(_newProperties);
@@ -113,6 +113,12 @@ void MainWindow::OnFluidInitialised(std::shared_ptr<Fluid> _fluid)
                 ui->properties->setCurrentIndex(tabId);
             }
         });
+
+        // connect fluid system property changed to fluid system
+//        auto fluid = _fluid.get();
+//        connect(fluidPropWidget, &FluidPropertyWidget::PropertyChanged, [this, fluid](const FluidProperty *_newProperties){
+//            fluid->SetFluidProperty(_newProperties);
+//        });
 
         // connect fluid property changed to openglscene in order ot clear cache
         connect(fluidPropWidget, &FluidPropertyWidget::PropertyChanged, ui->scene, &OpenGLScene::OnPropertiesChanged);

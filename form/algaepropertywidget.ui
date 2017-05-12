@@ -24,7 +24,14 @@
    </property>
    <layout class="QGridLayout" name="gridLayout">
     <item row="1" column="1">
-     <widget class="QDoubleSpinBox" name="bioIntensity"/>
+     <widget class="QDoubleSpinBox" name="bioThreshold">
+      <property name="maximum">
+       <double>1000.000000000000000</double>
+      </property>
+      <property name="value">
+       <double>200.000000000000000</double>
+      </property>
+     </widget>
     </item>
     <item row="0" column="0" colspan="2">
      <widget class="Line" name="line">
@@ -34,9 +41,9 @@
      </widget>
     </item>
     <item row="1" column="0">
-     <widget class="QLabel" name="bioIntensityLabel">
+     <widget class="QLabel" name="bioThresholdLabel">
       <property name="text">
-       <string>Bioluminescence Intensity</string>
+       <string>Bioluminescence Threshold</string>
       </property>
      </widget>
     </item>

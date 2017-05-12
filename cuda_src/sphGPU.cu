@@ -749,6 +749,7 @@ void sphGPU::ComputeBioluminescence(const uint maxCellOcc,
                                     const float *pressure,
                                     float *prevPressure,
                                     float *illumination,
+                                    const float bioThreshold,
                                     const uint numPoints)
 {
     uint numBlocks = iDivUp(numPoints, 1024u);
@@ -756,6 +757,7 @@ void sphGPU::ComputeBioluminescence(const uint maxCellOcc,
     sphGPU_Kernels::ComputeBioluminescence<<<numBlocks, 1024u>>>(pressure,
                                                                  prevPressure,
                                                                  illumination,
+                                                                 bioThreshold,
                                                                  numPoints);
 }
 

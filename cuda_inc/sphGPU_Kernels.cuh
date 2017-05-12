@@ -269,6 +269,7 @@ namespace sphGPU_Kernels
     __global__ void ComputeBioluminescence(const float *pressure,
                                            float *prevPressure,
                                            float *illumination,
+                                           const float bioThreshold,
                                            const uint numPoints);
 
 

@@ -412,6 +412,7 @@ namespace sphGPU
                                 const float *pressure,
                                 float *prevPressure,
                                 float *illumination,
+                                const float bioThreshold,
                                 const uint numPoints);
 
 

@@ -28,9 +28,9 @@ class Ui_AlgaePropertyWidget
 public:
     QWidget *layout;
     QGridLayout *gridLayout;
-    QDoubleSpinBox *bioIntensity;
+    QDoubleSpinBox *bioThreshold;
     QFrame *line;
-    QLabel *bioIntensityLabel;
+    QLabel *bioThresholdLabel;
     QSpacerItem *verticalSpacer;
 
     void setupUi(QWidget *AlgaePropertyWidget)
@@ -43,10 +43,12 @@ public:
         layout->setGeometry(QRect(40, 80, 271, 51));
         gridLayout = new QGridLayout(layout);
         gridLayout->setObjectName(QStringLiteral("gridLayout"));
-        bioIntensity = new QDoubleSpinBox(layout);
-        bioIntensity->setObjectName(QStringLiteral("bioIntensity"));
+        bioThreshold = new QDoubleSpinBox(layout);
+        bioThreshold->setObjectName(QStringLiteral("bioThreshold"));
+        bioThreshold->setMaximum(1000);
+        bioThreshold->setValue(200);
 
-        gridLayout->addWidget(bioIntensity, 1, 1, 1, 1);
+        gridLayout->addWidget(bioThreshold, 1, 1, 1, 1);
 
         line = new QFrame(layout);
         line->setObjectName(QStringLiteral("line"));
@@ -55,10 +57,10 @@ public:
 
         gridLayout->addWidget(line, 0, 0, 1, 2);
 
-        bioIntensityLabel = new QLabel(layout);
-        bioIntensityLabel->setObjectName(QStringLiteral("bioIntensityLabel"));
+        bioThresholdLabel = new QLabel(layout);
+        bioThresholdLabel->setObjectName(QStringLiteral("bioThresholdLabel"));
 
-        gridLayout->addWidget(bioIntensityLabel, 1, 0, 1, 1);
+        gridLayout->addWidget(bioThresholdLabel, 1, 0, 1, 1);
 
         verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
@@ -73,7 +75,7 @@ public:
     void retranslateUi(QWidget *AlgaePropertyWidget)
     {
         AlgaePropertyWidget->setWindowTitle(QApplication::translate("AlgaePropertyWidget", "Form", 0));
-        bioIntensityLabel->setText(QApplication::translate("AlgaePropertyWidget", "Bioluminescence Intensity", 0));
+        bioThresholdLabel->setText(QApplication::translate("AlgaePropertyWidget", "Bioluminescence Threshold", 0));
     } // retranslateUi
 
 };
