@@ -1832,6 +1832,9 @@ __global__ void sphGPU_Kernels::ComputeBioluminescence(const float *pressure,
                                                        float *prevPressure,
                                                        float *illumination,
                                                        const float bioThreshold,
+                                                       const float reactionRate,
+                                                       const float deactionRate,
+                                                       const float deltaTime,
                                                        const uint numPoints)
 {
     uint idx = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -1844,12 +1847,12 @@ __global__ void sphGPU_Kernels::ComputeBioluminescence(const float *pressure,
         prevPressure[idx] = press;
 
         float deltaPress = /*fabs*/(press - prevPress);
-        float deltaIllum = ((deltaPress > bioThreshold) ? 0.01 : -0.01f);
+        float deltaIllum = ((deltaPress > bioThreshold) ? reactionRate : -deactionRate);
 
         const float maxIllum = 1.0f;
         const float minIllum = 0.0f;
 
-        currIllum += deltaIllum;
+        currIllum += (deltaIllum * deltaTime);
         currIllum = (currIllum < minIllum) ? minIllum : currIllum;
         currIllum = (currIllum > maxIllum) ? maxIllum : currIllum;
 

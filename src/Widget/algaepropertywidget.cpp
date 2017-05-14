@@ -14,6 +14,8 @@ AlgaePropertyWidget::AlgaePropertyWidget(QWidget *parent, AlgaeProperty *_proper
     SetProperty(_property);
 
     connect(ui->bioThreshold, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &AlgaePropertyWidget::OnPropertyChanged);
+    connect(ui->reactionRate, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &AlgaePropertyWidget::OnPropertyChanged);
+    connect(ui->deactionRate, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &AlgaePropertyWidget::OnPropertyChanged);
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -36,6 +38,8 @@ void AlgaePropertyWidget::SetProperty(AlgaeProperty *_property)
         SetRestDensity(_property->restDensity);
 
         ui->bioThreshold->setValue(_property->bioluminescenceThreshold);
+        ui->reactionRate->setValue(_property->reactionRate);
+        ui->deactionRate->setValue(_property->deactionRate);
 
 
         m_property = _property;
@@ -66,6 +70,8 @@ void AlgaePropertyWidget::OnPropertyChanged()
         m_property->particleRadius = GetParticleRadius();
         m_property->restDensity = GetRestDensity();
         m_property->bioluminescenceThreshold = ui->bioThreshold->value();
+        m_property->reactionRate = ui->reactionRate->value();
+        m_property->deactionRate = ui->deactionRate->value();
 
         emit PropertyChanged(m_property);
     }

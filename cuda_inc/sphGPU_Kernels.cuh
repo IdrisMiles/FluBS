@@ -270,6 +270,9 @@ namespace sphGPU_Kernels
                                            float *prevPressure,
                                            float *illumination,
                                            const float bioThreshold,
+                                           const float reactionRate,
+                                           const float deactionRate,
+                                           const float deltaTime,
                                            const uint numPoints);
 
 

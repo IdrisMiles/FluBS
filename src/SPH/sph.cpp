@@ -734,6 +734,9 @@ void sph::ComputeBioluminescence(const FluidSolverProperty &_solverProps,
                                    _algae->GetPrevPressurePtr(),
                                    _algae->GetIlluminationPtr(),
                                    algaeProps->bioluminescenceThreshold,
+                                   algaeProps->reactionRate,
+                                   algaeProps->deactionRate,
+                                   _solverProps.deltaTime,
                                    algaeProps->numParticles);
 }
 
