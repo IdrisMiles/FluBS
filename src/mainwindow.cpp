@@ -148,6 +148,13 @@ void MainWindow::OnRigidInitialised(std::shared_ptr<Rigid> _rigid)
 
         // connect rigid property changed to openglscene in order ot clear cache
         connect(rigidPropWidget, &RigidPropertyWidget::PropertyChanged, ui->scene, &OpenGLScene::OnPropertiesChanged);
+
+        connect(rigidPropWidget, &RigidPropertyWidget::TransformChanged, [this, _rigid](float posX, float posY, float posZ, float rotX, float rotY, float rotZ){
+            glm::vec3 pos(posX, posY, posZ);
+            glm::vec3 rot(rotX, rotY, rotZ);
+
+            _rigid->UpdateMesh(pos, rot);
+        });
     }
 }
 
@@ -181,14 +188,42 @@ void MainWindow::OnAlgaeInitialised(std::shared_ptr<Algae> _algae)
 
 void MainWindow::Cache()
 {
-    ui->scene->OnCacheOutSimulation(ui->progressBar);
+    ui->scene->CacheOutSimulation(ui->progressBar);
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------------
 
 void MainWindow::Load()
 {
-    ui->scene->OnLoadSimulation(ui->progressBar);
+    ui->scene->LoadSimulation(ui->progressBar);
+}
+
+//---------------------------------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::AddRigid(const std::string type)
+{
+    ui->scene->AddRigid(ui->progressBar, type);
+}
+
+//---------------------------------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::AddRigidCube()
+{
+    ui->scene->AddRigid(ui->progressBar, "cube");
+}
+
+//---------------------------------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::AddRigidSphere()
+{
+    ui->scene->AddRigid(ui->progressBar, "sphere");
+}
+
+//---------------------------------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::AddRigidMesh()
+{
+    ui->scene->AddRigid(ui->progressBar, "mesh");
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------------
@@ -198,6 +233,13 @@ void MainWindow::CreateMenus()
     m_fileMenu = menuBar()->addMenu(tr("&File"));
     m_fileMenu->addAction(m_cacheAction);
     m_fileMenu->addAction(m_loadAction);
+
+
+    m_editMenu = menuBar()->addMenu(tr("&Edit"));
+    m_rigidMenu = m_editMenu->addMenu(tr("&Add Rigid Body"));
+    m_rigidMenu->addAction(m_addRigidCubeAction);
+    m_rigidMenu->addAction(m_addRigidSphereAction);
+    m_rigidMenu->addAction(m_addRigidMeshAction);
 
 
 }
@@ -212,6 +254,21 @@ void MainWindow::CreateActions()
     m_loadAction = new QAction(tr("&Load"), this);
     connect(m_loadAction, &QAction::triggered, this, &MainWindow::Load);
 
+
+    m_addRigidCubeAction = new QAction(tr("&Cube"), this);
+    connect(m_addRigidCubeAction, &QAction::triggered, [this](){
+        AddRigid("cube");
+    });
+
+    m_addRigidSphereAction = new QAction(tr("&Sphere"), this);
+    connect(m_addRigidSphereAction, &QAction::triggered, [this](){
+        AddRigid("sphere");
+    });
+
+    m_addRigidMeshAction = new QAction(tr("&Mesh"), this);
+    connect(m_addRigidMeshAction, &QAction::triggered, [this](){
+        AddRigid("mesh");
+    });
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------------

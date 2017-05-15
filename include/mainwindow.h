@@ -29,6 +29,10 @@ public slots:
 
     void Cache();
     void Load();
+    void AddRigid(const std::string type);
+    void AddRigidCube();
+    void AddRigidSphere();
+    void AddRigidMesh();
 
 private:
     void CreateMenus();
@@ -39,6 +43,12 @@ private:
     QMenu *m_fileMenu;
     QAction *m_cacheAction;
     QAction *m_loadAction;
+
+    QMenu *m_editMenu;
+    QMenu *m_rigidMenu;
+    QAction *m_addRigidCubeAction;
+    QAction *m_addRigidSphereAction;
+    QAction *m_addRigidMeshAction;
 
 };
 

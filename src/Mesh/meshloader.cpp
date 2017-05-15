@@ -38,7 +38,7 @@ std::vector<Mesh> MeshLoader::LoadMesh(const std::string _meshFile)
                     auto face = scene->mMeshes[i]->mFaces[f];
                     mesh[i].tris.push_back(glm::ivec3(face.mIndices[0]+indexOffset, face.mIndices[1]+indexOffset, face.mIndices[2]+indexOffset));
                 }
-                //indexOffset += 3 * numFaces;
+//                indexOffset += 3 * numFaces;
 
                 unsigned int numVerts = scene->mMeshes[i]->mNumVertices;
                 for(unsigned int v=0; v<numVerts; v++)
@@ -48,9 +48,10 @@ std::vector<Mesh> MeshLoader::LoadMesh(const std::string _meshFile)
                     mesh[i].verts.push_back(glm::vec3(vert.x, vert.y, vert.z));
                     mesh[i].norms.push_back(glm::vec3(norm.x, norm.y, norm.z));
                 }
-            }
-        }
-    }
+
+            } // end for num meshes
+        } // end if has mesh
+    } // end if valid scene
 
     return mesh;
 }

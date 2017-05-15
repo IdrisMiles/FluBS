@@ -43,7 +43,12 @@ public:
     QSize minimumSizeHint() const Q_DECL_OVERRIDE;
     QSize sizeHint() const Q_DECL_OVERRIDE;
 
-
+    void CacheOutSimulation(QProgressBar *progress);
+    void LoadSimulation(QProgressBar *progress);
+    void AddRigid(QProgressBar *progress = nullptr, std::string type = "cube");
+    std::shared_ptr<Rigid> AddRigidCube();
+    std::shared_ptr<Rigid> AddRigidSphere();
+    std::shared_ptr<Rigid> AddRigidMesh();
 
 
 public slots:
@@ -59,8 +64,6 @@ public slots:
     void OnFrameChanged(int frame);
     void OnPropertiesChanged();
     void OnCacheChecked(bool checked);
-    void OnCacheOutSimulation(QProgressBar *progress);
-    void OnLoadSimulation(QProgressBar *progress);
     void OnSetFrameRange(int start, int end);
 
 signals:
@@ -128,7 +131,6 @@ private:
     std::shared_ptr<Rigid> m_staticRigid;
     std::shared_ptr<Rigid> m_activeRigid;
     std::shared_ptr<FluidSystem> m_fluidSystem;
-    Mesh m_activeRigidMesh;
 
     // Rendering
     std::shared_ptr<BioluminescentFluidRenderer> m_bioRenderer;

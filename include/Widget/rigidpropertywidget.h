@@ -24,10 +24,12 @@ public:
 signals:
     /// @brief Qt Signal to communicate that the FluidProperty has changed to other classes
     void PropertyChanged(RigidProperty *_property);
+    void TransformChanged(float posX, float posY, float posZ, float rotX, float rotY, float rotZ);
 
 public slots:
     /// @brief Qt Slot to be connected to any changes on this widget, emits PropertyChanged(m_property)
     virtual void OnPropertyChanged();
+    void OnTransformChanged();
 
 private:
     Ui::RigidPropertyWidget *ui;

@@ -13,9 +13,14 @@ public:
     Rigid(std::shared_ptr<RigidProperty> _rigidProperty, Mesh _mesh);
     virtual ~Rigid();
 
-    void UpdateMesh(Mesh &_mesh);
+    void UpdateMesh(Mesh &_mesh, const glm::vec3 &_pos = glm::vec3(0.0f, 0.0f, 0.0f), const glm::vec3 &_rot = glm::vec3(0.0f, 0.0f, 0.0f));
+    void UpdateMesh(const glm::vec3 &_pos = glm::vec3(0.0f, 0.0f, 0.0f), const glm::vec3 &_rot = glm::vec3(0.0f, 0.0f, 0.0f));
+
+    void SetRigidPosition(const glm::vec3 &_pos);
+    void SetRigidRotation(const glm::vec3 &_rot);
 
     virtual void SetupSolveSpecs(const FluidSolverProperty &_solverProps);
+
 
     virtual RigidProperty* GetProperty();
 
@@ -24,8 +29,6 @@ public:
 
     float *GetVolumePtr();
     void ReleaseVolumePtr();
-
-
 
 
     virtual void GetPositions(std::vector<glm::vec3> &_pos);

@@ -1,4 +1,5 @@
 #include "SPH/rigid.h"
+#include <glm/gtx/euler_angles.hpp>
 
 Rigid::Rigid(std::shared_ptr<RigidProperty> _rigidProperty, Mesh _mesh):
     BaseSphParticle(_rigidProperty)
@@ -27,15 +28,34 @@ Rigid::~Rigid()
     CleanUp();
 }
 
-void Rigid::UpdateMesh(Mesh &_mesh)
+void Rigid::UpdateMesh(Mesh &_mesh, const glm::vec3 &_pos, const glm::vec3 &_rot)
 {
-    m_mesh = _mesh;
-
+    Mesh newMesh = m_mesh = _mesh;
+    for( auto &&v : newMesh.verts)
+    {
+        glm::mat3 t = glm::orientate3(_rot);
+        v = (t*v)+_pos;
+    }
 
     GetPositionPtr();
-    cudaMemcpy(d_positionPtr, &m_mesh.verts[0], m_property->numParticles * sizeof(float3), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_positionPtr, &newMesh.verts[0], m_property->numParticles * sizeof(float3), cudaMemcpyHostToDevice);
     ReleaseCudaGLResources();
 }
+
+void Rigid::UpdateMesh(const glm::vec3 &_pos, const glm::vec3 &_rot)
+{
+    Mesh newMesh = m_mesh;
+    for( auto &&v : newMesh.verts)
+    {
+        glm::mat3 t = glm::orientate3(_rot);
+        v = (t*v)+_pos;
+    }
+
+    GetPositionPtr();
+    cudaMemcpy(d_positionPtr, &newMesh.verts[0], m_property->numParticles * sizeof(float3), cudaMemcpyHostToDevice);
+    ReleaseCudaGLResources();
+}
+
 
 //------------------------------------------------------------------------
 

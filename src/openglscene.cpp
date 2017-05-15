@@ -63,7 +63,7 @@ QSize OpenGLScene::sizeHint() const
 
 //------------------------------------------------------------------------------------------------------------
 
-void OpenGLScene::OnCacheOutSimulation(QProgressBar *progress)
+void OpenGLScene::CacheOutSimulation(QProgressBar *progress)
 {
     QString fileName = QFileDialog::getSaveFileName(this, tr("Cache Out"), "./", tr("JSON Files (*.json *.jsn)"));
     if(fileName.isEmpty() || fileName.isNull())
@@ -77,9 +77,9 @@ void OpenGLScene::OnCacheOutSimulation(QProgressBar *progress)
 
 //------------------------------------------------------------------------------------------------------------
 
-void OpenGLScene::OnLoadSimulation(QProgressBar *progress)
+void OpenGLScene::LoadSimulation(QProgressBar *progress)
 {
-    std::vector<QString> qFileNames = QFileDialog::getOpenFileNames(this, tr("Cache Out"), "./", tr("JSON Files (*.json *.jsn)")).toVector().toStdVector();
+    std::vector<QString> qFileNames = QFileDialog::getOpenFileNames(this, tr("Load Sim"), "./", tr("JSON Files (*.json *.jsn)")).toVector().toStdVector();
     if(qFileNames.empty())
     {
         return;
@@ -92,6 +92,142 @@ void OpenGLScene::OnLoadSimulation(QProgressBar *progress)
     }
 
     m_cache.LoadCacheFromDisk(fileNames, progress);
+}
+
+//------------------------------------------------------------------------------------------------------------
+
+void OpenGLScene::AddRigid(QProgressBar *progress, std::string type)
+{
+    makeCurrent();
+    std::shared_ptr<Rigid> rigid;
+
+    if(type == "cube")
+    {
+        rigid = AddRigidCube();
+    }
+    else if(type == "sphere")
+    {
+        rigid = AddRigidSphere();
+    }
+    else if(type == "mesh")
+    {
+        rigid = AddRigidMesh();
+    }
+    else
+    {
+        rigid = AddRigidCube();
+    }
+
+    // rigid cube to solver
+    m_fluidSystem->AddRigid(rigid);
+    emit RigidInitialised(rigid);
+
+
+    // add rigid cube to renderer
+    m_sphRenderers.push_back(std::shared_ptr<SphParticleRenderer>(new SphParticleRenderer()));
+    m_sphRenderers.back()->SetSphParticles(rigid);
+    m_sphRenderers.back()->SetColour(glm::vec3(0.4f, 0.4f, 0.4f));
+}
+
+std::shared_ptr<Rigid> OpenGLScene::AddRigidCube()
+{
+    auto rigidCubeProps = std::shared_ptr<RigidProperty>(new RigidProperty());
+
+    Mesh rigidCubeMesh = Mesh();
+    auto fluidSolverProps = m_fluidSystem->GetProperty();
+    float maxDim = (fluidSolverProps.gridResolution-1)*fluidSolverProps.gridCellWidth;
+    float dim = maxDim * 0.1f;
+    float rad = rigidCubeProps->particleRadius;
+    int numRigidAxis = ceil(dim / (rad*2.0f));
+    glm::vec3 pos = glm::vec3(0.0f, -10.0f, 0.0f);
+
+
+    // cube
+    for(int z=0; z<numRigidAxis; z++)
+    {
+        for(int y=0; y<numRigidAxis; y++)
+        {
+            for(int x=0; x<numRigidAxis; x++)
+            {
+                if(x==0 || x==numRigidAxis-1 || y==0 || y==numRigidAxis-1 || z==0 || z==numRigidAxis-1)
+                {
+                    glm::vec3 vert((x*rad*2.0f)-(dim*0.5f), (y*rad*2.0f)-(dim*0.5f), (z*rad*2.0f)-(dim*0.5f));
+                    rigidCubeMesh.verts.push_back(pos + vert);
+                }
+            }
+        }
+    }
+
+    rigidCubeProps->numParticles = rigidCubeMesh.verts.size();
+
+    return std::shared_ptr<Rigid>(new Rigid(rigidCubeProps, rigidCubeMesh));
+}
+
+//------------------------------------------------------------------------------------------------------------
+
+std::shared_ptr<Rigid> OpenGLScene::AddRigidSphere()
+{
+    auto rigidSphereProps = std::shared_ptr<RigidProperty>(new RigidProperty());
+
+    Mesh rigidSphereMesh = Mesh();
+    auto fluidSolverProps = m_fluidSystem->GetProperty();
+    float maxDim = (fluidSolverProps.gridResolution-1)*fluidSolverProps.gridCellWidth;
+    float dim = maxDim * 0.1f;
+    int _stacks = 15;
+    int _slices = 40;
+    float _radius = 2.0f;
+    glm::vec3 _pos(0.0f, -10.0f, 0.0f);
+
+    //sphere
+    for( int t = 1 ; t < _stacks-1 ; t++ )
+    {
+        float theta1 = ( (float)(t)/(_stacks-1) )*glm::pi<float>();
+
+        for( int p = 0 ; p < _slices ; p++ )
+        {
+            float phi1 = ( (float)(p)/(_slices-1) )*2*glm::pi<float>();
+
+            glm::vec3 vert = glm::vec3(sin(theta1)*cos(phi1), cos(theta1), -sin(theta1)*sin(phi1));
+            rigidSphereMesh.verts.push_back(_pos + (_radius*vert));
+        }
+    }
+    rigidSphereMesh.verts.push_back(_pos + (_radius * glm::vec3(0.0f, 1.0f, 0.0f)));
+    rigidSphereMesh.verts.push_back(_pos + (_radius * glm::vec3(0.0f, -1.0f, 0.0f)));
+
+    rigidSphereProps->numParticles = rigidSphereMesh.verts.size();
+    return std::shared_ptr<Rigid>(new Rigid(rigidSphereProps, rigidSphereMesh));
+}
+
+//------------------------------------------------------------------------------------------------------------
+
+std::shared_ptr<Rigid> OpenGLScene::AddRigidMesh()
+{
+    auto rigidMeshProps = std::shared_ptr<RigidProperty>(new RigidProperty());
+    Mesh rigidMesh = Mesh();
+
+    QString qFileName = QFileDialog::getOpenFileName(this, tr("Load Mesh"), "./", tr("Mesh Files (*.obj *.dae)"));
+
+    makeCurrent();
+
+    if(qFileName.isEmpty() || qFileName.isNull())
+    {
+        std::cout<<"No file selected. Loading default cube\n";
+        return AddRigidCube();
+    }
+
+    auto meshes = MeshLoader::LoadMesh(qFileName.toStdString());
+    if(meshes.size() < 1)
+    {
+        std::cout<<"No meshes in file. Loading default cube\n";
+        return AddRigidCube();
+    }
+
+    rigidMesh = MeshSampler::BaryCoord::SampleMesh(meshes[0], 8000);
+
+
+    rigidMeshProps->numParticles = rigidMesh.verts.size();
+    return std::shared_ptr<Rigid>(new Rigid(rigidMeshProps, rigidMesh));
+
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -221,11 +357,11 @@ void OpenGLScene::initializeGL()
     //---------------------------------------------------------------------------------------
     // Set up simulation here
 
-    auto fluidProps = std::shared_ptr<FluidProperty>(new FluidProperty());
-    auto algaeProps = std::shared_ptr<AlgaeProperty>(new AlgaeProperty(200.0f, 1.0f, 1.0f, 64000, 1.0f, 0.1f, 998.36f));
     FluidSolverProperty fluidSolverProps;
     auto containerProps = std::shared_ptr<RigidProperty>(new RigidProperty());
-    auto staticRigidProps = std::shared_ptr<RigidProperty>(new RigidProperty());
+    auto fluidProps = std::shared_ptr<FluidProperty>(new FluidProperty());
+    auto algaeProps = std::shared_ptr<AlgaeProperty>(new AlgaeProperty(200.0f, 1.0f, 1.0f, 64000, 1.0f, 0.1f, 998.36f));
+
 
     // fluid
     m_fluid = std::shared_ptr<Fluid>(new Fluid(fluidProps));
@@ -255,71 +391,16 @@ void OpenGLScene::initializeGL()
     m_container = std::shared_ptr<Rigid>(new Rigid(containerProps, boundary));
 
 
-    // rigid static
-    Mesh staticRigidMesh = Mesh();
-    dim = 0.95f* fluidSolverProps.gridResolution*fluidSolverProps.gridCellWidth;
-    rad = staticRigidProps->particleRadius;
-    numRigidAxis = ceil((dim*0.1) / (rad*2.0f));
-    // cube
-    for(int z=0; z<numRigidAxis; z++)
-    {
-        for(int y=0; y<numRigidAxis; y++)
-        {
-            for(int x=0; x<numRigidAxis; x++)
-            {
-                if(x==0 || x==numRigidAxis-1 || y==0 || y==numRigidAxis-1 || z==0 || z==numRigidAxis-1)
-                {
-                    glm::vec3 pos((x*rad*2.0f)-(dim*0.1f*0.5f), (y*rad*2.0f)-(dim*0.1f*0.5f), (z*rad*2.0f)-(dim*0.1f*0.5f));
-
-                    staticRigidMesh.verts.push_back(pos + glm::vec3(dim*0.2f, -dim*0.4f, dim*0.2f));
-
-                    staticRigidMesh.verts.push_back(pos + glm::vec3(dim*0.2f, -dim*0.4f, -dim*0.2f));
-
-                    staticRigidMesh.verts.push_back(pos + glm::vec3(-dim*0.2f, -dim*0.4f, dim*0.2f));
-
-                    staticRigidMesh.verts.push_back(pos + glm::vec3(-dim*0.2f, -dim*0.4f, -dim*0.2f));
-                }
-            }
-        }
-    }
-
-    // sphere
-    int _stacks = 15;
-    int _slices = 40;
-    float _radius = 2.0f;
-    glm::vec3 _pos(dim*0.0f, -dim*0.4f, -dim*0.0f);
-    for( int t = 1 ; t < _stacks-1 ; t++ )
-    {
-        float theta1 = ( (float)(t)/(_stacks-1) )*glm::pi<float>();
-
-        for( int p = 0 ; p < _slices ; p++ )
-        {
-            float phi1 = ( (float)(p)/(_slices-1) )*2*glm::pi<float>();
-
-            glm::vec3 vert = glm::vec3(sin(theta1)*cos(phi1), cos(theta1), -sin(theta1)*sin(phi1));
-            staticRigidMesh.verts.push_back(_pos + (_radius*vert));
-        }
-    }
-    staticRigidMesh.verts.push_back(_pos + (_radius * glm::vec3(0.0f, 1.0f, 0.0f)));
-    staticRigidMesh.verts.push_back(_pos + (_radius * glm::vec3(0.0f, -1.0f, 0.0f)));
-
-    staticRigidProps->numParticles = staticRigidMesh.verts.size();
-    m_staticRigid = std::shared_ptr<Rigid>(new Rigid(staticRigidProps, staticRigidMesh));
-
-
-
-
     // Fluid system
     m_fluidSystem = std::shared_ptr<FluidSystem>(new FluidSystem(fluidSolverProps));
     m_fluidSystem->SetContainer(m_container);
     m_fluidSystem->AddFluid(m_fluid);
-    m_fluidSystem->AddRigid(m_staticRigid);
     m_fluidSystem->AddAlgae(m_algae);
 
     emit FluidSystemInitialised(m_fluidSystem);
     emit FluidInitialised(m_fluid);
-    emit RigidInitialised(m_staticRigid);
     emit AlgaeInitialised(m_algae);
+
 
     m_fluidSystem->InitialiseSim();
 
@@ -330,19 +411,6 @@ void OpenGLScene::initializeGL()
     m_bioRenderer->SetCubeMap(m_skyboxTex);
     m_bioRenderer->SetSphParticles(m_fluid, m_algae);
 
-
-
-    m_sphRenderers.push_back(std::shared_ptr<SphParticleRenderer>(new SphParticleRenderer()));
-    m_sphRenderers.back()->SetSphParticles(m_staticRigid);
-    m_sphRenderers.back()->SetColour(glm::vec3(0.4f, 0.4f, 0.4f));
-
-//    m_sphRenderers.push_back(std::shared_ptr<SphParticleRenderer>(new SphParticleRenderer()));
-//    m_sphRenderers.back()->SetSphParticles(m_fluid);
-//    m_sphRenderers.back()->SetColour(glm::vec3(0.2f, 0.4f, 1.0f));
-
-//    m_sphRenderers.push_back(std::shared_ptr<SphParticleRenderer>(new SphParticleRenderer()));
-//    m_sphRenderers.back()->SetSphParticles(m_algae);
-//    m_sphRenderers.back()->SetColour(glm::vec3(0.2f, 1.0f, 0.3f));
 
     //---------------------------------------------------------------------------------------
     // Start simulation and drawing rimers
@@ -411,7 +479,14 @@ void OpenGLScene::OnFrameChanged(int frame)
                 OnFrameChanged(frame-1);
             }
 
-            m_fluidSystem->StepSim();
+            if(frame == 0)
+            {
+                m_fluidSystem->InitialiseSim();
+            }
+            else
+            {
+                m_fluidSystem->StepSim();
+            }
             emit FrameSimmed(frame);
 
             m_cache.Cache(frame, m_fluidSystem);

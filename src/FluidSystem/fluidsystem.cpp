@@ -100,6 +100,8 @@ void FluidSystem::AddRigid(std::shared_ptr<Rigid> _rigid)
 
         // compute rigid particle volumes
         sph::ComputeParticleVolume(m_fluidSolverProperty, m_staticRigids.back());
+
+        InitRigid(m_staticRigids.back());
     }
     else
     {
@@ -129,8 +131,10 @@ void FluidSystem::AddRigid(std::shared_ptr<Rigid> _rigid)
 
         // compute rigid particle volumes
         sph::ComputeParticleVolume(m_fluidSolverProperty, m_activeRigids.back());
-    }
 
+
+        InitRigid(m_activeRigids.back());
+    }    
 }
 
 //--------------------------------------------------------------------------------------------------------------------

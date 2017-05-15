@@ -1,6 +1,8 @@
 #include "include/Widget/rigidpropertywidget.h"
 #include "ui_rigidpropertywidget.h"
 
+//-----------------------------------------------------------------------------------------------------------
+
 RigidPropertyWidget::RigidPropertyWidget(QWidget *parent, RigidProperty *_property) :
     SphParticlePropertyWidget(parent),
     ui(new Ui::RigidPropertyWidget),
@@ -10,7 +12,20 @@ RigidPropertyWidget::RigidPropertyWidget(QWidget *parent, RigidProperty *_proper
 
     AddWidgetToGridLayout(ui->layout, 0, 1, 2);
     SetProperty(_property);
+
+    connect(ui->static_2, &QCheckBox::clicked, this, &RigidPropertyWidget::OnPropertyChanged);
+    connect(ui->kinematic, &QCheckBox::clicked, this, &RigidPropertyWidget::OnPropertyChanged);
+
+    connect(ui->posX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RigidPropertyWidget::OnTransformChanged);
+    connect(ui->posY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RigidPropertyWidget::OnTransformChanged);
+    connect(ui->posZ, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RigidPropertyWidget::OnTransformChanged);
+
+    connect(ui->rotX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RigidPropertyWidget::OnTransformChanged);
+    connect(ui->rotY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RigidPropertyWidget::OnTransformChanged);
+    connect(ui->rotZ, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RigidPropertyWidget::OnTransformChanged);
 }
+
+//-----------------------------------------------------------------------------------------------------------
 
 RigidPropertyWidget::~RigidPropertyWidget()
 {
@@ -18,6 +33,7 @@ RigidPropertyWidget::~RigidPropertyWidget()
     delete ui;
 }
 
+//-----------------------------------------------------------------------------------------------------------
 
 void RigidPropertyWidget::SetProperty(RigidProperty *_property)
 {
@@ -34,6 +50,8 @@ void RigidPropertyWidget::SetProperty(RigidProperty *_property)
         m_property = _property;
     }
 }
+
+//-----------------------------------------------------------------------------------------------------------
 
 RigidProperty *RigidPropertyWidget::GetProperty()
 {
@@ -63,3 +81,13 @@ void RigidPropertyWidget::OnPropertyChanged()
     }
 
 }
+
+//-----------------------------------------------------------------------------------------------------------
+
+void RigidPropertyWidget::OnTransformChanged()
+{
+    emit TransformChanged(ui->posX->value(), ui->posY->value(), ui->posZ->value(), ui->rotX->value(), ui->rotY->value(), ui->rotZ->value());
+    emit PropertyChanged(m_property);
+}
+
+//-----------------------------------------------------------------------------------------------------------
