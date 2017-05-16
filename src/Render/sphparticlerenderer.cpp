@@ -159,6 +159,53 @@ void SphParticleRenderer::InitFluidVAO()
 }
 
 
+void SphParticleRenderer::UpdateFluidVAO()
+{
+    QOpenGLFunctions *glFuncs = QOpenGLContext::currentContext()->functions();
+
+    m_shaderProg.bind();
+
+    // Set up the VAO
+    m_vao.bind();
+
+
+    // Setup our pos buffer object.
+    m_posBO->bind();
+    glFuncs->glEnableVertexAttribArray(m_posAttrLoc);
+    glFuncs->glVertexAttribPointer(m_posAttrLoc, 3, GL_FLOAT, GL_FALSE, 1 * sizeof(float3), 0);
+    m_posBO->release();
+
+
+    // Set up velocity buffer object
+    m_velBO->bind();
+    glFuncs->glEnableVertexAttribArray(m_velAttrLoc);
+    glFuncs->glVertexAttribPointer(m_velAttrLoc, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
+    m_velBO->release();
+
+
+    // Set up density buffer object
+    m_denBO->bind();
+    glFuncs->glEnableVertexAttribArray(m_denAttrLoc);
+    glFuncs->glVertexAttribPointer(m_denAttrLoc, 1, GL_FLOAT, GL_FALSE, sizeof(GLfloat), 0);
+    m_denBO->release();
+
+
+    // Set up mass buffer object
+    m_massBO->bind();
+    m_massBO->release();
+
+
+    // Set up pressure buffer object
+    m_pressBO->bind();
+    m_pressBO->release();
+
+
+    m_vao.release();
+
+    m_shaderProg.release();
+}
+
+
 void SphParticleRenderer::CleanUpGL()
 {
 

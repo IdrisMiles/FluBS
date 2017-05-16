@@ -10,15 +10,18 @@
 class Algae : public BaseSphParticle
 {
 public:
-    Algae(std::shared_ptr<AlgaeProperty> _property);
+    Algae(std::shared_ptr<AlgaeProperty> _property, std::string _name = "algae");
 
-    Algae(std::shared_ptr<AlgaeProperty> _property, Mesh _mesh);
+    Algae(std::shared_ptr<AlgaeProperty> _property, Mesh _mesh, std::string _name = "algae");
 
     virtual ~Algae();
 
     virtual void SetupSolveSpecs(const FluidSolverProperty &_solverProps);
 
     virtual AlgaeProperty *GetProperty();
+
+    void SetProperty(std::shared_ptr<AlgaeProperty> _property);
+    void SetProperty(AlgaeProperty _property);
 
     virtual void MapCudaGLResources();
 
@@ -59,6 +62,8 @@ protected:
 
     virtual void CleanUpCUDAMemory();
     virtual void CleanUpGL();
+
+    virtual void UpdateCUDAMemory();
 
 
     // specfic simulation Data

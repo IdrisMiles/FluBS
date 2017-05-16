@@ -11,6 +11,12 @@ SphParticlePropertyWidget::SphParticlePropertyWidget(QWidget *parent, SphParticl
 {
     ui->setupUi(this);
     SetProperty(_property);
+
+    connect(ui->numParticles, QOverload<int>::of(&QSpinBox::valueChanged), this, &SphParticlePropertyWidget::OnPropertyChanged);
+    connect(ui->particleMass, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &SphParticlePropertyWidget::OnPropertyChanged);
+    connect(ui->particleRadius, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &SphParticlePropertyWidget::OnPropertyChanged);
+    connect(ui->restDensity, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &SphParticlePropertyWidget::OnPropertyChanged);
+    connect(ui->smoothingLength, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &SphParticlePropertyWidget::OnPropertyChanged);
 }
 
 //-----------------------------------------------------------------------------------------------------------

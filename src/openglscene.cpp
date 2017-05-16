@@ -98,8 +98,14 @@ void OpenGLScene::LoadSimulation(QProgressBar *progress)
 
 void OpenGLScene::AddRigid(QProgressBar *progress, std::string type)
 {
+    int progressCount = 0;
+    progress->setMaximum(4);
+    progress->setValue(progressCount++);
+
     makeCurrent();
     std::shared_ptr<Rigid> rigid;
+
+    progress->setValue(progressCount++);
 
     if(type == "cube")
     {
@@ -118,15 +124,20 @@ void OpenGLScene::AddRigid(QProgressBar *progress, std::string type)
         rigid = AddRigidCube();
     }
 
+    progress->setValue(progressCount++);
+
     // rigid cube to solver
     m_fluidSystem->AddRigid(rigid);
     emit RigidInitialised(rigid);
 
+    progress->setValue(progressCount++);
 
     // add rigid cube to renderer
     m_sphRenderers.push_back(std::shared_ptr<SphParticleRenderer>(new SphParticleRenderer()));
     m_sphRenderers.back()->SetSphParticles(rigid);
     m_sphRenderers.back()->SetColour(glm::vec3(0.4f, 0.4f, 0.4f));
+
+    progress->setValue(progressCount++);
 }
 
 std::shared_ptr<Rigid> OpenGLScene::AddRigidCube()

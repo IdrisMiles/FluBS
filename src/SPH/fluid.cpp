@@ -4,8 +4,8 @@
 #include <glm/gtx/transform.hpp>
 
 
-Fluid::Fluid(std::shared_ptr<FluidProperty> _fluidProperty):
-    BaseSphParticle(_fluidProperty),
+Fluid::Fluid(std::shared_ptr<FluidProperty> _fluidProperty, std::string _name):
+    BaseSphParticle(_fluidProperty, _name),
     m_property(_fluidProperty)
 {
     m_positionMapped = false;
@@ -19,8 +19,8 @@ Fluid::Fluid(std::shared_ptr<FluidProperty> _fluidProperty):
 
 //--------------------------------------------------------------------------------------------------------------------
 
-Fluid::Fluid(std::shared_ptr<FluidProperty> _fluidProperty, Mesh _mesh):
-    BaseSphParticle(_fluidProperty),
+Fluid::Fluid(std::shared_ptr<FluidProperty> _fluidProperty, Mesh _mesh, std::string _name):
+    BaseSphParticle(_fluidProperty, _name),
     m_property(_fluidProperty)
 {
     m_mesh = _mesh;
@@ -72,6 +72,45 @@ FluidProperty* Fluid::GetProperty()
     return m_property.get();
 }
 
+//---------------------------------------------------------------------------------------------------------------
+
+void Fluid::SetProperty(std::shared_ptr<FluidProperty> _property)
+{
+    m_property = _property;
+
+    UpdateCUDAMemory();
+
+}
+
+//---------------------------------------------------------------------------------------------------------------
+
+void Fluid::SetProperty(FluidProperty _property)
+{
+    m_property->gravity = _property.gravity;
+
+    if(m_property->particleMass != _property.particleMass)
+    {
+        m_property->particleMass = _property.particleMass;
+    }
+
+    if(m_property->particleRadius != _property.particleRadius)
+    {
+        m_property->particleRadius = _property.particleRadius;
+    }
+
+    if(m_property->restDensity != _property.restDensity)
+    {
+        m_property->restDensity = _property.restDensity;
+    }
+
+    m_property->gasStiffness = _property.gasStiffness;
+    m_property->viscosity = _property.viscosity;
+    m_property->surfaceTension= _property.surfaceTension;
+    m_property->surfaceThreshold = _property.surfaceThreshold;
+    m_property->numParticles = _property.numParticles;
+
+    UpdateCUDAMemory();
+}
 //--------------------------------------------------------------------------------------------------------------------
 
 void Fluid::Init()
@@ -111,7 +150,7 @@ void Fluid::InitCUDAMemory()
     checkCudaErrorsMsg(cudaMalloc(&d_particleHashIdPtr, m_property->numParticles * sizeof(unsigned int)),"");
 
     // particle Id
-    cudaMallocManaged(&d_particleIdPtr, m_property->numParticles * sizeof(unsigned int));
+    cudaMalloc(&d_particleIdPtr, m_property->numParticles * sizeof(unsigned int));
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -178,12 +217,69 @@ void Fluid::CleanUpCUDAMemory()
     checkCudaErrorsMsg(cudaFree(d_gravityForcePtr),"");
     checkCudaErrorsMsg(cudaFree(d_externalForcePtr),"");
     checkCudaErrorsMsg(cudaFree(d_totalForcePtr),"");
+
+    checkCudaErrorsMsg(cudaFree(d_particleIdPtr),"");
     checkCudaErrorsMsg(cudaFree(d_particleHashIdPtr),"");
-    checkCudaErrorsMsg(cudaFree(d_cellOccupancyPtr),"");
-    checkCudaErrorsMsg(cudaFree(d_cellParticleIdxPtr),"");
+//    checkCudaErrorsMsg(cudaFree(d_cellOccupancyPtr),"");
+//    checkCudaErrorsMsg(cudaFree(d_cellParticleIdxPtr),"");
     checkCudaErrorsMsg(cudaFree(d_predictPositionPtr),"");
     checkCudaErrorsMsg(cudaFree(d_predictVelocityPtr),"");
     checkCudaErrorsMsg(cudaFree(d_densityErrPtr),"");
+}
+
+void Fluid::UpdateCUDAMemory()
+{
+    checkCudaErrorsMsg(cudaFree(d_viscousForcePtr),"");
+    checkCudaErrorsMsg(cudaFree(d_surfaceTensionForcePtr),"");
+    checkCudaErrorsMsg(cudaFree(d_gravityForcePtr),"");
+    checkCudaErrorsMsg(cudaFree(d_externalForcePtr),"");
+    checkCudaErrorsMsg(cudaFree(d_totalForcePtr),"");
+    checkCudaErrorsMsg(cudaFree(d_particleIdPtr),"");
+    checkCudaErrorsMsg(cudaFree(d_particleHashIdPtr),"");
+    checkCudaErrorsMsg(cudaFree(d_predictPositionPtr),"");
+    checkCudaErrorsMsg(cudaFree(d_predictVelocityPtr),"");
+    checkCudaErrorsMsg(cudaFree(d_densityErrPtr),"");
+
+
+
+    // particle forces
+    checkCudaErrorsMsg(cudaMalloc(&d_pressureForcePtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_viscousForcePtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_surfaceTensionForcePtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_gravityForcePtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_externalForcePtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_totalForcePtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_predictPositionPtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_predictVelocityPtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_densityErrPtr, m_property->numParticles * sizeof(float)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_particleHashIdPtr, m_property->numParticles * sizeof(unsigned int)),"");
+    cudaMalloc(&d_particleIdPtr, m_property->numParticles * sizeof(unsigned int));
+
+
+    // Setup our pos buffer object.
+    m_posBO.bind();
+    m_posBO.allocate(m_property->numParticles * sizeof(float3));
+    m_posBO.release();
+
+    // Set up velocity buffer object
+    m_velBO.bind();
+    m_velBO.allocate(m_property->numParticles * sizeof(float3));
+    m_velBO.release();
+
+    // Set up density buffer object
+    m_denBO.bind();
+    m_denBO.allocate(m_property->numParticles * sizeof(float));
+    m_denBO.release();
+
+    // Set up mass buffer object
+    m_massBO.bind();
+    m_massBO.allocate(m_property->numParticles * sizeof(float));
+    m_massBO.release();
+
+    // Set up pressure buffer object
+    m_pressBO.bind();
+    m_pressBO.allocate(m_property->numParticles * sizeof(float));
+    m_pressBO.release();
 }
 
 //--------------------------------------------------------------------------------------------------------------------

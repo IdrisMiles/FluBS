@@ -120,8 +120,15 @@ void MainWindow::OnFluidInitialised(std::shared_ptr<Fluid> _fluid)
 //            fluid->SetFluidProperty(_newProperties);
 //        });
 
+
+        Fluid* fluid = _fluid.get();
+        connect(fluidPropWidget, &FluidPropertyWidget::PropertyChanged, [fluidPropWidget, fluid](){
+            fluid->SetProperty(*fluidPropWidget->GetProperty());
+        });
+
         // connect fluid property changed to openglscene in order ot clear cache
         connect(fluidPropWidget, &FluidPropertyWidget::PropertyChanged, ui->scene, &OpenGLScene::OnPropertiesChanged);
+
     }
 }
 
@@ -144,6 +151,10 @@ void MainWindow::OnRigidInitialised(std::shared_ptr<Rigid> _rigid)
             {
                 ui->properties->setCurrentIndex(tabId);
             }
+        });
+
+        connect(rigidPropWidget, &RigidPropertyWidget::PropertyChanged, [rigidPropWidget, _rigid](){
+            _rigid->SetProperty(*rigidPropWidget->GetProperty());
         });
 
         // connect rigid property changed to openglscene in order ot clear cache
@@ -177,6 +188,11 @@ void MainWindow::OnAlgaeInitialised(std::shared_ptr<Algae> _algae)
             {
                 ui->properties->setCurrentIndex(tabId);
             }
+        });
+
+        Algae* algae = _algae.get();
+        connect(algaePropWidget, &AlgaePropertyWidget::PropertyChanged, [algaePropWidget, algae](){
+            algae->SetProperty(*algaePropWidget->GetProperty());
         });
 
         // connect algae property changed to openglscene in order ot clear cache

@@ -1,10 +1,11 @@
 #include "SPH/isphparticles.h"
 #include <assert.h>
 
-BaseSphParticle::BaseSphParticle(std::shared_ptr<SphParticleProperty> _property):
+BaseSphParticle::BaseSphParticle(std::shared_ptr<SphParticleProperty> _property, std::string _name):
     m_property(_property),
     m_init(false),
-    m_setupSolveSpecsInit(false)
+    m_setupSolveSpecsInit(false),
+    m_name(_name)
 {
 
 }
@@ -40,11 +41,16 @@ SphParticleProperty* BaseSphParticle::GetProperty()
     return m_property.get();
 }
 
+//---------------------------------------------------------------------------------------------------------------
 
 void BaseSphParticle::SetProperty(std::shared_ptr<SphParticleProperty> _property)
 {
     m_property = _property;
+
+    UpdateCUDAMemory();
 }
+
+//---------------------------------------------------------------------------------------------------------------
 
 void BaseSphParticle::SetProperty(SphParticleProperty _property)
 {
@@ -65,17 +71,24 @@ void BaseSphParticle::SetProperty(SphParticleProperty _property)
         m_property->restDensity = _property.restDensity;
     }
 
-    if(m_property->numParticles != _property.numParticles)
-    {
-        m_property->numParticles = _property.numParticles;
+    m_property->numParticles = _property.numParticles;
 
-        // need to re-allocate gpu memory
-        CleanUp();
-        Init();
-    }
+    UpdateCUDAMemory();
 }
 
+//---------------------------------------------------------------------------------------------------------------
 
+void BaseSphParticle::SetName(const std::string _name)
+{
+    m_name = _name;
+}
+
+//---------------------------------------------------------------------------------------------------------------
+
+std::string BaseSphParticle::GetName() const
+{
+    return m_name;
+}
 //---------------------------------------------------------------------------------------------------------------
 
 
@@ -169,6 +182,8 @@ void BaseSphParticle::CleanUpCUDAMemory()
     cudaFree(d_gravityForcePtr);
     cudaFree(d_externalForcePtr);
     cudaFree(d_totalForcePtr);
+
+    cudaFree(d_particleIdPtr);
     cudaFree(d_particleHashIdPtr);
     cudaFree(d_cellOccupancyPtr);
     cudaFree(d_cellParticleIdxPtr);
@@ -193,6 +208,55 @@ void BaseSphParticle::CleanUpGL()
 
 }
 //---------------------------------------------------------------------------------------------------------------
+
+void BaseSphParticle::UpdateCUDAMemory()
+{
+
+    checkCudaErrorsMsg(cudaFree(d_gravityForcePtr),"");
+    checkCudaErrorsMsg(cudaFree(d_externalForcePtr),"");
+    checkCudaErrorsMsg(cudaFree(d_totalForcePtr),"");
+    checkCudaErrorsMsg(cudaFree(d_particleIdPtr),"");
+    checkCudaErrorsMsg(cudaFree(d_particleHashIdPtr),"");
+
+
+
+
+    // particle forces
+    checkCudaErrorsMsg(cudaMalloc(&d_pressureForcePtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_gravityForcePtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_externalForcePtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_totalForcePtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_particleHashIdPtr, m_property->numParticles * sizeof(unsigned int)),"");
+    cudaMalloc(&d_particleIdPtr, m_property->numParticles * sizeof(unsigned int));
+
+
+    // Setup our pos buffer object.
+    m_posBO.bind();
+    m_posBO.allocate(m_property->numParticles * sizeof(float3));
+    m_posBO.release();
+
+    // Set up velocity buffer object
+    m_velBO.bind();
+    m_velBO.allocate(m_property->numParticles * sizeof(float3));
+    m_velBO.release();
+
+    // Set up density buffer object
+    m_denBO.bind();
+    m_denBO.allocate(m_property->numParticles * sizeof(float));
+    m_denBO.release();
+
+    // Set up mass buffer object
+    m_massBO.bind();
+    m_massBO.allocate(m_property->numParticles * sizeof(float));
+    m_massBO.release();
+
+    // Set up pressure buffer object
+    m_pressBO.bind();
+    m_pressBO.allocate(m_property->numParticles * sizeof(float));
+    m_pressBO.release();
+}
+
+//--------------------------------------------------------------------------------------------------------------------
 
 
 void BaseSphParticle::MapCudaGLResources()

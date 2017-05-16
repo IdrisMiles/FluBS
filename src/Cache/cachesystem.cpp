@@ -169,6 +169,7 @@ void CacheSystem::WriteCacheToDisk(const int _frame)
 
     // write cache to disk asynchronously
     m_threads[m_threadHead] = std::thread(&CacheSystem::CacheToDisk, this, fileName, std::ref(m_cachedFrames[_frame]));
+//    m_threads[m_threadHead].detach();
     m_threadHead = (m_threadHead+1)%m_threads.size();
 
 

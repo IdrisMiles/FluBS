@@ -1,8 +1,8 @@
 #include "SPH/rigid.h"
 #include <glm/gtx/euler_angles.hpp>
 
-Rigid::Rigid(std::shared_ptr<RigidProperty> _rigidProperty, Mesh _mesh):
-    BaseSphParticle(_rigidProperty)
+Rigid::Rigid(std::shared_ptr<RigidProperty> _rigidProperty, Mesh _mesh, std::string _name):
+    BaseSphParticle(_rigidProperty, _name)
 {
     m_property = _rigidProperty;
     m_mesh = _mesh;
@@ -110,7 +110,7 @@ void Rigid::InitCUDAMemory()
     cudaMalloc(&d_particleHashIdPtr, m_property->numParticles * sizeof(unsigned int));
 
     // particle Id
-    cudaMallocManaged(&d_particleIdPtr, m_property->numParticles * sizeof(unsigned int));
+    cudaMalloc(&d_particleIdPtr, m_property->numParticles * sizeof(unsigned int));
 }
 
 void Rigid::InitGL()
@@ -163,6 +163,8 @@ void Rigid::CleanUpCUDAMemory()
     cudaFree(d_gravityForcePtr);
     cudaFree(d_externalForcePtr);
     cudaFree(d_totalForcePtr);
+
+    cudaFree(d_particleIdPtr);
     cudaFree(d_particleHashIdPtr);
     cudaFree(d_cellOccupancyPtr);
     cudaFree(d_cellParticleIdxPtr);
@@ -188,6 +190,56 @@ void Rigid::CleanUpGL()
 }
 
 //------------------------------------------------------------------------
+
+void Rigid::UpdateCUDAMemory()
+{
+
+    checkCudaErrorsMsg(cudaFree(d_gravityForcePtr),"");
+    checkCudaErrorsMsg(cudaFree(d_externalForcePtr),"");
+    checkCudaErrorsMsg(cudaFree(d_totalForcePtr),"");
+    checkCudaErrorsMsg(cudaFree(d_particleIdPtr),"");
+    checkCudaErrorsMsg(cudaFree(d_particleHashIdPtr),"");
+
+
+
+
+    // particle forces
+    checkCudaErrorsMsg(cudaMalloc(&d_pressureForcePtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_gravityForcePtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_externalForcePtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_totalForcePtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_particleHashIdPtr, m_property->numParticles * sizeof(unsigned int)),"");
+    cudaMalloc(&d_particleIdPtr, m_property->numParticles * sizeof(unsigned int));
+
+
+    // Setup our pos buffer object.
+    m_posBO.bind();
+    m_posBO.allocate(m_property->numParticles * sizeof(float3));
+    m_posBO.release();
+
+    // Set up velocity buffer object
+    m_velBO.bind();
+    m_velBO.allocate(m_property->numParticles * sizeof(float3));
+    m_velBO.release();
+
+    // Set up density buffer object
+    m_denBO.bind();
+    m_denBO.allocate(m_property->numParticles * sizeof(float));
+    m_denBO.release();
+
+    // Set up mass buffer object
+    m_massBO.bind();
+    m_massBO.allocate(m_property->numParticles * sizeof(float));
+    m_massBO.release();
+
+    // Set up pressure buffer object
+    m_pressBO.bind();
+    m_pressBO.allocate(m_property->numParticles * sizeof(float));
+    m_pressBO.release();
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
 
 void Rigid::MapCudaGLResources()
 {
@@ -228,6 +280,30 @@ RigidProperty *Rigid::GetProperty()
     return m_property.get();
 }
 
+//---------------------------------------------------------------------------------------------------------------
+
+void Rigid::SetProperty(std::shared_ptr<RigidProperty> _property)
+{
+    m_property = _property;
+
+    UpdateCUDAMemory();
+}
+
+//---------------------------------------------------------------------------------------------------------------
+
+void Rigid::SetProperty(RigidProperty _property)
+{
+    m_property->gravity = _property.gravity;
+    m_property->particleMass = _property.particleMass;
+    m_property->particleRadius = _property.particleRadius;
+    m_property->restDensity = _property.restDensity;
+    m_property->numParticles = _property.numParticles;
+
+    m_property->m_static = _property.m_static;
+    m_property->kinematic = _property.kinematic;
+
+    UpdateCUDAMemory();
+}
 
 //--------------------------------------------------------------------------------------------------------------------
 

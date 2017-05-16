@@ -491,6 +491,7 @@ void FluidSystem::InitRigid(std::shared_ptr<Rigid> _rigid)
 
 void FluidSystem::InitFluid(std::shared_ptr<Fluid> _fluid)
 {
+    std::cout<<"fluid particle count: "<<_fluid->GetProperty()->numParticles<<"\n";
     sph::ResetProperties(m_fluidSolverProperty, _fluid);
     cudaThreadSynchronize();
     sph::InitFluidAsCube(m_fluidSolverProperty, _fluid);

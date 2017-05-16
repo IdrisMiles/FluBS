@@ -4,8 +4,8 @@
 #include <glm/gtx/transform.hpp>
 
 
-Algae::Algae(std::shared_ptr<AlgaeProperty> _property):
-    BaseSphParticle(_property),
+Algae::Algae(std::shared_ptr<AlgaeProperty> _property, std::string _name):
+    BaseSphParticle(_property, _name),
     m_property(_property)
 {
     m_positionMapped = false;
@@ -20,7 +20,8 @@ Algae::Algae(std::shared_ptr<AlgaeProperty> _property):
 
 //--------------------------------------------------------------------------------------------------------------------
 
-Algae::Algae(std::shared_ptr<AlgaeProperty> _property, Mesh _mesh):
+Algae::Algae(std::shared_ptr<AlgaeProperty> _property, Mesh _mesh, std::string _name):
+    BaseSphParticle(_property, _name),
     m_property(_property)
 {
     m_mesh = _mesh;
@@ -68,6 +69,32 @@ void Algae::SetupSolveSpecs(const FluidSolverProperty &_solverProps)
 AlgaeProperty *Algae::GetProperty()
 {
     return m_property.get();
+}
+
+//---------------------------------------------------------------------------------------------------------------
+
+void Algae::SetProperty(std::shared_ptr<AlgaeProperty> _property)
+{
+    m_property = _property;
+
+    UpdateCUDAMemory();
+}
+
+//---------------------------------------------------------------------------------------------------------------
+
+void Algae::SetProperty(AlgaeProperty _property)
+{
+    m_property->gravity = _property.gravity;
+    m_property->particleMass = _property.particleMass;
+    m_property->particleRadius = _property.particleRadius;
+    m_property->restDensity = _property.restDensity;
+    m_property->numParticles = _property.numParticles;
+
+    m_property->bioluminescenceThreshold = _property.bioluminescenceThreshold;
+    m_property->reactionRate = _property.reactionRate;
+    m_property->deactionRate = _property.deactionRate;
+
+    UpdateCUDAMemory();
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -135,7 +162,7 @@ void Algae::InitCUDAMemory()
     cudaMalloc(&d_particleHashIdPtr, m_property->numParticles * sizeof(unsigned int));
 
     // particle Id
-    cudaMallocManaged(&d_particleIdPtr, m_property->numParticles * sizeof(unsigned int));
+    cudaMalloc(&d_particleIdPtr, m_property->numParticles * sizeof(unsigned int));
 
     cudaMalloc(&d_prevPressurePtr, m_property->numParticles * sizeof(float));
     cudaMalloc(&d_energyPtr, m_property->numParticles * sizeof(float));
@@ -213,6 +240,8 @@ void Algae::CleanUpCUDAMemory()
     cudaFree(d_totalForcePtr);
     cudaFree(d_particleHashIdPtr);
     cudaFree(d_cellOccupancyPtr);
+
+    cudaFree(d_particleIdPtr);
     cudaFree(d_cellParticleIdxPtr);
     cudaFree(d_prevPressurePtr);
     cudaFree(d_energyPtr);
@@ -242,6 +271,56 @@ void Algae::CleanUpGL()
 }
 
 //--------------------------------------------------------------------------------------------------------------------
+
+void Algae::UpdateCUDAMemory()
+{
+
+    checkCudaErrorsMsg(cudaFree(d_gravityForcePtr),"");
+    checkCudaErrorsMsg(cudaFree(d_externalForcePtr),"");
+    checkCudaErrorsMsg(cudaFree(d_totalForcePtr),"");
+    checkCudaErrorsMsg(cudaFree(d_particleIdPtr),"");
+    checkCudaErrorsMsg(cudaFree(d_particleHashIdPtr),"");
+
+
+
+
+    // particle forces
+    checkCudaErrorsMsg(cudaMalloc(&d_pressureForcePtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_gravityForcePtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_externalForcePtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_totalForcePtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_particleHashIdPtr, m_property->numParticles * sizeof(unsigned int)),"");
+    cudaMalloc(&d_particleIdPtr, m_property->numParticles * sizeof(unsigned int));
+
+
+    // Setup our pos buffer object.
+    m_posBO.bind();
+    m_posBO.allocate(m_property->numParticles * sizeof(float3));
+    m_posBO.release();
+
+    // Set up velocity buffer object
+    m_velBO.bind();
+    m_velBO.allocate(m_property->numParticles * sizeof(float3));
+    m_velBO.release();
+
+    // Set up density buffer object
+    m_denBO.bind();
+    m_denBO.allocate(m_property->numParticles * sizeof(float));
+    m_denBO.release();
+
+    // Set up mass buffer object
+    m_massBO.bind();
+    m_massBO.allocate(m_property->numParticles * sizeof(float));
+    m_massBO.release();
+
+    // Set up pressure buffer object
+    m_pressBO.bind();
+    m_pressBO.allocate(m_property->numParticles * sizeof(float));
+    m_pressBO.release();
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
 
 float *Algae::GetPrevPressurePtr()
 {

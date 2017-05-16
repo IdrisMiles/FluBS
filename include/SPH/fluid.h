@@ -11,13 +11,15 @@ class Fluid : public BaseSphParticle
 {
 
 public:
-    Fluid(std::shared_ptr<FluidProperty> _fluidProperty);
-    Fluid(std::shared_ptr<FluidProperty> _rigidProperty, Mesh _mesh);
+    Fluid(std::shared_ptr<FluidProperty> _fluidProperty, std::string _name = "fluid");
+    Fluid(std::shared_ptr<FluidProperty> _rigidProperty, Mesh _mesh, std::string _name = "fluid");
     virtual ~Fluid();
 
     virtual void SetupSolveSpecs(const FluidSolverProperty &_solverProps);
 
     virtual FluidProperty *GetProperty();
+    virtual void SetProperty(std::shared_ptr<FluidProperty> _property);
+    virtual void SetProperty(FluidProperty _property);
 
     void MapCudaGLResources();
     void ReleaseCudaGLResources();
@@ -51,6 +53,8 @@ protected:
 
     virtual void CleanUpGL();
     virtual void CleanUpCUDAMemory();
+
+    virtual void UpdateCUDAMemory();
 
 
     // specfic simulation Data

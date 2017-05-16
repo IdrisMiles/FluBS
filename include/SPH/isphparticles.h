@@ -23,7 +23,7 @@
 class BaseSphParticle
 {
 public:
-    BaseSphParticle(std::shared_ptr<SphParticleProperty> _property = nullptr);
+    BaseSphParticle(std::shared_ptr<SphParticleProperty> _property = nullptr, std::string _name = "SPH Particle");
     virtual ~BaseSphParticle();
 
     virtual void SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps);
@@ -31,6 +31,9 @@ public:
     virtual SphParticleProperty *GetProperty();
     virtual void SetProperty(std::shared_ptr<SphParticleProperty> _property);
     virtual void SetProperty(SphParticleProperty _property);
+
+    void SetName(const std::string _name);
+    std::string GetName() const;
 
     virtual void MapCudaGLResources();
     virtual void ReleaseCudaGLResources();
@@ -104,9 +107,13 @@ protected:
     virtual void CleanUpCUDAMemory();
     virtual void CleanUpGL();
 
+    virtual void UpdateCUDAMemory();
+
 
     bool m_init;
     bool m_setupSolveSpecsInit;
+
+    std::string m_name;
 
     // Simulation Data
     Mesh m_mesh;
