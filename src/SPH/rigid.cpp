@@ -209,7 +209,7 @@ void Rigid::UpdateCUDAMemory()
     checkCudaErrorsMsg(cudaMalloc(&d_externalForcePtr, m_property->numParticles * sizeof(float3)),"");
     checkCudaErrorsMsg(cudaMalloc(&d_totalForcePtr, m_property->numParticles * sizeof(float3)),"");
     checkCudaErrorsMsg(cudaMalloc(&d_particleHashIdPtr, m_property->numParticles * sizeof(unsigned int)),"");
-    cudaMalloc(&d_particleIdPtr, m_property->numParticles * sizeof(unsigned int));
+    checkCudaErrorsMsg(cudaMalloc(&d_particleIdPtr, m_property->numParticles * sizeof(unsigned int)),"");
 
 
     // Setup our pos buffer object.
@@ -286,7 +286,7 @@ void Rigid::SetProperty(std::shared_ptr<RigidProperty> _property)
 {
     m_property = _property;
 
-    UpdateCUDAMemory();
+//    UpdateCUDAMemory();
 }
 
 //---------------------------------------------------------------------------------------------------------------
@@ -302,7 +302,7 @@ void Rigid::SetProperty(RigidProperty _property)
     m_property->m_static = _property.m_static;
     m_property->kinematic = _property.kinematic;
 
-    UpdateCUDAMemory();
+//    UpdateCUDAMemory();
 }
 
 //--------------------------------------------------------------------------------------------------------------------

@@ -171,7 +171,7 @@ std::shared_ptr<Rigid> OpenGLScene::AddRigidCube()
 
     rigidCubeProps->numParticles = rigidCubeMesh.verts.size();
 
-    return std::shared_ptr<Rigid>(new Rigid(rigidCubeProps, rigidCubeMesh));
+    return std::shared_ptr<Rigid>(new Rigid(rigidCubeProps, rigidCubeMesh, "cube"));
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -206,7 +206,7 @@ std::shared_ptr<Rigid> OpenGLScene::AddRigidSphere()
     rigidSphereMesh.verts.push_back(_pos + (_radius * glm::vec3(0.0f, -1.0f, 0.0f)));
 
     rigidSphereProps->numParticles = rigidSphereMesh.verts.size();
-    return std::shared_ptr<Rigid>(new Rigid(rigidSphereProps, rigidSphereMesh));
+    return std::shared_ptr<Rigid>(new Rigid(rigidSphereProps, rigidSphereMesh, "sphere"));
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -233,11 +233,11 @@ std::shared_ptr<Rigid> OpenGLScene::AddRigidMesh()
         return AddRigidCube();
     }
 
-    rigidMesh = MeshSampler::BaryCoord::SampleMesh(meshes[0], 8000);
+    rigidMesh = MeshSampler::BaryCoord::SampleMesh(meshes[0], 1000);
 
 
     rigidMeshProps->numParticles = rigidMesh.verts.size();
-    return std::shared_ptr<Rigid>(new Rigid(rigidMeshProps, rigidMesh));
+    return std::shared_ptr<Rigid>(new Rigid(rigidMeshProps, rigidMesh, qFileName.toStdString()));
 
 }
 

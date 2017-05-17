@@ -3972,6 +3972,11 @@ obj/rigidpropertywidget.o: src/Widget/rigidpropertywidget.cpp include/Widget/rig
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QCheckBox \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qcheckbox.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractbutton.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QDoubleSpinBox \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qspinbox.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractspinbox.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qvalidator.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qregularexpression.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QFrame \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qframe.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QGridLayout \
@@ -3987,15 +3992,14 @@ obj/rigidpropertywidget.o: src/Widget/rigidpropertywidget.cpp include/Widget/rig
 		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qitemselectionmodel.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractitemdelegate.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qstyleoption.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractspinbox.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtGui/qvalidator.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qregularexpression.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qslider.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qabstractslider.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qstyle.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qtabbar.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qtabwidget.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qrubberband.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QLabel \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qlabel.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QSpacerItem
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/rigidpropertywidget.o src/Widget/rigidpropertywidget.cpp
 

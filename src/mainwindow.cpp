@@ -81,13 +81,12 @@ void MainWindow::OnFluidSystemInitialised(std::shared_ptr<FluidSystem> _fluidSys
 
 
         // connect fluid system property changed to fluid system
+        // connect fluid system property changed to openglscene in order ot clear cache
         auto fluidSystem = _fluidSystem.get();
         connect(solverPropWidget, &SolverPropertyWidget::PropertyChanged, [this, fluidSystem](const FluidSolverProperty &_newProperties){
             fluidSystem->SetFluidSolverProperty(_newProperties);
+            ui->scene->OnPropertiesChanged();
         });
-
-        // connect fluid system property changed to openglscene in order ot clear cache
-        connect(solverPropWidget, &SolverPropertyWidget::PropertyChanged, ui->scene, &OpenGLScene::OnPropertiesChanged);
     }
 }
 
@@ -114,20 +113,13 @@ void MainWindow::OnFluidInitialised(std::shared_ptr<Fluid> _fluid)
             }
         });
 
-        // connect fluid system property changed to fluid system
-//        auto fluid = _fluid.get();
-//        connect(fluidPropWidget, &FluidPropertyWidget::PropertyChanged, [this, fluid](const FluidProperty *_newProperties){
-//            fluid->SetFluidProperty(_newProperties);
-//        });
-
 
         Fluid* fluid = _fluid.get();
-        connect(fluidPropWidget, &FluidPropertyWidget::PropertyChanged, [fluidPropWidget, fluid](){
+        connect(fluidPropWidget, &FluidPropertyWidget::PropertyChanged, [this, fluidPropWidget, fluid](){
+            ui->scene->makeCurrent();
             fluid->SetProperty(*fluidPropWidget->GetProperty());
+            ui->scene->OnPropertiesChanged();
         });
-
-        // connect fluid property changed to openglscene in order ot clear cache
-        connect(fluidPropWidget, &FluidPropertyWidget::PropertyChanged, ui->scene, &OpenGLScene::OnPropertiesChanged);
 
     }
 }
@@ -138,27 +130,29 @@ void MainWindow::OnRigidInitialised(std::shared_ptr<Rigid> _rigid)
 {
     if(_rigid != nullptr)
     {
+        ui->scene->makeCurrent();
         auto rigidPropWidget = new RigidPropertyWidget(ui->properties, _rigid->GetProperty());
-        int tabId = ui->properties->addTab(rigidPropWidget, "Rigid");
+        std::string name = _rigid->GetName();
+        int tabId = ui->properties->addTab(rigidPropWidget, QString(name.c_str()));
 
 
         auto item = new QTreeWidgetItem();
-        item->setText(0,"Rigid");
+        item->setText(0,QString(name.c_str()));
         ui->outliner->addTopLevelItem(item);
 
-        connect(ui->outliner, &QTreeWidget::itemClicked, ui->properties, [this, tabId](QTreeWidgetItem* clickedItem, int column){
-            if(clickedItem->text(column) == "Rigid")
+        connect(ui->outliner, &QTreeWidget::itemClicked, ui->properties, [this, tabId, name](QTreeWidgetItem* clickedItem, int column){
+            if(clickedItem->text(column) == QString(name.c_str()))
             {
                 ui->properties->setCurrentIndex(tabId);
             }
         });
 
-        connect(rigidPropWidget, &RigidPropertyWidget::PropertyChanged, [rigidPropWidget, _rigid](){
+        connect(rigidPropWidget, &RigidPropertyWidget::PropertyChanged, [this, rigidPropWidget, _rigid](){
+            ui->scene->makeCurrent();
             _rigid->SetProperty(*rigidPropWidget->GetProperty());
+            ui->scene->OnPropertiesChanged();
         });
 
-        // connect rigid property changed to openglscene in order ot clear cache
-        connect(rigidPropWidget, &RigidPropertyWidget::PropertyChanged, ui->scene, &OpenGLScene::OnPropertiesChanged);
 
         connect(rigidPropWidget, &RigidPropertyWidget::TransformChanged, [this, _rigid](float posX, float posY, float posZ, float rotX, float rotY, float rotZ){
             glm::vec3 pos(posX, posY, posZ);
@@ -191,12 +185,11 @@ void MainWindow::OnAlgaeInitialised(std::shared_ptr<Algae> _algae)
         });
 
         Algae* algae = _algae.get();
-        connect(algaePropWidget, &AlgaePropertyWidget::PropertyChanged, [algaePropWidget, algae](){
+        connect(algaePropWidget, &AlgaePropertyWidget::PropertyChanged, [this, algaePropWidget, algae](){
+            ui->scene->makeCurrent();
             algae->SetProperty(*algaePropWidget->GetProperty());
+            ui->scene->OnPropertiesChanged();
         });
-
-        // connect algae property changed to openglscene in order ot clear cache
-        connect(algaePropWidget, &AlgaePropertyWidget::PropertyChanged, ui->scene, &OpenGLScene::OnPropertiesChanged);
     }
 }
 
