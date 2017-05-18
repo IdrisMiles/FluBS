@@ -49,9 +49,16 @@ public:
 
     void AddRigid(QProgressBar *progress = nullptr, std::string type = "cube");
     void RemoveRigid(std::shared_ptr<Rigid> rigid);
-    void RemoveRigid(std::string name);
-    void SaveRigid();
-    void LoadRigid();
+    // todo
+    void LoadRigid(QProgressBar *progress = nullptr,
+                   std::string type = "cube",
+                   RigidProperty property = RigidProperty(),
+                   glm::vec3 pos = glm::vec3(0.0f, 0.0f, 0.0f),
+                   glm::vec3 rot = glm::vec3(0.0f, 0.0f, 0.0f),
+                   glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f),
+                   std::string name = "cube",
+                   std::string file = "");
+    void SaveRigid(QProgressBar *progress = nullptr, std::shared_ptr<Rigid> rigid = nullptr);
 
     void AddFluid(QProgressBar *progress = nullptr);
     void RemoveFluid(std::shared_ptr<Fluid> fluid);
@@ -105,9 +112,18 @@ protected:
 
 private:
 
-    std::shared_ptr<Rigid> CreateRigidCube(RigidProperty property = RigidProperty());
-    std::shared_ptr<Rigid> CreateRigidSphere(RigidProperty property = RigidProperty());
-    std::shared_ptr<Rigid> CreateRigidMesh(RigidProperty property = RigidProperty());
+    std::shared_ptr<Rigid> CreateRigidCube(RigidProperty property = RigidProperty(),
+                                           glm::vec3 pos = glm::vec3(0.0f, 0.0f, 0.0f),
+                                           glm::vec3 rot = glm::vec3(0.0f, 0.0f, 0.0f),
+                                           glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f));
+    std::shared_ptr<Rigid> CreateRigidSphere(RigidProperty property = RigidProperty(),
+                                             glm::vec3 pos = glm::vec3(0.0f, 0.0f, 0.0f),
+                                             glm::vec3 rot = glm::vec3(0.0f, 0.0f, 0.0f),
+                                             glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f));
+    std::shared_ptr<Rigid> CreateRigidMesh(std::string meshFile, RigidProperty property = RigidProperty(),
+                                           glm::vec3 pos = glm::vec3(0.0f, 0.0f, 0.0f),
+                                           glm::vec3 rot = glm::vec3(0.0f, 0.0f, 0.0f),
+                                           glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f));
 
     void DrawSkybox();
     void CreateSkybox();

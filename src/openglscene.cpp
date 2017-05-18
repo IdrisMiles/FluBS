@@ -7,6 +7,8 @@
 #include <QImage>
 #include <QFileDialog>
 
+#include <glm/gtx/euler_angles.hpp>
+
 #include "Mesh/meshloader.h"
 #include "MeshSampler/meshsampler.h"
 
@@ -122,7 +124,13 @@ void OpenGLScene::AddRigid(QProgressBar *progress, std::string type)
     }
     else if(type == "mesh")
     {
-        rigid = CreateRigidMesh();
+        QString qFileName = QFileDialog::getOpenFileName(this, tr("Load Mesh"), "./", tr("Mesh Files (*.obj *.dae)"));
+        if(qFileName.isEmpty() || qFileName.isNull())
+        {
+            std::cout<<"No file selected. Loading default cube\n";
+            return;
+        }
+        rigid = CreateRigidMesh(qFileName.toStdString());
         rigid->SetName("mesh"+std::to_string(meshCount++));
     }
     else
@@ -147,7 +155,7 @@ void OpenGLScene::AddRigid(QProgressBar *progress, std::string type)
     progress->setValue(progressCount++);
 }
 
-std::shared_ptr<Rigid> OpenGLScene::CreateRigidCube(RigidProperty property)
+std::shared_ptr<Rigid> OpenGLScene::CreateRigidCube(RigidProperty property, glm::vec3 pos, glm::vec3 rot, glm::vec3 scale)
 {
     auto rigidProps = std::shared_ptr<RigidProperty>(new RigidProperty());
     *rigidProps = property;
@@ -156,8 +164,6 @@ std::shared_ptr<Rigid> OpenGLScene::CreateRigidCube(RigidProperty property)
     float dim = 1.0f;
     float rad = rigidProps->particleRadius;
     int numRigidAxis = ceil(dim / (rad*2.0f));
-    glm::vec3 pos = glm::vec3(0.0f, 0.0f, 0.0f);
-
 
     // cube
     for(int z=0; z<numRigidAxis; z++)
@@ -168,8 +174,11 @@ std::shared_ptr<Rigid> OpenGLScene::CreateRigidCube(RigidProperty property)
             {
                 if(x==0 || x==numRigidAxis-1 || y==0 || y==numRigidAxis-1 || z==0 || z==numRigidAxis-1)
                 {
-                    glm::vec3 vert((x*rad*2.0f)-(dim*0.5f), (y*rad*2.0f)-(dim*0.5f), (z*rad*2.0f)-(dim*0.5f));
-                    rigidCubeMesh.verts.push_back(pos + vert);
+                    glm::vec3 vert = glm::vec3((x*rad*2.0f)-(dim*0.5f), (y*rad*2.0f)-(dim*0.5f), (z*rad*2.0f)-(dim*0.5f));
+                    glm::mat3 t = glm::orientate3(rot);
+                    vert = (t*vert)+pos;
+                    rigidCubeMesh.verts.push_back(vert);
+
                 }
             }
         }
@@ -182,7 +191,7 @@ std::shared_ptr<Rigid> OpenGLScene::CreateRigidCube(RigidProperty property)
 
 //------------------------------------------------------------------------------------------------------------
 
-std::shared_ptr<Rigid> OpenGLScene::CreateRigidSphere(RigidProperty property)
+std::shared_ptr<Rigid> OpenGLScene::CreateRigidSphere(RigidProperty property, glm::vec3 pos, glm::vec3 rot, glm::vec3 scale)
 {
     auto rigidProps = std::shared_ptr<RigidProperty>(new RigidProperty());
     *rigidProps = property;
@@ -191,7 +200,6 @@ std::shared_ptr<Rigid> OpenGLScene::CreateRigidSphere(RigidProperty property)
     int _stacks = 15;
     int _slices = 40;
     float _radius = 0.5f;
-    glm::vec3 _pos(0.0f, 0.0f, 0.0f);
 
     //sphere
     for( int t = 1 ; t < _stacks-1 ; t++ )
@@ -202,15 +210,40 @@ std::shared_ptr<Rigid> OpenGLScene::CreateRigidSphere(RigidProperty property)
         {
             float phi1 = ( (float)(p)/(_slices-1) )*2*glm::pi<float>();
 
-            glm::vec3 vert = glm::vec3(sin(theta1)*cos(phi1), cos(theta1), -sin(theta1)*sin(phi1));
-            rigidSphereMesh.verts.push_back(_pos + (_radius*vert));
+            glm::vec3 vert = _radius * glm::vec3(sin(theta1)*cos(phi1), cos(theta1), -sin(theta1)*sin(phi1));
+            glm::mat3 t = glm::orientate3(rot);
+            vert = (t*vert)+pos;
+            rigidSphereMesh.verts.push_back(vert);
         }
     }
-    rigidSphereMesh.verts.push_back(_pos + (_radius * glm::vec3(0.0f, 1.0f, 0.0f)));
-    rigidSphereMesh.verts.push_back(_pos + (_radius * glm::vec3(0.0f, -1.0f, 0.0f)));
+    rigidSphereMesh.verts.push_back(pos + (_radius * glm::vec3(0.0f, 1.0f, 0.0f)));
+    rigidSphereMesh.verts.push_back(pos + (_radius * glm::vec3(0.0f, -1.0f, 0.0f)));
 
     rigidProps->numParticles = rigidSphereMesh.verts.size();
     return std::shared_ptr<Rigid>(new Rigid(rigidProps, rigidSphereMesh, "sphere"));
+}
+
+//------------------------------------------------------------------------------------------------------------
+
+std::shared_ptr<Rigid> OpenGLScene::CreateRigidMesh(std::string meshFile, RigidProperty property, glm::vec3 pos, glm::vec3 rot, glm::vec3 scale)
+{
+    auto rigidProps = std::shared_ptr<RigidProperty>(new RigidProperty());
+    *rigidProps = property;
+    Mesh rigidMesh = Mesh();
+
+    auto meshes = MeshLoader::LoadMesh(meshFile);
+    if(meshes.size() < 1)
+    {
+        std::cout<<"No meshes in file. Loading default cube\n";
+        return CreateRigidCube();
+    }
+
+    rigidMesh = MeshSampler::BaryCoord::SampleMesh(meshes[0], 1000);
+
+
+    rigidProps->numParticles = rigidMesh.verts.size();
+    return std::shared_ptr<Rigid>(new Rigid(rigidProps, rigidMesh, meshFile));
+
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -241,42 +274,64 @@ void OpenGLScene::RemoveRigid(std::shared_ptr<Rigid> rigid)
     m_fluidSystem->RemoveRigid(rigid);
 }
 
-void OpenGLScene::RemoveRigid(std::string name)
-{
-
-}
 
 //------------------------------------------------------------------------------------------------------------
 
-std::shared_ptr<Rigid> OpenGLScene::CreateRigidMesh(RigidProperty property)
+void OpenGLScene::LoadRigid(QProgressBar *progress, std::string type, RigidProperty property,
+                            glm::vec3 pos, glm::vec3 rot, glm::vec3 scale,
+                            std::string name, std::string file)
 {
-    auto rigidProps = std::shared_ptr<RigidProperty>(new RigidProperty());
-    *rigidProps = property;
-    Mesh rigidMesh = Mesh();
-
-    QString qFileName = QFileDialog::getOpenFileName(this, tr("Load Mesh"), "./", tr("Mesh Files (*.obj *.dae)"));
+    int progressCount = 0;
+    progress->setMaximum(4);
+    progress->setValue(progressCount++);
 
     makeCurrent();
+    std::shared_ptr<Rigid> rigid;
 
-    if(qFileName.isEmpty() || qFileName.isNull())
+    progress->setValue(progressCount++);
+    static int cubeCount=0;
+    static int sphereCount=0;
+    static int meshCount=0;
+
+    if(type == "cube")
     {
-        std::cout<<"No file selected. Loading default cube\n";
-        return CreateRigidCube();
+        rigid = CreateRigidCube(property, pos, rot, scale);
+        rigid->SetName(name);
+        cubeCount++;
+    }
+    else if(type == "sphere")
+    {
+        rigid = CreateRigidSphere(property, pos, rot, scale);
+        rigid->SetName(name);
+        sphereCount++;
+    }
+    else if(type == "mesh")
+    {
+        rigid = CreateRigidMesh(file, property, pos, rot, scale);
+        rigid->SetName(name);
+        meshCount++;
+    }
+    else
+    {
+        rigid = CreateRigidCube(property, pos, rot, scale);
+        cubeCount++;
     }
 
-    auto meshes = MeshLoader::LoadMesh(qFileName.toStdString());
-    if(meshes.size() < 1)
-    {
-        std::cout<<"No meshes in file. Loading default cube\n";
-        return CreateRigidCube();
-    }
+    progress->setValue(progressCount++);
 
-    rigidMesh = MeshSampler::BaryCoord::SampleMesh(meshes[0], 1000);
+    // rigid cube to solver
+    m_rigids.push_back(rigid);
+    m_fluidSystem->AddRigid(rigid);
+    emit RigidInitialised(rigid);
 
+    progress->setValue(progressCount++);
 
-    rigidProps->numParticles = rigidMesh.verts.size();
-    return std::shared_ptr<Rigid>(new Rigid(rigidProps, rigidMesh, qFileName.toStdString()));
+    // add rigid cube to renderer
+    m_sphRenderers.push_back(std::shared_ptr<SphParticleRenderer>(new SphParticleRenderer()));
+    m_sphRenderers.back()->SetSphParticles(rigid);
+    m_sphRenderers.back()->SetColour(glm::vec3(0.4f, 0.4f, 0.4f));
 
+    progress->setValue(progressCount++);
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -398,9 +453,6 @@ void OpenGLScene::initializeGL()
     //---------------------------------------------------------------------------------------
     // Create Skybox
     CreateSkybox();
-
-
-
 
 
     //---------------------------------------------------------------------------------------
