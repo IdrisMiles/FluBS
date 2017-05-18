@@ -15,16 +15,16 @@ class AlgaePropertyWidget : public SphParticlePropertyWidget
     Q_OBJECT
 
 public:
-    explicit AlgaePropertyWidget(QWidget *parent = 0, AlgaeProperty *_algaeProperty = nullptr);
+    explicit AlgaePropertyWidget(QWidget *parent = 0, AlgaeProperty _algaeProperty = AlgaeProperty());
     ~AlgaePropertyWidget();
 
-    virtual void SetProperty(AlgaeProperty *_property);
-    virtual AlgaeProperty *GetProperty();
+    virtual void SetProperty(AlgaeProperty _property);
+    AlgaeProperty GetProperty();
 
 
 signals:
     /// @brief Qt Signal to communicate that the FluidProperty has changed to other classes
-    void PropertyChanged(AlgaeProperty *_property);
+    void PropertyChanged(AlgaeProperty _property);
 
 
 public slots:
@@ -34,7 +34,7 @@ public slots:
 private:
     Ui::AlgaePropertyWidget *ui;
 
-    AlgaeProperty *m_property;
+    AlgaeProperty m_property;
 };
 
 #endif // ALGAEPROPERTYWIDGET_H

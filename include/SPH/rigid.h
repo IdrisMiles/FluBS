@@ -13,18 +13,16 @@ public:
     Rigid(std::shared_ptr<RigidProperty> _rigidProperty, Mesh _mesh, std::string _name = "rigid");
     virtual ~Rigid();
 
-    void UpdateMesh(Mesh &_mesh, const glm::vec3 &_pos = glm::vec3(0.0f, 0.0f, 0.0f), const glm::vec3 &_rot = glm::vec3(0.0f, 0.0f, 0.0f));
-    void UpdateMesh(const glm::vec3 &_pos = glm::vec3(0.0f, 0.0f, 0.0f), const glm::vec3 &_rot = glm::vec3(0.0f, 0.0f, 0.0f));
+    virtual RigidProperty* GetProperty();
 
-    void SetRigidPosition(const glm::vec3 &_pos);
-    void SetRigidRotation(const glm::vec3 &_rot);
+//    void SetProperty(std::shared_ptr<RigidProperty> _property);
+    void SetProperty(RigidProperty _property);
 
     virtual void SetupSolveSpecs(const FluidSolverProperty &_solverProps);
 
-    virtual RigidProperty* GetProperty();
+    void UpdateMesh(Mesh &_mesh, const glm::vec3 &_pos = glm::vec3(0.0f, 0.0f, 0.0f), const glm::vec3 &_rot = glm::vec3(0.0f, 0.0f, 0.0f));
+    void UpdateMesh(const glm::vec3 &_pos = glm::vec3(0.0f, 0.0f, 0.0f), const glm::vec3 &_rot = glm::vec3(0.0f, 0.0f, 0.0f));
 
-    void SetProperty(std::shared_ptr<RigidProperty> _property);
-    void SetProperty(RigidProperty _property);
 
     virtual void MapCudaGLResources();
     virtual void ReleaseCudaGLResources();

@@ -97,7 +97,7 @@ void MainWindow::OnFluidInitialised(std::shared_ptr<Fluid> _fluid)
     if(_fluid != nullptr)
     {
         // create a new fluid property widget
-        auto fluidPropWidget = new FluidPropertyWidget(ui->properties, _fluid->GetProperty());
+        auto fluidPropWidget = new FluidPropertyWidget(ui->properties, *_fluid->GetProperty());
         int tabId = ui->properties->addTab(fluidPropWidget, "Fluid");
 
         // add fluid to outliner
@@ -117,7 +117,7 @@ void MainWindow::OnFluidInitialised(std::shared_ptr<Fluid> _fluid)
         Fluid* fluid = _fluid.get();
         connect(fluidPropWidget, &FluidPropertyWidget::PropertyChanged, [this, fluidPropWidget, fluid](){
             ui->scene->makeCurrent();
-            fluid->SetProperty(*fluidPropWidget->GetProperty());
+            fluid->SetProperty(fluidPropWidget->GetProperty());
             ui->scene->OnPropertiesChanged();
         });
 
@@ -131,7 +131,7 @@ void MainWindow::OnRigidInitialised(std::shared_ptr<Rigid> _rigid)
     if(_rigid != nullptr)
     {
         ui->scene->makeCurrent();
-        auto rigidPropWidget = new RigidPropertyWidget(ui->properties, _rigid->GetProperty());
+        auto rigidPropWidget = new RigidPropertyWidget(ui->properties, *_rigid->GetProperty());
         std::string name = _rigid->GetName();
         int tabId = ui->properties->addTab(rigidPropWidget, QString(name.c_str()));
 
@@ -149,7 +149,7 @@ void MainWindow::OnRigidInitialised(std::shared_ptr<Rigid> _rigid)
 
         connect(rigidPropWidget, &RigidPropertyWidget::PropertyChanged, [this, rigidPropWidget, _rigid](){
             ui->scene->makeCurrent();
-            _rigid->SetProperty(*rigidPropWidget->GetProperty());
+            _rigid->SetProperty(rigidPropWidget->GetProperty());
             ui->scene->OnPropertiesChanged();
         });
 
@@ -169,7 +169,7 @@ void MainWindow::OnAlgaeInitialised(std::shared_ptr<Algae> _algae)
 {
     if(_algae != nullptr)
     {
-        auto algaePropWidget = new AlgaePropertyWidget(ui->properties, _algae->GetProperty());
+        auto algaePropWidget = new AlgaePropertyWidget(ui->properties, *_algae->GetProperty());
         int tabId = ui->properties->addTab(algaePropWidget, "Algae");
 
 
@@ -187,7 +187,8 @@ void MainWindow::OnAlgaeInitialised(std::shared_ptr<Algae> _algae)
         Algae* algae = _algae.get();
         connect(algaePropWidget, &AlgaePropertyWidget::PropertyChanged, [this, algaePropWidget, algae](){
             ui->scene->makeCurrent();
-            algae->SetProperty(*algaePropWidget->GetProperty());
+            algae->SetProperty(
+                        algaePropWidget->GetProperty());
             ui->scene->OnPropertiesChanged();
         });
     }
@@ -212,27 +213,6 @@ void MainWindow::Load()
 void MainWindow::AddRigid(const std::string type)
 {
     ui->scene->AddRigid(ui->progressBar, type);
-}
-
-//---------------------------------------------------------------------------------------------------------------------------------------------
-
-void MainWindow::AddRigidCube()
-{
-    ui->scene->AddRigid(ui->progressBar, "cube");
-}
-
-//---------------------------------------------------------------------------------------------------------------------------------------------
-
-void MainWindow::AddRigidSphere()
-{
-    ui->scene->AddRigid(ui->progressBar, "sphere");
-}
-
-//---------------------------------------------------------------------------------------------------------------------------------------------
-
-void MainWindow::AddRigidMesh()
-{
-    ui->scene->AddRigid(ui->progressBar, "mesh");
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------------

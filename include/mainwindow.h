@@ -30,9 +30,6 @@ public slots:
     void Cache();
     void Load();
     void AddRigid(const std::string type);
-    void AddRigidCube();
-    void AddRigidSphere();
-    void AddRigidMesh();
 
 private:
     void CreateMenus();

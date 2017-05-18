@@ -30,21 +30,21 @@ class FluidPropertyWidget : public SphParticlePropertyWidget
 public:
 
     /// @brief constructor
-    explicit FluidPropertyWidget(QWidget *parent = 0, FluidProperty *_property = nullptr);
+    explicit FluidPropertyWidget(QWidget *parent = 0, FluidProperty _property = FluidProperty());
 
     /// @brief destructor
     virtual ~FluidPropertyWidget();
 
     /// @brief Setter for the m_property attribute
-    virtual void SetProperty(FluidProperty *_property);
+    virtual void SetProperty(FluidProperty _property);
 
     /// @brief Geter for the m_property attribute
-    virtual FluidProperty *GetProperty();
+    virtual FluidProperty GetProperty();
 
 
 signals:
     /// @brief Qt Signal to communicate that the FluidProperty has changed to other classes
-    void PropertyChanged(FluidProperty *_property);
+    void PropertyChanged(FluidProperty _property);
 
 public slots:
     /// @brief Qt Slot to be connected to any changes on this widget, emits PropertyChanged(m_property)
@@ -59,7 +59,7 @@ private:
     Ui::FluidPropertyWidget *ui;
 
     /// @brief The underlying fluid property that is affected by this widget
-    FluidProperty *m_property;
+    FluidProperty m_property;
 };
 
 //-----------------------------------------------------------------------------------------------------------

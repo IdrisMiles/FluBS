@@ -15,15 +15,15 @@ class RigidPropertyWidget : public SphParticlePropertyWidget
     Q_OBJECT
 
 public:
-    explicit RigidPropertyWidget(QWidget *parent = 0, RigidProperty *_property = nullptr);
+    explicit RigidPropertyWidget(QWidget *parent = 0, RigidProperty _property = RigidProperty());
     ~RigidPropertyWidget();
 
-    virtual void SetProperty(RigidProperty *_property);
-    virtual RigidProperty *GetProperty();
+    virtual void SetProperty(RigidProperty _property);
+    virtual RigidProperty GetProperty();
 
 signals:
     /// @brief Qt Signal to communicate that the FluidProperty has changed to other classes
-    void PropertyChanged(RigidProperty *_property);
+    void PropertyChanged(RigidProperty _property);
     void TransformChanged(float posX, float posY, float posZ, float rotX, float rotY, float rotZ);
 
 public slots:
@@ -34,7 +34,7 @@ public slots:
 private:
     Ui::RigidPropertyWidget *ui;
 
-    RigidProperty *m_property;
+    RigidProperty m_property;
 };
 
 #endif // RIGIDPROPERTYWIDGET_H

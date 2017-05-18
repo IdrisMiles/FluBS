@@ -3,8 +3,8 @@
 
 //-----------------------------------------------------------------------------------------------------------
 
-AlgaePropertyWidget::AlgaePropertyWidget(QWidget *parent, AlgaeProperty *_property) :
-    SphParticlePropertyWidget(parent),
+AlgaePropertyWidget::AlgaePropertyWidget(QWidget *parent, AlgaeProperty _property) :
+    SphParticlePropertyWidget(parent, _property),
     ui(new Ui::AlgaePropertyWidget),
     m_property(_property)
 {
@@ -22,33 +22,28 @@ AlgaePropertyWidget::AlgaePropertyWidget(QWidget *parent, AlgaeProperty *_proper
 
 AlgaePropertyWidget::~AlgaePropertyWidget()
 {
-    m_property = nullptr;
     delete ui;
 }
 
 //-----------------------------------------------------------------------------------------------------------
 
-void AlgaePropertyWidget::SetProperty(AlgaeProperty *_property)
+void AlgaePropertyWidget::SetProperty(AlgaeProperty _property)
 {
-    if(_property != nullptr)
-    {
-        SetNumParticles(_property->numParticles);
-        SetParticleMass(_property->particleMass);
-        SetParticleRadius(_property->particleRadius);
-        SetRestDensity(_property->restDensity);
-
-        ui->bioThreshold->setValue(_property->bioluminescenceThreshold);
-        ui->reactionRate->setValue(_property->reactionRate);
-        ui->deactionRate->setValue(_property->deactionRate);
-
-
         m_property = _property;
-    }
+
+        SetNumParticles(m_property.numParticles);
+        SetParticleMass(m_property.particleMass);
+        SetParticleRadius(m_property.particleRadius);
+        SetRestDensity(m_property.restDensity);
+
+        ui->bioThreshold->setValue(m_property.bioluminescenceThreshold);
+        ui->reactionRate->setValue(m_property.reactionRate);
+        ui->deactionRate->setValue(m_property.deactionRate);
 }
 
 //-----------------------------------------------------------------------------------------------------------
 
-AlgaeProperty *AlgaePropertyWidget::GetProperty()
+AlgaeProperty AlgaePropertyWidget::GetProperty()
 {
     return m_property;
 }
@@ -57,23 +52,19 @@ AlgaeProperty *AlgaePropertyWidget::GetProperty()
 
 void AlgaePropertyWidget::OnPropertyChanged()
 {
-    if(m_property == nullptr)
-    {
-        m_property = new AlgaeProperty();
-    }
 
-    if(m_property != nullptr)
-    {
+        m_property.numParticles = GetNumParticles();
+        m_property.particleRadius = GetParticleRadius();
+        m_property.restDensity = GetRestDensity();
+        m_property.bioluminescenceThreshold = ui->bioThreshold->value();
+        m_property.reactionRate = ui->reactionRate->value();
+        m_property.deactionRate = ui->deactionRate->value();
 
-        m_property->numParticles = GetNumParticles();
-        m_property->particleMass = GetParticleMass();
-        m_property->particleRadius = GetParticleRadius();
-        m_property->restDensity = GetRestDensity();
-        m_property->bioluminescenceThreshold = ui->bioThreshold->value();
-        m_property->reactionRate = ui->reactionRate->value();
-        m_property->deactionRate = ui->deactionRate->value();
 
-        emit PropertyChanged(m_property);
-    }
+        float dia = 2.0f * m_property.particleRadius;
+        m_property.particleMass = m_property.restDensity * (dia * dia * dia);
+        SetParticleMass(m_property.particleMass);
 
+
+    emit PropertyChanged(m_property);
 }

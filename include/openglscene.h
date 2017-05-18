@@ -44,11 +44,24 @@ public:
     QSize sizeHint() const Q_DECL_OVERRIDE;
 
     void CacheOutSimulation(QProgressBar *progress);
+    void SaveSimulation(QProgressBar *progress);
     void LoadSimulation(QProgressBar *progress);
+
     void AddRigid(QProgressBar *progress = nullptr, std::string type = "cube");
-    std::shared_ptr<Rigid> AddRigidCube();
-    std::shared_ptr<Rigid> AddRigidSphere();
-    std::shared_ptr<Rigid> AddRigidMesh();
+    void RemoveRigid(std::shared_ptr<Rigid> rigid);
+    void RemoveRigid(std::string name);
+    void SaveRigid();
+    void LoadRigid();
+
+    void AddFluid(QProgressBar *progress = nullptr);
+    void RemoveFluid(std::shared_ptr<Fluid> fluid);
+    void SaveFluid();
+    void LoadFluid();
+
+    void AddAlgae(QProgressBar *progress = nullptr);
+    void RemoveAlgae(std::shared_ptr<Algae> algae);
+    void SaveAlgae();
+    void LoadAlgae();
 
 
 public slots:
@@ -92,8 +105,13 @@ protected:
 
 private:
 
+    std::shared_ptr<Rigid> CreateRigidCube(RigidProperty property = RigidProperty());
+    std::shared_ptr<Rigid> CreateRigidSphere(RigidProperty property = RigidProperty());
+    std::shared_ptr<Rigid> CreateRigidMesh(RigidProperty property = RigidProperty());
+
     void DrawSkybox();
     void CreateSkybox();
+
     QOpenGLShaderProgram m_skyboxShader;
     std::shared_ptr<QOpenGLTexture> m_skyboxTex;
     QOpenGLVertexArrayObject m_skyboxVAO;
@@ -127,15 +145,14 @@ private:
     // Application specific members
     std::shared_ptr<Fluid> m_fluid;
     std::shared_ptr<Algae> m_algae;
+    std::vector<std::shared_ptr<Rigid>> m_activeRigids;
+    std::vector<std::shared_ptr<Rigid>> m_staticRigids;
     std::shared_ptr<Rigid> m_container;
-    std::shared_ptr<Rigid> m_staticRigid;
-    std::shared_ptr<Rigid> m_activeRigid;
     std::shared_ptr<FluidSystem> m_fluidSystem;
 
     // Rendering
     std::shared_ptr<BioluminescentFluidRenderer> m_bioRenderer;
     std::vector<std::shared_ptr<SphParticleRenderer>> m_sphRenderers;
-
     QTimer *m_drawTimer;
 
     // simulation cache

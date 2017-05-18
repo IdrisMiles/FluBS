@@ -23,6 +23,8 @@ public:
         gasStiffness(_gasStiffness),
         viscosity(_viscosity)
     {
+        float dia = 2.0f * particleRadius;
+        particleMass = restDensity * (dia * dia * dia);
     }
 
     ~FluidProperty(){}

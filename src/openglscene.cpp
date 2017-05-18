@@ -109,19 +109,19 @@ void OpenGLScene::AddRigid(QProgressBar *progress, std::string type)
 
     if(type == "cube")
     {
-        rigid = AddRigidCube();
+        rigid = CreateRigidCube();
     }
     else if(type == "sphere")
     {
-        rigid = AddRigidSphere();
+        rigid = CreateRigidSphere();
     }
     else if(type == "mesh")
     {
-        rigid = AddRigidMesh();
+        rigid = CreateRigidMesh();
     }
     else
     {
-        rigid = AddRigidCube();
+        rigid = CreateRigidCube();
     }
 
     progress->setValue(progressCount++);
@@ -140,15 +140,16 @@ void OpenGLScene::AddRigid(QProgressBar *progress, std::string type)
     progress->setValue(progressCount++);
 }
 
-std::shared_ptr<Rigid> OpenGLScene::AddRigidCube()
+std::shared_ptr<Rigid> OpenGLScene::CreateRigidCube(RigidProperty property)
 {
-    auto rigidCubeProps = std::shared_ptr<RigidProperty>(new RigidProperty());
+    auto rigidProps = std::shared_ptr<RigidProperty>(new RigidProperty());
+    *rigidProps = property;
 
     Mesh rigidCubeMesh = Mesh();
     auto fluidSolverProps = m_fluidSystem->GetProperty();
     float maxDim = (fluidSolverProps.gridResolution-1)*fluidSolverProps.gridCellWidth;
     float dim = maxDim * 0.1f;
-    float rad = rigidCubeProps->particleRadius;
+    float rad = rigidProps->particleRadius;
     int numRigidAxis = ceil(dim / (rad*2.0f));
     glm::vec3 pos = glm::vec3(0.0f, -10.0f, 0.0f);
 
@@ -169,16 +170,17 @@ std::shared_ptr<Rigid> OpenGLScene::AddRigidCube()
         }
     }
 
-    rigidCubeProps->numParticles = rigidCubeMesh.verts.size();
+    rigidProps->numParticles = rigidCubeMesh.verts.size();
 
-    return std::shared_ptr<Rigid>(new Rigid(rigidCubeProps, rigidCubeMesh, "cube"));
+    return std::shared_ptr<Rigid>(new Rigid(rigidProps, rigidCubeMesh, "cube"));
 }
 
 //------------------------------------------------------------------------------------------------------------
 
-std::shared_ptr<Rigid> OpenGLScene::AddRigidSphere()
+std::shared_ptr<Rigid> OpenGLScene::CreateRigidSphere(RigidProperty property)
 {
-    auto rigidSphereProps = std::shared_ptr<RigidProperty>(new RigidProperty());
+    auto rigidProps = std::shared_ptr<RigidProperty>(new RigidProperty());
+    *rigidProps = property;
 
     Mesh rigidSphereMesh = Mesh();
     auto fluidSolverProps = m_fluidSystem->GetProperty();
@@ -205,15 +207,16 @@ std::shared_ptr<Rigid> OpenGLScene::AddRigidSphere()
     rigidSphereMesh.verts.push_back(_pos + (_radius * glm::vec3(0.0f, 1.0f, 0.0f)));
     rigidSphereMesh.verts.push_back(_pos + (_radius * glm::vec3(0.0f, -1.0f, 0.0f)));
 
-    rigidSphereProps->numParticles = rigidSphereMesh.verts.size();
-    return std::shared_ptr<Rigid>(new Rigid(rigidSphereProps, rigidSphereMesh, "sphere"));
+    rigidProps->numParticles = rigidSphereMesh.verts.size();
+    return std::shared_ptr<Rigid>(new Rigid(rigidProps, rigidSphereMesh, "sphere"));
 }
 
 //------------------------------------------------------------------------------------------------------------
 
-std::shared_ptr<Rigid> OpenGLScene::AddRigidMesh()
+std::shared_ptr<Rigid> OpenGLScene::CreateRigidMesh(RigidProperty property)
 {
-    auto rigidMeshProps = std::shared_ptr<RigidProperty>(new RigidProperty());
+    auto rigidProps = std::shared_ptr<RigidProperty>(new RigidProperty());
+    *rigidProps = property;
     Mesh rigidMesh = Mesh();
 
     QString qFileName = QFileDialog::getOpenFileName(this, tr("Load Mesh"), "./", tr("Mesh Files (*.obj *.dae)"));
@@ -223,21 +226,21 @@ std::shared_ptr<Rigid> OpenGLScene::AddRigidMesh()
     if(qFileName.isEmpty() || qFileName.isNull())
     {
         std::cout<<"No file selected. Loading default cube\n";
-        return AddRigidCube();
+        return CreateRigidCube();
     }
 
     auto meshes = MeshLoader::LoadMesh(qFileName.toStdString());
     if(meshes.size() < 1)
     {
         std::cout<<"No meshes in file. Loading default cube\n";
-        return AddRigidCube();
+        return CreateRigidCube();
     }
 
     rigidMesh = MeshSampler::BaryCoord::SampleMesh(meshes[0], 1000);
 
 
-    rigidMeshProps->numParticles = rigidMesh.verts.size();
-    return std::shared_ptr<Rigid>(new Rigid(rigidMeshProps, rigidMesh, qFileName.toStdString()));
+    rigidProps->numParticles = rigidMesh.verts.size();
+    return std::shared_ptr<Rigid>(new Rigid(rigidProps, rigidMesh, qFileName.toStdString()));
 
 }
 

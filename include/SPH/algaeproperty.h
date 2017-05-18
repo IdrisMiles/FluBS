@@ -22,6 +22,8 @@ public:
         reactionRate(_reactionRate),
         deactionRate(_deactionRate)
     {
+        float dia = 2.0f * particleRadius;
+        particleMass = restDensity * (dia * dia * dia);
     }
 
     ~AlgaeProperty(){}

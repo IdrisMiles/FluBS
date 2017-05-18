@@ -282,17 +282,20 @@ RigidProperty *Rigid::GetProperty()
 
 //---------------------------------------------------------------------------------------------------------------
 
-void Rigid::SetProperty(std::shared_ptr<RigidProperty> _property)
-{
-    m_property = _property;
+//void Rigid::SetProperty(std::shared_ptr<RigidProperty> _property)
+//{
+//    BaseSphParticle::SetProperty(_property);
+//    m_property = _property;
 
-//    UpdateCUDAMemory();
-}
+////    UpdateCUDAMemory();
+//}
 
 //---------------------------------------------------------------------------------------------------------------
 
 void Rigid::SetProperty(RigidProperty _property)
 {
+    BaseSphParticle::SetProperty(_property);
+
     m_property->gravity = _property.gravity;
     m_property->particleMass = _property.particleMass;
     m_property->particleRadius = _property.particleRadius;

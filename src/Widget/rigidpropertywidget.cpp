@@ -3,8 +3,8 @@
 
 //-----------------------------------------------------------------------------------------------------------
 
-RigidPropertyWidget::RigidPropertyWidget(QWidget *parent, RigidProperty *_property) :
-    SphParticlePropertyWidget(parent),
+RigidPropertyWidget::RigidPropertyWidget(QWidget *parent, RigidProperty _property) :
+    SphParticlePropertyWidget(parent, _property),
     ui(new Ui::RigidPropertyWidget),
     m_property(_property)
 {
@@ -29,31 +29,31 @@ RigidPropertyWidget::RigidPropertyWidget(QWidget *parent, RigidProperty *_proper
 
 RigidPropertyWidget::~RigidPropertyWidget()
 {
-    m_property = nullptr;
+
     delete ui;
 }
 
 //-----------------------------------------------------------------------------------------------------------
 
-void RigidPropertyWidget::SetProperty(RigidProperty *_property)
+void RigidPropertyWidget::SetProperty(RigidProperty _property)
 {
-    if(_property != nullptr)
-    {
-        SetNumParticles(_property->numParticles);
-        SetParticleMass(_property->particleMass);
-        SetParticleRadius(_property->particleRadius);
-        SetRestDensity(_property->restDensity);
 
-        ui->kinematic->setChecked(_property->kinematic);
-        ui->static_2->setChecked(_property->m_static);
+        SphParticlePropertyWidget::SetProperty(_property);
+
+//        SetNumParticles(_property.numParticles);
+//        SetParticleMass(_property.particleMass);
+//        SetParticleRadius(_property.particleRadius);
+//        SetRestDensity(_property.restDensity);
+
+        ui->kinematic->setChecked(_property.kinematic);
+        ui->static_2->setChecked(_property.m_static);
 
         m_property = _property;
-    }
 }
 
 //-----------------------------------------------------------------------------------------------------------
 
-RigidProperty *RigidPropertyWidget::GetProperty()
+RigidProperty RigidPropertyWidget::GetProperty()
 {
     return m_property;
 }
@@ -62,23 +62,20 @@ RigidProperty *RigidPropertyWidget::GetProperty()
 
 void RigidPropertyWidget::OnPropertyChanged()
 {
-    if(m_property == nullptr)
-    {
-        m_property = new RigidProperty();
-    }
+        m_property.kinematic = ui->kinematic->isChecked();
+        m_property.m_static = ui->static_2->isChecked();
 
-    if(m_property != nullptr)
-    {
-        m_property->kinematic = ui->kinematic->isChecked();
-        m_property->m_static = ui->static_2->isChecked();
+        m_property.numParticles = GetNumParticles();
+        m_property.particleMass = GetParticleMass();
+        m_property.particleRadius = GetParticleRadius();
+        m_property.restDensity = GetRestDensity();
 
-        m_property->numParticles = GetNumParticles();
-        m_property->particleMass = GetParticleMass();
-        m_property->particleRadius = GetParticleRadius();
-        m_property->restDensity = GetRestDensity();
+
+        float dia = 2.0f * m_property.particleRadius;
+        m_property.particleMass = m_property.restDensity * (dia * dia * dia);
+        SetParticleMass(m_property.particleMass);
 
         emit PropertyChanged(m_property);
-    }
 
 }
 

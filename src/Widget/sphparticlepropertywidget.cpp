@@ -3,7 +3,7 @@
 
 //-----------------------------------------------------------------------------------------------------------
 
-SphParticlePropertyWidget::SphParticlePropertyWidget(QWidget *parent, SphParticleProperty *_property) :
+SphParticlePropertyWidget::SphParticlePropertyWidget(QWidget *parent, SphParticleProperty _property) :
     QWidget(parent),
     ui(new Ui::SphParticlePropertyWidget),
     m_numRow(5),
@@ -23,7 +23,6 @@ SphParticlePropertyWidget::SphParticlePropertyWidget(QWidget *parent, SphParticl
 
 SphParticlePropertyWidget::~SphParticlePropertyWidget()
 {
-    m_property = nullptr;
     delete ui;
 }
 
@@ -37,21 +36,22 @@ void SphParticlePropertyWidget::AddWidgetToGridLayout(QWidget *w, int col, int r
 
 //-----------------------------------------------------------------------------------------------------------
 
-void SphParticlePropertyWidget::SetProperty(SphParticleProperty *_property)
+void SphParticlePropertyWidget::SetProperty(SphParticleProperty _property)
 {
-    if(_property != nullptr)
-    {
         m_property = _property;
-        ui->numParticles->setValue((int)m_property->numParticles);
-        ui->particleMass->setValue(m_property->particleMass);
-        ui->particleRadius->setValue(m_property->particleRadius);
-        ui->restDensity->setValue(m_property->restDensity);
-    }
+
+        ui->numParticles->setValue((int)m_property.numParticles);
+        ui->particleRadius->setValue(m_property.particleRadius);
+        ui->restDensity->setValue(m_property.restDensity);
+
+        float dia = 2.0f * m_property.particleRadius;
+        m_property.particleMass = m_property.restDensity * (dia * dia * dia);
+        ui->particleMass->setValue(m_property.particleMass);
 }
 
 //-----------------------------------------------------------------------------------------------------------
 
-SphParticleProperty *SphParticlePropertyWidget::GetProperty()
+SphParticleProperty SphParticlePropertyWidget::GetProperty()
 {
     return m_property;
 }
@@ -61,19 +61,14 @@ SphParticleProperty *SphParticlePropertyWidget::GetProperty()
 
 void SphParticlePropertyWidget::OnPropertyChanged()
 {
-    if(m_property == nullptr)
-    {
-        m_property = new SphParticleProperty();
-    }
+        m_property.numParticles = GetNumParticles();
+        m_property.particleRadius = GetParticleRadius();
+        m_property.restDensity = GetRestDensity();
 
-    if(m_property != nullptr)
-    {
+        float dia = 2.0f * m_property.particleRadius;
+        m_property.particleMass = m_property.restDensity * (dia * dia * dia);
+        SetParticleMass(m_property.particleMass);
 
-        m_property->numParticles = GetNumParticles();
-        m_property->particleMass = GetParticleMass();
-        m_property->particleRadius = GetParticleRadius();
-        m_property->restDensity = GetRestDensity();
-    }
     emit PropertyChanged(m_property);
 }
 
@@ -82,6 +77,7 @@ void SphParticlePropertyWidget::OnPropertyChanged()
 
 void SphParticlePropertyWidget::SetNumParticles(const int _numParticles)
 {
+    m_property.numParticles = _numParticles;
     ui->numParticles->setValue(_numParticles);
 }
 
@@ -89,6 +85,7 @@ void SphParticlePropertyWidget::SetNumParticles(const int _numParticles)
 
 void SphParticlePropertyWidget::SetParticleMass(const float _particlesMass)
 {
+    m_property.particleMass = _particlesMass;
     ui->particleMass->setValue(_particlesMass);
 }
 
@@ -96,7 +93,12 @@ void SphParticlePropertyWidget::SetParticleMass(const float _particlesMass)
 
 void SphParticlePropertyWidget::SetParticleRadius(const float _particlesRadius)
 {
+    m_property.particleRadius = _particlesRadius;
     ui->particleRadius->setValue(_particlesRadius);
+
+    float dia = 2.0f * _particlesRadius;
+    ui->particleMass->setValue(m_property.restDensity * (dia * dia * dia));
+    m_property.particleMass = m_property.restDensity * (dia * dia * dia);
 }
 
 //-----------------------------------------------------------------------------------------------------------

@@ -47,7 +47,7 @@ void BaseSphParticle::SetProperty(std::shared_ptr<SphParticleProperty> _property
 {
     m_property = _property;
 
-    UpdateCUDAMemory();
+//    UpdateCUDAMemory();
 }
 
 //---------------------------------------------------------------------------------------------------------------
@@ -73,7 +73,7 @@ void BaseSphParticle::SetProperty(SphParticleProperty _property)
 
     m_property->numParticles = _property.numParticles;
 
-    UpdateCUDAMemory();
+//    UpdateCUDAMemory();
 }
 
 //---------------------------------------------------------------------------------------------------------------

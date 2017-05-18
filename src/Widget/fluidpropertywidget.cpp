@@ -3,7 +3,7 @@
 
 //-----------------------------------------------------------------------------------------------------------
 
-FluidPropertyWidget::FluidPropertyWidget(QWidget *parent, FluidProperty *_property) :
+FluidPropertyWidget::FluidPropertyWidget(QWidget *parent, FluidProperty _property) :
     SphParticlePropertyWidget(parent, _property),
     ui(new Ui::FluidPropertyWidget),
     m_property(_property)
@@ -28,33 +28,30 @@ FluidPropertyWidget::FluidPropertyWidget(QWidget *parent, FluidProperty *_proper
 
 FluidPropertyWidget::~FluidPropertyWidget()
 {
-    m_property = nullptr;
     delete ui;
 }
 
 //-----------------------------------------------------------------------------------------------------------
 
-void FluidPropertyWidget::SetProperty(FluidProperty *_property)
+void FluidPropertyWidget::SetProperty(FluidProperty _property)
 {
-    if(_property != nullptr)
-    {
-        SetNumParticles(_property->numParticles);
-        SetParticleMass(_property->particleMass);
-        SetParticleRadius(_property->particleRadius);
-        SetRestDensity(_property->restDensity);
 
-        ui->surfaceTension->setValue((double)_property->surfaceTension);
-        ui->surfaceThreshold->setValue((double)_property->surfaceThreshold);
-        ui->viscosity->setValue((double)_property->viscosity);
-        ui->gasStiffness->setValue((double)_property->gasStiffness);
+        SetNumParticles(_property.numParticles);
+        SetParticleMass(_property.particleMass);
+        SetParticleRadius(_property.particleRadius);
+        SetRestDensity(_property.restDensity);
+
+        ui->surfaceTension->setValue((double)_property.surfaceTension);
+        ui->surfaceThreshold->setValue((double)_property.surfaceThreshold);
+        ui->viscosity->setValue((double)_property.viscosity);
+        ui->gasStiffness->setValue((double)_property.gasStiffness);
 
         m_property = _property;
-    }
 }
 
 //-----------------------------------------------------------------------------------------------------------
 
-FluidProperty *FluidPropertyWidget::GetProperty()
+FluidProperty FluidPropertyWidget::GetProperty()
 {
     return m_property;
 }
@@ -63,28 +60,20 @@ FluidProperty *FluidPropertyWidget::GetProperty()
 
 void FluidPropertyWidget::OnPropertyChanged()
 {
-    if(m_property == nullptr)
-    {
-        m_property = new FluidProperty();
-    }
+        m_property.numParticles = GetNumParticles();
+        m_property.particleRadius = GetParticleRadius();
+        m_property.restDensity = GetRestDensity();
 
-    if(m_property != nullptr)
-    {
-
-        m_property->numParticles = GetNumParticles();
-        m_property->particleMass = GetParticleMass();
-        m_property->particleRadius = GetParticleRadius();
-        m_property->restDensity = GetRestDensity();
-
-        m_property->surfaceTension = ui->surfaceTension->value();
-        m_property->surfaceThreshold = ui->surfaceThreshold->value();
-        m_property->viscosity = ui->viscosity->value();
-        m_property->gasStiffness = ui->gasStiffness->value();
+        m_property.surfaceTension = ui->surfaceTension->value();
+        m_property.surfaceThreshold = ui->surfaceThreshold->value();
+        m_property.viscosity = ui->viscosity->value();
+        m_property.gasStiffness = ui->gasStiffness->value();
 
 
-        float dia = 2.0f * m_property->particleRadius;
-        m_property->particleMass = m_property->restDensity * (dia * dia * dia);
-    }
+        float dia = 2.0f * m_property.particleRadius;
+        m_property.particleMass = m_property.restDensity * (dia * dia * dia);
+        SetParticleMass(m_property.particleMass);
+
 
     emit PropertyChanged(m_property);
 }

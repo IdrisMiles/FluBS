@@ -19,6 +19,21 @@ public:
         m_static(_static),
         kinematic(_kinematic)
     {
+
+        float dia = 2.0f * particleRadius;
+        particleMass = restDensity * (dia * dia * dia);
+    }
+
+    RigidProperty(const RigidProperty &_other)
+    {
+        this->m_static = _other.m_static;
+        this->kinematic = _other.kinematic;
+        this->gravity = _other.gravity;
+        this->numParticles = _other.numParticles;
+        this->particleMass = _other.particleMass;
+        this->particleRadius = _other.particleRadius;
+        this->restDensity = _other.restDensity;
+        this->smoothingLength = _other.smoothingLength;
     }
 
     ~RigidProperty(){}
