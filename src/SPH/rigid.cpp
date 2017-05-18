@@ -37,6 +37,12 @@ void Rigid::UpdateMesh(Mesh &_mesh, const glm::vec3 &_pos, const glm::vec3 &_rot
         v = (t*v)+_pos;
     }
 
+    if(m_property->numParticles != m_mesh.verts.size())
+    {
+        m_property->numParticles = m_mesh.verts.size();
+        UpdateCUDAMemory();
+    }
+
     GetPositionPtr();
     cudaMemcpy(d_positionPtr, &newMesh.verts[0], m_property->numParticles * sizeof(float3), cudaMemcpyHostToDevice);
     ReleaseCudaGLResources();
@@ -98,19 +104,16 @@ void Rigid::InitCUDAMemory()
     cudaGraphicsGLRegisterBuffer(&m_massBO_CUDA, m_massBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
     cudaGraphicsGLRegisterBuffer(&m_pressBO_CUDA, m_pressBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
 
-    cudaMalloc(&d_volumePtr, m_property->numParticles * sizeof(float));
-
     // particle forces
     cudaMalloc(&d_pressureForcePtr, m_property->numParticles * sizeof(float3));
     cudaMalloc(&d_gravityForcePtr, m_property->numParticles * sizeof(float3));
     cudaMalloc(&d_externalForcePtr, m_property->numParticles * sizeof(float3));
     cudaMalloc(&d_totalForcePtr, m_property->numParticles * sizeof(float3));
 
-    // particle hash
     cudaMalloc(&d_particleHashIdPtr, m_property->numParticles * sizeof(unsigned int));
-
-    // particle Id
     cudaMalloc(&d_particleIdPtr, m_property->numParticles * sizeof(unsigned int));
+
+    cudaMalloc(&d_volumePtr, m_property->numParticles * sizeof(float));
 }
 
 void Rigid::InitGL()
@@ -160,15 +163,18 @@ void Rigid::InitVAO()
 
 void Rigid::CleanUpCUDAMemory()
 {
+    cudaFree(d_pressureForcePtr);
     cudaFree(d_gravityForcePtr);
     cudaFree(d_externalForcePtr);
     cudaFree(d_totalForcePtr);
 
     cudaFree(d_particleIdPtr);
     cudaFree(d_particleHashIdPtr);
+
+    cudaFree(d_volumePtr);
+
     cudaFree(d_cellOccupancyPtr);
     cudaFree(d_cellParticleIdxPtr);
-    cudaFree(d_volumePtr);
 }
 
 void Rigid::CleanUpGL()
@@ -193,23 +199,28 @@ void Rigid::CleanUpGL()
 
 void Rigid::UpdateCUDAMemory()
 {
-
+    // delete memory
+    checkCudaErrorsMsg(cudaFree(d_pressureForcePtr),"");
     checkCudaErrorsMsg(cudaFree(d_gravityForcePtr),"");
     checkCudaErrorsMsg(cudaFree(d_externalForcePtr),"");
     checkCudaErrorsMsg(cudaFree(d_totalForcePtr),"");
+
     checkCudaErrorsMsg(cudaFree(d_particleIdPtr),"");
     checkCudaErrorsMsg(cudaFree(d_particleHashIdPtr),"");
 
+    checkCudaErrorsMsg(cudaFree(d_volumePtr),"");
 
 
-
-    // particle forces
+    // re allocate memory
     checkCudaErrorsMsg(cudaMalloc(&d_pressureForcePtr, m_property->numParticles * sizeof(float3)),"");
     checkCudaErrorsMsg(cudaMalloc(&d_gravityForcePtr, m_property->numParticles * sizeof(float3)),"");
     checkCudaErrorsMsg(cudaMalloc(&d_externalForcePtr, m_property->numParticles * sizeof(float3)),"");
     checkCudaErrorsMsg(cudaMalloc(&d_totalForcePtr, m_property->numParticles * sizeof(float3)),"");
+
     checkCudaErrorsMsg(cudaMalloc(&d_particleHashIdPtr, m_property->numParticles * sizeof(unsigned int)),"");
     checkCudaErrorsMsg(cudaMalloc(&d_particleIdPtr, m_property->numParticles * sizeof(unsigned int)),"");
+
+    checkCudaErrorsMsg(cudaMalloc(&d_volumePtr, m_property->numParticles * sizeof(float)),"");
 
 
     // Setup our pos buffer object.

@@ -38,17 +38,16 @@ RigidPropertyWidget::~RigidPropertyWidget()
 void RigidPropertyWidget::SetProperty(RigidProperty _property)
 {
 
-        SphParticlePropertyWidget::SetProperty(_property);
+    m_property = _property;
+    SphParticlePropertyWidget::SetProperty(_property);
 
-//        SetNumParticles(_property.numParticles);
-//        SetParticleMass(_property.particleMass);
-//        SetParticleRadius(_property.particleRadius);
-//        SetRestDensity(_property.restDensity);
+    SetNumParticles(_property.numParticles);
+    SetParticleMass(_property.particleMass);
+    SetParticleRadius(_property.particleRadius);
+    SetRestDensity(_property.restDensity);
 
-        ui->kinematic->setChecked(_property.kinematic);
-        ui->static_2->setChecked(_property.m_static);
-
-        m_property = _property;
+    ui->kinematic->setChecked(_property.kinematic);
+    ui->static_2->setChecked(_property.m_static);
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -83,8 +82,11 @@ void RigidPropertyWidget::OnPropertyChanged()
 
 void RigidPropertyWidget::OnTransformChanged()
 {
-    emit TransformChanged(ui->posX->value(), ui->posY->value(), ui->posZ->value(), ui->rotX->value(), ui->rotY->value(), ui->rotZ->value());
-    emit PropertyChanged(m_property);
+    emit TransformChanged(ui->posX->value(), ui->posY->value(), ui->posZ->value(),
+                          ui->rotX->value(), ui->rotY->value(), ui->rotZ->value(),
+                          ui->scaleX->value(), ui->scaleY->value(), ui->scaleZ->value());
+
+//    emit PropertyChanged(m_property);
 }
 
 //-----------------------------------------------------------------------------------------------------------

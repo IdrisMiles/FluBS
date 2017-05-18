@@ -38,15 +38,16 @@ void SphParticlePropertyWidget::AddWidgetToGridLayout(QWidget *w, int col, int r
 
 void SphParticlePropertyWidget::SetProperty(SphParticleProperty _property)
 {
-        m_property = _property;
+    m_property = _property;
 
-        ui->numParticles->setValue((int)m_property.numParticles);
-        ui->particleRadius->setValue(m_property.particleRadius);
-        ui->restDensity->setValue(m_property.restDensity);
+    SetNumParticles(m_property.numParticles);
+    SetRestDensity(m_property.restDensity);
+    SetParticleRadius(m_property.particleRadius);
 
-        float dia = 2.0f * m_property.particleRadius;
-        m_property.particleMass = m_property.restDensity * (dia * dia * dia);
-        ui->particleMass->setValue(m_property.particleMass);
+
+    float dia = 2.0f * m_property.particleRadius;
+    m_property.particleMass = m_property.restDensity * (dia * dia * dia);
+    ui->particleMass->setValue(m_property.particleMass);
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -61,13 +62,9 @@ SphParticleProperty SphParticlePropertyWidget::GetProperty()
 
 void SphParticlePropertyWidget::OnPropertyChanged()
 {
-        m_property.numParticles = GetNumParticles();
-        m_property.particleRadius = GetParticleRadius();
-        m_property.restDensity = GetRestDensity();
-
-        float dia = 2.0f * m_property.particleRadius;
-        m_property.particleMass = m_property.restDensity * (dia * dia * dia);
-        SetParticleMass(m_property.particleMass);
+    m_property.numParticles = GetNumParticles();
+    m_property.particleRadius = GetParticleRadius();
+    m_property.restDensity = GetRestDensity();
 
     emit PropertyChanged(m_property);
 }
@@ -96,9 +93,9 @@ void SphParticlePropertyWidget::SetParticleRadius(const float _particlesRadius)
     m_property.particleRadius = _particlesRadius;
     ui->particleRadius->setValue(_particlesRadius);
 
-    float dia = 2.0f * _particlesRadius;
-    ui->particleMass->setValue(m_property.restDensity * (dia * dia * dia));
+    float dia = 2.0f * m_property.particleRadius;
     m_property.particleMass = m_property.restDensity * (dia * dia * dia);
+    SetParticleMass(m_property.particleMass);
 }
 
 //-----------------------------------------------------------------------------------------------------------

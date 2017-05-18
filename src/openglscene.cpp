@@ -106,18 +106,24 @@ void OpenGLScene::AddRigid(QProgressBar *progress, std::string type)
     std::shared_ptr<Rigid> rigid;
 
     progress->setValue(progressCount++);
+    static int cubeCount=0;
+    static int sphereCount=0;
+    static int meshCount=0;
 
     if(type == "cube")
     {
         rigid = CreateRigidCube();
+        rigid->SetName("cube"+std::to_string(cubeCount++));
     }
     else if(type == "sphere")
     {
         rigid = CreateRigidSphere();
+        rigid->SetName("sphere"+std::to_string(sphereCount++));
     }
     else if(type == "mesh")
     {
         rigid = CreateRigidMesh();
+        rigid->SetName("mesh"+std::to_string(meshCount++));
     }
     else
     {
@@ -127,6 +133,7 @@ void OpenGLScene::AddRigid(QProgressBar *progress, std::string type)
     progress->setValue(progressCount++);
 
     // rigid cube to solver
+    m_rigids.push_back(rigid);
     m_fluidSystem->AddRigid(rigid);
     emit RigidInitialised(rigid);
 
@@ -146,12 +153,10 @@ std::shared_ptr<Rigid> OpenGLScene::CreateRigidCube(RigidProperty property)
     *rigidProps = property;
 
     Mesh rigidCubeMesh = Mesh();
-    auto fluidSolverProps = m_fluidSystem->GetProperty();
-    float maxDim = (fluidSolverProps.gridResolution-1)*fluidSolverProps.gridCellWidth;
-    float dim = maxDim * 0.1f;
+    float dim = 1.0f;
     float rad = rigidProps->particleRadius;
     int numRigidAxis = ceil(dim / (rad*2.0f));
-    glm::vec3 pos = glm::vec3(0.0f, -10.0f, 0.0f);
+    glm::vec3 pos = glm::vec3(0.0f, 0.0f, 0.0f);
 
 
     // cube
@@ -183,13 +188,10 @@ std::shared_ptr<Rigid> OpenGLScene::CreateRigidSphere(RigidProperty property)
     *rigidProps = property;
 
     Mesh rigidSphereMesh = Mesh();
-    auto fluidSolverProps = m_fluidSystem->GetProperty();
-    float maxDim = (fluidSolverProps.gridResolution-1)*fluidSolverProps.gridCellWidth;
-    float dim = maxDim * 0.1f;
     int _stacks = 15;
     int _slices = 40;
-    float _radius = 2.0f;
-    glm::vec3 _pos(0.0f, -10.0f, 0.0f);
+    float _radius = 0.5f;
+    glm::vec3 _pos(0.0f, 0.0f, 0.0f);
 
     //sphere
     for( int t = 1 ; t < _stacks-1 ; t++ )

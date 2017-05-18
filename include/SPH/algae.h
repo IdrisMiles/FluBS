@@ -32,9 +32,6 @@ public:
     float *GetPrevPressurePtr();
     void ReleasePrevPressurePtr();
 
-    float *GetEnergyPtr();
-    void ReleaseEnergyPtr();
-
     float *GetIlluminationPtr();
     void ReleaseIlluminationPtr();
 
@@ -70,7 +67,6 @@ protected:
     std::shared_ptr<AlgaeProperty> m_property;
 
     float *d_prevPressurePtr;
-    float *d_energyPtr;
     float *d_illumPtr;
 
     bool m_illumMapped;

@@ -36,17 +36,14 @@ FluidPropertyWidget::~FluidPropertyWidget()
 void FluidPropertyWidget::SetProperty(FluidProperty _property)
 {
 
-        SetNumParticles(_property.numParticles);
-        SetParticleMass(_property.particleMass);
-        SetParticleRadius(_property.particleRadius);
-        SetRestDensity(_property.restDensity);
+    m_property = _property;
+    SphParticlePropertyWidget::SetProperty(_property);
 
-        ui->surfaceTension->setValue((double)_property.surfaceTension);
-        ui->surfaceThreshold->setValue((double)_property.surfaceThreshold);
-        ui->viscosity->setValue((double)_property.viscosity);
-        ui->gasStiffness->setValue((double)_property.gasStiffness);
+    ui->surfaceTension->setValue((double)_property.surfaceTension);
+    ui->surfaceThreshold->setValue((double)_property.surfaceThreshold);
+    ui->viscosity->setValue((double)_property.viscosity);
+    ui->gasStiffness->setValue((double)_property.gasStiffness);
 
-        m_property = _property;
 }
 
 //-----------------------------------------------------------------------------------------------------------

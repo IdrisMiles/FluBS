@@ -145,8 +145,7 @@ private:
     // Application specific members
     std::shared_ptr<Fluid> m_fluid;
     std::shared_ptr<Algae> m_algae;
-    std::vector<std::shared_ptr<Rigid>> m_activeRigids;
-    std::vector<std::shared_ptr<Rigid>> m_staticRigids;
+    std::vector<std::shared_ptr<Rigid>> m_rigids;
     std::shared_ptr<Rigid> m_container;
     std::shared_ptr<FluidSystem> m_fluidSystem;
 

@@ -137,20 +137,18 @@ void Fluid::InitCUDAMemory()
 
     // particle forces
     checkCudaErrorsMsg(cudaMalloc(&d_pressureForcePtr, m_property->numParticles * sizeof(float3)),"");
-    checkCudaErrorsMsg(cudaMalloc(&d_viscousForcePtr, m_property->numParticles * sizeof(float3)),"");
-    checkCudaErrorsMsg(cudaMalloc(&d_surfaceTensionForcePtr, m_property->numParticles * sizeof(float3)),"");
     checkCudaErrorsMsg(cudaMalloc(&d_gravityForcePtr, m_property->numParticles * sizeof(float3)),"");
     checkCudaErrorsMsg(cudaMalloc(&d_externalForcePtr, m_property->numParticles * sizeof(float3)),"");
     checkCudaErrorsMsg(cudaMalloc(&d_totalForcePtr, m_property->numParticles * sizeof(float3)),"");
+
+    checkCudaErrorsMsg(cudaMalloc(&d_particleHashIdPtr, m_property->numParticles * sizeof(unsigned int)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_particleIdPtr, m_property->numParticles * sizeof(unsigned int)), "");
+
+    checkCudaErrorsMsg(cudaMalloc(&d_viscousForcePtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_surfaceTensionForcePtr, m_property->numParticles * sizeof(float3)),"");
     checkCudaErrorsMsg(cudaMalloc(&d_predictPositionPtr, m_property->numParticles * sizeof(float3)),"");
     checkCudaErrorsMsg(cudaMalloc(&d_predictVelocityPtr, m_property->numParticles * sizeof(float3)),"");
     checkCudaErrorsMsg(cudaMalloc(&d_densityErrPtr, m_property->numParticles * sizeof(float)),"");
-
-    // particle hash
-    checkCudaErrorsMsg(cudaMalloc(&d_particleHashIdPtr, m_property->numParticles * sizeof(unsigned int)),"");
-
-    // particle Id
-    cudaMalloc(&d_particleIdPtr, m_property->numParticles * sizeof(unsigned int));
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -212,30 +210,36 @@ void Fluid::InitFluidAsMesh()
 
 void Fluid::CleanUpCUDAMemory()
 {
-    checkCudaErrorsMsg(cudaFree(d_viscousForcePtr),"");
-    checkCudaErrorsMsg(cudaFree(d_surfaceTensionForcePtr),"");
+    checkCudaErrorsMsg(cudaFree(d_pressureForcePtr),"");
     checkCudaErrorsMsg(cudaFree(d_gravityForcePtr),"");
     checkCudaErrorsMsg(cudaFree(d_externalForcePtr),"");
     checkCudaErrorsMsg(cudaFree(d_totalForcePtr),"");
 
     checkCudaErrorsMsg(cudaFree(d_particleIdPtr),"");
     checkCudaErrorsMsg(cudaFree(d_particleHashIdPtr),"");
-//    checkCudaErrorsMsg(cudaFree(d_cellOccupancyPtr),"");
-//    checkCudaErrorsMsg(cudaFree(d_cellParticleIdxPtr),"");
+
+    checkCudaErrorsMsg(cudaFree(d_viscousForcePtr),"");
+    checkCudaErrorsMsg(cudaFree(d_surfaceTensionForcePtr),"");
     checkCudaErrorsMsg(cudaFree(d_predictPositionPtr),"");
     checkCudaErrorsMsg(cudaFree(d_predictVelocityPtr),"");
     checkCudaErrorsMsg(cudaFree(d_densityErrPtr),"");
+
+    checkCudaErrorsMsg(cudaFree(d_cellOccupancyPtr),"");
+    checkCudaErrorsMsg(cudaFree(d_cellParticleIdxPtr),"");
 }
 
 void Fluid::UpdateCUDAMemory()
 {
-    checkCudaErrorsMsg(cudaFree(d_viscousForcePtr),"");
-    checkCudaErrorsMsg(cudaFree(d_surfaceTensionForcePtr),"");
+    checkCudaErrorsMsg(cudaFree(d_pressureForcePtr),"");
     checkCudaErrorsMsg(cudaFree(d_gravityForcePtr),"");
     checkCudaErrorsMsg(cudaFree(d_externalForcePtr),"");
     checkCudaErrorsMsg(cudaFree(d_totalForcePtr),"");
+
     checkCudaErrorsMsg(cudaFree(d_particleIdPtr),"");
     checkCudaErrorsMsg(cudaFree(d_particleHashIdPtr),"");
+
+    checkCudaErrorsMsg(cudaFree(d_viscousForcePtr),"");
+    checkCudaErrorsMsg(cudaFree(d_surfaceTensionForcePtr),"");
     checkCudaErrorsMsg(cudaFree(d_predictPositionPtr),"");
     checkCudaErrorsMsg(cudaFree(d_predictVelocityPtr),"");
     checkCudaErrorsMsg(cudaFree(d_densityErrPtr),"");
@@ -244,16 +248,18 @@ void Fluid::UpdateCUDAMemory()
 
     // particle forces
     checkCudaErrorsMsg(cudaMalloc(&d_pressureForcePtr, m_property->numParticles * sizeof(float3)),"");
-    checkCudaErrorsMsg(cudaMalloc(&d_viscousForcePtr, m_property->numParticles * sizeof(float3)),"");
-    checkCudaErrorsMsg(cudaMalloc(&d_surfaceTensionForcePtr, m_property->numParticles * sizeof(float3)),"");
     checkCudaErrorsMsg(cudaMalloc(&d_gravityForcePtr, m_property->numParticles * sizeof(float3)),"");
     checkCudaErrorsMsg(cudaMalloc(&d_externalForcePtr, m_property->numParticles * sizeof(float3)),"");
     checkCudaErrorsMsg(cudaMalloc(&d_totalForcePtr, m_property->numParticles * sizeof(float3)),"");
+
+    checkCudaErrorsMsg(cudaMalloc(&d_particleHashIdPtr, m_property->numParticles * sizeof(unsigned int)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_particleIdPtr, m_property->numParticles * sizeof(unsigned int)),"");
+
+    checkCudaErrorsMsg(cudaMalloc(&d_viscousForcePtr, m_property->numParticles * sizeof(float3)),"");
+    checkCudaErrorsMsg(cudaMalloc(&d_surfaceTensionForcePtr, m_property->numParticles * sizeof(float3)),"");
     checkCudaErrorsMsg(cudaMalloc(&d_predictPositionPtr, m_property->numParticles * sizeof(float3)),"");
     checkCudaErrorsMsg(cudaMalloc(&d_predictVelocityPtr, m_property->numParticles * sizeof(float3)),"");
     checkCudaErrorsMsg(cudaMalloc(&d_densityErrPtr, m_property->numParticles * sizeof(float)),"");
-    checkCudaErrorsMsg(cudaMalloc(&d_particleHashIdPtr, m_property->numParticles * sizeof(unsigned int)),"");
-    cudaMalloc(&d_particleIdPtr, m_property->numParticles * sizeof(unsigned int));
 
 
     // Setup our pos buffer object.

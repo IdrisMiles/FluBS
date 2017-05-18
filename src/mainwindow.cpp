@@ -156,7 +156,7 @@ void MainWindow::OnRigidInitialised(std::shared_ptr<Rigid> _rigid)
 
         connect(rigidPropWidget, &RigidPropertyWidget::TransformChanged, [this, _rigid](float posX, float posY, float posZ, float rotX, float rotY, float rotZ){
             glm::vec3 pos(posX, posY, posZ);
-            glm::vec3 rot(rotX, rotY, rotZ);
+            glm::vec3 rot(glm::radians(rotX), glm::radians(rotY), glm::radians(rotZ));
 
             _rigid->UpdateMesh(pos, rot);
         });
@@ -187,8 +187,7 @@ void MainWindow::OnAlgaeInitialised(std::shared_ptr<Algae> _algae)
         Algae* algae = _algae.get();
         connect(algaePropWidget, &AlgaePropertyWidget::PropertyChanged, [this, algaePropWidget, algae](){
             ui->scene->makeCurrent();
-            algae->SetProperty(
-                        algaePropWidget->GetProperty());
+            algae->SetProperty(algaePropWidget->GetProperty());
             ui->scene->OnPropertiesChanged();
         });
     }

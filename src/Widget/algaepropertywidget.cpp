@@ -29,16 +29,13 @@ AlgaePropertyWidget::~AlgaePropertyWidget()
 
 void AlgaePropertyWidget::SetProperty(AlgaeProperty _property)
 {
-        m_property = _property;
 
-        SetNumParticles(m_property.numParticles);
-        SetParticleMass(m_property.particleMass);
-        SetParticleRadius(m_property.particleRadius);
-        SetRestDensity(m_property.restDensity);
+    m_property = _property;
+    SphParticlePropertyWidget::SetProperty(_property);
 
-        ui->bioThreshold->setValue(m_property.bioluminescenceThreshold);
-        ui->reactionRate->setValue(m_property.reactionRate);
-        ui->deactionRate->setValue(m_property.deactionRate);
+    ui->bioThreshold->setValue(m_property.bioluminescenceThreshold);
+    ui->reactionRate->setValue(m_property.reactionRate);
+    ui->deactionRate->setValue(m_property.deactionRate);
 }
 
 //-----------------------------------------------------------------------------------------------------------

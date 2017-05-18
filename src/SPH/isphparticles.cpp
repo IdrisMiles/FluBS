@@ -117,10 +117,7 @@ void BaseSphParticle::InitCUDAMemory()
     cudaMallocManaged(&d_externalForcePtr, m_property->numParticles * sizeof(float3));
     cudaMallocManaged(&d_totalForcePtr, m_property->numParticles * sizeof(float3));
 
-    // particle hash
     cudaMallocManaged(&d_particleHashIdPtr, m_property->numParticles * sizeof(unsigned int));
-
-    // particle Id
     cudaMallocManaged(&d_particleIdPtr, m_property->numParticles * sizeof(unsigned int));
 }
 
@@ -185,6 +182,7 @@ void BaseSphParticle::CleanUpCUDAMemory()
 
     cudaFree(d_particleIdPtr);
     cudaFree(d_particleHashIdPtr);
+
     cudaFree(d_cellOccupancyPtr);
     cudaFree(d_cellParticleIdxPtr);
 }
@@ -211,23 +209,24 @@ void BaseSphParticle::CleanUpGL()
 
 void BaseSphParticle::UpdateCUDAMemory()
 {
-
+    // delete memory
+    checkCudaErrorsMsg(cudaFree(d_pressureForcePtr),"");
     checkCudaErrorsMsg(cudaFree(d_gravityForcePtr),"");
     checkCudaErrorsMsg(cudaFree(d_externalForcePtr),"");
     checkCudaErrorsMsg(cudaFree(d_totalForcePtr),"");
+
     checkCudaErrorsMsg(cudaFree(d_particleIdPtr),"");
     checkCudaErrorsMsg(cudaFree(d_particleHashIdPtr),"");
 
 
-
-
-    // particle forces
+    // re-allocate memeory
     checkCudaErrorsMsg(cudaMalloc(&d_pressureForcePtr, m_property->numParticles * sizeof(float3)),"");
     checkCudaErrorsMsg(cudaMalloc(&d_gravityForcePtr, m_property->numParticles * sizeof(float3)),"");
     checkCudaErrorsMsg(cudaMalloc(&d_externalForcePtr, m_property->numParticles * sizeof(float3)),"");
     checkCudaErrorsMsg(cudaMalloc(&d_totalForcePtr, m_property->numParticles * sizeof(float3)),"");
+
     checkCudaErrorsMsg(cudaMalloc(&d_particleHashIdPtr, m_property->numParticles * sizeof(unsigned int)),"");
-    cudaMalloc(&d_particleIdPtr, m_property->numParticles * sizeof(unsigned int));
+    checkCudaErrorsMsg(cudaMalloc(&d_particleIdPtr, m_property->numParticles * sizeof(unsigned int)), "");
 
 
     // Setup our pos buffer object.

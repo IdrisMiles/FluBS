@@ -147,25 +147,16 @@ void Algae::InitCUDAMemory()
     cudaGraphicsGLRegisterBuffer(&m_pressBO_CUDA, m_pressBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
     cudaGraphicsGLRegisterBuffer(&m_illumBO_CUDA, m_illumBO.bufferId(),cudaGraphicsMapFlagsNone);//WriteDiscard);
 
-    // Initialise some cuda memory
-//    cudaMemset(GetIlluminationPtr(), make_float3(0.0f, 0.0f, 0.0f), m_property->numParticles * sizeof(float3));
-//    cudaMemset(GetIlluminationPtr(), make_float3(0.0f, 0.0f, 0.0f), m_property->numParticles * sizeof(float3));
-//    cudaMemset(GetIlluminationPtr(), 0.0f, m_property->numParticles * sizeof(float));
-
     // particle forces
     cudaMalloc(&d_pressureForcePtr, m_property->numParticles * sizeof(float3));
     cudaMalloc(&d_gravityForcePtr, m_property->numParticles * sizeof(float3));
     cudaMalloc(&d_externalForcePtr, m_property->numParticles * sizeof(float3));
     cudaMalloc(&d_totalForcePtr, m_property->numParticles * sizeof(float3));
 
-    // particle hash
     cudaMalloc(&d_particleHashIdPtr, m_property->numParticles * sizeof(unsigned int));
-
-    // particle Id
     cudaMalloc(&d_particleIdPtr, m_property->numParticles * sizeof(unsigned int));
 
     cudaMalloc(&d_prevPressurePtr, m_property->numParticles * sizeof(float));
-    cudaMalloc(&d_energyPtr, m_property->numParticles * sizeof(float));
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -235,16 +226,18 @@ void Algae::InitAlgaeAsMesh()
 
 void Algae::CleanUpCUDAMemory()
 {
+    cudaFree(d_pressureForcePtr);
     cudaFree(d_gravityForcePtr);
     cudaFree(d_externalForcePtr);
     cudaFree(d_totalForcePtr);
-    cudaFree(d_particleHashIdPtr);
-    cudaFree(d_cellOccupancyPtr);
 
+    cudaFree(d_particleHashIdPtr);
     cudaFree(d_particleIdPtr);
-    cudaFree(d_cellParticleIdxPtr);
+
     cudaFree(d_prevPressurePtr);
-    cudaFree(d_energyPtr);
+
+    cudaFree(d_cellParticleIdxPtr);
+    cudaFree(d_cellOccupancyPtr);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -274,23 +267,28 @@ void Algae::CleanUpGL()
 
 void Algae::UpdateCUDAMemory()
 {
-
+    // delete memory
+    checkCudaErrorsMsg(cudaFree(d_pressureForcePtr),"");
     checkCudaErrorsMsg(cudaFree(d_gravityForcePtr),"");
     checkCudaErrorsMsg(cudaFree(d_externalForcePtr),"");
     checkCudaErrorsMsg(cudaFree(d_totalForcePtr),"");
-    checkCudaErrorsMsg(cudaFree(d_particleIdPtr),"");
+
     checkCudaErrorsMsg(cudaFree(d_particleHashIdPtr),"");
+    checkCudaErrorsMsg(cudaFree(d_particleIdPtr),"");
+
+    checkCudaErrorsMsg(cudaFree(d_prevPressurePtr),"");
 
 
-
-
-    // particle forces
+    // re allocate memory
     checkCudaErrorsMsg(cudaMalloc(&d_pressureForcePtr, m_property->numParticles * sizeof(float3)),"");
     checkCudaErrorsMsg(cudaMalloc(&d_gravityForcePtr, m_property->numParticles * sizeof(float3)),"");
     checkCudaErrorsMsg(cudaMalloc(&d_externalForcePtr, m_property->numParticles * sizeof(float3)),"");
     checkCudaErrorsMsg(cudaMalloc(&d_totalForcePtr, m_property->numParticles * sizeof(float3)),"");
+
     checkCudaErrorsMsg(cudaMalloc(&d_particleHashIdPtr, m_property->numParticles * sizeof(unsigned int)),"");
-    cudaMalloc(&d_particleIdPtr, m_property->numParticles * sizeof(unsigned int));
+    checkCudaErrorsMsg(cudaMalloc(&d_particleIdPtr, m_property->numParticles * sizeof(unsigned int)), "");
+
+    checkCudaErrorsMsg(cudaMalloc(&d_prevPressurePtr, m_property->numParticles * sizeof(float)), "");
 
 
     // Setup our pos buffer object.
@@ -332,19 +330,6 @@ float *Algae::GetPrevPressurePtr()
 void Algae::ReleasePrevPressurePtr()
 {
 
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-float *Algae::GetEnergyPtr()
-{
-    return d_energyPtr;
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void Algae::ReleaseEnergyPtr()
-{
 }
 
 //--------------------------------------------------------------------------------------------------------------------
