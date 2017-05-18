@@ -25,6 +25,11 @@ void SphParticleRenderer::SetSphParticles(std::shared_ptr<BaseSphParticle> _sphP
     Init();
 }
 
+std::shared_ptr<BaseSphParticle> SphParticleRenderer::GetSphParticles()
+{
+    return m_sphParticles;
+}
+
 void SphParticleRenderer::Draw()
 {
     QOpenGLFunctions *glFuncs = QOpenGLContext::currentContext()->functions();

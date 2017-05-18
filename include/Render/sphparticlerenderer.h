@@ -17,6 +17,8 @@ public:
 
 
     virtual void SetSphParticles(std::shared_ptr<BaseSphParticle> _sphParticles);
+    virtual std::shared_ptr<BaseSphParticle> GetSphParticles();
+
     virtual void Draw();
     virtual void SetShaderUniforms(const glm::mat4 &_projMat,
                            const glm::mat4 &_viewMat,

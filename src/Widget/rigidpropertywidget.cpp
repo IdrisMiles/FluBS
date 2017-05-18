@@ -86,7 +86,7 @@ void RigidPropertyWidget::OnTransformChanged()
                           ui->rotX->value(), ui->rotY->value(), ui->rotZ->value(),
                           ui->scaleX->value(), ui->scaleY->value(), ui->scaleZ->value());
 
-//    emit PropertyChanged(m_property);
+    emit PropertyChanged(m_property);
 }
 
 //-----------------------------------------------------------------------------------------------------------

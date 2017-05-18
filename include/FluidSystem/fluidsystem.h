@@ -26,11 +26,16 @@ public:
 
     void SetFluidSolverProperty(FluidSolverProperty _fluidSolverProperty);
     void SetContainer(std::shared_ptr<Rigid> _container);
+
     void AddFluid(std::shared_ptr<Fluid> _fluid);
     void AddRigid(std::shared_ptr<Rigid> _rigid);
     void AddAlgae(std::shared_ptr<Algae> _algae);
 
-    FluidSolverProperty GetProperty() const;
+    void RemoveFluid(std::shared_ptr<Fluid> _fluid);
+    void RemoveRigid(std::shared_ptr<Rigid> _rigid);
+    void RemoveAlgae(std::shared_ptr<Algae> _algae);
+
+    FluidSolverProperty GetProperty();
     std::shared_ptr<Fluid> GetFluid();
     std::shared_ptr<Algae> GetAlgae();
     std::vector<std::shared_ptr<Rigid>> GetActiveRigids();

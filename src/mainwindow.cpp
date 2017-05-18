@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QMessageBox>
 
 //---------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -131,21 +132,45 @@ void MainWindow::OnRigidInitialised(std::shared_ptr<Rigid> _rigid)
     if(_rigid != nullptr)
     {
         ui->scene->makeCurrent();
+
+        // create rigid widget
         auto rigidPropWidget = new RigidPropertyWidget(ui->properties, *_rigid->GetProperty());
         std::string name = _rigid->GetName();
         int tabId = ui->properties->addTab(rigidPropWidget, QString(name.c_str()));
 
-
+        // add rigid to tree view
         auto item = new QTreeWidgetItem();
         item->setText(0,QString(name.c_str()));
         ui->outliner->addTopLevelItem(item);
 
-        connect(ui->outliner, &QTreeWidget::itemClicked, ui->properties, [this, tabId, name](QTreeWidgetItem* clickedItem, int column){
-            if(clickedItem->text(column) == QString(name.c_str()))
+
+        connect(ui->outliner, &QTreeWidget::itemClicked, [this, item, tabId, name](QTreeWidgetItem* clickedItem, int column){
+            if(clickedItem == item)
             {
                 ui->properties->setCurrentIndex(tabId);
             }
         });
+
+        connect(ui->outliner, &QTreeWidget::itemDoubleClicked, [this, _rigid, item, tabId, name](QTreeWidgetItem* clickedItem, int column){
+            if(clickedItem == item)
+            {
+                ui->properties->setCurrentIndex(tabId);
+
+                QMessageBox msgBox;
+                msgBox.setText("Do you want to Delete this Rigid Object: "+QString(name.c_str()));
+                msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
+                msgBox.setDefaultButton(QMessageBox::Cancel);
+                if(msgBox.exec() == QMessageBox::Yes)
+                {
+                    ui->scene->RemoveRigid(_rigid);
+                    ui->outliner->removeItemWidget(item, 0);
+                    delete item;
+                    ui->properties->removeTab(tabId);
+                }
+
+            }
+        });
+
 
         connect(rigidPropWidget, &RigidPropertyWidget::PropertyChanged, [this, rigidPropWidget, _rigid](){
             ui->scene->makeCurrent();

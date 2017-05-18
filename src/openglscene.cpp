@@ -215,6 +215,39 @@ std::shared_ptr<Rigid> OpenGLScene::CreateRigidSphere(RigidProperty property)
 
 //------------------------------------------------------------------------------------------------------------
 
+void OpenGLScene::RemoveRigid(std::shared_ptr<Rigid> rigid)
+{
+
+    auto renderIt = m_sphRenderers.cbegin();
+    for(;renderIt != m_sphRenderers.cend(); ++renderIt)
+    {
+        if((*renderIt)->GetSphParticles()->GetName() == rigid->GetName())
+        {
+            m_sphRenderers.erase(renderIt);
+            break;
+        }
+    }
+
+    auto rit = m_rigids.cbegin();
+    for(;rit != m_rigids.cend(); ++rit)
+    {
+        if(*rit == rigid)
+        {
+            m_rigids.erase(rit);
+            break;
+        }
+    }
+
+    m_fluidSystem->RemoveRigid(rigid);
+}
+
+void OpenGLScene::RemoveRigid(std::string name)
+{
+
+}
+
+//------------------------------------------------------------------------------------------------------------
+
 std::shared_ptr<Rigid> OpenGLScene::CreateRigidMesh(RigidProperty property)
 {
     auto rigidProps = std::shared_ptr<RigidProperty>(new RigidProperty());
@@ -523,6 +556,7 @@ void OpenGLScene::OnFrameChanged(int frame)
 void OpenGLScene::OnPropertiesChanged()
 {
     m_cache.ClearCache(-1);
+    m_fluidSystem->ResetSim();
 }
 
 //------------------------------------------------------------------------------------------------------------
