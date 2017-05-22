@@ -143,7 +143,7 @@ void CacheSystem::Load(const int _frame, std::shared_ptr<FluidSystem> _fluidSyst
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void CacheSystem::WriteCacheToDisk(const int _frame)
+void CacheSystem::WriteFrameToDisk(const int _frame)
 {
     if(_frame == -1)
     {
@@ -168,8 +168,7 @@ void CacheSystem::WriteCacheToDisk(const int _frame)
     }
 
     // write cache to disk asynchronously
-    m_threads[m_threadHead] = std::thread(&CacheSystem::CacheToDisk, this, fileName, std::ref(m_cachedFrames[_frame]));
-//    m_threads[m_threadHead].detach();
+    m_threads[m_threadHead] = std::thread(&CacheSystem::CacheJsonToDisk, this, fileName, std::ref(m_cachedFrames[_frame]));
     m_threadHead = (m_threadHead+1)%m_threads.size();
 
 
@@ -219,7 +218,7 @@ void CacheSystem::CacheOutToDisk(std::string _fileName, QProgressBar *_progress)
 
             // write to disk
             std::string fileName = _fileName+ss.str()+".json";
-            CacheToDisk(fileName, m_cachedFrames[i]);
+            CacheJsonToDisk(fileName, m_cachedFrames[i]);
 
             if(notInMemory)
             {
@@ -359,7 +358,7 @@ void CacheSystem::LoadCacheFromDisk(std::vector<std::string> _fileNames, QProgre
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void CacheSystem::CacheToDisk(const std::string _file, const json &_object)
+void CacheSystem::CacheJsonToDisk(const std::string _file, const json &_object)
 {
     std::ofstream ofs(_file);
     if(ofs.is_open())

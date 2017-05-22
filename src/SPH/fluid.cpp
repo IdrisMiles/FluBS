@@ -87,21 +87,10 @@ void Fluid::SetProperty(std::shared_ptr<FluidProperty> _property)
 void Fluid::SetProperty(FluidProperty _property)
 {
     m_property->gravity = _property.gravity;
-
-    if(m_property->particleMass != _property.particleMass)
-    {
-        m_property->particleMass = _property.particleMass;
-    }
-
-    if(m_property->particleRadius != _property.particleRadius)
-    {
-        m_property->particleRadius = _property.particleRadius;
-    }
-
-    if(m_property->restDensity != _property.restDensity)
-    {
-        m_property->restDensity = _property.restDensity;
-    }
+    m_property->particleMass = _property.particleMass;
+    m_property->particleRadius = _property.particleRadius;
+    m_property->restDensity = _property.restDensity;
+    m_property->numParticles = _property.numParticles;
 
     m_property->gasStiffness = _property.gasStiffness;
     m_property->viscosity = _property.viscosity;

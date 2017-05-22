@@ -1,5 +1,10 @@
 #include "include/openglscene.h"
+
 #include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <sys/time.h>
 #include <math.h>
 
@@ -75,6 +80,37 @@ void OpenGLScene::CacheOutSimulation(QProgressBar *progress)
     
     m_cache.CacheOutToDisk(fileName.toStdString(), progress);
 
+    SaveSimulation(progress);
+
+}
+
+//------------------------------------------------------------------------------------------------------------
+
+void OpenGLScene::SaveSimulation(QProgressBar *progress)
+{
+    json scene;
+
+    scene["numFluids"] = 1;
+    scene["numAlgaes"] = 1;
+    scene["numRigids"] = m_rigids.size();
+
+    scene["fluid"] = *m_fluid->GetProperty();
+    scene["algae"] = *m_algae->GetProperty();
+
+    for(size_t i=0; i<m_rigids.size(); i++)
+    {
+        scene["rigids"].push_back(*m_rigids[i]->GetProperty());
+    }
+
+
+    std::string _file = "testing";
+    std::ofstream ofs(_file);
+    if(ofs.is_open())
+    {
+        ofs << std::setw(4)<< scene << std::endl;
+
+        ofs.close();
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -112,6 +148,8 @@ void OpenGLScene::AddRigid(QProgressBar *progress, std::string type)
     static int sphereCount=0;
     static int meshCount=0;
 
+    //---------------------------------------------------------------
+    // create rigid
     if(type == "cube")
     {
         rigid = CreateRigidCube();
@@ -140,19 +178,24 @@ void OpenGLScene::AddRigid(QProgressBar *progress, std::string type)
 
     progress->setValue(progressCount++);
 
-    // rigid cube to solver
+    //---------------------------------------------------------------
+    // Add rigid to solver
     m_rigids.push_back(rigid);
     m_fluidSystem->AddRigid(rigid);
     emit RigidInitialised(rigid);
 
     progress->setValue(progressCount++);
 
-    // add rigid cube to renderer
+
+    //---------------------------------------------------------------
+    // Add rigid to renderer
     m_sphRenderers.push_back(std::shared_ptr<SphParticleRenderer>(new SphParticleRenderer()));
     m_sphRenderers.back()->SetSphParticles(rigid);
     m_sphRenderers.back()->SetColour(glm::vec3(0.4f, 0.4f, 0.4f));
 
     progress->setValue(progressCount++);
+
+    OnPropertiesChanged();
 }
 
 std::shared_ptr<Rigid> OpenGLScene::CreateRigidCube(RigidProperty property, glm::vec3 pos, glm::vec3 rot, glm::vec3 scale)
@@ -319,14 +362,14 @@ void OpenGLScene::LoadRigid(QProgressBar *progress, std::string type, RigidPrope
 
     progress->setValue(progressCount++);
 
-    // rigid cube to solver
+    // add rigid to solver
     m_rigids.push_back(rigid);
     m_fluidSystem->AddRigid(rigid);
     emit RigidInitialised(rigid);
 
     progress->setValue(progressCount++);
 
-    // add rigid cube to renderer
+    // add rigid to renderer
     m_sphRenderers.push_back(std::shared_ptr<SphParticleRenderer>(new SphParticleRenderer()));
     m_sphRenderers.back()->SetSphParticles(rigid);
     m_sphRenderers.back()->SetColour(glm::vec3(0.4f, 0.4f, 0.4f));

@@ -5,12 +5,11 @@
 
 TimeLine::TimeLine(int duration, QObject *parent) : QTimeLine(duration, parent)
 {
-    m_frameCacheStates.resize(endFrame() - startFrame(), CacheState::NotCached);
 
 
     connect(this, &TimeLine::frameChanged, [this](int frame){
+//        m_savedState = state();
 //        setPaused(true);
-        m_frameCacheStates[frame] = Cached;
     });
 
 
@@ -35,7 +34,6 @@ TimeLine::~TimeLine()
 
 void TimeLine::SetFrameRange(int start, int end)
 {
-    m_frameCacheStates.resize(end - start, CacheState::NotCached);
     setFrameRange(start, end);
 }
 
@@ -74,11 +72,12 @@ void TimeLine::OnFrameFinished(int frame)
 //            (State() != TimeLine::State::NotRunning && State() != TimeLine::State::Paused))
 //    {
 //        setPaused(true);
-//        std::cout<<"pause\n";
+////        std::cout<<"pause\n";
 //    }
 //    else if(m_savedState == TimeLine::State::Running && state() != TimeLine::State::Running)
 //    {
 //        resume();
-//        std::cout<<"resume\n";
+////        std::cout<<"resume\n";
 //    }
+
 }

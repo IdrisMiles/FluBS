@@ -46,27 +46,11 @@ TimeLineWidget::TimeLineWidget(QWidget *parent) :
     });
 
     connect(ui->playButton, &QPushButton::clicked, [this](bool checked){
-        m_timeLine->SetSavedState(TimeLine::State::Running);
-
-        auto state = m_timeLine->state();
-        if(state == TimeLine::State::NotRunning)
-        {
-            m_timeLine->resume();
-        }
-        else if(state == TimeLine::State::Paused)
-        {
-            m_timeLine->resume();
-        }
+        Play();
     });
 
     connect(ui->pauseButton, &QPushButton::clicked, [this](bool checked){
-        m_timeLine->SetSavedState(TimeLine::State::Paused);
-
-        auto state = m_timeLine->state();
-        if(state == TimeLine::State::Running)
-        {
-            m_timeLine->setPaused(true);
-        }
+        Pause();
     });
 
     connect(ui->gotoStartButton, &QPushButton::clicked, [this](bool checked){
@@ -78,7 +62,10 @@ TimeLineWidget::TimeLineWidget(QWidget *parent) :
     });
 
     connect(ui->scrubber, &QSlider::sliderMoved,[this](int frame){
-        m_timeLine->setCurrentTime((1000*frame)/ui->fps->value());
+        if(m_timeLine->state() != TimeLine::State::Running)
+        {
+            m_timeLine->setCurrentTime((1000*frame)/ui->fps->value());
+        }
     });
 
     connect(ui->frame, QOverload<int>::of(&QSpinBox::valueChanged), [this](int value){
@@ -104,6 +91,31 @@ TimeLineWidget::~TimeLineWidget()
     delete ui;
 }
 
+void TimeLineWidget::Pause()
+{
+//    m_timeLine->SetSavedState(TimeLine::State::Paused);
+
+    auto state = m_timeLine->state();
+    if(state == TimeLine::State::Running)
+    {
+        m_timeLine->setPaused(true);
+    }
+}
+
+void TimeLineWidget::Play()
+{
+//    m_timeLine->SetSavedState(TimeLine::State::Running);
+
+    auto state = m_timeLine->state();
+    if(state == TimeLine::State::NotRunning)
+    {
+        m_timeLine->resume();
+    }
+    else if(state == TimeLine::State::Paused)
+    {
+        m_timeLine->resume();
+    }
+}
 
 void TimeLineWidget::OnFrameChanged(int frame)
 {

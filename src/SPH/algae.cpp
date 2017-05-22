@@ -315,6 +315,11 @@ void Algae::UpdateCUDAMemory()
     m_pressBO.bind();
     m_pressBO.allocate(m_property->numParticles * sizeof(float));
     m_pressBO.release();
+
+    // Set up bioluminous buffer object
+    m_illumBO.bind();
+    m_illumBO.allocate(m_property->numParticles * sizeof(float));
+    m_illumBO.release();
 }
 
 //--------------------------------------------------------------------------------------------------------------------

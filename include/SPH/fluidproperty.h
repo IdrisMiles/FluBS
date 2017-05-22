@@ -29,6 +29,7 @@ public:
 
     ~FluidProperty(){}
 
+
     //--------------------------------------------------------------------------------------------------------------
 
     float surfaceTension;
@@ -37,5 +38,8 @@ public:
     float viscosity;
 
 };
+
+void to_json(json& j, const FluidProperty& p);
+void from_json(const json& j, FluidProperty& p);
 
 #endif // FLUIDPROPERTY_H

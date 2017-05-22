@@ -3,6 +3,7 @@
 
 #include <cuda_runtime.h>
 
+
 class SphParticleProperty
 {
 
@@ -28,6 +29,7 @@ public:
 
     ~SphParticleProperty(){}
 
+
     unsigned int numParticles;
     float particleMass;
     float particleRadius;
@@ -35,5 +37,13 @@ public:
     float smoothingLength;
     float3 gravity;
 };
+
+
+
+#include "json/src/json.hpp"
+using json = nlohmann::json;
+
+void to_json(json& j, const SphParticleProperty& p);
+void from_json(const json& j, SphParticleProperty& p);
 
 #endif // SPHPARTICLEPROPEPRTY_H

@@ -1,6 +1,9 @@
 #ifndef FLUIDSOLVERPROPERTY_H
 #define FLUIDSOLVERPROPERTY_H
 
+#include "json/src/json.hpp"
+using json = nlohmann::json;
+
 
 class FluidSolverProperty
 {
@@ -40,7 +43,6 @@ public:
     ~FluidSolverProperty(){}
 
 
-
     float smoothingLength;
     float deltaTime;
     unsigned int solveIterations;
@@ -49,5 +51,8 @@ public:
     float gridVolume;
 
 };
+
+void to_json(json& j, const FluidSolverProperty& p);
+void from_json(const json& j, FluidSolverProperty& p);
 
 #endif // FLUIDSOLVERPROPERTY_H

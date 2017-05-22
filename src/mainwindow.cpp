@@ -88,6 +88,7 @@ void MainWindow::OnFluidSystemInitialised(std::shared_ptr<FluidSystem> _fluidSys
             fluidSystem->SetFluidSolverProperty(_newProperties);
             ui->scene->OnPropertiesChanged();
         });
+
     }
 }
 
@@ -185,6 +186,7 @@ void MainWindow::OnRigidInitialised(std::shared_ptr<Rigid> _rigid)
 
             _rigid->UpdateMesh(pos, rot);
         });
+
     }
 }
 
@@ -236,6 +238,7 @@ void MainWindow::Load()
 
 void MainWindow::AddRigid(const std::string type)
 {
+    ui->timeline->Pause();
     ui->scene->AddRigid(ui->progressBar, type);
 }
 

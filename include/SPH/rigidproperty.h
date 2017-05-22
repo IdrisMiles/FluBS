@@ -7,8 +7,8 @@ class RigidProperty : public SphParticleProperty
 {
 
 public:
-    RigidProperty(bool _static = true,
-                  bool _kinematic = false,
+    RigidProperty(int _static = true,
+                  int _kinematic = false,
                   unsigned int _numParticles = 8000,
                   float _particleMass = 1.0f,
                   float _particleRadius = 0.2f,
@@ -24,23 +24,16 @@ public:
         particleMass = restDensity * (dia * dia * dia);
     }
 
-    RigidProperty(const RigidProperty &_other)
-    {
-        this->m_static = _other.m_static;
-        this->kinematic = _other.kinematic;
-        this->gravity = _other.gravity;
-        this->numParticles = _other.numParticles;
-        this->particleMass = _other.particleMass;
-        this->particleRadius = _other.particleRadius;
-        this->restDensity = _other.restDensity;
-        this->smoothingLength = _other.smoothingLength;
-    }
-
     ~RigidProperty(){}
 
-    bool m_static;
-    bool kinematic;
+    //--------------------------------------------------------------------------------------------------------------
+
+    int m_static;
+    int kinematic;
 };
 
+
+void to_json(json& j, const RigidProperty& p);
+void from_json(const json& j, RigidProperty& p);
 
 #endif // RIGIDPROPERTY_H

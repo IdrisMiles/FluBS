@@ -33,7 +33,6 @@ protected:
 private:
     TimeLine::State m_currentState;
     TimeLine::State m_savedState;
-    std::vector<CacheState> m_frameCacheStates;
 
 };
 

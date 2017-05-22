@@ -17,6 +17,9 @@ public:
     explicit TimeLineWidget(QWidget *parent = 0);
     ~TimeLineWidget();
 
+    void Pause();
+    void Play();
+
 public slots:
     void OnFrameChanged(int frame);
     void OnFrameCached(int frame);

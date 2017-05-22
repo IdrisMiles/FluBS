@@ -96,8 +96,8 @@ private:
     void Load(const json &_frame, const std::string &_object, const std::shared_ptr<Rigid> _rigid);
 
 
-    void WriteCacheToDisk(const int _frame = -1);
-    void CacheToDisk(const std::string _file, const json &_object);
+    void WriteFrameToDisk(const int _frame = -1);
+    void CacheJsonToDisk(const std::string _file, const json &_object);
 
     void LoadFromMemory(json &_frame, std::shared_ptr<FluidSystem> _fluidSystem);
     void LoadFromDisk(const std::string _file, json &_object);
