@@ -3,7 +3,7 @@
 
 //-----------------------------------------------------------------------------------------------------------
 
-RigidPropertyWidget::RigidPropertyWidget(QWidget *parent, RigidProperty _property) :
+RigidPropertyWidget::RigidPropertyWidget(QWidget *parent, RigidProperty _property, float posX, float posY, float posZ, float rotX, float rotY, float rotZ) :
     SphParticlePropertyWidget(parent, _property),
     ui(new Ui::RigidPropertyWidget),
     m_property(_property)
@@ -12,6 +12,7 @@ RigidPropertyWidget::RigidPropertyWidget(QWidget *parent, RigidProperty _propert
 
     AddWidgetToGridLayout(ui->layout, 0, 1, 2);
     SetProperty(_property);
+    SetTransform(posX, posY, posZ, rotX, rotY, rotZ);
 
     connect(ui->static_2, &QCheckBox::clicked, this, &RigidPropertyWidget::OnPropertyChanged);
     connect(ui->kinematic, &QCheckBox::clicked, this, &RigidPropertyWidget::OnPropertyChanged);
@@ -55,6 +56,19 @@ void RigidPropertyWidget::SetProperty(RigidProperty _property)
 RigidProperty RigidPropertyWidget::GetProperty()
 {
     return m_property;
+}
+
+//---------------------------------------------------------------------------------------
+
+void RigidPropertyWidget::SetTransform(float posX, float posY, float posZ, float rotX, float rotY, float rotZ)
+{
+    ui->posX->setValue(posX);
+    ui->posY->setValue(posY);
+    ui->posZ->setValue(posZ);
+
+    ui->rotX->setValue(rotX);
+    ui->rotY->setValue(rotY);
+    ui->rotZ->setValue(rotZ);
 }
 
 //-----------------------------------------------------------------------------------------------------------

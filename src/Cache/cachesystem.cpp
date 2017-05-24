@@ -419,6 +419,25 @@ void CacheSystem::SetFrameRange(int start, int end)
 
 //--------------------------------------------------------------------------------------------------------------------
 
+int CacheSystem::GetCachedRange()
+{
+    int lastCachedFrame;
+
+    for(auto &fc : m_isFrameCached)
+    {
+        if(!IS_CACHED(fc) && !IS_CACHED_TO_MEMORY(fc))
+        {
+            break;
+        }
+
+        lastCachedFrame++;
+    }
+
+    return lastCachedFrame;
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
 void CacheSystem::Cache(json &_frame, const std::string &_object, std::shared_ptr<FluidSystem> _fluidSystem)
 {
     auto props = _fluidSystem->GetProperty();

@@ -1,7 +1,7 @@
 #include "SPH/rigid.h"
 #include <glm/gtx/euler_angles.hpp>
 
-Rigid::Rigid(std::shared_ptr<RigidProperty> _rigidProperty, Mesh _mesh, std::string _name):
+Rigid::Rigid(std::shared_ptr<RigidProperty> _rigidProperty, Mesh _mesh, std::string _name, std::string _type):
     BaseSphParticle(_rigidProperty, _name)
 {
     m_property = _rigidProperty;
@@ -12,6 +12,12 @@ Rigid::Rigid(std::shared_ptr<RigidProperty> _rigidProperty, Mesh _mesh, std::str
     m_densityMapped = false;
     m_massMapped = false;
     m_pressureMapped = false;
+    m_setupSolveSpecsInit = false;
+
+    m_type = _type;
+
+    m_pos = glm::vec3(0.0f, 0.0f, 0.0f);
+    m_rot = glm::vec3(0.0f, 0.0f, 0.0f);
 
     Init();
 
@@ -30,11 +36,13 @@ Rigid::~Rigid()
 
 void Rigid::UpdateMesh(Mesh &_mesh, const glm::vec3 &_pos, const glm::vec3 &_rot)
 {
+    m_pos = _pos;
+    m_rot = _rot;
     Mesh newMesh = m_mesh = _mesh;
     for( auto &&v : newMesh.verts)
     {
-        glm::mat3 t = glm::orientate3(_rot);
-        v = (t*v)+_pos;
+        glm::mat3 t = glm::orientate3(glm::radians(m_rot));
+        v = (t*v)+m_pos;
     }
 
     if(m_property->numParticles != m_mesh.verts.size())
@@ -50,16 +58,28 @@ void Rigid::UpdateMesh(Mesh &_mesh, const glm::vec3 &_pos, const glm::vec3 &_rot
 
 void Rigid::UpdateMesh(const glm::vec3 &_pos, const glm::vec3 &_rot)
 {
+    m_pos = _pos;
+    m_rot = _rot;
     Mesh newMesh = m_mesh;
     for( auto &&v : newMesh.verts)
     {
-        glm::mat3 t = glm::orientate3(_rot);
-        v = (t*v)+_pos;
+        glm::mat3 t = glm::orientate3(glm::radians(m_rot));
+        v = (t*v)+m_pos;
     }
 
     GetPositionPtr();
     cudaMemcpy(d_positionPtr, &newMesh.verts[0], m_property->numParticles * sizeof(float3), cudaMemcpyHostToDevice);
     ReleaseCudaGLResources();
+}
+
+glm::vec3 Rigid::GetPos()
+{
+    return m_pos;
+}
+
+glm::vec3 Rigid::GetRot()
+{
+    return m_rot;
 }
 
 
@@ -78,6 +98,9 @@ void Rigid::SetupSolveSpecs(const FluidSolverProperty &_solverProps)
     const uint numCells = _solverProps.gridResolution * _solverProps.gridResolution * _solverProps.gridResolution;
     checkCudaErrorsMsg(cudaMalloc(&d_cellOccupancyPtr, numCells * sizeof(unsigned int)), "Allocate cell Occ memory in setupSolverSpecs");
     checkCudaErrorsMsg(cudaMalloc(&d_cellParticleIdxPtr, numCells * sizeof(unsigned int)), "Allcoate cell particle Idx memory in setupSolverSpecs");
+
+
+    getLastCudaError("SetUpSolveSpecs Rigid");
 
     m_setupSolveSpecsInit = true;
 }
@@ -179,20 +202,20 @@ void Rigid::CleanUpCUDAMemory()
 
 void Rigid::CleanUpGL()
 {
-    cudaGraphicsUnregisterResource(m_posBO_CUDA);
-    m_posBO.destroy();
+//    cudaGraphicsUnregisterResource(m_posBO_CUDA);
+//    m_posBO.destroy();
 
-    cudaGraphicsUnregisterResource(m_velBO_CUDA);
-    m_velBO.destroy();
+//    cudaGraphicsUnregisterResource(m_velBO_CUDA);
+//    m_velBO.destroy();
 
-    cudaGraphicsUnregisterResource(m_denBO_CUDA);
-    m_denBO.destroy();
+//    cudaGraphicsUnregisterResource(m_denBO_CUDA);
+//    m_denBO.destroy();
 
-    cudaGraphicsUnregisterResource(m_massBO_CUDA);
-    m_massBO.destroy();
+//    cudaGraphicsUnregisterResource(m_massBO_CUDA);
+//    m_massBO.destroy();
 
-    cudaGraphicsUnregisterResource(m_pressBO_CUDA);
-    m_pressBO.destroy();
+//    cudaGraphicsUnregisterResource(m_pressBO_CUDA);
+//    m_pressBO.destroy();
 }
 
 //------------------------------------------------------------------------
@@ -293,13 +316,13 @@ RigidProperty *Rigid::GetProperty()
 
 //---------------------------------------------------------------------------------------------------------------
 
-//void Rigid::SetProperty(std::shared_ptr<RigidProperty> _property)
-//{
-//    BaseSphParticle::SetProperty(_property);
-//    m_property = _property;
+void Rigid::SetProperty(std::shared_ptr<RigidProperty> _property)
+{
+    BaseSphParticle::SetProperty(_property);
+    m_property = _property;
 
-////    UpdateCUDAMemory();
-//}
+//    UpdateCUDAMemory();
+}
 
 //---------------------------------------------------------------------------------------------------------------
 
@@ -317,6 +340,34 @@ void Rigid::SetProperty(RigidProperty _property)
     m_property->kinematic = _property.kinematic;
 
 //    UpdateCUDAMemory();
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void Rigid::SetType(std::string type)
+{
+    m_type = type;
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+std::string Rigid::GetType()
+{
+    return m_type;
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void Rigid::SetFileName(std::string file)
+{
+    m_fileName = file;
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+std::string Rigid::GetFileName()
+{
+    return m_fileName;
 }
 
 //--------------------------------------------------------------------------------------------------------------------

@@ -10,18 +10,26 @@
 class Rigid : public BaseSphParticle
 {
 public:
-    Rigid(std::shared_ptr<RigidProperty> _rigidProperty, Mesh _mesh, std::string _name = "rigid");
+    Rigid(std::shared_ptr<RigidProperty> _rigidProperty, Mesh _mesh, std::string _name = "rigid", std::string _type = "rigid");
     virtual ~Rigid();
 
     virtual RigidProperty* GetProperty();
 
-//    void SetProperty(std::shared_ptr<RigidProperty> _property);
+    void SetProperty(std::shared_ptr<RigidProperty> _property);
     void SetProperty(RigidProperty _property);
+
+    void SetType(std::string type);
+    std::string GetType();
+
+    void SetFileName(std::string file);
+    std::string GetFileName();
 
     virtual void SetupSolveSpecs(const FluidSolverProperty &_solverProps);
 
     void UpdateMesh(Mesh &_mesh, const glm::vec3 &_pos = glm::vec3(0.0f, 0.0f, 0.0f), const glm::vec3 &_rot = glm::vec3(0.0f, 0.0f, 0.0f));
     void UpdateMesh(const glm::vec3 &_pos = glm::vec3(0.0f, 0.0f, 0.0f), const glm::vec3 &_rot = glm::vec3(0.0f, 0.0f, 0.0f));
+    glm::vec3 GetPos();
+    glm::vec3 GetRot();
 
 
     virtual void MapCudaGLResources();
@@ -51,6 +59,12 @@ protected:
     virtual void CleanUpGL();
 
     virtual void UpdateCUDAMemory();
+
+
+    std::string m_type;
+    std::string m_fileName;
+    glm::vec3 m_pos;
+    glm::vec3 m_rot;
 
 
     // specfic simulation Data

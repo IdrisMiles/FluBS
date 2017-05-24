@@ -43,32 +43,30 @@ public:
     QSize minimumSizeHint() const Q_DECL_OVERRIDE;
     QSize sizeHint() const Q_DECL_OVERRIDE;
 
-    void CacheOutSimulation(QProgressBar *progress);
-    void SaveSimulation(QProgressBar *progress);
-    void LoadSimulation(QProgressBar *progress);
+    void SaveScene(QProgressBar *progress, QString fileName="");
+    void OpenScene(QProgressBar *progress, QString fileName="");
+    void ClearScene();
 
+    void AddSolver(FluidSolverProperty fluidSolverProps = FluidSolverProperty());
+    void AddContainer(std::shared_ptr<RigidProperty> containerProps = std::shared_ptr<RigidProperty>(new RigidProperty()));
+    void AddFluid(std::shared_ptr<FluidProperty> fluidProps = std::shared_ptr<FluidProperty>(new FluidProperty()));
+    void AddAlgae(std::shared_ptr<AlgaeProperty> algaeProps = std::shared_ptr<AlgaeProperty>(new AlgaeProperty()));
     void AddRigid(QProgressBar *progress = nullptr, std::string type = "cube");
-    void RemoveRigid(std::shared_ptr<Rigid> rigid);
-    // todo
     void LoadRigid(QProgressBar *progress = nullptr,
                    std::string type = "cube",
                    RigidProperty property = RigidProperty(),
+                   std::string name = "cube",
+                   std::string file = "",
                    glm::vec3 pos = glm::vec3(0.0f, 0.0f, 0.0f),
                    glm::vec3 rot = glm::vec3(0.0f, 0.0f, 0.0f),
-                   glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f),
-                   std::string name = "cube",
-                   std::string file = "");
-    void SaveRigid(QProgressBar *progress = nullptr, std::shared_ptr<Rigid> rigid = nullptr);
+                   glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f));
 
-    void AddFluid(QProgressBar *progress = nullptr);
-    void RemoveFluid(std::shared_ptr<Fluid> fluid);
-    void SaveFluid();
-    void LoadFluid();
 
-    void AddAlgae(QProgressBar *progress = nullptr);
-    void RemoveAlgae(std::shared_ptr<Algae> algae);
-    void SaveAlgae();
-    void LoadAlgae();
+    void RemoveFluidSolver();
+    void RemoveFluid();
+    void RemoveAlgae();
+    void RemoveRigid(std::shared_ptr<Rigid> rigid);
+
 
 
 public slots:

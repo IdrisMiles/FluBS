@@ -2450,7 +2450,11 @@ obj/mainwindow.o: src/mainwindow.cpp include/mainwindow.h \
 		ui/ui_mainwindow.h \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QMessageBox \
 		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qmessagebox.h \
-		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qdialog.h
+		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qdialog.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/QFileDialog \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtWidgets/qfiledialog.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qdir.h \
+		../../../Qt5.7.0/5.7/gcc_64/include/QtCore/qfileinfo.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/mainwindow.o src/mainwindow.cpp
 
 obj/openglscene.o: src/openglscene.cpp include/openglscene.h \

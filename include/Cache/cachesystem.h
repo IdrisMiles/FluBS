@@ -63,6 +63,8 @@ public:
 
     void SetFrameRange(int start, int end);
 
+    int GetCachedRange();
+
 
 private:
     const struct DataId{

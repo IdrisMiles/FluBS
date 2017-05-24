@@ -13,6 +13,7 @@ Fluid::Fluid(std::shared_ptr<FluidProperty> _fluidProperty, std::string _name):
     m_densityMapped = false;
     m_massMapped = false;
     m_pressureMapped = false;
+    m_setupSolveSpecsInit = false;
 
     Init();
 }
@@ -61,7 +62,7 @@ void Fluid::SetupSolveSpecs(const FluidSolverProperty &_solverProps)
     checkCudaErrorsMsg(cudaMalloc(&d_cellParticleIdxPtr, numCells * sizeof(unsigned int)), "Allcoate cell particle Idx memory in setupSolverSpecs");
 
 
-    getLastCudaError("SetUpSolveSpecs");
+    getLastCudaError("SetUpSolveSpecs Fluid");
     m_setupSolveSpecsInit = true;
 }
 
@@ -281,20 +282,20 @@ void Fluid::UpdateCUDAMemory()
 
 void Fluid::CleanUpGL()
 {
-    checkCudaErrorsMsg(cudaGraphicsUnregisterResource(m_posBO_CUDA),"");
-    m_posBO.destroy();
+//    checkCudaErrorsMsg(cudaGraphicsUnregisterResource(m_posBO_CUDA),"");
+//    m_posBO.destroy();
 
-    checkCudaErrorsMsg(cudaGraphicsUnregisterResource(m_velBO_CUDA),"");
-    m_velBO.destroy();
+//    checkCudaErrorsMsg(cudaGraphicsUnregisterResource(m_velBO_CUDA),"");
+//    m_velBO.destroy();
 
-    checkCudaErrorsMsg(cudaGraphicsUnregisterResource(m_denBO_CUDA),"");
-    m_denBO.destroy();
+//    checkCudaErrorsMsg(cudaGraphicsUnregisterResource(m_denBO_CUDA),"");
+//    m_denBO.destroy();
 
-    checkCudaErrorsMsg(cudaGraphicsUnregisterResource(m_massBO_CUDA),"");
-    m_massBO.destroy();
+//    checkCudaErrorsMsg(cudaGraphicsUnregisterResource(m_massBO_CUDA),"");
+//    m_massBO.destroy();
 
-    checkCudaErrorsMsg(cudaGraphicsUnregisterResource(m_pressBO_CUDA),"");
-    m_pressBO.destroy();
+//    checkCudaErrorsMsg(cudaGraphicsUnregisterResource(m_pressBO_CUDA),"");
+//    m_pressBO.destroy();
 }
 
 //--------------------------------------------------------------------------------------------------------------------

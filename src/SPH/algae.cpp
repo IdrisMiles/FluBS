@@ -15,6 +15,8 @@ Algae::Algae(std::shared_ptr<AlgaeProperty> _property, std::string _name):
     m_pressureMapped = false;
     m_illumMapped = false;
 
+    m_setupSolveSpecsInit = false;
+
     Init();
 }
 
@@ -60,6 +62,9 @@ void Algae::SetupSolveSpecs(const FluidSolverProperty &_solverProps)
     const uint numCells = _solverProps.gridResolution * _solverProps.gridResolution * _solverProps.gridResolution;
     checkCudaErrorsMsg(cudaMalloc(&d_cellOccupancyPtr, numCells * sizeof(unsigned int)),"");
     checkCudaErrorsMsg(cudaMalloc(&d_cellParticleIdxPtr, numCells * sizeof(unsigned int)),"");
+
+
+    getLastCudaError("SetUpSolveSpecs Algae");
 
     m_setupSolveSpecsInit = true;
 }
@@ -244,20 +249,20 @@ void Algae::CleanUpCUDAMemory()
 
 void Algae::CleanUpGL()
 {
-    cudaGraphicsUnregisterResource(m_posBO_CUDA);
-    m_posBO.destroy();
+//    cudaGraphicsUnregisterResource(m_posBO_CUDA);
+//    m_posBO.destroy();
 
-    cudaGraphicsUnregisterResource(m_velBO_CUDA);
-    m_velBO.destroy();
+//    cudaGraphicsUnregisterResource(m_velBO_CUDA);
+//    m_velBO.destroy();
 
-    cudaGraphicsUnregisterResource(m_denBO_CUDA);
-    m_denBO.destroy();
+//    cudaGraphicsUnregisterResource(m_denBO_CUDA);
+//    m_denBO.destroy();
 
-    cudaGraphicsUnregisterResource(m_massBO_CUDA);
-    m_massBO.destroy();
+//    cudaGraphicsUnregisterResource(m_massBO_CUDA);
+//    m_massBO.destroy();
 
-    cudaGraphicsUnregisterResource(m_pressBO_CUDA);
-    m_pressBO.destroy();
+//    cudaGraphicsUnregisterResource(m_pressBO_CUDA);
+//    m_pressBO.destroy();
 
     cudaGraphicsUnregisterResource(m_illumBO_CUDA);
     m_illumBO.destroy();

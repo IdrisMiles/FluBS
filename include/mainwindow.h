@@ -27,19 +27,20 @@ public slots:
     void OnRigidInitialised(std::shared_ptr<Rigid> _rigid);
     void OnAlgaeInitialised(std::shared_ptr<Algae> _algae);
 
-    void Cache();
-    void Load();
+    void Save();
+    void Open();
     void AddRigid(const std::string type);
 
 private:
     void CreateMenus();
     void CreateActions();
+    void ClearScene();
 
     Ui::MainWindow *ui;
 
     QMenu *m_fileMenu;
-    QAction *m_cacheAction;
-    QAction *m_loadAction;
+    QAction *m_saveAction;
+    QAction *m_openAction;
 
     QMenu *m_editMenu;
     QMenu *m_rigidMenu;

@@ -70,40 +70,50 @@ QSize OpenGLScene::sizeHint() const
 
 //------------------------------------------------------------------------------------------------------------
 
-void OpenGLScene::CacheOutSimulation(QProgressBar *progress)
+void OpenGLScene::SaveScene(QProgressBar *progress, QString fileName)
 {
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Cache Out"), "./", tr("JSON Files (*.json *.jsn)"));
-    if(fileName.isEmpty() || fileName.isNull())
+    // Get filename to save to
+    if(fileName=="" || fileName.isEmpty() || fileName.isNull())
     {
-        return;
+        fileName = QFileDialog::getSaveFileName(this, tr("Save"), "./", tr("JSON Files (*.json *.jsn)"));
+        if(fileName.isEmpty() || fileName.isNull())
+        {
+            return;
+        }
     }
-    
-    m_cache.CacheOutToDisk(fileName.toStdString(), progress);
 
-    SaveSimulation(progress);
-
-}
-
-//------------------------------------------------------------------------------------------------------------
-
-void OpenGLScene::SaveSimulation(QProgressBar *progress)
-{
+    // create json data
     json scene;
-
+    scene["numSolvers"] = 1;
     scene["numFluids"] = 1;
     scene["numAlgaes"] = 1;
     scene["numRigids"] = m_rigids.size();
-
+    scene["solver"] = m_fluidSystem->GetProperty();
     scene["fluid"] = *m_fluid->GetProperty();
     scene["algae"] = *m_algae->GetProperty();
-
     for(size_t i=0; i<m_rigids.size(); i++)
     {
-        scene["rigids"].push_back(*m_rigids[i]->GetProperty());
+        scene["rigids"].push_back({{"property", *m_rigids[i]->GetProperty()},
+                                   {"type", m_rigids[i]->GetType()},
+                                   {"name", m_rigids[i]->GetName()},
+                                   {"file", m_rigids[i]->GetFileName()},
+                                   {"pos", m_rigids[i]->GetPos()},
+                                   {"rot", m_rigids[i]->GetRot()}});
+    }
+
+    if(!QDir(fileName).exists())
+    {
+        QDir().mkdir(fileName);
     }
 
 
-    std::string _file = "testing";
+    // cache sim data
+    scene["numCachedFrames"] = m_cache.GetCachedRange();
+    scene["cachedFiles"] = fileName.toStdString()+"/sim_";
+    m_cache.CacheOutToDisk(fileName.toStdString()+"/sim_", progress);
+
+    // save scene file
+    std::string _file = fileName.toStdString()+".json";
     std::ofstream ofs(_file);
     if(ofs.is_open())
     {
@@ -111,25 +121,243 @@ void OpenGLScene::SaveSimulation(QProgressBar *progress)
 
         ofs.close();
     }
+
+
 }
 
 //------------------------------------------------------------------------------------------------------------
 
-void OpenGLScene::LoadSimulation(QProgressBar *progress)
+void OpenGLScene::OpenScene(QProgressBar *progress, QString fileName)
 {
-    std::vector<QString> qFileNames = QFileDialog::getOpenFileNames(this, tr("Load Sim"), "./", tr("JSON Files (*.json *.jsn)")).toVector().toStdVector();
-    if(qFileNames.empty())
+    if(fileName=="" || fileName.isEmpty() || fileName.isNull())
     {
-        return;
+        std::cout<<fileName.toStdString()<<" | KEHHHH\n";
+        fileName = QFileDialog::getOpenFileName(this, tr("Open Scene"), "./", tr("JSON Files (*.json *.jsn)"));
+        if(fileName.isEmpty() || fileName.isNull())
+        {
+            return;
+        }
     }
 
-    std::vector<std::string> fileNames;
-    for(auto &f : qFileNames)
+    json scene;
+    std::ifstream i(fileName.toStdString());
+    i >> scene;
+
+    int numSolver = scene.at("numSolvers").get<int>();
+    if(numSolver > 0)
     {
-        fileNames.push_back(f.toStdString());
+        FluidSolverProperty fluidSolverProps = scene.at("solver").get<FluidSolverProperty>();
+//        AddSolver(fluidSolverProps);
+        m_fluidSystem->SetFluidSolverProperty(fluidSolverProps);
+
+        emit FluidSystemInitialised(m_fluidSystem);
     }
 
-    m_cache.LoadCacheFromDisk(fileNames, progress);
+    int numFluid = scene.at("numFluids").get<int>();
+    if(numFluid > 0)
+    {
+        FluidProperty fluidProps = scene.at("fluid").get<FluidProperty>();
+//        auto fp = std::shared_ptr<FluidProperty>(new FluidProperty);// std::make_shared<FluidProperty>(fluidProps);
+//        *fp = fluidProps;
+//        AddFluid(fp);
+        m_fluid->SetProperty(fluidProps);
+        emit FluidInitialised(m_fluid);
+    }
+
+    int numAlgae = scene.at("numAlgaes").get<int>();
+    if(numAlgae > 0)
+    {
+        AlgaeProperty algaeProps = scene.at("algae").get<AlgaeProperty>();
+//        auto ap = std::make_shared<AlgaeProperty>(algaeProps);
+//        AddAlgae(ap);
+        m_algae->SetProperty(algaeProps);
+        emit AlgaeInitialised(m_algae);
+    }
+
+    int numRigids = scene.at("numRigids").get<int>();
+    for(size_t i=0; i<numRigids; i++)
+    {
+        RigidProperty rigidProp = scene["rigids"][i].at("property").get<RigidProperty>();
+        std::string rigidType = scene["rigids"][i].at("type").get<std::string>();
+        std::string rigidName = scene["rigids"][i].at("name").get<std::string>();
+        std::string meshFileName = scene["rigids"][i].at("file").get<std::string>();
+        glm::vec3 rigidPos = scene["rigids"][i].at("pos").get<glm::vec3>();
+        glm::vec3 rigidRot = scene["rigids"][i].at("rot").get<glm::vec3>();
+
+        LoadRigid(progress, rigidType, rigidProp, rigidName, meshFileName, rigidPos, rigidRot);
+    }
+
+    m_fluidSystem->InitialiseSim();
+
+//    m_bioRenderer = std::shared_ptr<BioluminescentFluidRenderer>(new BioluminescentFluidRenderer(width(), height()));
+//    m_bioRenderer->SetSphParticles(m_fluid, m_algae);
+
+    OnPropertiesChanged();
+
+    int numFrame = scene.at("numCachedFrames").get<int>();
+    if(numFrame > 0)
+    {
+        std::string cachedFileName = scene.at("cachedFiles").get<std::string>();
+        if(!cachedFileName.empty())
+        {
+            std::vector<std::string> files;
+            for(int i=0; i<numFrame; i++)
+            {
+                std::stringstream ss;
+                ss << std::setw(4) << std::setfill('0') << i;
+                files.push_back(cachedFileName+ss.str()+".json");
+            }
+
+            m_cache.LoadCacheFromDisk(files, progress);
+        }
+    }
+}
+
+
+//------------------------------------------------------------------------------------------------------------
+
+void OpenGLScene::ClearScene()
+{
+
+//    RemoveFluid();
+//    RemoveAlgae();
+//    RemoveFluidSolver();
+
+
+    // clear rigids
+    for(size_t i=0; i<m_rigids.size(); i++)
+    {
+        RemoveRigid(m_rigids[i]);
+    }
+
+}
+
+//------------------------------------------------------------------------------------------------------------
+
+void OpenGLScene::AddSolver(FluidSolverProperty fluidSolverProps)
+{
+    m_fluidSystem.reset(new FluidSystem(fluidSolverProps));
+    emit FluidSystemInitialised(m_fluidSystem);
+}
+
+//------------------------------------------------------------------------------------------------------------
+
+void OpenGLScene::AddContainer(std::shared_ptr<RigidProperty> containerProps)
+{
+    // rigid container
+    Mesh boundary = Mesh();
+    auto fluidSolverProps = m_fluidSystem->GetProperty();
+    float dim = 0.95f* fluidSolverProps.gridResolution*fluidSolverProps.gridCellWidth;
+    float rad = containerProps->particleRadius;
+    int numRigidAxis = ceil(dim / (rad*2.0f));
+    for(int z=0; z<numRigidAxis; z++)
+    {
+        for(int y=0; y<numRigidAxis; y++)
+        {
+            for(int x=0; x<numRigidAxis; x++)
+            {
+                if(x==0 || x==numRigidAxis-1 || y==0 || y==numRigidAxis-1 || z==0 || z==numRigidAxis-1)
+                {
+                    glm::vec3 pos((x*rad*2.0f)-(dim*0.5f), (y*rad*2.0f)-(dim*0.5f), (z*rad*2.0f)-(dim*0.5f));
+                    boundary.verts.push_back(pos);
+                }
+            }
+        }
+    }
+    containerProps->numParticles = boundary.verts.size();
+    m_container = std::shared_ptr<Rigid>(new Rigid(containerProps, boundary));
+
+    m_fluidSystem->SetContainer(m_container);
+}
+
+//------------------------------------------------------------------------------------------------------------
+
+void OpenGLScene::AddFluid(std::shared_ptr<FluidProperty> fluidProps)
+{
+    m_fluid = std::shared_ptr<Fluid>(new Fluid(fluidProps));
+    m_fluidSystem->AddFluid(m_fluid);
+    emit FluidInitialised(m_fluid);
+}
+
+//------------------------------------------------------------------------------------------------------------
+
+void OpenGLScene::AddAlgae(std::shared_ptr<AlgaeProperty> algaeProps)
+{
+    m_algae = std::shared_ptr<Algae>(new Algae(algaeProps));
+    m_fluidSystem->AddAlgae(m_algae);
+    emit AlgaeInitialised(m_algae);
+}
+
+//------------------------------------------------------------------------------------------------------------
+
+void OpenGLScene::RemoveFluidSolver()
+{
+
+}
+
+//------------------------------------------------------------------------------------------------------------
+
+void OpenGLScene::RemoveFluid()
+{
+    auto renderIt = m_sphRenderers.cbegin();
+    for(;renderIt != m_sphRenderers.cend(); ++renderIt)
+    {
+        if((*renderIt)->GetSphParticles()->GetName() == m_fluid->GetName())
+        {
+            m_sphRenderers.erase(renderIt);
+            break;
+        }
+    }
+    m_bioRenderer = nullptr;
+    m_fluidSystem->RemoveFluid(m_fluid);
+    m_fluid = nullptr;
+}
+
+//------------------------------------------------------------------------------------------------------------
+
+void OpenGLScene::RemoveAlgae()
+{
+    auto renderIt = m_sphRenderers.cbegin();
+    for(;renderIt != m_sphRenderers.cend(); ++renderIt)
+    {
+        if((*renderIt)->GetSphParticles()->GetName() == m_algae->GetName())
+        {
+            m_sphRenderers.erase(renderIt);
+            break;
+        }
+    }
+    m_bioRenderer = nullptr;
+    m_fluidSystem->RemoveAlgae(m_algae);
+    m_algae = nullptr;
+}
+
+//------------------------------------------------------------------------------------------------------------
+
+void OpenGLScene::RemoveRigid(std::shared_ptr<Rigid> rigid)
+{
+
+    auto renderIt = m_sphRenderers.cbegin();
+    for(;renderIt != m_sphRenderers.cend(); ++renderIt)
+    {
+        if((*renderIt)->GetSphParticles()->GetName() == rigid->GetName())
+        {
+            m_sphRenderers.erase(renderIt);
+            break;
+        }
+    }
+
+    m_fluidSystem->RemoveRigid(rigid);
+
+
+    auto rit = m_rigids.cbegin();
+    for(;rit != m_rigids.cend(); ++rit)
+    {
+        if(*rit == rigid)
+        {
+            m_rigids.erase(rit);
+            break;
+        }
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -147,18 +375,20 @@ void OpenGLScene::AddRigid(QProgressBar *progress, std::string type)
     static int cubeCount=0;
     static int sphereCount=0;
     static int meshCount=0;
+    std::string name;
 
     //---------------------------------------------------------------
     // create rigid
     if(type == "cube")
     {
         rigid = CreateRigidCube();
-        rigid->SetName("cube"+std::to_string(cubeCount++));
+        name = "cube"+std::to_string(cubeCount++);
     }
     else if(type == "sphere")
     {
         rigid = CreateRigidSphere();
-        rigid->SetName("sphere"+std::to_string(sphereCount++));
+        name = "sphere"+std::to_string(sphereCount++);
+        rigid->SetType(type);
     }
     else if(type == "mesh")
     {
@@ -169,13 +399,17 @@ void OpenGLScene::AddRigid(QProgressBar *progress, std::string type)
             return;
         }
         rigid = CreateRigidMesh(qFileName.toStdString());
-        rigid->SetName("mesh"+std::to_string(meshCount++));
+        name  = "mesh"+std::to_string(meshCount++);
+        rigid->SetFileName(qFileName.toStdString());
     }
     else
     {
-        rigid = CreateRigidCube();
+        progress->setValue(0);
+        return;
     }
 
+    rigid->SetName(name);
+    rigid->SetType(type);
     progress->setValue(progressCount++);
 
     //---------------------------------------------------------------
@@ -197,6 +431,68 @@ void OpenGLScene::AddRigid(QProgressBar *progress, std::string type)
 
     OnPropertiesChanged();
 }
+
+//------------------------------------------------------------------------------------------------------------
+
+void OpenGLScene::LoadRigid(QProgressBar *progress, std::string type, RigidProperty property,
+                            std::string name, std::string file,
+                            glm::vec3 pos, glm::vec3 rot, glm::vec3 scale)
+{
+    int progressCount = 0;
+    progress->setMaximum(4);
+    progress->setValue(progressCount++);
+
+    makeCurrent();
+    std::shared_ptr<Rigid> rigid;
+
+    progress->setValue(progressCount++);
+
+    //---------------------------------------------------------------
+    // create rigid
+    if(type == "cube")
+    {
+        rigid = CreateRigidCube(property, pos, rot, scale);
+    }
+    else if(type == "sphere")
+    {
+        rigid = CreateRigidSphere(property, pos, rot, scale);
+    }
+    else if(type == "mesh")
+    {
+        rigid = CreateRigidMesh(file, property, pos, rot, scale);
+    }
+    else
+    {
+        progress->setValue(0);
+        return;
+    }
+
+    rigid->SetName(name);
+    rigid->SetType(type);
+    rigid->SetFileName(file);
+
+    progress->setValue(progressCount++);
+
+    //---------------------------------------------------------------
+    // Add rigid to solver
+    m_rigids.push_back(rigid);
+    m_fluidSystem->AddRigid(rigid);
+    emit RigidInitialised(rigid);
+
+    progress->setValue(progressCount++);
+
+
+    //---------------------------------------------------------------
+    // Add rigid to renderer
+    m_sphRenderers.push_back(std::shared_ptr<SphParticleRenderer>(new SphParticleRenderer()));
+    m_sphRenderers.back()->SetSphParticles(rigid);
+    m_sphRenderers.back()->SetColour(glm::vec3(0.4f, 0.4f, 0.4f));
+
+    progress->setValue(progressCount++);
+    OnPropertiesChanged();
+}
+
+//------------------------------------------------------------------------------------------------------------
 
 std::shared_ptr<Rigid> OpenGLScene::CreateRigidCube(RigidProperty property, glm::vec3 pos, glm::vec3 rot, glm::vec3 scale)
 {
@@ -285,96 +581,9 @@ std::shared_ptr<Rigid> OpenGLScene::CreateRigidMesh(std::string meshFile, RigidP
 
 
     rigidProps->numParticles = rigidMesh.verts.size();
-    return std::shared_ptr<Rigid>(new Rigid(rigidProps, rigidMesh, meshFile));
-
-}
-
-//------------------------------------------------------------------------------------------------------------
-
-void OpenGLScene::RemoveRigid(std::shared_ptr<Rigid> rigid)
-{
-
-    auto renderIt = m_sphRenderers.cbegin();
-    for(;renderIt != m_sphRenderers.cend(); ++renderIt)
-    {
-        if((*renderIt)->GetSphParticles()->GetName() == rigid->GetName())
-        {
-            m_sphRenderers.erase(renderIt);
-            break;
-        }
-    }
-
-    auto rit = m_rigids.cbegin();
-    for(;rit != m_rigids.cend(); ++rit)
-    {
-        if(*rit == rigid)
-        {
-            m_rigids.erase(rit);
-            break;
-        }
-    }
-
-    m_fluidSystem->RemoveRigid(rigid);
-}
-
-
-//------------------------------------------------------------------------------------------------------------
-
-void OpenGLScene::LoadRigid(QProgressBar *progress, std::string type, RigidProperty property,
-                            glm::vec3 pos, glm::vec3 rot, glm::vec3 scale,
-                            std::string name, std::string file)
-{
-    int progressCount = 0;
-    progress->setMaximum(4);
-    progress->setValue(progressCount++);
-
-    makeCurrent();
-    std::shared_ptr<Rigid> rigid;
-
-    progress->setValue(progressCount++);
-    static int cubeCount=0;
-    static int sphereCount=0;
-    static int meshCount=0;
-
-    if(type == "cube")
-    {
-        rigid = CreateRigidCube(property, pos, rot, scale);
-        rigid->SetName(name);
-        cubeCount++;
-    }
-    else if(type == "sphere")
-    {
-        rigid = CreateRigidSphere(property, pos, rot, scale);
-        rigid->SetName(name);
-        sphereCount++;
-    }
-    else if(type == "mesh")
-    {
-        rigid = CreateRigidMesh(file, property, pos, rot, scale);
-        rigid->SetName(name);
-        meshCount++;
-    }
-    else
-    {
-        rigid = CreateRigidCube(property, pos, rot, scale);
-        cubeCount++;
-    }
-
-    progress->setValue(progressCount++);
-
-    // add rigid to solver
-    m_rigids.push_back(rigid);
-    m_fluidSystem->AddRigid(rigid);
-    emit RigidInitialised(rigid);
-
-    progress->setValue(progressCount++);
-
-    // add rigid to renderer
-    m_sphRenderers.push_back(std::shared_ptr<SphParticleRenderer>(new SphParticleRenderer()));
-    m_sphRenderers.back()->SetSphParticles(rigid);
-    m_sphRenderers.back()->SetColour(glm::vec3(0.4f, 0.4f, 0.4f));
-
-    progress->setValue(progressCount++);
+    std::shared_ptr<Rigid> rigid = std::shared_ptr<Rigid>(new Rigid(rigidProps, rigidMesh, meshFile));
+    rigid->UpdateMesh(pos, rot);
+    return rigid;
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -501,49 +710,10 @@ void OpenGLScene::initializeGL()
     //---------------------------------------------------------------------------------------
     // Set up simulation here
 
-    FluidSolverProperty fluidSolverProps;
-    auto containerProps = std::shared_ptr<RigidProperty>(new RigidProperty());
-    auto fluidProps = std::shared_ptr<FluidProperty>(new FluidProperty());
-    auto algaeProps = std::shared_ptr<AlgaeProperty>(new AlgaeProperty(200.0f, 1.0f, 1.0f, 64000, 1.0f, 0.1f, 998.36f));
-
-
-    // fluid
-    m_fluid = std::shared_ptr<Fluid>(new Fluid(fluidProps));
-    m_algae = std::shared_ptr<Algae>(new Algae(algaeProps));
-
-
-    // rigid container
-    Mesh boundary = Mesh();
-    float dim = 0.95f* fluidSolverProps.gridResolution*fluidSolverProps.gridCellWidth;
-    float rad = containerProps->particleRadius;
-    int numRigidAxis = ceil(dim / (rad*2.0f));
-    for(int z=0; z<numRigidAxis; z++)
-    {
-        for(int y=0; y<numRigidAxis; y++)
-        {
-            for(int x=0; x<numRigidAxis; x++)
-            {
-                if(x==0 || x==numRigidAxis-1 || y==0 || y==numRigidAxis-1 || z==0 || z==numRigidAxis-1)
-                {
-                    glm::vec3 pos((x*rad*2.0f)-(dim*0.5f), (y*rad*2.0f)-(dim*0.5f), (z*rad*2.0f)-(dim*0.5f));
-                    boundary.verts.push_back(pos);
-                }
-            }
-        }
-    }
-    containerProps->numParticles = boundary.verts.size();
-    m_container = std::shared_ptr<Rigid>(new Rigid(containerProps, boundary));
-
-
-    // Fluid system
-    m_fluidSystem = std::shared_ptr<FluidSystem>(new FluidSystem(fluidSolverProps));
-    m_fluidSystem->SetContainer(m_container);
-    m_fluidSystem->AddFluid(m_fluid);
-    m_fluidSystem->AddAlgae(m_algae);
-
-    emit FluidSystemInitialised(m_fluidSystem);
-    emit FluidInitialised(m_fluid);
-    emit AlgaeInitialised(m_algae);
+    AddSolver();
+    AddContainer();
+    AddFluid();
+    AddAlgae(std::shared_ptr<AlgaeProperty>(new AlgaeProperty(200.0f, 1.0f, 1.0f, 64000, 1.0f, 0.1f, 998.36f)));
 
 
     m_fluidSystem->InitialiseSim();

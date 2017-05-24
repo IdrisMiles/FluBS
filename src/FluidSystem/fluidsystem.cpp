@@ -149,14 +149,20 @@ void FluidSystem::AddAlgae(std::shared_ptr<Algae> _algae)
 
 void FluidSystem::RemoveFluid(std::shared_ptr<Fluid> _fluid)
 {
-
+    if(m_fluid == _fluid)
+    {
+        m_fluid = nullptr;
+    }
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
 void FluidSystem::RemoveAlgae(std::shared_ptr<Algae> _algae)
 {
-
+    if(m_algae == _algae)
+    {
+        m_algae = nullptr;
+    }
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -188,7 +194,6 @@ void FluidSystem::RemoveRigid(std::shared_ptr<Rigid> _rigid)
 
 void FluidSystem::SetFluidSolverProperty(FluidSolverProperty _fluidSolverProperty)
 {
-    std::cout<<"FluidSystem Set solver props\n";
     m_fluidSolverProperty = _fluidSolverProperty;
 
 

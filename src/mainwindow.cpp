@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QMessageBox>
+#include <QFileDialog>
 
 //---------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -135,7 +136,9 @@ void MainWindow::OnRigidInitialised(std::shared_ptr<Rigid> _rigid)
         ui->scene->makeCurrent();
 
         // create rigid widget
-        auto rigidPropWidget = new RigidPropertyWidget(ui->properties, *_rigid->GetProperty());
+        glm::vec3 pos = _rigid->GetPos();
+        glm::vec3 rot = _rigid->GetRot();
+        auto rigidPropWidget = new RigidPropertyWidget(ui->properties, *_rigid->GetProperty(), pos.x, pos.y, pos.z, rot.x, rot.y, rot.z);
         std::string name = _rigid->GetName();
         int tabId = ui->properties->addTab(rigidPropWidget, QString(name.c_str()));
 
@@ -182,7 +185,7 @@ void MainWindow::OnRigidInitialised(std::shared_ptr<Rigid> _rigid)
 
         connect(rigidPropWidget, &RigidPropertyWidget::TransformChanged, [this, _rigid](float posX, float posY, float posZ, float rotX, float rotY, float rotZ){
             glm::vec3 pos(posX, posY, posZ);
-            glm::vec3 rot(glm::radians(rotX), glm::radians(rotY), glm::radians(rotZ));
+            glm::vec3 rot(rotX, rotY, rotZ);
 
             _rigid->UpdateMesh(pos, rot);
         });
@@ -222,16 +225,31 @@ void MainWindow::OnAlgaeInitialised(std::shared_ptr<Algae> _algae)
 
 //---------------------------------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::Cache()
+void MainWindow::Save()
 {
-    ui->scene->CacheOutSimulation(ui->progressBar);
+    // Get filename to save to
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save"), "./", tr("JSON Files (*.json *.jsn)"));
+    if(fileName.isEmpty() || fileName.isNull())
+    {
+        return;
+    }
+
+    ui->scene->SaveScene(ui->progressBar, fileName);
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::Load()
+void MainWindow::Open()
 {
-    ui->scene->LoadSimulation(ui->progressBar);
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Save"), "./", tr("JSON Files (*.json *.jsn)"));
+    if(fileName.isEmpty() || fileName.isNull())
+    {
+        return;
+    }
+
+    ClearScene();
+
+    ui->scene->OpenScene(ui->progressBar, fileName);
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------------
@@ -247,8 +265,8 @@ void MainWindow::AddRigid(const std::string type)
 void MainWindow::CreateMenus()
 {
     m_fileMenu = menuBar()->addMenu(tr("&File"));
-    m_fileMenu->addAction(m_cacheAction);
-    m_fileMenu->addAction(m_loadAction);
+    m_fileMenu->addAction(m_saveAction);
+    m_fileMenu->addAction(m_openAction);
 
 
     m_editMenu = menuBar()->addMenu(tr("&Edit"));
@@ -264,11 +282,11 @@ void MainWindow::CreateMenus()
 
 void MainWindow::CreateActions()
 {
-    m_cacheAction = new QAction(tr("&Cache"), this);
-    connect(m_cacheAction, &QAction::triggered, this, &MainWindow::Cache);
+    m_saveAction = new QAction(tr("&Save"), this);
+    connect(m_saveAction, &QAction::triggered, this, &MainWindow::Save);
 
-    m_loadAction = new QAction(tr("&Load"), this);
-    connect(m_loadAction, &QAction::triggered, this, &MainWindow::Load);
+    m_openAction = new QAction(tr("&Open"), this);
+    connect(m_openAction, &QAction::triggered, this, &MainWindow::Open);
 
 
     m_addRigidCubeAction = new QAction(tr("&Cube"), this);
@@ -289,6 +307,12 @@ void MainWindow::CreateActions()
 
 //---------------------------------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::ClearScene()
+{
+    ui->scene->ClearScene();
+    ui->outliner->clear();
+    ui->properties->clear();
+}
 
 //---------------------------------------------------------------------------------------------------------------------------------------------
 
