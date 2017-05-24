@@ -147,7 +147,6 @@ void OpenGLScene::OpenScene(QProgressBar *progress, QString fileName)
     if(numSolver > 0)
     {
         FluidSolverProperty fluidSolverProps = scene.at("solver").get<FluidSolverProperty>();
-//        AddSolver(fluidSolverProps);
         m_fluidSystem->SetFluidSolverProperty(fluidSolverProps);
 
         emit FluidSystemInitialised(m_fluidSystem);
@@ -157,9 +156,6 @@ void OpenGLScene::OpenScene(QProgressBar *progress, QString fileName)
     if(numFluid > 0)
     {
         FluidProperty fluidProps = scene.at("fluid").get<FluidProperty>();
-//        auto fp = std::shared_ptr<FluidProperty>(new FluidProperty);// std::make_shared<FluidProperty>(fluidProps);
-//        *fp = fluidProps;
-//        AddFluid(fp);
         m_fluid->SetProperty(fluidProps);
         emit FluidInitialised(m_fluid);
     }
@@ -168,8 +164,6 @@ void OpenGLScene::OpenScene(QProgressBar *progress, QString fileName)
     if(numAlgae > 0)
     {
         AlgaeProperty algaeProps = scene.at("algae").get<AlgaeProperty>();
-//        auto ap = std::make_shared<AlgaeProperty>(algaeProps);
-//        AddAlgae(ap);
         m_algae->SetProperty(algaeProps);
         emit AlgaeInitialised(m_algae);
     }

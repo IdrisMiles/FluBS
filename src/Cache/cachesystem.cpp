@@ -421,11 +421,11 @@ void CacheSystem::SetFrameRange(int start, int end)
 
 int CacheSystem::GetCachedRange()
 {
-    int lastCachedFrame;
+    int lastCachedFrame = 0;
 
-    for(auto &fc : m_isFrameCached)
+    for(int i=0; i<m_isFrameCached.size(); i++)
     {
-        if(!IS_CACHED(fc) && !IS_CACHED_TO_MEMORY(fc))
+        if(!IS_CACHED(m_isFrameCached[i]) || !IS_CACHED_TO_MEMORY(m_isFrameCached[i]))
         {
             break;
         }
