@@ -75,16 +75,6 @@ FluidProperty* Fluid::GetProperty()
 
 //---------------------------------------------------------------------------------------------------------------
 
-void Fluid::SetProperty(std::shared_ptr<FluidProperty> _property)
-{
-    m_property = _property;
-
-    UpdateCUDAMemory();
-
-}
-
-//---------------------------------------------------------------------------------------------------------------
-
 void Fluid::SetProperty(FluidProperty _property)
 {
     m_property->gravity = _property.gravity;
@@ -200,22 +190,11 @@ void Fluid::InitFluidAsMesh()
 
 void Fluid::CleanUpCUDAMemory()
 {
-    checkCudaErrorsMsg(cudaFree(d_pressureForcePtr),"");
-    checkCudaErrorsMsg(cudaFree(d_gravityForcePtr),"");
-    checkCudaErrorsMsg(cudaFree(d_externalForcePtr),"");
-    checkCudaErrorsMsg(cudaFree(d_totalForcePtr),"");
-
-    checkCudaErrorsMsg(cudaFree(d_particleIdPtr),"");
-    checkCudaErrorsMsg(cudaFree(d_particleHashIdPtr),"");
-
     checkCudaErrorsMsg(cudaFree(d_viscousForcePtr),"");
     checkCudaErrorsMsg(cudaFree(d_surfaceTensionForcePtr),"");
     checkCudaErrorsMsg(cudaFree(d_predictPositionPtr),"");
     checkCudaErrorsMsg(cudaFree(d_predictVelocityPtr),"");
     checkCudaErrorsMsg(cudaFree(d_densityErrPtr),"");
-
-    checkCudaErrorsMsg(cudaFree(d_cellOccupancyPtr),"");
-    checkCudaErrorsMsg(cudaFree(d_cellParticleIdxPtr),"");
 }
 
 void Fluid::UpdateCUDAMemory()
@@ -282,20 +261,6 @@ void Fluid::UpdateCUDAMemory()
 
 void Fluid::CleanUpGL()
 {
-//    checkCudaErrorsMsg(cudaGraphicsUnregisterResource(m_posBO_CUDA),"");
-//    m_posBO.destroy();
-
-//    checkCudaErrorsMsg(cudaGraphicsUnregisterResource(m_velBO_CUDA),"");
-//    m_velBO.destroy();
-
-//    checkCudaErrorsMsg(cudaGraphicsUnregisterResource(m_denBO_CUDA),"");
-//    m_denBO.destroy();
-
-//    checkCudaErrorsMsg(cudaGraphicsUnregisterResource(m_massBO_CUDA),"");
-//    m_massBO.destroy();
-
-//    checkCudaErrorsMsg(cudaGraphicsUnregisterResource(m_pressBO_CUDA),"");
-//    m_pressBO.destroy();
 }
 
 //--------------------------------------------------------------------------------------------------------------------

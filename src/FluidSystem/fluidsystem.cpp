@@ -88,10 +88,8 @@ void FluidSystem::AddRigid(std::shared_ptr<Rigid> _rigid)
         // Sort particles
         sph::SortParticlesByHash(m_staticRigids.back());
 
-
         // Get Cell particle indexes - scatter addresses
         sph::ComputeParticleScatterIds(m_fluidSolverProperty, m_staticRigids.back());
-
 
         // Find max cell occupancy
         uint maxCellOcc;
@@ -194,13 +192,22 @@ void FluidSystem::RemoveRigid(std::shared_ptr<Rigid> _rigid)
 
 void FluidSystem::SetFluidSolverProperty(FluidSolverProperty _fluidSolverProperty)
 {
+    bool rebuildContainer = m_fluidSolverProperty.gridCellWidth != _fluidSolverProperty.gridCellWidth ||
+                            m_fluidSolverProperty.gridResolution != _fluidSolverProperty.gridResolution;
+
     m_fluidSolverProperty = _fluidSolverProperty;
 
 
-    if(m_container != nullptr)
+    if(rebuildContainer)
     {
-        m_container->SetupSolveSpecs(m_fluidSolverProperty);
+        GenerateDefaultContainer();
     }
+
+
+//    if(m_container != nullptr)
+//    {
+//        m_container->SetupSolveSpecs(m_fluidSolverProperty);
+//    }
 
     if(m_fluid != nullptr)
     {
@@ -221,6 +228,7 @@ void FluidSystem::SetFluidSolverProperty(FluidSolverProperty _fluidSolverPropert
     {
         r->SetupSolveSpecs(m_fluidSolverProperty);
     }
+
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -416,7 +424,7 @@ void FluidSystem::StepSim()
 
 void FluidSystem::GenerateDefaultContainer()
 {
-    auto rigidProps = std::shared_ptr<RigidProperty>(new RigidProperty());
+    auto rigidProps = std::shared_ptr<RigidProperty>(new RigidProperty(true, false, 1, 1.0f, m_fluidSolverProperty.gridCellWidth/6.0f, 998.36f, m_fluidSolverProperty.gridCellWidth/6.0f));
 
     Mesh boundary = Mesh();
     float dim = 0.95f* m_fluidSolverProperty.gridResolution*m_fluidSolverProperty.gridCellWidth;
@@ -535,7 +543,6 @@ void FluidSystem::InitRigid(std::shared_ptr<Rigid> _rigid)
 
 void FluidSystem::InitFluid(std::shared_ptr<Fluid> _fluid)
 {
-    std::cout<<"fluid particle count: "<<_fluid->GetProperty()->numParticles<<"\n";
     sph::ResetProperties(m_fluidSolverProperty, _fluid);
     cudaThreadSynchronize();
     sph::InitFluidAsCube(m_fluidSolverProperty, _fluid);

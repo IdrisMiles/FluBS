@@ -15,7 +15,6 @@ public:
 
     virtual RigidProperty* GetProperty();
 
-    void SetProperty(std::shared_ptr<RigidProperty> _property);
     void SetProperty(RigidProperty _property);
 
     void SetType(std::string type);

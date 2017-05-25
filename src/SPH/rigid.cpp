@@ -32,6 +32,9 @@ Rigid::~Rigid()
     m_property = nullptr;
 
     CleanUp();
+
+
+    getLastCudaError("destructor Rigid");
 }
 
 void Rigid::UpdateMesh(Mesh &_mesh, const glm::vec3 &_pos, const glm::vec3 &_rot)
@@ -186,36 +189,11 @@ void Rigid::InitVAO()
 
 void Rigid::CleanUpCUDAMemory()
 {
-    cudaFree(d_pressureForcePtr);
-    cudaFree(d_gravityForcePtr);
-    cudaFree(d_externalForcePtr);
-    cudaFree(d_totalForcePtr);
-
-    cudaFree(d_particleIdPtr);
-    cudaFree(d_particleHashIdPtr);
-
     cudaFree(d_volumePtr);
-
-    cudaFree(d_cellOccupancyPtr);
-    cudaFree(d_cellParticleIdxPtr);
 }
 
 void Rigid::CleanUpGL()
 {
-//    cudaGraphicsUnregisterResource(m_posBO_CUDA);
-//    m_posBO.destroy();
-
-//    cudaGraphicsUnregisterResource(m_velBO_CUDA);
-//    m_velBO.destroy();
-
-//    cudaGraphicsUnregisterResource(m_denBO_CUDA);
-//    m_denBO.destroy();
-
-//    cudaGraphicsUnregisterResource(m_massBO_CUDA);
-//    m_massBO.destroy();
-
-//    cudaGraphicsUnregisterResource(m_pressBO_CUDA);
-//    m_pressBO.destroy();
 }
 
 //------------------------------------------------------------------------
@@ -314,15 +292,6 @@ RigidProperty *Rigid::GetProperty()
     return m_property.get();
 }
 
-//---------------------------------------------------------------------------------------------------------------
-
-void Rigid::SetProperty(std::shared_ptr<RigidProperty> _property)
-{
-    BaseSphParticle::SetProperty(_property);
-    m_property = _property;
-
-//    UpdateCUDAMemory();
-}
 
 //---------------------------------------------------------------------------------------------------------------
 
@@ -339,7 +308,7 @@ void Rigid::SetProperty(RigidProperty _property)
     m_property->m_static = _property.m_static;
     m_property->kinematic = _property.kinematic;
 
-//    UpdateCUDAMemory();
+    UpdateCUDAMemory();
 }
 
 //--------------------------------------------------------------------------------------------------------------------

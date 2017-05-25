@@ -29,7 +29,6 @@ public:
     virtual void SetupSolveSpecs(std::shared_ptr<FluidSolverProperty> _solverProps);
 
     virtual SphParticleProperty *GetProperty();
-    virtual void SetProperty(std::shared_ptr<SphParticleProperty> _property);
     virtual void SetProperty(SphParticleProperty _property);
 
     void SetName(const std::string _name);

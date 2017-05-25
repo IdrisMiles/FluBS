@@ -78,15 +78,6 @@ AlgaeProperty *Algae::GetProperty()
 
 //---------------------------------------------------------------------------------------------------------------
 
-void Algae::SetProperty(std::shared_ptr<AlgaeProperty> _property)
-{
-    m_property = _property;
-
-    UpdateCUDAMemory();
-}
-
-//---------------------------------------------------------------------------------------------------------------
-
 void Algae::SetProperty(AlgaeProperty _property)
 {
     m_property->gravity = _property.gravity;
@@ -231,39 +222,13 @@ void Algae::InitAlgaeAsMesh()
 
 void Algae::CleanUpCUDAMemory()
 {
-    cudaFree(d_pressureForcePtr);
-    cudaFree(d_gravityForcePtr);
-    cudaFree(d_externalForcePtr);
-    cudaFree(d_totalForcePtr);
-
-    cudaFree(d_particleHashIdPtr);
-    cudaFree(d_particleIdPtr);
-
     cudaFree(d_prevPressurePtr);
-
-    cudaFree(d_cellParticleIdxPtr);
-    cudaFree(d_cellOccupancyPtr);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
 void Algae::CleanUpGL()
 {
-//    cudaGraphicsUnregisterResource(m_posBO_CUDA);
-//    m_posBO.destroy();
-
-//    cudaGraphicsUnregisterResource(m_velBO_CUDA);
-//    m_velBO.destroy();
-
-//    cudaGraphicsUnregisterResource(m_denBO_CUDA);
-//    m_denBO.destroy();
-
-//    cudaGraphicsUnregisterResource(m_massBO_CUDA);
-//    m_massBO.destroy();
-
-//    cudaGraphicsUnregisterResource(m_pressBO_CUDA);
-//    m_pressBO.destroy();
-
     cudaGraphicsUnregisterResource(m_illumBO_CUDA);
     m_illumBO.destroy();
 }

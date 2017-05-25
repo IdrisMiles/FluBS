@@ -16,6 +16,9 @@ BaseSphParticle::~BaseSphParticle()
 
     CleanUpCUDAMemory();
     CleanUpGL();
+
+
+    getLastCudaError("destructor BASE SPH Particle");
 }
 
 
@@ -43,15 +46,6 @@ SphParticleProperty* BaseSphParticle::GetProperty()
 
 //---------------------------------------------------------------------------------------------------------------
 
-void BaseSphParticle::SetProperty(std::shared_ptr<SphParticleProperty> _property)
-{
-    m_property = _property;
-
-//    UpdateCUDAMemory();
-}
-
-//---------------------------------------------------------------------------------------------------------------
-
 void BaseSphParticle::SetProperty(SphParticleProperty _property)
 {
     m_property->gravity = _property.gravity;
@@ -73,7 +67,7 @@ void BaseSphParticle::SetProperty(SphParticleProperty _property)
 
     m_property->numParticles = _property.numParticles;
 
-//    UpdateCUDAMemory();
+    UpdateCUDAMemory();
 }
 
 //---------------------------------------------------------------------------------------------------------------

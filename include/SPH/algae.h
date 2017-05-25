@@ -20,7 +20,6 @@ public:
 
     virtual AlgaeProperty *GetProperty();
 
-    void SetProperty(std::shared_ptr<AlgaeProperty> _property);
     void SetProperty(AlgaeProperty _property);
 
     virtual void MapCudaGLResources();

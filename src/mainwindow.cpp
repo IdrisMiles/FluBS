@@ -86,6 +86,7 @@ void MainWindow::OnFluidSystemInitialised(std::shared_ptr<FluidSystem> _fluidSys
         // connect fluid system property changed to openglscene in order ot clear cache
         auto fluidSystem = _fluidSystem.get();
         connect(solverPropWidget, &SolverPropertyWidget::PropertyChanged, [this, fluidSystem](const FluidSolverProperty &_newProperties){
+            ui->scene->makeCurrent();
             fluidSystem->SetFluidSolverProperty(_newProperties);
             ui->scene->OnPropertiesChanged();
         });
@@ -179,6 +180,8 @@ void MainWindow::OnRigidInitialised(std::shared_ptr<Rigid> _rigid)
         connect(rigidPropWidget, &RigidPropertyWidget::PropertyChanged, [this, rigidPropWidget, _rigid](){
             ui->scene->makeCurrent();
             _rigid->SetProperty(rigidPropWidget->GetProperty());
+            // TODO:
+            // OpenGLScene to update rigid in fludi solver, update hash pos, volumes, density.
             ui->scene->OnPropertiesChanged();
         });
 

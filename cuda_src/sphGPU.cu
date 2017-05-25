@@ -524,7 +524,7 @@ void sphGPU::ComputeViscForce(const uint maxCellOcc,
 void sphGPU::ComputeSurfaceTensionForce(const uint maxCellOcc, const uint gridRes, float3 *surfTenForce, const float surfaceTension, const float surfaceThreshold, const float *density, const float mass, const float3 *particles, const uint *cellOcc, const uint *cellPartIdx, const uint numPoints, const float smoothingLength)
 {
     dim3 gridDim = dim3(gridRes, gridRes, gridRes);
-    uint blockSize = std::min(maxCellOcc, 1024u);
+    uint blockSize = std::max(std::min(maxCellOcc, 1024u), 32u);
 
     sphGPU_Kernels::ComputeSurfaceTensionForce_kernel<<<gridDim, blockSize>>>(surfTenForce, surfaceTension, surfaceThreshold, density, mass, particles, cellOcc, cellPartIdx, numPoints, smoothingLength);
 }

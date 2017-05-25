@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <random>
 #include <iostream>
+#include <assert.h>
 
 struct AcceptSample
 {
@@ -41,6 +42,7 @@ Mesh MeshSampler::BaryCoord::SampleMesh(const Mesh &_mesh, const int _numSamples
         triAreas.push_back(area);
     }
 
+    assert(triAreas.size() > 0);
 
     // Get smallest triangle area
     float smallestArea = *std::min_element(triAreas.begin(), triAreas.end());
@@ -53,6 +55,8 @@ Mesh MeshSampler::BaryCoord::SampleMesh(const Mesh &_mesh, const int _numSamples
         unsigned int propirtion = ceil(triArea / smallestArea);
         triAreaProportions.push_back(propirtion);
     }
+
+    assert(triAreaProportions.size() > 0);
 
 
     // Generate Sample Probability Vector
@@ -67,6 +71,8 @@ Mesh MeshSampler::BaryCoord::SampleMesh(const Mesh &_mesh, const int _numSamples
 
         triIndex++;
     }
+
+    assert(sampleTriProbability.size() > 0);
 
 
     // figure out our sampling criteria
@@ -88,10 +94,17 @@ Mesh MeshSampler::BaryCoord::SampleMesh(const Mesh &_mesh, const int _numSamples
     while(samples.verts.size() < _numSamples && currIteration < maxIterations)
     {
         unsigned int sampleTriProbabilityIndex = randDistTriIndex(prg);
-//        if(sampleTriProbabilityIndex >= sampleTriProbability.size())
-//        {
-//            sampleTriProbabilityIndex = sampleTriProbability.size()-1;
-//        }
+        if(sampleTriProbabilityIndex >= sampleTriProbability.size())
+        {
+            if(sampleTriProbability.size() == 0)
+            {
+                sampleTriProbabilityIndex = 0;
+            }
+            else
+            {
+                sampleTriProbabilityIndex = sampleTriProbability.size()-1;
+            }
+        }
         triIndex = sampleTriProbability[sampleTriProbabilityIndex];
 //        std::cout<<"sampleTriProb size "<<sampleTriProbability.size()<<"\n";
 //        std::cout<<"sampleTriProbIndex "<<sampleTriProbabilityIndex<<"\n";

@@ -264,8 +264,6 @@ __global__ void sphGPU_Kernels::ComputeDensity_kernel(float *density,
 
         if(isnan(accDensity))
         {
-            printf("nan density \n");
-
             if(!accumulate)
             {
                 density[thisParticleGlobalIdx] = 0.0f;
@@ -385,8 +383,6 @@ __global__ void sphGPU_Kernels::ComputeDensityFluidRigid_kernel(const uint numPo
 
         if(isnan(accDensity))
         {
-            printf("nan density \n");
-
             if(!accumulate)
             {
                 fluidDensity[thisParticleGlobalIdx] = 0.0f;
@@ -429,16 +425,11 @@ __global__ void sphGPU_Kernels::ComputeDensityFluidFluid_kernel(const uint numPo
     if(threadIdx.x==0)
     {
         thisCellIdx = blockIdx.x + (blockIdx.y * gridDim.x) + (blockIdx.z * gridDim.x * gridDim.y);
+        thisCellOcc = fluidCellOcc[thisCellIdx];
     }
     __syncthreads();
 
     int thisParticleGlobalIdx = fluidCellPartIdx[thisCellIdx] + threadIdx.x;
-
-    if(threadIdx.x==0)
-    {
-        thisCellOcc = fluidCellOcc[thisCellIdx];
-    }
-    __syncthreads();
 
 
     if((thisParticleGlobalIdx < numPoints) && (threadIdx.x < thisCellOcc) && (thisCellIdx < gridDim.x * gridDim.y * gridDim.z))
@@ -510,8 +501,6 @@ __global__ void sphGPU_Kernels::ComputeDensityFluidFluid_kernel(const uint numPo
 
         if(isnan(accDensity))
         {
-            printf("nan density \n");
-
             if(!accumulate)
             {
                 fluidDensity[thisParticleGlobalIdx] = 0.0f;
@@ -573,7 +562,7 @@ __global__ void sphGPU_Kernels::ComputePressure_kernel(float *pressure,
 
         if(isnan(accPressure))
         {
-            printf("nan pressure \n");
+//            printf("nan pressure \n");
             pressure[thisParticleGlobalIdx] = 0.0f;
         }
         else
@@ -948,20 +937,15 @@ __global__ void sphGPU_Kernels::ComputePressureForceFluidRigid_kernel(float3 *pr
                                                                       const bool accumulate)
 {
     __shared__ int thisCellIdx;
+    __shared__ int thisCellOcc;
     if(threadIdx.x==0)
     {
         thisCellIdx = blockIdx.x + (blockIdx.y * gridDim.x) + (blockIdx.z * gridDim.x * gridDim.y);
+        thisCellOcc = cellOcc[thisCellIdx];
     }
     __syncthreads();
 
     int thisParticleGlobalIdx = cellPartIdx[thisCellIdx] + threadIdx.x;
-
-    __shared__ int thisCellOcc;
-    if(threadIdx.x==0)
-    {
-        thisCellOcc = cellOcc[thisCellIdx];
-    }
-    __syncthreads();
 
 
     if(thisParticleGlobalIdx < numPoints && threadIdx.x < thisCellOcc && thisCellIdx < gridDim.x * gridDim.y * gridDim.z)
@@ -1041,20 +1025,15 @@ __global__ void sphGPU_Kernels::ComputeViscousForce_kernel(float3 *viscForce,
                                                            const float smoothingLength)
 {
     __shared__ int thisCellIdx;
+    __shared__ int thisCellOcc;
     if(threadIdx.x==0)
     {
         thisCellIdx = blockIdx.x + (blockIdx.y * gridDim.x) + (blockIdx.z * gridDim.x * gridDim.y);
+        thisCellOcc = cellOcc[thisCellIdx];
     }
     __syncthreads();
 
     int thisParticleGlobalIdx = cellPartIdx[thisCellIdx] + threadIdx.x;
-
-    __shared__ int thisCellOcc;
-    if(threadIdx.x==0)
-    {
-        thisCellOcc = cellOcc[thisCellIdx];
-    }
-    __syncthreads();
 
 
 
@@ -1128,21 +1107,18 @@ __global__ void sphGPU_Kernels::ComputeSurfaceTensionForce_kernel(float3 *surfac
                                                                   const float smoothingLength)
 {
     __shared__ int thisCellIdx;
+    __shared__ int thisCellOcc;
+    __shared__ int s_neighCellOcc[27];
+    __shared__ int s_neighCellPartIdx[27];
+    __shared__ float3 s_pos[27*27];
+
     if(threadIdx.x==0)
     {
         thisCellIdx = blockIdx.x + (blockIdx.y * gridDim.x) + (blockIdx.z * gridDim.x * gridDim.y);
-    }
-    __syncthreads();
-
-    int thisParticleGlobalIdx = cellPartIdx[thisCellIdx] + threadIdx.x;
-
-    __shared__ int thisCellOcc;
-    if(threadIdx.x==0)
-    {
         thisCellOcc = cellOcc[thisCellIdx];
     }
     __syncthreads();
-
+    int thisParticleGlobalIdx = cellPartIdx[thisCellIdx] + threadIdx.x;
 
 
     if(thisParticleGlobalIdx < numPoints && threadIdx.x < thisCellOcc && thisCellIdx < gridDim.x * gridDim.y * gridDim.z)
@@ -1160,8 +1136,72 @@ __global__ void sphGPU_Kernels::ComputeSurfaceTensionForce_kernel(float3 *surfac
         int yMax = ((blockIdx.y==gridDim.y-1)?0:1);
         int zMax = ((blockIdx.z==gridDim.z-1)?0:1);
 
-        int neighLocalIdx;
+        if(threadIdx.x == 0)
+        {
+            for(z = zMin; z <= zMax; z++)
+            {
+                for(y = yMin; y <= yMax; y++)
+                {
+                    for(x = xMin; x <= xMax; x++)
+                    {
+                        int nIdx = (x-xMin) + ((y-yMin)*3) + ((z-zMin)*3*3);
+                        neighCellIdx = thisCellIdx + x + (y*gridDim.x) + (z*gridDim.x*gridDim.y);
+                        s_neighCellOcc[nIdx] = cellOcc[neighCellIdx];
+                        s_neighCellPartIdx[nIdx] = cellPartIdx[neighCellIdx];
+                    }
+                }
+            }
+        }
+//        if(threadIdx.x < 27)// (1+xMax-xMin)*(1+yMax-yMin)*(1+zMax-zMin))
+//        {
+//            x = threadIdx.x % 3;
+//            y = (threadIdx.x/3) % 3;
+//            z = (threadIdx.x/9) % 3;
+//            int nIdx = x + (y*3) + (z*9);
 
+//            if( (x-1)<xMin || (x-1)>xMax ||
+//                (y-1)<yMin || (y-1)>yMax ||
+//                (z-1)<zMin || (z-1)>zMax)
+//            {
+//                s_neighCellOcc[nIdx] = 0;
+//                s_neighCellPartIdx[nIdx] = 0;
+//            }
+//            else
+//            {
+//                neighCellIdx = thisCellIdx + (x-1) + ((y-1)*gridDim.x) + ((z-1)*gridDim.x*gridDim.y);
+
+//                s_neighCellOcc[nIdx] = cellOcc[neighCellIdx];
+//                s_neighCellPartIdx[nIdx] = cellPartIdx[neighCellIdx];
+
+//            }
+//        }
+//        __syncthreads();
+
+
+        int neighLocalIdx;
+//        if(threadIdx.x == 0)
+//        {
+//            neighCellOcc = s_neighCellOcc[threadIdx.x];
+//            neighCellPartIdx = s_neighCellPartIdx[threadIdx.x];
+
+//            for(z = zMin; z <= zMax; z++)
+//            {
+//                for(y = yMin; y <= yMax; y++)
+//                {
+//                    for(x = xMin; x <= xMax; x++)
+//                    {
+//                        int nIdx = (x-xMin) + ((y-yMin)*3) + ((z-zMin)*3*3);
+
+//                for(neighLocalIdx=0; neighLocalIdx<neighCellOcc&&neighLocalIdx<27; neighLocalIdx++)
+//                {
+//                    neighParticleGlobalIdx = neighCellPartIdx + neighLocalIdx;
+//                    s_pos[(27*nIdx)+neighLocalIdx] = position[neighParticleGlobalIdx];
+//                }
+//                    }
+//                }
+//            }
+//        }
+        __syncthreads();
 
         float3 thisPos = position[thisParticleGlobalIdx];
         float3 accColourFieldGrad = make_float3(0.0f, 0.0f, 0.0f);
@@ -1174,18 +1214,19 @@ __global__ void sphGPU_Kernels::ComputeSurfaceTensionForce_kernel(float3 *surfac
             {
                 for(x = xMin; x <= xMax; x++)
                 {
+                    int nIdx = (x-xMin) + ((y-yMin)*3) + ((z-zMin)*3*3);
+//                    int nIdx = (x+1) + ((y+1)*3) + ((z+1)*3*3);
+                    neighCellOcc = s_neighCellOcc[nIdx];
+                    neighCellPartIdx = s_neighCellPartIdx[nIdx];
 
-                    neighCellIdx = (blockIdx.x + x) + ((blockIdx.y + y) * gridDim.x) + ((blockIdx.z + z) * gridDim.x * gridDim.y);
-                    neighCellOcc = cellOcc[neighCellIdx];
-                    neighCellPartIdx = cellPartIdx[neighCellIdx];
-
-                    for(neighLocalIdx=0; neighLocalIdx<neighCellOcc; neighLocalIdx++)
+                    for(neighLocalIdx=0; neighLocalIdx<neighCellOcc&&neighLocalIdx<27; neighLocalIdx++)
                     {
                         neighParticleGlobalIdx = neighCellPartIdx + neighLocalIdx;
                         if(neighParticleGlobalIdx == thisParticleGlobalIdx){continue;}
 
                         float3 neighPos = position[neighParticleGlobalIdx];
                         float neighDensity = density[neighParticleGlobalIdx];
+//                        float3 neighPos = s_pos[(27*nIdx)+neighLocalIdx];
 
                         float neighMassOverDen = ( (fabs(neighDensity)<FLT_EPSILON) ? 0.0f : neighMass / neighDensity );
 
@@ -1232,20 +1273,15 @@ __global__ void sphGPU_Kernels::ComputeForce_kernel(/*float3 *force,*/
                                                     const bool accumulate)
 {    
     __shared__ int thisCellIdx;
+    __shared__ int thisCellOcc;
     if(threadIdx.x==0)
     {
         thisCellIdx = blockIdx.x + (blockIdx.y * gridDim.x) + (blockIdx.z * gridDim.x * gridDim.y);
+        thisCellOcc = cellOcc[thisCellIdx];
     }
     __syncthreads();
 
     int thisParticleGlobalIdx = cellPartIdx[thisCellIdx] + threadIdx.x;
-
-    __shared__ int thisCellOcc;
-    if(threadIdx.x==0)
-    {
-        thisCellOcc = cellOcc[thisCellIdx];
-    }
-    __syncthreads();
 
 
     if(!(thisParticleGlobalIdx < numPoints && threadIdx.x < thisCellOcc && thisCellIdx < gridDim.x * gridDim.y * gridDim.z))
@@ -1334,67 +1370,6 @@ __global__ void sphGPU_Kernels::ComputeForce_kernel(/*float3 *force,*/
         float colourFieldGradMag = length(accColourFieldGrad);
         float3 accSurfTenForce = (colourFieldGradMag > surfaceThreshold ) ? (-1.0f * surfaceTension * (accCurvature/colourFieldGradMag) * accColourFieldGrad) : make_float3(0.0f,0.0f,0.0f);
         surfaceTensionForce[thisParticleGlobalIdx] = accSurfTenForce;
-
-
-
-
-
-//        // re-initialise forces to zero
-//        float3 accForce = make_float3(0.0f, 0.0f, 0.0f);
-
-//        // Add external force
-//        float3 extForce = externalForce[thisCellIdx];
-//        if(isnan(extForce.x) || isnan(extForce.y) || isnan(extForce.z))
-//        {
-//            printf("nan external force\n");
-//        }
-//        else
-//        {
-//            accForce = accForce + extForce;
-//        }
-
-
-//        // Add pressure force
-//        if(isnan(accPressureForce.x) || isnan(accPressureForce.y) || isnan(accPressureForce.z))
-//        {
-//            printf("nan pressure force\n");
-//        }
-//        else
-//        {
-//            accForce = accForce + accPressureForce;
-//        }
-
-//        // Add Viscous force
-//        if(isnan(accViscForce.x) || isnan(accViscForce.y) || isnan(accViscForce.z))
-//        {
-//            printf("nan visc force\n");
-//        }
-//        else
-//        {
-//            accForce = accForce + accViscForce;
-//        }
-
-//        // Add surface tension force
-//        if(isnan(accSurfTenForce.x) || isnan(accSurfTenForce.y) || isnan(accSurfTenForce.z))
-//        {
-//            printf("nan surfTen force\n");
-//        }
-//        else
-//        {
-//            //printf("%f, %f, %f\n",surfTenForce.x, surfTenForce.y,surfTenForce.z);
-//            accForce = accForce + accSurfTenForce;
-//        }
-
-
-//        // Work out acceleration from force
-//        float3 acceleration = accForce / mass[thisParticleGlobalIdx];
-
-//        // Add gravity acceleration
-//        acceleration = acceleration + gravity;
-
-//        // Set particle force
-//        force[thisParticleGlobalIdx] = acceleration;
-
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -1420,20 +1395,16 @@ __global__ void sphGPU_Kernels::ComputeTotalForce_kernel(const bool accumulatePr
 {
 
     __shared__ int thisCellIdx;
+    __shared__ int thisCellOcc;
+
     if(threadIdx.x==0)
     {
         thisCellIdx = blockIdx.x + (blockIdx.y * gridDim.x) + (blockIdx.z * gridDim.x * gridDim.y);
+        thisCellOcc = cellOcc[thisCellIdx];
     }
     __syncthreads();
 
     int thisParticleGlobalIdx = cellPartIdx[thisCellIdx] + threadIdx.x;
-
-    __shared__ int thisCellOcc;
-    if(threadIdx.x==0)
-    {
-        thisCellOcc = cellOcc[thisCellIdx];
-    }
-    __syncthreads();
 
 
     if(thisParticleGlobalIdx < numPoints && threadIdx.x < thisCellOcc && thisCellIdx < gridDim.x * gridDim.y * gridDim.z)
@@ -1447,7 +1418,7 @@ __global__ void sphGPU_Kernels::ComputeTotalForce_kernel(const bool accumulatePr
             float3 extForce = externalForce[thisCellIdx];
             if(isnan(extForce.x) || isnan(extForce.y) || isnan(extForce.z))
             {
-                printf("nan external force\n");
+//                printf("nan external force\n");
             }
             else
             {
@@ -1462,7 +1433,7 @@ __global__ void sphGPU_Kernels::ComputeTotalForce_kernel(const bool accumulatePr
             float3 pressForce = pressureForce[thisParticleGlobalIdx];
             if(isnan(pressForce.x) || isnan(pressForce.y) || isnan(pressForce.z))
             {
-                printf("nan pressure force\n");
+//                printf("nan pressure force\n");
             }
             else
             {
@@ -1477,7 +1448,7 @@ __global__ void sphGPU_Kernels::ComputeTotalForce_kernel(const bool accumulatePr
             float3 viscForce = viscousForce[thisParticleGlobalIdx];
             if(isnan(viscForce.x) || isnan(viscForce.y) || isnan(viscForce.z))
             {
-                printf("nan visc force\n");
+//                printf("nan visc force\n");
             }
             else
             {
@@ -1492,7 +1463,7 @@ __global__ void sphGPU_Kernels::ComputeTotalForce_kernel(const bool accumulatePr
             float3 surfTenForce = surfaceTensionForce[thisParticleGlobalIdx];
             if(isnan(surfTenForce.x) || isnan(surfTenForce.y) || isnan(surfTenForce.z))
             {
-                printf("nan surfTen force\n");
+//                printf("nan surfTen force\n");
             }
             else
             {
@@ -1518,7 +1489,7 @@ __global__ void sphGPU_Kernels::ComputeTotalForce_kernel(const bool accumulatePr
 
 //--------------------------------------------------------------------------------------------------------------------
 
-__global__ void sphGPU_Kernels::Integrate_kernel(float3 *force,
+__global__ void sphGPU_Kernels::Integrate_kernel(float3 *acceleration,
                                                  float3 *particles,
                                                  float3 *velocities,
                                                  const float _dt,
@@ -1530,41 +1501,61 @@ __global__ void sphGPU_Kernels::Integrate_kernel(float3 *force,
     {
         //---------------------------------------------------------
         // Good old instable Euler integration - ONLY FOR TESTING
-        float3 oldPos = particles[idx];
-        float3 oldVel = velocities[idx];
+        float3 pos = particles[idx];
+        float3 vel = velocities[idx];
+        float3 acc = acceleration[idx];
 
-        float3 newVel = oldVel + (_dt * force[idx]);
-        float3 newPos = oldPos + (_dt * newVel);
+        vel = vel + (_dt * acc);
+        pos = pos + (_dt * vel);
 
         //---------------------------------------------------------
         // Verlet/Leapfrog integration
-//        float3 newPos = oldPos + (oldVel * _dt) + (0.5f * force[idx] * _dt * _dt);
-//        float3 newVel = oldVel + (0.5 * (force[idx] + force[idx]) * _dt);
+//        float3 pos = particles[idx];
+//        float3 vel = velocities[idx];
+//        float3 acc = acceleration[idx];
+
+//        vel = vel + (0.5f * _dt * acc);
+//        pos = pos + (_dt * vel);
+
+//        float pos2 = length2(pos);
+
+//        acc = (-1.0f*pos) / (pos2*sqrtf(pos2));
+//        vel = vel + (0.5f * _dt * acc);
+
+
 
         //---------------------------------------------------------
         // TODO:
         // Verlet integration
         // RK4 integration
+//        float3 pos = particles[idx];
+//        float3 vel = velocities[idx];
+//        float3 acc = acceleration[idx];
+
+//        float3 newPos = ((2*pos) - vel) + (acc * _dt * _dt);
+//        vel = pos;
+//        pos = newPos;
+
 
         //---------------------------------------------------------
         // Error checking and setting new values
 
-        if(isnan(newVel.x) || isnan(newVel.y) || isnan(newVel.z))
+        if(isnan(vel.x) || isnan(vel.y) || isnan(vel.z))
         {
-            printf("nan vel\n");
+//            printf("nan vel\n");
         }
         else
         {
-            velocities[idx] = newVel;
+            velocities[idx] = vel;
         }
 
-        if(isnan(newPos.x) || isnan(newPos.y) || isnan(newPos.z))
+        if(isnan(pos.x) || isnan(pos.y) || isnan(pos.z))
         {
-            printf("nan pos\n");
+//            printf("nan pos\n");
         }
         else
         {
-            particles[idx] = newPos;
+            particles[idx] = pos;
         }
     }
 }
@@ -1672,20 +1663,15 @@ __global__ void sphGPU_Kernels::ComputeAdvectionForce(float3 *pos,
                                                       const bool accumulate)
 {
     __shared__ int thisCellIdx;
+    __shared__ int thisCellOcc;
     if(threadIdx.x==0)
     {
         thisCellIdx = blockIdx.x + (blockIdx.y * gridDim.x) + (blockIdx.z * gridDim.x * gridDim.y);
+        thisCellOcc = cellOcc[thisCellIdx];
     }
     __syncthreads();
 
     int thisParticleGlobalIdx = cellPartIdx[thisCellIdx] + threadIdx.x;
-
-    __shared__ int thisCellOcc;
-    if(threadIdx.x==0)
-    {
-        thisCellOcc = cellOcc[thisCellIdx];
-    }
-    __syncthreads();
 
 
     if(thisParticleGlobalIdx < numPoints && threadIdx.x < thisCellOcc && thisCellIdx < gridDim.x * gridDim.y * gridDim.z)
@@ -1759,20 +1745,16 @@ __global__ void sphGPU_Kernels::AdvectParticle(float3 *pos,
                                                const float deltaTime)
 {
     __shared__ int thisCellIdx;
+    __shared__ int thisCellOcc;
+
     if(threadIdx.x==0)
     {
         thisCellIdx = blockIdx.x + (blockIdx.y * gridDim.x) + (blockIdx.z * gridDim.x * gridDim.y);
+        thisCellOcc = cellOcc[thisCellIdx];
     }
     __syncthreads();
 
     int thisParticleGlobalIdx = cellPartIdx[thisCellIdx] + threadIdx.x;
-
-    __shared__ int thisCellOcc;
-    if(threadIdx.x==0)
-    {
-        thisCellOcc = cellOcc[thisCellIdx];
-    }
-    __syncthreads();
 
 
     if(thisParticleGlobalIdx < numPoints && threadIdx.x < thisCellOcc && thisCellIdx < gridDim.x * gridDim.y * gridDim.z)

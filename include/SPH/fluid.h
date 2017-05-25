@@ -18,7 +18,6 @@ public:
     virtual void SetupSolveSpecs(const FluidSolverProperty &_solverProps);
 
     virtual FluidProperty *GetProperty();
-    virtual void SetProperty(std::shared_ptr<FluidProperty> _property);
     virtual void SetProperty(FluidProperty _property);
 
     void MapCudaGLResources();

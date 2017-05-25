@@ -48,7 +48,7 @@ OpenGLScene::OpenGLScene(QWidget *parent) : QOpenGLWidget(parent),
 
 OpenGLScene::~OpenGLScene()
 {
-//    m_cache.WriteCache();
+    makeCurrent();
     cleanup();
 }
 
@@ -72,6 +72,8 @@ QSize OpenGLScene::sizeHint() const
 
 void OpenGLScene::SaveScene(QProgressBar *progress, QString fileName)
 {
+    progress->setValue(0);
+    progress->setMaximum(4);
     // Get filename to save to
     if(fileName=="" || fileName.isEmpty() || fileName.isNull())
     {
@@ -88,6 +90,7 @@ void OpenGLScene::SaveScene(QProgressBar *progress, QString fileName)
     scene["numFluids"] = 1;
     scene["numAlgaes"] = 1;
     scene["numRigids"] = m_rigids.size();
+    progress->setValue(1);
     scene["solver"] = m_fluidSystem->GetProperty();
     scene["fluid"] = *m_fluid->GetProperty();
     scene["algae"] = *m_algae->GetProperty();
@@ -100,16 +103,21 @@ void OpenGLScene::SaveScene(QProgressBar *progress, QString fileName)
                                    {"pos", m_rigids[i]->GetPos()},
                                    {"rot", m_rigids[i]->GetRot()}});
     }
+    progress->setValue(2);
 
     if(!QDir(fileName).exists())
     {
         QDir().mkdir(fileName);
     }
 
+    progress->setValue(3);
 
     // cache sim data
     scene["numCachedFrames"] = m_cache.GetCachedRange();
+    scene["startFrame"] = 0;
+    scene["endFrame"] = m_cache.GetCachedRange();
     scene["cachedFiles"] = fileName.toStdString()+"/sim_";
+    progress->setValue(4);
     m_cache.CacheOutToDisk(fileName.toStdString()+"/sim_", progress);
 
     // save scene file
@@ -259,9 +267,9 @@ void OpenGLScene::AddContainer(std::shared_ptr<RigidProperty> containerProps)
         }
     }
     containerProps->numParticles = boundary.verts.size();
-    m_container = std::shared_ptr<Rigid>(new Rigid(containerProps, boundary));
+    auto _container = std::shared_ptr<Rigid>(new Rigid(containerProps, boundary));
 
-    m_fluidSystem->SetContainer(m_container);
+    m_fluidSystem->SetContainer(_container);
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -571,7 +579,7 @@ std::shared_ptr<Rigid> OpenGLScene::CreateRigidMesh(std::string meshFile, RigidP
         return CreateRigidCube();
     }
 
-    rigidMesh = MeshSampler::BaryCoord::SampleMesh(meshes[0], 1000);
+    rigidMesh = MeshSampler::BaryCoord::SampleMesh(meshes[0], 10000);
 
 
     rigidProps->numParticles = rigidMesh.verts.size();
@@ -670,10 +678,8 @@ void OpenGLScene::setZRotation(int angle)
 
 void OpenGLScene::cleanup()
 {
-    makeCurrent();
     m_skyboxTex->destroy();
     m_skyboxTex = nullptr;
-    doneCurrent();
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -772,14 +778,14 @@ void OpenGLScene::OnFrameChanged(int frame)
         return;
     }
 
-    if(m_isCaching)
+    if(m_cache.IsFrameCached(frame))
     {
-        if(m_cache.IsFrameCached(frame))
-        {
-            m_cache.Load(frame, m_fluidSystem);
-            emit FrameLoaded(frame);
-        }
-        else
+        m_cache.Load(frame, m_fluidSystem);
+        emit FrameLoaded(frame);
+    }
+    else
+    {
+        if(m_isCaching)
         {
             // check previous frame was cached, if not then need to sim previous frame
             if(!m_cache.IsFrameCached(frame-1))
@@ -799,13 +805,22 @@ void OpenGLScene::OnFrameChanged(int frame)
 
             m_cache.Cache(frame, m_fluidSystem);
             emit FrameCached(frame);
+
+        }
+        else
+        {
+            if(frame == 0)
+            {
+                m_fluidSystem->InitialiseSim();
+            }
+            else
+            {
+                m_fluidSystem->StepSim();
+            }
+            emit FrameSimmed(frame);
         }
     }
-    else
-    {
-        m_fluidSystem->StepSim();
-        emit FrameSimmed(frame);
-    }
+
 
     emit FrameFinished(frame);
 }

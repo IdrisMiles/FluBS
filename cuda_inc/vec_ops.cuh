@@ -69,7 +69,7 @@ __host__ __device__ float3 operator/(const float3 lhs, const float rhs)
 
 __host__ __device__ float dot(const float3 lhs, const float3 rhs)
 {
-    return lhs.x*rhs.x + lhs.y*rhs.y + lhs.z*rhs.z;
+    return (lhs.x*rhs.x) + (lhs.y*rhs.y) + (lhs.z*rhs.z);
 }
 
 __host__ __device__ float length(const float3 vec)
@@ -91,7 +91,7 @@ __host__ __device__ float magnitude(const float3 vec)
 __host__ __device__ float3 normalize(const float3 vec)
 {
     float mag = magnitude(vec);
-    if(fabsf(mag) < FLT_EPSILON)
+    if(mag < FLT_EPSILON)
     {
         return vec;
     }

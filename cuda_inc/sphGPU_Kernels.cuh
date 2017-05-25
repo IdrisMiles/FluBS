@@ -211,7 +211,7 @@ namespace sphGPU_Kernels
 
     //--------------------------------------------------------------------------------------------------------------------
 
-    __global__ void Integrate_kernel(float3 *force,
+    __global__ void Integrate_kernel(float3 *acceleration,
                                      float3 *particles,
                                      float3 *velocities,
                                      const float _dt,
