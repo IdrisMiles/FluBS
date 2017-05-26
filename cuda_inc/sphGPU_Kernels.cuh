@@ -4,8 +4,7 @@
 
 // CUDA includes
 #include <cuda_runtime.h>
-
-
+#include "SPH/gpudata.h"
 
 namespace sphGPU_Kernels
 {
@@ -17,79 +16,33 @@ namespace sphGPU_Kernels
                                         const uint gridRes,
                                         const float cellWidth);
 
-    //--------------------------------------------------------------------------------------------------------------------
-
-    __global__ void ComputeVolume_kernel(float *volume,
-                                         const uint *cellOcc,
-                                         const uint *cellPartIdx,
-                                         const float3 *particles,
-                                         const uint numPoints,
-                                         const float smoothingLength);
+    __global__ void ParticleHash_Kernel(ParticleGpuData particle,
+                                        const uint gridRes,
+                                        const float cellWidth);
 
     //--------------------------------------------------------------------------------------------------------------------
 
-    __global__ void ComputeDensity_kernel(float *density,
-                                          const float mass,
-                                          const uint *cellOcc,
-                                          const uint *cellPartIdx,
-                                          const float3 *particles,
-                                          const uint numPoints,
-                                          const float smoothingLength,
-                                          const bool accumulate);
+    __global__ void ComputeVolume_kernel(RigidGpuData particle);
 
     //--------------------------------------------------------------------------------------------------------------------
 
-    __global__ void ComputeDensityFluidRigid_kernel(const uint numPoints,
-                                                    const float fluidRestDensity,
-                                                    float *fluidDensity,
-                                                    const uint *fluidCellOcc,
-                                                    const uint *fluidCellPartIdx,
-                                                    const float3 *fluidPos,
-                                                    float *rigidVolume,
-                                                    const uint *rigidCellOcc,
-                                                    const uint *rigidCellPartIdx,
-                                                    const float3 *rigidPos,
-                                                    const float smoothingLength,
-                                                    const bool accumulate);
+    __global__ void ComputeDensity_kernel(ParticleGpuData particle, const bool accumulate);
 
     //--------------------------------------------------------------------------------------------------------------------
 
-    __global__ void ComputeDensityFluidFluid_kernel(const uint numPoints,
-                                                    float *fluidDensity,
-                                                    const uint *fluidCellOcc,
-                                                    const uint *fluidCellPartIdx,
-                                                    const float3 *fluidPos,
-                                                    const uint *otherFluidCellOcc,
-                                                    const uint *otherFluidCellPartIdx,
-                                                    const float otherFluidMass,
-                                                    const float3 *otherFluidPos,
-                                                    const float smoothingLength,
-                                                    const bool accumulate);
+    __global__ void ComputeDensityFluidRigid_kernel(ParticleGpuData particle, RigidGpuData rigidParticle, const bool accumulate);
 
     //--------------------------------------------------------------------------------------------------------------------
 
-    __global__ void ComputePressure_kernel(float *pressure,
-                                           float *density,
-                                           const float restDensity,
-                                           const float gasConstant,
-                                           const uint *cellOcc,
-                                           const uint *cellPartIdx,
-                                           const uint numPoints);
+    __global__ void ComputeDensityFluidFluid_kernel(ParticleGpuData particle, ParticleGpuData contributerParticle, const bool accumulate);
 
     //--------------------------------------------------------------------------------------------------------------------
 
-    __global__ void SamplePressure(const float3* samplePoints,
-                                   float *pressure,
-                                   const uint *cellOcc,
-                                   const uint *cellPartIdx,
-                                   const float3 *fluidPos,
-                                   const float *fluidPressure,
-                                   const float *fluidDensity,
-                                   const float fluidParticleMass,
-                                   const uint *fluidCellOcc,
-                                   const uint *fluidCellPartIdx,
-                                   const uint numPoints,
-                                   const float smoothingLength);
+    __global__ void ComputePressure_kernel(FluidGpuData particle);
+
+    //--------------------------------------------------------------------------------------------------------------------
+
+    __global__ void SamplePressure(ParticleGpuData particleData, ParticleGpuData particleContributerData);
 
     //--------------------------------------------------------------------------------------------------------------------
 
@@ -169,11 +122,9 @@ namespace sphGPU_Kernels
 
     //--------------------------------------------------------------------------------------------------------------------
 
-    __global__ void ComputeForce_kernel(/*float3 *force,*/
-                                        float3 *pressureForce,
+    __global__ void ComputeForce_kernel(float3 *pressureForce,
                                         float3 *viscForce,
                                         float3 *surfaceTensionForce,
-//                                        const float3 gravity,
                                         const float viscCoeff,
                                         const float surfaceTension,
                                         const float surfaceThreshold,
@@ -226,11 +177,7 @@ namespace sphGPU_Kernels
 
     //--------------------------------------------------------------------------------------------------------------------
 
-    __global__ void InitParticleAsCube_Kernel(float3 *particles,
-                                              float3 *velocities,
-                                              float *densities,
-                                              const float restDensity,
-                                              const uint numParticles,
+    __global__ void InitParticleAsCube_Kernel(ParticleGpuData particle,
                                               const uint numPartsPerAxis,
                                               const float scale);
 

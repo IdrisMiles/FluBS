@@ -20,6 +20,8 @@ public:
     virtual FluidProperty *GetProperty();
     virtual void SetProperty(FluidProperty _property);
 
+    FluidGpuData GetFluidGpuData();
+
     void MapCudaGLResources();
     void ReleaseCudaGLResources();
 

@@ -2,7 +2,7 @@
 #define SPHGPU_H
 
 #include <cuda_runtime.h>
-
+#include "SPH/gpudata.h"
 
 namespace sphGPU
 {
@@ -12,79 +12,31 @@ namespace sphGPU
     //--------------------------------------------------------------------------------------------------------------------
 
     // BaseSPHParticle Reset
-    void ResetProperties(float3 *pressureForce,
-                         float3 *externalForce,
-                         float3 *totalForce,
-                         float *density,
-                         float *pressure,
-                         uint *hash,
-                         uint *cellOcc,
-                         uint *cellPartIdx,
-                         const uint numCells,
-                         const uint numPoints);
+    void ResetProperties(ParticleGpuData particle,
+                         const uint numCells);
 
     //--------------------------------------------------------------------------------------------------------------------
 
     // Algae Reset
-    void ResetProperties(float3 *pressureForce,
-                         float3 *externalForce,
-                         float3 *totalForce,
-                         float *density,
-                         float *pressure,
-                         float *prevPressure,
-                         float *bioIllum,
-                         uint *hash,
-                         uint *cellOcc,
-                         uint *cellPartIdx,
-                         const uint numCells,
-                         const uint numPoints);
+    void ResetProperties(AlgaeGpuData particle, const uint numCells);
 
     //--------------------------------------------------------------------------------------------------------------------
 
     // Rigid Reset
-    void ResetProperties(float3 *pressureForce,
-                         float3 *externalForce,
-                         float3 *totalForce,
-                         float *density,
-                         float *pressure,
-                         float *volume,
-                         uint *hash,
-                         uint *cellOcc,
-                         uint *cellPartIdx,
-                         const uint numCells,
-                         const uint numPoints);
+    void ResetProperties(RigidGpuData particle, const uint numCells);
 
     //--------------------------------------------------------------------------------------------------------------------
 
     // Fluid Reset
-    void ResetProperties(float3 *pressureForce,
-                         float3 *viscousForce,
-                         float3 *surfTenForce,
-                         float3 *externalForce,
-                         float3 *totalForce,
-                         float *densityErr,
-                         float *density,
-                         float *pressure,
-                         uint *hash,
-                         uint *cellOcc,
-                         uint *cellPartIdx,
-                         const uint numCells,
-                         const uint numPoints);
+    void ResetProperties(FluidGpuData particle, const uint numCells);
 
     //--------------------------------------------------------------------------------------------------------------------
 
-    void ResetTotalForce(float3 *totalForce,
-                         const uint numPoints);
+    void ResetTotalForce(float3 *totalForce, const uint numPoints);
 
     //--------------------------------------------------------------------------------------------------------------------
 
-    void InitFluidAsCube(float3 *particles,
-                         float3 *velocities,
-                         float *densities,
-                         const float restDensity,
-                         const unsigned int numParticles,
-                         const unsigned int numPartsPerAxis,
-                         const float scale);
+    void InitFluidAsCube(ParticleGpuData particle, const unsigned int numPartsPerAxis, const float scale);
 
     //--------------------------------------------------------------------------------------------------------------------
 
@@ -98,30 +50,17 @@ namespace sphGPU
 
     //--------------------------------------------------------------------------------------------------------------------
 
-    void ParticleHash(unsigned int *hash,
-                      unsigned int *cellOcc,
-                      float3 *particles,
-                      const unsigned int numPoints,
+    void ParticleHash(ParticleGpuData particle,
                       const unsigned int gridRes,
                       const float cellWidth);
 
     //--------------------------------------------------------------------------------------------------------------------
 
-    void SortParticlesByHash(uint *hash,
-                             float3 *position,
-                             float3 *velocity,
-                             uint *particleId,
-                             const uint numPoints);
+    void SortParticlesByHash(ParticleGpuData particle);
 
     //--------------------------------------------------------------------------------------------------------------------
 
-    void SortParticlesByHash(uint *hash,
-                             float3 *position,
-                             float3 *velocity,
-                             uint *particleId,
-                             float *prevPressure,
-                             float *illum,
-                             const uint numPoints);
+    void SortParticlesByHash(AlgaeGpuData particle);
 
     //--------------------------------------------------------------------------------------------------------------------
 
@@ -137,89 +76,27 @@ namespace sphGPU
 
     //--------------------------------------------------------------------------------------------------------------------
 
-    void ComputeParticleVolume(const uint maxCellOcc,
-                               const uint gridRes,
-                               float *volume,
-                               const uint *cellOcc,
-                               const uint *cellPartIdx,
-                               const float3 *particles,
-                               const uint numPoints,
-                               const float smoothingLength);
+    void ComputeParticleVolume(RigidGpuData particle,  const uint gridRes);
 
     //--------------------------------------------------------------------------------------------------------------------
 
-    void ComputeDensity(const uint maxCellOcc,
-                        const uint gridRes,
-                        float *density,
-                        const float mass,
-                        const uint *cellOcc,
-                        const uint *cellPartIdx,
-                        const float3 *particles,
-                        const uint numPoints,
-                        const float smoothingLength,
-                        const bool accumulate);
+    void ComputeDensity(ParticleGpuData particle, const uint gridRes, const bool accumulate);
 
     //--------------------------------------------------------------------------------------------------------------------
 
-    void ComputeDensityFluidFluid(const uint maxCellOcc,
-                                  const uint gridRes,
-                                  const uint numPoints,
-                                  float *fluidDensity,
-                                  const float3 *fluidPos,
-                                  const uint *fluidCellOcc,
-                                  const uint *fluidCellPartIdx,
-                                  const float fluidContribMass,
-                                  const float3 *fluidContribPos,
-                                  const uint *fluidContribCellOcc,
-                                  const uint *fluidContribCellPartIdx,
-                                  const float smoothingLength,
-                                  const bool accumulate);
+    void ComputeDensityFluidFluid(ParticleGpuData particle, ParticleGpuData contributerParticle, const uint gridRes, const bool accumulate);
 
     //--------------------------------------------------------------------------------------------------------------------
 
-    void ComputeDensityFluidRigid(const uint maxCellOcc,
-                                  const uint gridRes,
-                                  const uint numPoints,
-                                  const float fluidRestDensity,
-                                  float *fluidDensity,
-                                  const float3 *fluidPos,
-                                  const uint *fluidCellOcc,
-                                  const uint *fluidCellPartIdx,
-                                  float *rigidVolume,
-                                  const float3 *rigidPos,
-                                  const uint *rigidCellOcc,
-                                  const uint *rigidCellPartIdx,
-                                  const float smoothingLength,
-                                  const bool accumulate);
+    void ComputeDensityFluidRigid(ParticleGpuData particle, RigidGpuData rigidParticle, const uint gridRes, const bool accumulate);
 
     //--------------------------------------------------------------------------------------------------------------------
 
-    void ComputePressureFluid(const uint maxCellOcc,
-                              const uint gridRes,
-                              float *pressure,
-                              float *density,
-                              const float restDensity,
-                              const float gasConstant,
-                              const uint *cellOcc,
-                              const uint *cellPartIdx,
-                              const uint numPoints);
+    void ComputePressureFluid(FluidGpuData particle, const uint gridRes);
 
     //--------------------------------------------------------------------------------------------------------------------
 
-    void SamplePressure(const uint maxCellOcc,
-                        const uint gridRes,
-                        const float3* samplePoints,
-                        float *pressure,
-                        const uint *cellOcc,
-                        const uint *cellPartIdx,
-                        const float3 *fluidPos,
-                        const float *fluidPressure,
-                        const float *fluidDensity,
-                        const float fluidParticleMass,
-                        const uint *fluidCellOcc,
-                        const uint *fluidCellPartIdx,
-                        const uint numPoints,
-                        const float smoothingLength);
+    void SamplePressure(ParticleGpuData particleData, ParticleGpuData particleContributerData, const uint gridRes);
 
     //--------------------------------------------------------------------------------------------------------------------
 

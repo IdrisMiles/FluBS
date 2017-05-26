@@ -91,6 +91,45 @@ void Fluid::SetProperty(FluidProperty _property)
 
     UpdateCUDAMemory();
 }
+//---------------------------------------------------------------------------------------------------------------
+
+FluidGpuData Fluid::GetFluidGpuData()
+{
+    FluidGpuData particle;
+    particle.pos = GetPositionPtr();
+    particle.vel = GetVelocityPtr();
+    particle.den = GetDensityPtr();
+    particle.pressure = GetPressurePtr();
+
+    particle.pressureForce = GetPressureForcePtr();
+    particle.gravityForce = GetGravityForcePtr();
+    particle.externalForce = GetExternalForcePtr();
+    particle.totalForce = GetTotalForcePtr();
+
+    particle.id = GetParticleIdPtr();
+    particle.hash = GetParticleHashIdPtr();
+    particle.cellOcc = GetCellOccupancyPtr();
+    particle.cellPartIdx = GetCellParticleIdxPtr();
+
+    particle.maxCellOcc = GetMaxCellOcc();
+
+    particle.mass = m_property->particleMass;
+    particle.restDen = m_property->restDensity;
+    particle.radius = m_property->particleRadius;
+    particle.smoothingLength = m_property->smoothingLength;
+    particle.numParticles = m_property->numParticles;
+
+    particle.viscousForce = GetViscForcePtr();
+    particle.surfaceTensionForce = GetSurfTenForcePtr();
+
+    particle.surfaceTension = m_property->surfaceTension;
+    particle.surfaceThreshold = m_property->surfaceThreshold;
+    particle.gasStiffness = m_property->gasStiffness;
+    particle.viscosity = m_property->viscosity;
+
+    return particle;
+}
+
 //--------------------------------------------------------------------------------------------------------------------
 
 void Fluid::Init()

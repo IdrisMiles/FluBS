@@ -61,7 +61,7 @@ namespace sph
     // Compute Particle Hash functions
 
     void ComputeHash(const FluidSolverProperty &_solverProps,
-                     std::shared_ptr<BaseSphParticle> _fluid);
+                     std::shared_ptr<BaseSphParticle> _sphParticles);
 
     template<typename T>
     void ComputeHash(const FluidSolverProperty &_solverProps,

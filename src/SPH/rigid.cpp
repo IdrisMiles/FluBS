@@ -84,7 +84,38 @@ glm::vec3 Rigid::GetRot()
 {
     return m_rot;
 }
+//---------------------------------------------------------------------------------------------------------------
 
+RigidGpuData Rigid::GetRigidGpuData()
+{
+    RigidGpuData particle;
+    particle.pos = GetPositionPtr();
+    particle.vel = GetVelocityPtr();
+    particle.den = GetDensityPtr();
+    particle.pressure = GetPressurePtr();
+
+    particle.pressureForce = GetPressureForcePtr();
+    particle.gravityForce = GetGravityForcePtr();
+    particle.externalForce = GetExternalForcePtr();
+    particle.totalForce = GetTotalForcePtr();
+
+    particle.id = GetParticleIdPtr();
+    particle.hash = GetParticleHashIdPtr();
+    particle.cellOcc = GetCellOccupancyPtr();
+    particle.cellPartIdx = GetCellParticleIdxPtr();
+
+    particle.maxCellOcc = GetMaxCellOcc();
+
+    particle.mass = m_property->particleMass;
+    particle.restDen = m_property->restDensity;
+    particle.radius = m_property->particleRadius;
+    particle.smoothingLength = m_property->smoothingLength;
+    particle.numParticles = m_property->numParticles;
+
+    particle.volume = GetVolumePtr();
+
+    return particle;
+}
 
 //------------------------------------------------------------------------
 

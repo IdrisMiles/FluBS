@@ -22,6 +22,8 @@ public:
 
     void SetProperty(AlgaeProperty _property);
 
+    AlgaeGpuData GetAlgaeGpuData();
+
     virtual void MapCudaGLResources();
 
     virtual void ReleaseCudaGLResources();

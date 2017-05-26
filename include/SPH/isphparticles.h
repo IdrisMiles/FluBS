@@ -16,6 +16,7 @@
 #include "cuda_inc/helper_cuda.h"
 
 #include "SPH/sphparticlepropeprty.h"
+#include "SPH/gpudata.h"
 #include "FluidSystem/fluidsolverproperty.h"
 #include "Mesh/mesh.h"
 
@@ -33,6 +34,8 @@ public:
 
     void SetName(const std::string _name);
     std::string GetName() const;
+
+    ParticleGpuData GetParticleGpuData();
 
     virtual void MapCudaGLResources();
     virtual void ReleaseCudaGLResources();

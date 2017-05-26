@@ -6,32 +6,6 @@
 #include "float.h"
 
 
-//__host__ __device__ float3 operator+(const float3 lhs, const float3 rhs);
-
-//__host__ __device__ float3 operator-(const float3 lhs, const float3 rhs);
-
-//__host__ __device__ float3 operator*(const float3 lhs, const float3 rhs);
-
-//__host__ __device__ float3 operator*(const float3 lhs, const float rhs);
-
-//__host__ __device__ float3 operator*(const float lhs, const float3 rhs);
-
-//__host__ __device__ float3 operator/(const float3 lhs, const float3 rhs);
-
-//__host__ __device__ float3 operator/(const float3 lhs, const float rhs);
-
-//__host__ __device__ float dot(const float3 lhs, const float3 rhs);
-
-//__host__ __device__ float length(const float3 vec);
-
-//__host__ __device__ float length2(const float3 vec);
-
-//__host__ __device__ float magnitude(const float3 vec);
-
-//__host__ __device__ float3 normalize(const float3 vec);
-
-
-
 __host__ __device__ float3 operator+(const float3 lhs, const float3 rhs)
 {
     return make_float3(lhs.x+rhs.x, lhs.y+rhs.y, lhs.z+rhs.z);

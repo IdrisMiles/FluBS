@@ -25,105 +25,76 @@ uint sphGPU::iDivUp(uint a, uint b)
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void sphGPU::ResetProperties(float3 *pressureForce,
-                             float3 *externalForce,
-                             float3 *totalForce,
-                             float *density,
-                             float *pressure,
-                             uint *hash,
-                             uint *cellOcc,
-                             uint *cellPartIdx,
-                             const uint numCells,
-                             const uint numPoints)
+void sphGPU::ResetProperties(ParticleGpuData particle, const uint numCells)
 {
-    thrust::device_ptr<float3> pressureForcePtr = thrust::device_pointer_cast(pressureForce);
-    thrust::device_ptr<float3> externalForcePtr = thrust::device_pointer_cast(externalForce);
-    thrust::device_ptr<float3> totalForcePtr = thrust::device_pointer_cast(totalForce);
-    thrust::device_ptr<float> densityPtr = thrust::device_pointer_cast(density);
-    thrust::device_ptr<float> pressurePtr = thrust::device_pointer_cast(pressure);
-    thrust::device_ptr<uint> hashPtr = thrust::device_pointer_cast(hash);
-    thrust::device_ptr<uint> cellOccPtr = thrust::device_pointer_cast(cellOcc);
-    thrust::device_ptr<uint> cellPartIdxPtr = thrust::device_pointer_cast(cellPartIdx);
+    thrust::device_ptr<float3> pressureForcePtr = thrust::device_pointer_cast(particle.pressureForce);
+    thrust::device_ptr<float3> externalForcePtr = thrust::device_pointer_cast(particle.externalForce);
+    thrust::device_ptr<float3> totalForcePtr = thrust::device_pointer_cast(particle.totalForce);
+    thrust::device_ptr<float> densityPtr = thrust::device_pointer_cast(particle.den);
+    thrust::device_ptr<float> pressurePtr = thrust::device_pointer_cast(particle.pressure);
+    thrust::device_ptr<uint> hashPtr = thrust::device_pointer_cast(particle.hash);
+    thrust::device_ptr<uint> cellOccPtr = thrust::device_pointer_cast(particle.cellOcc);
+    thrust::device_ptr<uint> cellPartIdxPtr = thrust::device_pointer_cast(particle.cellPartIdx);
 
-    thrust::fill(pressureForcePtr, pressureForcePtr+numPoints, make_float3(0.0f,0.0f,0.0f));
-    thrust::fill(externalForcePtr, externalForcePtr+numPoints, make_float3(0.0f, 0.0f,0.0f));
-    thrust::fill(totalForcePtr, totalForcePtr+numPoints, make_float3(0.0f,0.0f,0.0f));
-    thrust::fill(densityPtr, densityPtr+numPoints, 0.0f);
-    thrust::fill(pressurePtr, pressurePtr+numPoints, 0.0f);
-    thrust::fill(hashPtr, hashPtr+numPoints, 0);
+    thrust::fill(pressureForcePtr, pressureForcePtr+particle.numParticles, make_float3(0.0f,0.0f,0.0f));
+    thrust::fill(externalForcePtr, externalForcePtr+particle.numParticles, make_float3(0.0f, 0.0f,0.0f));
+    thrust::fill(totalForcePtr, totalForcePtr+particle.numParticles, make_float3(0.0f,0.0f,0.0f));
+    thrust::fill(densityPtr, densityPtr+particle.numParticles, 0.0f);
+    thrust::fill(pressurePtr, pressurePtr+particle.numParticles, 0.0f);
+    thrust::fill(hashPtr, hashPtr+particle.numParticles, 0);
     thrust::fill(cellOccPtr, cellOccPtr+numCells, 0);
     thrust::fill(cellPartIdxPtr, cellPartIdxPtr+numCells, 0);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void sphGPU::ResetProperties(float3 *pressureForce,
-                             float3 *externalForce,
-                             float3 *totalForce,
-                             float *density,
-                             float *pressure,
-                             float *prevPressure,
-                             float *bioIllum,
-                             uint *hash,
-                             uint *cellOcc,
-                             uint *cellPartIdx,
-                             const uint numCells,
-                             const uint numPoints)
+void sphGPU::ResetProperties(AlgaeGpuData particle, const uint numCells)
 {
-    thrust::device_ptr<float3> pressureForcePtr = thrust::device_pointer_cast(pressureForce);
-    thrust::device_ptr<float3> externalForcePtr = thrust::device_pointer_cast(externalForce);
-    thrust::device_ptr<float3> totalForcePtr = thrust::device_pointer_cast(totalForce);
-    thrust::device_ptr<float> densityPtr = thrust::device_pointer_cast(density);
-    thrust::device_ptr<float> pressurePtr = thrust::device_pointer_cast(pressure);
-//    thrust::device_ptr<float> prevPressurePtr = thrust::device_pointer_cast(prevPressure);
-//    thrust::device_ptr<float> bioIllumPtr = thrust::device_pointer_cast(bioIllum);
-    thrust::device_ptr<uint> hashPtr = thrust::device_pointer_cast(hash);
-    thrust::device_ptr<uint> cellOccPtr = thrust::device_pointer_cast(cellOcc);
-    thrust::device_ptr<uint> cellPartIdxPtr = thrust::device_pointer_cast(cellPartIdx);
+    thrust::device_ptr<float3> pressureForcePtr = thrust::device_pointer_cast(particle.pressureForce);
+    thrust::device_ptr<float3> externalForcePtr = thrust::device_pointer_cast(particle.externalForce);
+    thrust::device_ptr<float3> totalForcePtr = thrust::device_pointer_cast(particle.totalForce);
+    thrust::device_ptr<float> densityPtr = thrust::device_pointer_cast(particle.den);
+    thrust::device_ptr<float> pressurePtr = thrust::device_pointer_cast(particle.pressure);
+//    thrust::device_ptr<float> prevPressurePtr = thrust::device_pointer_cast(particle.prevPressure);
+//    thrust::device_ptr<float> bioIllumPtr = thrust::device_pointer_cast(particle.bioIllum);
+    thrust::device_ptr<uint> hashPtr = thrust::device_pointer_cast(particle.hash);
+    thrust::device_ptr<uint> cellOccPtr = thrust::device_pointer_cast(particle.cellOcc);
+    thrust::device_ptr<uint> cellPartIdxPtr = thrust::device_pointer_cast(particle.cellPartIdx);
 
-    thrust::fill(pressureForcePtr, pressureForcePtr+numPoints, make_float3(0.0f,0.0f,0.0f));
-    thrust::fill(externalForcePtr, externalForcePtr+numPoints, make_float3(0.0f, 0.0f,0.0f));
-    thrust::fill(totalForcePtr, totalForcePtr+numPoints, make_float3(0.0f,0.0f,0.0f));
-    thrust::fill(densityPtr, densityPtr+numPoints, 0.0f);
-    thrust::fill(pressurePtr, pressurePtr+numPoints, 0.0f);
-//    thrust::fill(prevPressurePtr, prevPressurePtr+numPoints, 0.0f);
-//    thrust::fill(bioIllumPtr, bioIllumPtr+numPoints, 0.0f);
-    thrust::fill(hashPtr, hashPtr+numPoints, 0);
+    thrust::fill(pressureForcePtr, pressureForcePtr+particle.numParticles, make_float3(0.0f,0.0f,0.0f));
+    thrust::fill(externalForcePtr, externalForcePtr+particle.numParticles, make_float3(0.0f, 0.0f,0.0f));
+    thrust::fill(totalForcePtr, totalForcePtr+particle.numParticles, make_float3(0.0f,0.0f,0.0f));
+    thrust::fill(densityPtr, densityPtr+particle.numParticles, 0.0f);
+    thrust::fill(pressurePtr, pressurePtr+particle.numParticles, 0.0f);
+//    thrust::fill(prevPressurePtr, prevPressurePtr+particle.numParticles, 0.0f);
+//    thrust::fill(bioIllumPtr, bioIllumPtr+particle.numParticles, 0.0f);
+    thrust::fill(hashPtr, hashPtr+particle.numParticles, 0);
+
     thrust::fill(cellOccPtr, cellOccPtr+numCells, 0);
     thrust::fill(cellPartIdxPtr, cellPartIdxPtr+numCells, 0);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void sphGPU::ResetProperties(float3 *pressureForce,
-                             float3 *externalForce,
-                             float3 *totalForce,
-                             float *density,
-                             float *pressure,
-                             float *volume,
-                             uint *hash,
-                             uint *cellOcc,
-                             uint *cellPartIdx,
-                             const uint numCells,
-                             const uint numPoints)
+void sphGPU::ResetProperties(RigidGpuData particle, const uint numCells)
 {
-    thrust::device_ptr<float3> pressureForcePtr = thrust::device_pointer_cast(pressureForce);
-    thrust::device_ptr<float3> externalForcePtr = thrust::device_pointer_cast(externalForce);
-    thrust::device_ptr<float3> totalForcePtr = thrust::device_pointer_cast(totalForce);
-    thrust::device_ptr<float> densityPtr = thrust::device_pointer_cast(density);
-    thrust::device_ptr<float> pressurePtr = thrust::device_pointer_cast(pressure);
-    thrust::device_ptr<float> volumePtr = thrust::device_pointer_cast(volume);
-    thrust::device_ptr<uint> hashPtr = thrust::device_pointer_cast(hash);
-    thrust::device_ptr<uint> cellOccPtr = thrust::device_pointer_cast(cellOcc);
-    thrust::device_ptr<uint> cellPartIdxPtr = thrust::device_pointer_cast(cellPartIdx);
+    thrust::device_ptr<float3> pressureForcePtr = thrust::device_pointer_cast(particle.pressureForce);
+    thrust::device_ptr<float3> externalForcePtr = thrust::device_pointer_cast(particle.externalForce);
+    thrust::device_ptr<float3> totalForcePtr = thrust::device_pointer_cast(particle.totalForce);
+    thrust::device_ptr<float> densityPtr = thrust::device_pointer_cast(particle.den);
+    thrust::device_ptr<float> pressurePtr = thrust::device_pointer_cast(particle.pressure);
+    thrust::device_ptr<float> volumePtr = thrust::device_pointer_cast(particle.volume);
+    thrust::device_ptr<uint> hashPtr = thrust::device_pointer_cast(particle.hash);
+    thrust::device_ptr<uint> cellOccPtr = thrust::device_pointer_cast(particle.cellOcc);
+    thrust::device_ptr<uint> cellPartIdxPtr = thrust::device_pointer_cast(particle.cellPartIdx);
 
-    thrust::fill(pressureForcePtr, pressureForcePtr+numPoints, make_float3(0.0f,0.0f,0.0f));
-    thrust::fill(externalForcePtr, externalForcePtr+numPoints, make_float3(0.0f, 0.0f,0.0f));
-    thrust::fill(totalForcePtr, totalForcePtr+numPoints, make_float3(0.0f,0.0f,0.0f));
-    thrust::fill(densityPtr, densityPtr+numPoints, 0.0f);
-    thrust::fill(pressurePtr, pressurePtr+numPoints, 0.0f);
-    thrust::fill(volumePtr, volumePtr+numPoints, 1.0f);
-    thrust::fill(hashPtr, hashPtr+numPoints, 0);
+    thrust::fill(pressureForcePtr, pressureForcePtr+particle.numParticles, make_float3(0.0f,0.0f,0.0f));
+    thrust::fill(externalForcePtr, externalForcePtr+particle.numParticles, make_float3(0.0f, 0.0f,0.0f));
+    thrust::fill(totalForcePtr, totalForcePtr+particle.numParticles, make_float3(0.0f,0.0f,0.0f));
+    thrust::fill(densityPtr, densityPtr+particle.numParticles, 0.0f);
+    thrust::fill(pressurePtr, pressurePtr+particle.numParticles, 0.0f);
+    thrust::fill(volumePtr, volumePtr+particle.numParticles, 1.0f);
+    thrust::fill(hashPtr, hashPtr+particle.numParticles, 0);
     thrust::fill(cellOccPtr, cellOccPtr+numCells, 0);
     thrust::fill(cellPartIdxPtr, cellPartIdxPtr+numCells, 0);
 }
@@ -131,49 +102,36 @@ void sphGPU::ResetProperties(float3 *pressureForce,
 //--------------------------------------------------------------------------------------------------------------------
 
 
-void sphGPU::ResetProperties(float3 *pressureForce,
-                             float3 *viscousForce,
-                             float3 *surfTenForce,
-                             float3 *externalForce,
-                             float3 *totalForce,
-                             float *densityErr,
-                             float *density,
-                             float *pressure,
-                             uint *hash,
-                             uint *cellOcc,
-                             uint *cellPartIdx,
-                             const uint numCells,
-                             const uint numPoints)
+void sphGPU::ResetProperties(FluidGpuData particle, const uint numCells)
 {
-    thrust::device_ptr<float3> pressureForcePtr = thrust::device_pointer_cast(pressureForce);
-    thrust::device_ptr<float3> viscousForcePtr = thrust::device_pointer_cast(viscousForce);
-    thrust::device_ptr<float3> surfTenForcePtr = thrust::device_pointer_cast(surfTenForce);
-    thrust::device_ptr<float3> externalForcePtr = thrust::device_pointer_cast(externalForce);
-    thrust::device_ptr<float3> totalForcePtr = thrust::device_pointer_cast(totalForce);
-    thrust::device_ptr<float> densityErrPtr = thrust::device_pointer_cast(densityErr);
-    thrust::device_ptr<float> densityPtr = thrust::device_pointer_cast(density);
-    thrust::device_ptr<float> pressurePtr = thrust::device_pointer_cast(pressure);
-    thrust::device_ptr<uint> hashPtr = thrust::device_pointer_cast(hash);
-    thrust::device_ptr<uint> cellOccPtr = thrust::device_pointer_cast(cellOcc);
-    thrust::device_ptr<uint> cellPartIdxPtr = thrust::device_pointer_cast(cellPartIdx);
+    thrust::device_ptr<float3> pressureForcePtr = thrust::device_pointer_cast(particle.pressureForce);
+    thrust::device_ptr<float3> viscousForcePtr = thrust::device_pointer_cast(particle.viscousForce);
+    thrust::device_ptr<float3> surfTenForcePtr = thrust::device_pointer_cast(particle.surfaceTensionForce);
+    thrust::device_ptr<float3> externalForcePtr = thrust::device_pointer_cast(particle.externalForce);
+    thrust::device_ptr<float3> totalForcePtr = thrust::device_pointer_cast(particle.totalForce);
+//    thrust::device_ptr<float> densityErrPtr = thrust::device_pointer_cast(particle.densityErr);
+    thrust::device_ptr<float> densityPtr = thrust::device_pointer_cast(particle.den);
+    thrust::device_ptr<float> pressurePtr = thrust::device_pointer_cast(particle.pressure);
+    thrust::device_ptr<uint> hashPtr = thrust::device_pointer_cast(particle.hash);
+    thrust::device_ptr<uint> cellOccPtr = thrust::device_pointer_cast(particle.cellOcc);
+    thrust::device_ptr<uint> cellPartIdxPtr = thrust::device_pointer_cast(particle.cellPartIdx);
 
-    thrust::fill(pressureForcePtr, pressureForcePtr+numPoints, make_float3(0.0f,0.0f,0.0f));
-    thrust::fill(viscousForcePtr, viscousForcePtr+numPoints, make_float3(0.0f,0.0f,0.0f));
-    thrust::fill(surfTenForcePtr, surfTenForcePtr+numPoints, make_float3(0.0f,0.0f,0.0f));
-    thrust::fill(externalForcePtr, externalForcePtr+numPoints, make_float3(0.0f, 0.0f,0.0f));
-    thrust::fill(totalForcePtr, totalForcePtr+numPoints, make_float3(0.0f,0.0f,0.0f));
-    thrust::fill(densityErrPtr, densityErrPtr+numPoints, 0.0f);
-    thrust::fill(densityPtr, densityPtr+numPoints, 0.0f);
-    thrust::fill(pressurePtr, pressurePtr+numPoints, 0.0f);
-    thrust::fill(hashPtr, hashPtr+numPoints, 0);
+    thrust::fill(pressureForcePtr, pressureForcePtr+particle.numParticles, make_float3(0.0f,0.0f,0.0f));
+    thrust::fill(viscousForcePtr, viscousForcePtr+particle.numParticles, make_float3(0.0f,0.0f,0.0f));
+    thrust::fill(surfTenForcePtr, surfTenForcePtr+particle.numParticles, make_float3(0.0f,0.0f,0.0f));
+    thrust::fill(externalForcePtr, externalForcePtr+particle.numParticles, make_float3(0.0f, 0.0f,0.0f));
+    thrust::fill(totalForcePtr, totalForcePtr+particle.numParticles, make_float3(0.0f,0.0f,0.0f));
+//    thrust::fill(densityErrPtr, densityErrPtr+particle.numParticles, 0.0f);
+    thrust::fill(densityPtr, densityPtr+particle.numParticles, 0.0f);
+    thrust::fill(pressurePtr, pressurePtr+particle.numParticles, 0.0f);
+    thrust::fill(hashPtr, hashPtr+particle.numParticles, 0);
     thrust::fill(cellOccPtr, cellOccPtr+numCells, 0);
     thrust::fill(cellPartIdxPtr, cellPartIdxPtr+numCells, 0);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void sphGPU::ResetTotalForce(float3 *totalForce,
-                             const uint numPoints)
+void sphGPU::ResetTotalForce(float3 *totalForce, const uint numPoints)
 {
     thrust::device_ptr<float3> totalForcePtr = thrust::device_pointer_cast(totalForce);
     thrust::fill(totalForcePtr, totalForcePtr+numPoints, make_float3(0.0f,0.0f,0.0f));
@@ -181,45 +139,39 @@ void sphGPU::ResetTotalForce(float3 *totalForce,
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void sphGPU::ParticleHash(uint *hash, uint *cellOcc, float3 *particles, const uint numPoints, const uint gridRes, const float cellWidth)
+void sphGPU::ParticleHash(ParticleGpuData particle, const uint gridRes, const float cellWidth)
 {
-    uint numBlocks = iDivUp(numPoints, 1024u);
-    sphGPU_Kernels::ParticleHash_Kernel<<<numBlocks, 1024u>>>(hash, cellOcc, particles, numPoints, gridRes, cellWidth);
+    uint numBlocks = iDivUp(particle.numParticles, 1024u);
+    sphGPU_Kernels::ParticleHash_Kernel<<<numBlocks, 1024u>>>(particle, gridRes, cellWidth);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void sphGPU::SortParticlesByHash(uint *hash, float3 *position, float3 *velocity, uint *particleId, const uint numPoints)
+void sphGPU::SortParticlesByHash(ParticleGpuData particle)
 {
-    thrust::device_ptr<uint> hashPtr = thrust::device_pointer_cast(hash);
-    thrust::device_ptr<float3> posPtr = thrust::device_pointer_cast(position);
-    thrust::device_ptr<float3> velPtr = thrust::device_pointer_cast(velocity);
-    thrust::device_ptr<uint> particleIdPtr = thrust::device_pointer_cast(particleId);
+    thrust::device_ptr<uint> hashPtr = thrust::device_pointer_cast(particle.hash);
+    thrust::device_ptr<float3> posPtr = thrust::device_pointer_cast(particle.pos);
+    thrust::device_ptr<float3> velPtr = thrust::device_pointer_cast(particle.vel);
+    thrust::device_ptr<uint> particleIdPtr = thrust::device_pointer_cast(particle.id);
 
     thrust::sort_by_key(hashPtr,
-                        hashPtr + numPoints,
+                        hashPtr + particle.numParticles,
                         thrust::make_zip_iterator(thrust::make_tuple(posPtr, velPtr, particleIdPtr)));
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void sphGPU::SortParticlesByHash(uint *hash,
-                                 float3 *position,
-                                 float3 *velocity,
-                                 uint *particleId,
-                                 float *prevPressure,
-                                 float *illum,
-                                 const uint numPoints)
+void sphGPU::SortParticlesByHash(AlgaeGpuData particle)
 {
-    thrust::device_ptr<uint> hashPtr = thrust::device_pointer_cast(hash);
-    thrust::device_ptr<float3> posPtr = thrust::device_pointer_cast(position);
-    thrust::device_ptr<float3> velPtr = thrust::device_pointer_cast(velocity);
-    thrust::device_ptr<uint> particleIdPtr = thrust::device_pointer_cast(particleId);
-    thrust::device_ptr<float> prevPressPtr = thrust::device_pointer_cast(prevPressure);
-    thrust::device_ptr<float> illumPtr = thrust::device_pointer_cast(illum);
+    thrust::device_ptr<uint> hashPtr = thrust::device_pointer_cast(particle.hash);
+    thrust::device_ptr<float3> posPtr = thrust::device_pointer_cast(particle.pos);
+    thrust::device_ptr<float3> velPtr = thrust::device_pointer_cast(particle.vel);
+    thrust::device_ptr<uint> particleIdPtr = thrust::device_pointer_cast(particle.id);
+    thrust::device_ptr<float> prevPressPtr = thrust::device_pointer_cast(particle.prevPressure);
+    thrust::device_ptr<float> illumPtr = thrust::device_pointer_cast(particle.illum);
 
     thrust::sort_by_key(hashPtr,
-                        hashPtr + numPoints,
+                        hashPtr + particle.numParticles,
                         thrust::make_zip_iterator(thrust::make_tuple(posPtr, velPtr, particleIdPtr, prevPressPtr, illumPtr)));
 }
 
@@ -242,147 +194,64 @@ void sphGPU::ComputeMaxCellOccupancy(uint *cellOccupancy, const uint numCells, u
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void sphGPU::ComputeParticleVolume(const uint maxCellOcc,
-                                   const uint gridRes,
-                                   float *volume,
-                                   const uint *cellOcc,
-                                   const uint *cellPartIdx,
-                                   const float3 *particles,
-                                   const uint numPoints,
-                                   const float smoothingLength)
+void sphGPU::ComputeParticleVolume(RigidGpuData particle, const uint gridRes)
 {
     dim3 gridDim = dim3(gridRes, gridRes, gridRes);
-    uint blockSize = std::min(maxCellOcc, 1024u);
+    uint blockSize = std::min(particle.maxCellOcc, 1024u);
 
-    sphGPU_Kernels::ComputeVolume_kernel<<<gridDim, blockSize>>>(volume, cellOcc, cellPartIdx, particles, numPoints, smoothingLength);
+    sphGPU_Kernels::ComputeVolume_kernel<<<gridDim, blockSize>>>(particle);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void sphGPU::ComputeDensity(const uint maxCellOcc,
-                            const uint gridRes,
-                            float *density,
-                            const float mass,
-                            const uint *cellOcc,
-                            const uint *cellPartIdx,
-                            const float3 *particles,
-                            const uint numPoints,
-                            const float smoothingLength,
-                            const bool accumulate)
+void sphGPU::ComputeDensity(ParticleGpuData particle, const uint gridRes, const bool accumulate)
 {
     dim3 gridDim = dim3(gridRes, gridRes, gridRes);
-    uint blockSize = std::min(maxCellOcc, 1024u);
+    uint blockSize = std::min(particle.maxCellOcc, 1024u);
 
-    sphGPU_Kernels::ComputeDensity_kernel<<<gridDim, blockSize>>>(density, mass, cellOcc, cellPartIdx, particles, numPoints, smoothingLength, accumulate);
+    sphGPU_Kernels::ComputeDensity_kernel<<<gridDim, blockSize>>>(particle, accumulate);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void sphGPU::ComputeDensityFluidFluid(const uint maxCellOcc,
-                              const uint gridRes,
-                              const uint numPoints,
-                              float *fluidDensity,
-                              const float3 *fluidPos,
-                              const uint *fluidCellOcc,
-                              const uint *fluidCellPartIdx,
-                              const float fluidContribMass,
-                              const float3 *fluidContribPos,
-                              const uint *fluidContribCellOcc,
-                              const uint *fluidContribCellPartIdx,
-                              const float smoothingLength,
-                              const bool accumulate)
+void sphGPU::ComputeDensityFluidFluid(ParticleGpuData particle, ParticleGpuData contributerParticle, const uint gridRes, const bool accumulate)
 {
 
     dim3 gridDim = dim3(gridRes, gridRes, gridRes);
-    uint blockSize = std::min(maxCellOcc, 1024u);
+    uint blockSize = std::min(particle.maxCellOcc, 1024u);
 
-    sphGPU_Kernels::ComputeDensityFluidFluid_kernel<<<gridDim, blockSize>>>(numPoints,
-                                                                            fluidDensity,
-                                                                            fluidCellOcc,
-                                                                            fluidCellPartIdx,
-                                                                            fluidPos,
-                                                                            fluidContribCellOcc,
-                                                                            fluidContribCellPartIdx,
-                                                                            fluidContribMass,
-                                                                            fluidContribPos,
-                                                                            smoothingLength,
-                                                                            accumulate);
+    sphGPU_Kernels::ComputeDensityFluidFluid_kernel<<<gridDim, blockSize>>>(particle, contributerParticle, accumulate);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
 
-void sphGPU::ComputeDensityFluidRigid(const uint maxCellOcc,
-                              const uint gridRes,
-                              const uint numPoints,
-                              const float fluidRestDensity,
-                              float *fluidDensity,
-                              const float3 *fluidPos,
-                              const uint *fluidCellOcc,
-                              const uint *fluidCellPartIdx,
-                              float *rigidVolume,
-                              const float3 *rigidPos,
-                              const uint *rigidCellOcc,
-                              const uint *rigidCellPartIdx,
-                              const float smoothingLength,
-                              const bool accumulate)
+void sphGPU::ComputeDensityFluidRigid(ParticleGpuData particle, RigidGpuData rigidParticle, const uint gridRes, const bool accumulate)
 {
     dim3 gridDim = dim3(gridRes, gridRes, gridRes);
-    uint blockSize = std::min(maxCellOcc, 1024u);
+    uint blockSize = std::min(particle.maxCellOcc, 1024u);
 
-    sphGPU_Kernels::ComputeDensityFluidRigid_kernel<<<gridDim, blockSize>>>(numPoints, fluidRestDensity, fluidDensity, fluidCellOcc, fluidCellPartIdx, fluidPos, rigidVolume, rigidCellOcc, rigidCellPartIdx, rigidPos, smoothingLength, accumulate);
+    sphGPU_Kernels::ComputeDensityFluidRigid_kernel<<<gridDim, blockSize>>>(particle, rigidParticle, accumulate);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void sphGPU::ComputePressureFluid(const uint maxCellOcc,
-                             const uint gridRes,
-                             float *pressure,
-                             float *density,
-                             const float restDensity,
-                             const float gasConstant,
-                             const uint *cellOcc,
-                             const uint *cellPartIdx,
-                             const uint numPoints)
+void sphGPU::ComputePressureFluid(FluidGpuData particle, const uint gridRes)
 {
     dim3 gridDim = dim3(gridRes, gridRes, gridRes);
-    uint blockSize = std::min(maxCellOcc, 1024u);
+    uint blockSize = std::min(particle.maxCellOcc, 1024u);
 
-    sphGPU_Kernels::ComputePressure_kernel<<<gridDim, blockSize>>>(pressure, density, restDensity, gasConstant, cellOcc, cellPartIdx, numPoints);
+    sphGPU_Kernels::ComputePressure_kernel<<<gridDim, blockSize>>>(particle);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void sphGPU::SamplePressure(const uint maxCellOcc,
-                            const uint gridRes,
-                            const float3* samplePoints,
-                            float *pressure,
-                            const uint *cellOcc,
-                            const uint *cellPartIdx,
-                            const float3 *fluidPos,
-                            const float *fluidPressure,
-                            const float *fluidDensity,
-                            const float fluidParticleMass,
-                            const uint *fluidCellOcc,
-                            const uint *fluidCellPartIdx,
-                            const uint numPoints,
-                            const float smoothingLength)
+void sphGPU::SamplePressure(ParticleGpuData particleData, ParticleGpuData particleContributerData, const uint gridRes)
 {
     dim3 gridDim = dim3(gridRes, gridRes, gridRes);
-    uint blockSize = std::min(maxCellOcc, 1024u);
+    uint blockSize = std::min(particleData.maxCellOcc, 1024u);
 
-    sphGPU_Kernels::SamplePressure<<<gridDim, blockSize>>>(samplePoints,
-                                                           pressure,
-                                                           cellOcc,
-                                                           cellPartIdx,
-                                                           fluidPos,
-                                                           fluidPressure,
-                                                           fluidDensity,
-                                                           fluidParticleMass,
-                                                           fluidCellOcc,
-                                                           fluidCellPartIdx,
-                                                           numPoints,
-                                                           smoothingLength);
+    sphGPU_Kernels::SamplePressure<<<gridDim, blockSize>>>(particleData, particleContributerData);
 }
 
 
@@ -637,7 +506,7 @@ void sphGPU::HandleBoundaries(const uint maxCellOcc, const uint gridRes, float3 
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void sphGPU::InitFluidAsCube(float3 *particles, float3 *velocities, float *densities, const float restDensity, const uint numParticles, const uint numPartsPerAxis, const float scale)
+void sphGPU::InitFluidAsCube(ParticleGpuData particle, const uint numPartsPerAxis, const float scale)
 {
 
     uint threadsPerBlock = 8;
@@ -645,7 +514,7 @@ void sphGPU::InitFluidAsCube(float3 *particles, float3 *velocities, float *densi
     uint blocksPerGrid = iDivUp(numPartsPerAxis,threadsPerBlock);
     dim3 gridDim(blocksPerGrid, blocksPerGrid, blocksPerGrid);
 
-    sphGPU_Kernels::InitParticleAsCube_Kernel<<<gridDim, blockDim>>>(particles, velocities, densities, restDensity, numParticles, numPartsPerAxis, scale);
+    sphGPU_Kernels::InitParticleAsCube_Kernel<<<gridDim, blockDim>>>(particle, numPartsPerAxis, scale);
 
 }
 

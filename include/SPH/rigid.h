@@ -30,6 +30,8 @@ public:
     glm::vec3 GetPos();
     glm::vec3 GetRot();
 
+    RigidGpuData GetRigidGpuData();
+
 
     virtual void MapCudaGLResources();
     virtual void ReleaseCudaGLResources();

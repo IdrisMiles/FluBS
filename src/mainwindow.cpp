@@ -286,9 +286,11 @@ void MainWindow::CreateMenus()
 void MainWindow::CreateActions()
 {
     m_saveAction = new QAction(tr("&Save"), this);
+    m_saveAction->setShortcut(QKeySequence::Save);
     connect(m_saveAction, &QAction::triggered, this, &MainWindow::Save);
 
     m_openAction = new QAction(tr("&Open"), this);
+    m_openAction->setShortcut(QKeySequence::Open);
     connect(m_openAction, &QAction::triggered, this, &MainWindow::Open);
 
 
