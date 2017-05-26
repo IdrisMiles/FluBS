@@ -139,7 +139,7 @@ public:
 
     void retranslateUi(QMainWindow *MainWindow)
     {
-        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "MainWindow", 0));
+        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "FluBS", 0));
         QTreeWidgetItem *___qtreewidgetitem = outliner->headerItem();
         ___qtreewidgetitem->setText(0, QApplication::translate("MainWindow", "Scene Outliner", 0));
     } // retranslateUi
