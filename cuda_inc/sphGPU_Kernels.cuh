@@ -46,98 +46,27 @@ namespace sphGPU_Kernels
 
     //--------------------------------------------------------------------------------------------------------------------
 
-    __global__ void ComputePressureForce_kernel(float3 *pressureForce,
-                                                const float *pressure,
-                                                const float *density,
-                                                const float mass,
-                                                const float3 *particles,
-                                                const uint *cellOcc,
-                                                const uint *cellPartIdx,
-                                                const uint numPoints,
-                                                const float smoothingLength,
-                                                const bool accumulate);
+    __global__ void ComputePressureForce_kernel(ParticleGpuData particleData, const bool accumulate);
 
     //--------------------------------------------------------------------------------------------------------------------
 
-    __global__ void ComputePressureForceFluidFluid_kernel(float3 *pressureForce,
-                                                          const float *pressure,
-                                                          const float *density,
-                                                          const float mass,
-                                                          const float3 *particles,
-                                                          const uint *cellOcc,
-                                                          const uint *cellPartIdx,
-                                                          const float *fluidContribPressure,
-                                                          const float *fluidContribDensity,
-                                                          const float fluidContribMass,
-                                                          const float3 *fluidContribParticles,
-                                                          const uint *fluidContribCellOcc,
-                                                          const uint *fluidContribCellPartIdx,
-                                                          const uint numPoints,
-                                                          const float smoothingLength,
-                                                          const bool accumulate);
+    __global__ void ComputePressureForceFluidFluid_kernel(ParticleGpuData particle, ParticleGpuData contributerParticle, const bool accumulate);
 
     //--------------------------------------------------------------------------------------------------------------------
 
-    __global__ void ComputePressureForceFluidRigid_kernel(float3 *pressureForce,
-                                                          const float *pressure,
-                                                          const float *density,
-                                                          const float mass,
-                                                          const float3 *particles,
-                                                          const uint *cellOcc,
-                                                          const uint *cellPartIdx,
-                                                          const float restDensity,
-                                                          const float *rigidVolume,
-                                                          const float3 *rigidPos,
-                                                          const uint *rigidCellOcc,
-                                                          const uint *rigidCellPartIdx,
-                                                          const uint numPoints,
-                                                          const float smoothingLength,
-                                                          const bool accumulate);
+    __global__ void ComputePressureForceFluidRigid_kernel(ParticleGpuData particle, RigidGpuData rigidParticle, const bool accumulate);
 
     //--------------------------------------------------------------------------------------------------------------------
 
-    __global__ void ComputeViscousForce_kernel(float3 *viscForce,
-                                               const float viscCoeff,
-                                               const float3 *velocity,
-                                               const float *density,
-                                               const float mass,
-                                               const float3 *position,
-                                               const uint *cellOcc,
-                                               const uint *cellPartIdx,
-                                               const uint numPoints,
-                                               const float smoothingLength);
+    __global__ void ComputeViscousForce_kernel(FluidGpuData particleData);
 
     //--------------------------------------------------------------------------------------------------------------------
 
-    __global__ void ComputeSurfaceTensionForce_kernel(float3 *surfaceTensionForce,
-                                                      const float surfaceTension,
-                                                      const float surfaceThreshold,
-                                                      const float *density,
-                                                      const float mass,
-                                                      const float3 *position,
-                                                      const uint *cellOcc,
-                                                      const uint *cellPartIdx,
-                                                      const uint numPoints,
-                                                      const float smoothingLength);
+    __global__ void ComputeSurfaceTensionForce_kernel(FluidGpuData particleData);
 
     //--------------------------------------------------------------------------------------------------------------------
 
-    __global__ void ComputeForce_kernel(float3 *pressureForce,
-                                        float3 *viscForce,
-                                        float3 *surfaceTensionForce,
-                                        const float viscCoeff,
-                                        const float surfaceTension,
-                                        const float surfaceThreshold,
-                                        const float *pressure,
-                                        const float *density,
-                                        const float mass,
-                                        const float3 *particles,
-                                        const float3 *velocity,
-                                        const uint *cellOcc,
-                                        const uint *cellPartIdx,
-                                        const uint numPoints,
-                                        const float smoothingLength,
-                                        const bool accumulate);
+    __global__ void ComputeForce_kernel(FluidGpuData particleData, const bool accumulate);
 
     //--------------------------------------------------------------------------------------------------------------------
 
@@ -146,34 +75,15 @@ namespace sphGPU_Kernels
                                              const bool accumulateSurfTen,
                                              const bool accumulateExternal,
                                              const bool accumulateGravity,
-                                             float3 *force,
-                                             const float3 *externalForce,
-                                             const float3 *pressureForce,
-                                             const float3 *viscousForce,
-                                             const float3 *surfaceTensionForce,
-                                             const float3 gravity,
-                                             const float mass,
-                                             const float3 *particles,
-                                             const float3 *velocities,
-                                             const uint *cellOcc,
-                                             const uint *cellPartIdx,
-                                             const uint numPoints,
-                                             const float smoothingLength);
+                                             FluidGpuData particleData);
 
     //--------------------------------------------------------------------------------------------------------------------
 
-    __global__ void Integrate_kernel(float3 *acceleration,
-                                     float3 *particles,
-                                     float3 *velocities,
-                                     const float _dt,
-                                     const uint numPoints);
+    __global__ void Integrate_kernel(ParticleGpuData particleData, const float _dt);
 
     //--------------------------------------------------------------------------------------------------------------------
 
-    __global__ void HandleBoundaries_Kernel(float3 *particles,
-                                            float3 *velocities,
-                                            const float boundary,
-                                            const uint numPoints);
+    __global__ void HandleBoundaries_Kernel(ParticleGpuData particleData, const float boundary);
 
     //--------------------------------------------------------------------------------------------------------------------
 
@@ -182,45 +92,13 @@ namespace sphGPU_Kernels
                                               const float scale);
 
     //--------------------------------------------------------------------------------------------------------------------
-    __global__ void ComputeAdvectionForce(float3 *pos,
-                                          float3 *vel,
-                                          float3 *advectForce,
-                                          const uint *cellOcc,
-                                          const uint *cellPartIdx,
-                                          const float3 *advectorPos,
-                                          const float3 *advectorForce,
-                                          const float* advectorDensity,
-                                          const float advectorMass,
-                                          const uint *advectorCellOcc,
-                                          const uint *advectorCellPartIdx,
-                                          const uint numPoints,
-                                          const float smoothingLength,
-                                          const bool accumulate);
+    __global__ void ComputeAdvectionForce(ParticleGpuData particleData, FluidGpuData advectorParticleData, const bool accumulate);
 
     //--------------------------------------------------------------------------------------------------------------------
-    __global__ void AdvectParticle(float3 *pos,
-                                   float3 *vel,
-                                   const uint *cellOcc,
-                                   const uint *cellPartIdx,
-                                   const float3 *advectorPos,
-                                   const float3 *advectorVel,
-                                   const float* advectorDensity,
-                                   const float advectorMass,
-                                   const uint *advectorCellOcc,
-                                   const uint *advectorCellPartIdx,
-                                   const uint numPoints,
-                                   const float smoothingLength,
-                                   const float deltaTime);
+    __global__ void AdvectParticle(ParticleGpuData particleData, FluidGpuData advectorParticleData, const float deltaTime);
 
     //--------------------------------------------------------------------------------------------------------------------
-    __global__ void ComputeBioluminescence(const float *pressure,
-                                           float *prevPressure,
-                                           float *illumination,
-                                           const float bioThreshold,
-                                           const float reactionRate,
-                                           const float deactionRate,
-                                           const float deltaTime,
-                                           const uint numPoints);
+    __global__ void ComputeBioluminescence(AlgaeGpuData particleData, const float deltaTime);
 
 
 

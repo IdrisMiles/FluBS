@@ -114,6 +114,7 @@ AlgaeGpuData Algae::GetAlgaeGpuData()
 
     particle.maxCellOcc = GetMaxCellOcc();
 
+    particle.gravity = m_property->gravity;
     particle.mass = m_property->particleMass;
     particle.restDen = m_property->restDensity;
     particle.radius = m_property->particleRadius;

@@ -257,251 +257,101 @@ void sphGPU::SamplePressure(ParticleGpuData particleData, ParticleGpuData partic
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void sphGPU::ComputePressureForceFluid(const uint maxCellOcc,
-                                       const uint gridRes,
-                                       float3 *pressureForce,
-                                       const float *pressure,
-                                       const float *density,
-                                       const float mass,
-                                       const float3 *particles,
-                                       const uint *cellOcc,
-                                       const uint *cellPartIdx,
-                                       const uint numPoints,
-                                       const float smoothingLength,
-                                       const bool accumulate)
+void sphGPU::ComputePressureForceFluid(ParticleGpuData particleData, const uint gridRes, const bool accumulate)
 {
     dim3 gridDim = dim3(gridRes, gridRes, gridRes);
-    uint blockSize = std::min(maxCellOcc, 1024u);
+    uint blockSize = std::min(particleData.maxCellOcc, 1024u);
 
-    sphGPU_Kernels::ComputePressureForce_kernel<<<gridDim, blockSize>>>(pressureForce,
-                                                                        pressure,
-                                                                        density,
-                                                                        mass,
-                                                                        particles,
-                                                                        cellOcc,
-                                                                        cellPartIdx,
-                                                                        numPoints,
-                                                                        smoothingLength,
-                                                                        accumulate);
+    sphGPU_Kernels::ComputePressureForce_kernel<<<gridDim, blockSize>>>(particleData, accumulate);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void sphGPU::ComputePressureForceFluidFluid(const uint maxCellOcc,
-                                            const uint gridRes,
-                                            float3 *pressureForce,
-                                            const float *pressure,
-                                            const float *density,
-                                            const float mass,
-                                            const float3 *particles,
-                                            const uint *cellOcc,
-                                            const uint *cellPartIdx,
-                                            const float *fluidContribPressure,
-                                            const float *fluidContribDensity,
-                                            const float fluidContribMass,
-                                            const float3 *fluidContribParticles,
-                                            const uint *fluidContribCellOcc,
-                                            const uint *fluidContribCellPartIdx,
-                                            const uint numPoints,
-                                            const float smoothingLength,
-                                            const bool accumulate)
+void sphGPU::ComputePressureForceFluidFluid(ParticleGpuData particle, ParticleGpuData contributerParticle, const uint gridRes, const bool accumulate)
 {
     dim3 gridDim = dim3(gridRes, gridRes, gridRes);
-    uint blockSize = std::min(maxCellOcc, 1024u);
+    uint blockSize = std::min(particle.maxCellOcc, 1024u);
 
-    sphGPU_Kernels::ComputePressureForceFluidFluid_kernel<<<gridDim, blockSize>>>(pressureForce,
-                                                                                  pressure,
-                                                                                  density,
-                                                                                  mass,
-                                                                                  particles,
-                                                                                  cellOcc,
-                                                                                  cellPartIdx,
-                                                                                  fluidContribPressure,
-                                                                                  fluidContribDensity,
-                                                                                  fluidContribMass,
-                                                                                  fluidContribParticles,
-                                                                                  fluidContribCellOcc,
-                                                                                  fluidContribCellPartIdx,
-                                                                                  numPoints,
-                                                                                  smoothingLength,
-                                                                                  accumulate);
+    sphGPU_Kernels::ComputePressureForceFluidFluid_kernel<<<gridDim, blockSize>>>(particle, contributerParticle, accumulate);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void sphGPU::ComputePressureForceFluidRigid(const uint maxCellOcc,
-                                            const uint gridRes,
-                                            float3 *pressureForce,
-                                            const float *pressure,
-                                            const float *density,
-                                            const float mass,
-                                            const float3 *particles,
-                                            const uint *cellOcc,
-                                            const uint *cellPartIdx,
-                                            const float restDensity,
-                                            const float *rigidVolume,
-                                            const float3 *rigidPos,
-                                            const uint *rigidCellOcc,
-                                            const uint *rigidCellPartIdx,
-                                            const uint numPoints,
-                                            const float smoothingLength,
-                                            const bool accumulate)
+void sphGPU::ComputePressureForceFluidRigid(ParticleGpuData particle, RigidGpuData rigidParticle, const uint gridRes, const bool accumulate)
 {
     dim3 gridDim = dim3(gridRes, gridRes, gridRes);
-    uint blockSize = std::min(maxCellOcc, 1024u);
+    uint blockSize = std::min(particle.maxCellOcc, 1024u);
 
-    sphGPU_Kernels::ComputePressureForceFluidRigid_kernel<<<gridDim, blockSize>>>(pressureForce,
-                                                                                  pressure,
-                                                                                  density,
-                                                                                  mass,
-                                                                                  particles,
-                                                                                  cellOcc,
-                                                                                  cellPartIdx,
-                                                                                  restDensity,
-                                                                                  rigidVolume,
-                                                                                  rigidPos,
-                                                                                  rigidCellOcc,
-                                                                                  rigidCellPartIdx,
-                                                                                  numPoints,
-                                                                                  smoothingLength,
-                                                                                  accumulate);
+    sphGPU_Kernels::ComputePressureForceFluidRigid_kernel<<<gridDim, blockSize>>>(particle, rigidParticle, accumulate);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void sphGPU::ComputeViscForce(const uint maxCellOcc,
-                              const uint gridRes,
-                              float3 *viscForce,
-                              const float viscCoeff,
-                              const float3 *velocity,
-                              const float *density,
-                              const float mass,
-                              const float3 *particles,
-                              const uint *cellOcc,
-                              const uint *cellPartIdx,
-                              const uint numPoints,
-                              const float smoothingLength)
+void sphGPU::ComputeViscForce(FluidGpuData particleData, const uint gridRes)
 {
     dim3 gridDim = dim3(gridRes, gridRes, gridRes);
-    uint blockSize = std::min(maxCellOcc, 1024u);
+    uint blockSize = std::min(particleData.maxCellOcc, 1024u);
 
-    sphGPU_Kernels::ComputeViscousForce_kernel<<<gridDim, blockSize>>>(viscForce, viscCoeff, velocity, density, mass, particles, cellOcc, cellPartIdx, numPoints, smoothingLength);
+    sphGPU_Kernels::ComputeViscousForce_kernel<<<gridDim, blockSize>>>(particleData);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void sphGPU::ComputeSurfaceTensionForce(const uint maxCellOcc, const uint gridRes, float3 *surfTenForce, const float surfaceTension, const float surfaceThreshold, const float *density, const float mass, const float3 *particles, const uint *cellOcc, const uint *cellPartIdx, const uint numPoints, const float smoothingLength)
+void sphGPU::ComputeSurfaceTensionForce(FluidGpuData particleData, const uint gridRes)
 {
     dim3 gridDim = dim3(gridRes, gridRes, gridRes);
-    uint blockSize = std::max(std::min(maxCellOcc, 1024u), 32u);
+    uint blockSize = std::max(std::min(particleData.maxCellOcc, 1024u), 32u);
 
-    sphGPU_Kernels::ComputeSurfaceTensionForce_kernel<<<gridDim, blockSize>>>(surfTenForce, surfaceTension, surfaceThreshold, density, mass, particles, cellOcc, cellPartIdx, numPoints, smoothingLength);
+    sphGPU_Kernels::ComputeSurfaceTensionForce_kernel<<<gridDim, blockSize>>>(particleData);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void sphGPU::ComputeForce(const uint maxCellOcc,
-                          const uint gridRes,
-                          float3 *pressureForce,
-                          float3 *viscForce,
-                          float3 *surfaceTensionForce,
-                          const float viscCoeff,
-                          const float surfaceTension,
-                          const float surfaceThreshold,
-                          const float *pressure,
-                          const float *density,
-                          const float mass,
-                          const float3 *particles,
-                          const float3 *velocity,
-                          const uint *cellOcc,
-                          const uint *cellPartIdx,
-                          const uint numPoints,
-                          const float smoothingLength,
-                          const bool accumulate)
+void sphGPU::ComputeForce(FluidGpuData particleData, const uint gridRes, const bool accumulate)
 {
     dim3 gridDim = dim3(gridRes, gridRes, gridRes);
-    uint blockSize = std::max(std::min(maxCellOcc, 1024u), 27u);
+    uint blockSize = std::max(std::min(particleData.maxCellOcc, 1024u), 27u);
 
-    sphGPU_Kernels::ComputeForce_kernel<<<gridDim, blockSize>>>(pressureForce,
-                                                                viscForce,
-                                                                surfaceTensionForce,
-                                                                viscCoeff,
-                                                                surfaceTension,
-                                                                surfaceThreshold,
-                                                                pressure,
-                                                                density,
-                                                                mass,
-                                                                particles,
-                                                                velocity,
-                                                                cellOcc,
-                                                                cellPartIdx,
-                                                                numPoints,
-                                                                smoothingLength,
-                                                                accumulate);
+    sphGPU_Kernels::ComputeForce_kernel<<<gridDim, blockSize>>>(particleData, accumulate);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void sphGPU::ComputeTotalForce(const uint maxCellOcc,
+void sphGPU::ComputeTotalForce(FluidGpuData particleData,
                                const uint gridRes,
                                const bool accumulatePressure,
                                const bool accumulateViscous,
                                const bool accumulateSurfTen,
                                const bool accumulateExternal,
-                               const bool accumulateGravity,
-                               float3 *force,
-                               const float3 *externalForce,
-                               const float3 *pressureForce,
-                               const float3 *viscForce,
-                               const float3 *surfaceTensionForce,
-                               const float3 gravity,
-                               const float mass,
-                               const float3 *particles,
-                               const float3 *velocities,
-                               const uint *cellOcc,
-                               const uint *cellPartIdx,
-                               const uint numPoints,
-                               const float smoothingLength)
+                               const bool accumulateGravity)
 {
     dim3 gridDim = dim3(gridRes, gridRes, gridRes);
-    uint blockSize = std::min(maxCellOcc, 1024u);
+    uint blockSize = std::min(particleData.maxCellOcc, 1024u);
 
     sphGPU_Kernels::ComputeTotalForce_kernel<<<gridDim, blockSize>>>(accumulatePressure,
                                                                      accumulateViscous,
                                                                      accumulateSurfTen,
                                                                      accumulateExternal,
                                                                      accumulateGravity,
-                                                                     force,
-                                                                     externalForce,
-                                                                     pressureForce,
-                                                                     viscForce,
-                                                                     surfaceTensionForce,
-                                                                     gravity,
-                                                                     mass,
-                                                                     particles,
-                                                                     velocities,
-                                                                     cellOcc,
-                                                                     cellPartIdx,
-                                                                     numPoints,
-                                                                     smoothingLength);
+                                                                     particleData);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void sphGPU::Integrate(const uint maxCellOcc, const uint gridRes, float3 *force, float3 *particles, float3 *velocities, const float _dt, const uint numPoints)
+void sphGPU::Integrate(ParticleGpuData particleData, const uint gridRes, const float _dt)
 {
-    uint numBlocks = iDivUp(numPoints, 1024u);
+    uint numBlocks = iDivUp(particleData.numParticles, 1024u);
 
-    sphGPU_Kernels::Integrate_kernel<<<numBlocks, 1024u>>>(force, particles, velocities, _dt, numPoints);
+    sphGPU_Kernels::Integrate_kernel<<<numBlocks, 1024u>>>(particleData, _dt);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void sphGPU::HandleBoundaries(const uint maxCellOcc, const uint gridRes, float3 *particles, float3 *velocities, const float _gridDim, const uint numPoints)
+void sphGPU::HandleBoundaries(ParticleGpuData particleData, const uint gridRes, const float _gridDim)
 {
-    uint numBlocks = iDivUp(numPoints, 1024u);
+    uint numBlocks = iDivUp(particleData.numParticles, 1024u);
 
-    sphGPU_Kernels::HandleBoundaries_Kernel<<<numBlocks, 1024u>>>(particles, velocities, _gridDim, numPoints);
+    sphGPU_Kernels::HandleBoundaries_Kernel<<<numBlocks, 1024u>>>(particleData, _gridDim);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -539,101 +389,31 @@ void sphGPU::InitSphParticleIds(unsigned int *particleId,
 
 //--------------------------------------------------------------------------------------------------------------------
 // Algae functions
-void sphGPU::ComputeAdvectionForce(const uint maxCellOcc,
-                                   const uint gridRes,
-                                   float3 *pos,
-                                   float3 *vel,
-                                   float3 *advectForce,
-                                   const uint *cellOcc,
-                                   const uint *cellPartIdx,
-                                   const float3 *advectorPos,
-                                   const float3 *advectorForce,
-                                   const float* advectorDensity,
-                                   const float advectorMass,
-                                   const uint *advectorCellOcc,
-                                   const uint *advectorCellPartIdx,
-                                   const uint numPoints,
-                                   const float smoothingLength,
-                                   const bool accumulate)
+void sphGPU::ComputeAdvectionForce(ParticleGpuData particleData, FluidGpuData advectorParticleData, const uint gridRes, const bool accumulate)
 {
 
     dim3 gridDim = dim3(gridRes, gridRes, gridRes);
-    uint blockSize = std::min(maxCellOcc, 1024u);
+    uint blockSize = std::min(particleData.maxCellOcc, 1024u);
 
-    sphGPU_Kernels::ComputeAdvectionForce<<<gridDim, blockSize>>>(pos,
-                                                                  vel,
-                                                                  advectForce,
-                                                                  cellOcc,
-                                                                  cellPartIdx,
-                                                                  advectorPos,
-                                                                  advectorForce,
-                                                                  advectorDensity,
-                                                                  advectorMass,
-                                                                  advectorCellOcc,
-                                                                  advectorCellPartIdx,
-                                                                  numPoints,
-                                                                  smoothingLength,
-                                                                  accumulate);
+    sphGPU_Kernels::ComputeAdvectionForce<<<gridDim, blockSize>>>(particleData, advectorParticleData, accumulate);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
-void sphGPU::AdvectParticle(const uint maxCellOcc,
-                            const uint gridRes,
-                            float3 *pos,
-                            float3 *vel,
-                            const uint *cellOcc,
-                            const uint *cellPartIdx,
-                            const float3 *advectorPos,
-                            const float3 *advectorVel,
-                            const float *advectorDensity,
-                            const float advectorMass,
-                            const uint *advectorCellOcc,
-                            const uint *advectorCellPartIdx,
-                            const uint numPoints,
-                            const float smoothingLength,
-                            const float deltaTime)
+void sphGPU::AdvectParticle(ParticleGpuData particleData, FluidGpuData advectorParticleData, const uint gridRes, const float deltaTime)
 {
 
     dim3 gridDim = dim3(gridRes, gridRes, gridRes);
-    uint blockSize = std::min(maxCellOcc, 1024u);
+    uint blockSize = std::min(particleData.maxCellOcc, 1024u);
 
-    sphGPU_Kernels::AdvectParticle<<<gridDim, blockSize>>>(pos,
-                                                           vel,
-                                                           cellOcc,
-                                                           cellPartIdx,
-                                                           advectorPos,
-                                                           advectorVel,
-                                                           advectorDensity,
-                                                           advectorMass,
-                                                           advectorCellOcc,
-                                                           advectorCellPartIdx,
-                                                           numPoints,
-                                                           smoothingLength,
-                                                           deltaTime);
+    sphGPU_Kernels::AdvectParticle<<<gridDim, blockSize>>>(particleData, advectorParticleData, deltaTime);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
-void sphGPU::ComputeBioluminescence(const uint maxCellOcc,
-                                    const uint gridRes,
-                                    const float *pressure,
-                                    float *prevPressure,
-                                    float *illumination,
-                                    const float bioThreshold,
-                                    const float reactionRate,
-                                    const float deactionRate,
-                                    const float deltaTime,
-                                    const uint numPoints)
+void sphGPU::ComputeBioluminescence(AlgaeGpuData particleData, const uint gridRes, const float deltaTime)
 {
-    uint numBlocks = iDivUp(numPoints, 1024u);
+    uint numBlocks = iDivUp(particleData.numParticles, 1024u);
 
-    sphGPU_Kernels::ComputeBioluminescence<<<numBlocks, 1024u>>>(pressure,
-                                                                 prevPressure,
-                                                                 illumination,
-                                                                 bioThreshold,
-                                                                 reactionRate,
-                                                                 deactionRate,
-                                                                 deltaTime,
-                                                                 numPoints);
+    sphGPU_Kernels::ComputeBioluminescence<<<numBlocks, 1024u>>>(particleData, deltaTime);
 }
 
 

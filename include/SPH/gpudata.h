@@ -19,6 +19,7 @@ struct ParticleGpuData{
     uint *cellOcc;
     uint *cellPartIdx;
 
+    float3 gravity;
     float mass;
     float restDen;
     float radius;

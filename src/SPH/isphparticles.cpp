@@ -103,6 +103,7 @@ ParticleGpuData BaseSphParticle::GetParticleGpuData()
     particle.cellOcc = GetCellOccupancyPtr();
     particle.cellPartIdx = GetCellParticleIdxPtr();
 
+    particle.gravity = m_property->gravity;
     particle.mass = m_property->particleMass;
     particle.restDen = m_property->restDensity;
     particle.radius = m_property->particleRadius;
