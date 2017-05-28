@@ -9,7 +9,7 @@ class FluidProperty : public SphParticleProperty
 public:
     FluidProperty(float _surfaceTension = 0.0728f,
                   float _surfaceThreshold = 1.0f,
-                  float _gasStiffness = 100.0f,
+                  float _gasStiffness = 50.0f,
                   float _viscosity = 0.1f,
                   unsigned int _numParticles = 16000,
                   float _particleMass = 1.0f,

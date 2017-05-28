@@ -44,7 +44,7 @@ void Rigid::UpdateMesh(Mesh &_mesh, const glm::vec3 &_pos, const glm::vec3 &_rot
     Mesh newMesh = m_mesh = _mesh;
     for( auto &&v : newMesh.verts)
     {
-        glm::mat3 t = glm::orientate3(glm::radians(m_rot));
+        glm::mat3 t = glm::mat3(glm::eulerAngleXYZ(glm::radians(_rot.x), glm::radians(_rot.y), glm::radians(_rot.z)));
         v = (t*v)+m_pos;
     }
 
@@ -66,7 +66,7 @@ void Rigid::UpdateMesh(const glm::vec3 &_pos, const glm::vec3 &_rot)
     Mesh newMesh = m_mesh;
     for( auto &&v : newMesh.verts)
     {
-        glm::mat3 t = glm::orientate3(glm::radians(m_rot));
+        glm::mat3 t = glm::mat3(glm::eulerAngleXYZ(glm::radians(_rot.x), glm::radians(_rot.y), glm::radians(_rot.z)));
         v = (t*v)+m_pos;
     }
 

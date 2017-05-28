@@ -85,6 +85,7 @@ public:
 
         endFrame = new QSpinBox(TimeLineWidget);
         endFrame->setObjectName(QStringLiteral("endFrame"));
+        endFrame->setMinimum(1);
         endFrame->setMaximum(1000);
         endFrame->setValue(250);
 
@@ -113,7 +114,7 @@ public:
 
         startFrame = new QSpinBox(TimeLineWidget);
         startFrame->setObjectName(QStringLiteral("startFrame"));
-        startFrame->setMaximum(1000);
+        startFrame->setMaximum(0);
 
         gridLayout->addWidget(startFrame, 0, 4, 1, 1);
 
@@ -124,8 +125,9 @@ public:
 
         fps = new QDoubleSpinBox(TimeLineWidget);
         fps->setObjectName(QStringLiteral("fps"));
+        fps->setMinimum(0.1);
         fps->setMaximum(60);
-        fps->setValue(25);
+        fps->setValue(1);
 
         gridLayout->addWidget(fps, 2, 6, 1, 1);
 
