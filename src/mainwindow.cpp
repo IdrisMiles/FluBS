@@ -231,7 +231,7 @@ void MainWindow::OnAlgaeInitialised(std::shared_ptr<Algae> _algae)
 void MainWindow::Save()
 {
     // Get filename to save to
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save"), "./", tr("JSON Files (*.json *.jsn)"));
+    QString fileName = QDir().relativeFilePath(QFileDialog::getSaveFileName(this, tr("Save"), "./", tr("JSON Files (*.json *.jsn)")));
     if(fileName.isEmpty() || fileName.isNull())
     {
         return;

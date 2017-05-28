@@ -77,7 +77,7 @@ void OpenGLScene::SaveScene(QProgressBar *progress, QString fileName)
     // Get filename to save to
     if(fileName=="" || fileName.isEmpty() || fileName.isNull())
     {
-        fileName = QFileDialog::getSaveFileName(this, tr("Save"), "./", tr("JSON Files (*.json *.jsn)"));
+        fileName = QDir().relativeFilePath(QFileDialog::getSaveFileName(this, tr("Save"), "./", tr("JSON Files (*.json *.jsn)")));
         if(fileName.isEmpty() || fileName.isNull())
         {
             return;
@@ -394,7 +394,7 @@ void OpenGLScene::AddRigid(QProgressBar *progress, std::string type)
     }
     else if(type == "mesh")
     {
-        QString qFileName = QFileDialog::getOpenFileName(this, tr("Load Mesh"), "./", tr("Mesh Files (*.obj *.dae)"));
+        QString qFileName = QDir().relativeFilePath(QFileDialog::getOpenFileName(this, tr("Load Mesh"), "./", tr("Mesh Files (*.obj *.dae)")));
         if(qFileName.isEmpty() || qFileName.isNull())
         {
             std::cout<<"No file selected. Loading default cube\n";
