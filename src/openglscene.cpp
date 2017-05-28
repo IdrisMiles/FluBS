@@ -213,6 +213,8 @@ void OpenGLScene::OpenScene(QProgressBar *progress, QString fileName)
             m_cache.LoadCacheFromDisk(files, progress);
         }
     }
+
+    emit SceneFrameRangeChanged(numFrame-1);
 }
 
 

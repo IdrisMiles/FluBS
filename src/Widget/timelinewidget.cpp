@@ -30,14 +30,14 @@ TimeLineWidget::TimeLineWidget(QWidget *parent) :
         m_timeLine->setStartFrame(value);
         m_timeLine->setDuration(1000 * (ui->endFrame->value() - ui->startFrame->value())/ ui->fps->value());
         ui->scrubber->setRange(value, ui->endFrame->value());
-        ui->scrubber->setValue(m_timeLine->currentFrame());
+//        ui->scrubber->setValue(m_timeLine->currentFrame());
     });
 
     connect(ui->endFrame, QOverload<int>::of(&QSpinBox::valueChanged), [this](int value){
         m_timeLine->setEndFrame(value);
         m_timeLine->setDuration(1000 * (ui->endFrame->value() - ui->startFrame->value())/ ui->fps->value());
         ui->scrubber->setRange(ui->startFrame->value(), value);
-        ui->scrubber->setValue(m_timeLine->currentFrame());
+//        ui->scrubber->setValue(m_timeLine->currentFrame());
     });
 
     connect(ui->fps, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [this](double value){
@@ -131,4 +131,15 @@ void TimeLineWidget::OnFrameCached(int frame)
 void TimeLineWidget::OnFrameFinished(int frame)
 {
     m_timeLine->OnFrameFinished(frame);
+}
+
+void TimeLineWidget::OnFrameRangeChanged(int frameRange)
+{
+    ui->startFrame->setValue(0);
+    ui->endFrame->setValue(frameRange);
+//    m_timeLine->setEndFrame(frameRange);
+//    m_timeLine->setDuration(1000 * (ui->endFrame->value() - ui->startFrame->value())/ ui->fps->value());
+//    ui->scrubber->setRange(ui->startFrame->value(), value);
+//    ui->scrubber->setValue(m_timeLine->currentFrame());
+
 }

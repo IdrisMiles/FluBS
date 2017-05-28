@@ -100,6 +100,7 @@ signals:
     void FrameLoaded(int frame);
     void FrameFinished(int frame);
     void CacheCleared();
+    void SceneFrameRangeChanged(int frameRange);
 
 protected:
     void initializeGL() Q_DECL_OVERRIDE;

@@ -24,6 +24,7 @@ public slots:
     void OnFrameChanged(int frame);
     void OnFrameCached(int frame);
     void OnFrameFinished(int frame);
+    void OnFrameRangeChanged(int frameRange);
 
 signals:
     void FrameChanged(int frame);

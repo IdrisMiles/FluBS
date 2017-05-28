@@ -46,6 +46,8 @@ MainWindow::MainWindow(QWidget *parent) :
     // connect OpenGLScene::FrameFinished with TimeLine
     connect(ui->scene, &OpenGLScene::FrameFinished, ui->timeline, &TimeLineWidget::OnFrameFinished);
 
+    connect(ui->scene, &OpenGLScene::SceneFrameRangeChanged, ui->timeline, &TimeLineWidget::OnFrameRangeChanged);
+
 
 }
 
