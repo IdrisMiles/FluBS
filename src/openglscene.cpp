@@ -588,7 +588,7 @@ std::shared_ptr<Rigid> OpenGLScene::CreateRigidMesh(std::string meshFile, RigidP
         return CreateRigidCube();
     }
 
-    rigidMesh = MeshSampler::BaryCoord::SampleMesh(meshes[0], 10000);
+    rigidMesh = MeshSampler::BaryCoord::SampleMesh(meshes[0], rigidProps->particleRadius*0.6f);//  15000);
 
 
     rigidProps->numParticles = rigidMesh.verts.size();

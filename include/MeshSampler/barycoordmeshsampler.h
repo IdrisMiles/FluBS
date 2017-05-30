@@ -10,7 +10,7 @@ namespace MeshSampler
     namespace BaryCoord
     {
 
-        Mesh SampleMesh(const Mesh &_mesh, const int _numSamples);
+        Mesh SampleMesh(const Mesh &_mesh, const float sampleRad);//const int _numSamples);
 
     }
 

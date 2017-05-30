@@ -23,10 +23,11 @@ struct AcceptSample
     bool accept;
 };
 
-Mesh MeshSampler::BaryCoord::SampleMesh(const Mesh &_mesh, const int _numSamples)
+Mesh MeshSampler::BaryCoord::SampleMesh(const Mesh &_mesh, const float sampleRad)// const int _numSamples)
 {
 
     // iterate through triangles and get their area
+    float totalArea = 0.0f;
     std::vector<float> triAreas;
     for(auto &tri : _mesh.tris)
     {
@@ -38,6 +39,7 @@ Mesh MeshSampler::BaryCoord::SampleMesh(const Mesh &_mesh, const int _numSamples
         glm::vec3 e2 = v3 - v1;
 
         float area = 0.5f * glm::length(glm::cross(e1, e2));
+        totalArea += area;
 
         triAreas.push_back(area);
     }
@@ -76,8 +78,8 @@ Mesh MeshSampler::BaryCoord::SampleMesh(const Mesh &_mesh, const int _numSamples
 
 
     // figure out our sampling criteria
-    float totalArea = std::accumulate(triAreas.begin(), triAreas.end(), 0);
-    float sampleArea = totalArea / _numSamples;
+    float sampleArea = sampleRad*sampleRad*3.14f;
+    const int _numSamples = totalArea / sampleArea;
     float sampleDist = (sqrt(sampleArea));
 
 
@@ -89,7 +91,7 @@ Mesh MeshSampler::BaryCoord::SampleMesh(const Mesh &_mesh, const int _numSamples
 
     // Get sample points
     int currIteration = 0;
-    int maxIterations = 1000;
+    int maxIterations = _numSamples * 5;
     Mesh samples;
     while(samples.verts.size() < _numSamples && currIteration < maxIterations)
     {
