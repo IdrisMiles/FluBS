@@ -116,7 +116,7 @@ void OpenGLScene::SaveScene(QProgressBar *progress, QString fileName)
     scene["numCachedFrames"] = m_cache.GetCachedRange();
     scene["startFrame"] = 0;
     scene["endFrame"] = m_cache.GetCachedRange();
-    scene["cachedFiles"] = fileName.toStdString()+"/sim_";
+    scene["cachedFiles"] = QDir(fileName).dirName().toStdString()+"/sim_";
     progress->setValue(4);
     m_cache.CacheOutToDisk(fileName.toStdString()+"/sim_", progress);
 
@@ -199,7 +199,12 @@ void OpenGLScene::OpenScene(QProgressBar *progress, QString fileName)
     int numFrame = scene.at("numCachedFrames").get<int>();
     if(numFrame > 0)
     {
-        std::string cachedFileName = scene.at("cachedFiles").get<std::string>();
+        QDir simPath = QDir(fileName);
+        simPath.cdUp();
+        std::string scenePath = simPath.path().toStdString();
+        scenePath.push_back('/');
+
+        std::string cachedFileName =  scenePath + scene.at("cachedFiles").get<std::string>();
         if(!cachedFileName.empty())
         {
             std::vector<std::string> files;
