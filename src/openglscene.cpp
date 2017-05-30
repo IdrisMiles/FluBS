@@ -303,8 +303,8 @@ void OpenGLScene::RemoveFluidSolver()
 
 void OpenGLScene::RemoveFluid()
 {
-    auto renderIt = m_sphRenderers.cbegin();
-    for(;renderIt != m_sphRenderers.cend(); ++renderIt)
+    auto renderIt = m_sphRenderers.begin();
+    for(;renderIt != m_sphRenderers.end(); ++renderIt)
     {
         if((*renderIt)->GetSphParticles()->GetName() == m_fluid->GetName())
         {
@@ -321,8 +321,8 @@ void OpenGLScene::RemoveFluid()
 
 void OpenGLScene::RemoveAlgae()
 {
-    auto renderIt = m_sphRenderers.cbegin();
-    for(;renderIt != m_sphRenderers.cend(); ++renderIt)
+    auto renderIt = m_sphRenderers.begin();
+    for(;renderIt != m_sphRenderers.end(); ++renderIt)
     {
         if((*renderIt)->GetSphParticles()->GetName() == m_algae->GetName())
         {
@@ -340,8 +340,8 @@ void OpenGLScene::RemoveAlgae()
 void OpenGLScene::RemoveRigid(std::shared_ptr<Rigid> rigid)
 {
 
-    auto renderIt = m_sphRenderers.cbegin();
-    for(;renderIt != m_sphRenderers.cend(); ++renderIt)
+    auto renderIt = m_sphRenderers.begin();
+    for(;renderIt != m_sphRenderers.end(); ++renderIt)
     {
         if((*renderIt)->GetSphParticles()->GetName() == rigid->GetName())
         {
@@ -353,8 +353,9 @@ void OpenGLScene::RemoveRigid(std::shared_ptr<Rigid> rigid)
     m_fluidSystem->RemoveRigid(rigid);
 
 
-    auto rit = m_rigids.cbegin();
-    for(;rit != m_rigids.cend(); ++rit)
+    auto rit = m_rigids.begin();
+    for(;rit != m_rigids.
+        end(); ++rit)
     {
         if(*rit == rigid)
         {
@@ -427,6 +428,7 @@ void OpenGLScene::AddRigid(QProgressBar *progress, std::string type)
 
     //---------------------------------------------------------------
     // Add rigid to renderer
+    makeCurrent();
     m_sphRenderers.push_back(std::shared_ptr<SphParticleRenderer>(new SphParticleRenderer()));
     m_sphRenderers.back()->SetSphParticles(rigid);
     m_sphRenderers.back()->SetColour(glm::vec3(0.4f, 0.4f, 0.4f));

@@ -167,8 +167,8 @@ void FluidSystem::RemoveAlgae(std::shared_ptr<Algae> _algae)
 
 void FluidSystem::RemoveRigid(std::shared_ptr<Rigid> _rigid)
 {
-    auto it = m_staticRigids.cbegin();
-    for(;it != m_staticRigids.cend(); ++it)
+    auto it = m_staticRigids.begin();
+    for(;it != m_staticRigids.end(); ++it)
     {
         if(*it == _rigid)
         {
@@ -177,8 +177,8 @@ void FluidSystem::RemoveRigid(std::shared_ptr<Rigid> _rigid)
         }
     }
 
-    it = m_activeRigids.cbegin();
-    for(;it != m_activeRigids.cend(); ++it)
+    it = m_activeRigids.begin();
+    for(;it != m_activeRigids.end(); ++it)
     {
         if(*it == _rigid)
         {

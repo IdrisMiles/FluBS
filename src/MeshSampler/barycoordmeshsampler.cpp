@@ -88,7 +88,7 @@ Mesh MeshSampler::BaryCoord::SampleMesh(const Mesh &_mesh, const int _numSamples
 
 
     // Get sample points
-    int currIteration;
+    int currIteration = 0;
     int maxIterations = 1000;
     Mesh samples;
     while(samples.verts.size() < _numSamples && currIteration < maxIterations)
