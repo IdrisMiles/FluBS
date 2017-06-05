@@ -10,7 +10,6 @@ Rigid::Rigid(std::shared_ptr<RigidProperty> _rigidProperty, Mesh _mesh, std::str
     m_positionMapped = false;
     m_velocityMapped = false;
     m_densityMapped = false;
-    m_massMapped = false;
     m_pressureMapped = false;
     m_setupSolveSpecsInit = false;
 
@@ -159,7 +158,6 @@ void Rigid::InitCUDAMemory()
     cudaGraphicsGLRegisterBuffer(&m_posBO_CUDA, m_posBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
     cudaGraphicsGLRegisterBuffer(&m_velBO_CUDA, m_velBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
     cudaGraphicsGLRegisterBuffer(&m_denBO_CUDA, m_denBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
-    cudaGraphicsGLRegisterBuffer(&m_massBO_CUDA, m_massBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
     cudaGraphicsGLRegisterBuffer(&m_pressBO_CUDA, m_pressBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
 
     // particle forces
@@ -201,13 +199,6 @@ void Rigid::InitVAO()
     m_denBO.bind();
     m_denBO.allocate(m_property->numParticles * sizeof(float));
     m_denBO.release();
-
-
-    // Set up mass buffer object
-    m_massBO.create();
-    m_massBO.bind();
-    m_massBO.allocate(m_property->numParticles * sizeof(float));
-    m_massBO.release();
 
 
     // Set up pressure buffer object
@@ -271,11 +262,6 @@ void Rigid::UpdateCUDAMemory()
     m_denBO.allocate(m_property->numParticles * sizeof(float));
     m_denBO.release();
 
-    // Set up mass buffer object
-    m_massBO.bind();
-    m_massBO.allocate(m_property->numParticles * sizeof(float));
-    m_massBO.release();
-
     // Set up pressure buffer object
     m_pressBO.bind();
     m_pressBO.allocate(m_property->numParticles * sizeof(float));
@@ -290,7 +276,6 @@ void Rigid::MapCudaGLResources()
     GetPositionPtr();
     GetVelocityPtr();
     GetDensityPtr();
-    GetMassPtr();
     GetPressurePtr();
 }
 
@@ -299,7 +284,6 @@ void Rigid::ReleaseCudaGLResources()
     ReleasePositionPtr();
     ReleaseVelocityPtr();
     ReleaseDensityPtr();
-    ReleaseMassPtr();
     ReleasePressurePtr();
 }
 
@@ -408,7 +392,6 @@ void Rigid::GetParticleIds(std::vector<int> &_ids)
     }
     _ids.resize(this->m_property->numParticles);
     checkCudaErrors(cudaMemcpy(&_ids[0], GetParticleIdPtr(), this->m_property->numParticles * sizeof(unsigned int), cudaMemcpyDeviceToHost));
-    ReleaseParticleIdPtr();
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -440,13 +423,6 @@ void Rigid::SetParticleIds(const std::vector<int> &_ids)
 {
     assert(_ids.size() == m_property->numParticles);
     checkCudaErrors(cudaMemcpy(GetParticleIdPtr(), &_ids[0], m_property->numParticles * sizeof(unsigned int), cudaMemcpyHostToDevice));
-    ReleaseParticleIdPtr();
 }
 
 //--------------------------------------------------------------------------------------------------------------------
-
-
-//--------------------------------------------------------------------------------------------------------------------
-
-//--------------------------------------------------------------------------------------------------------------------
-

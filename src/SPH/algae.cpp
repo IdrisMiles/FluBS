@@ -11,7 +11,6 @@ Algae::Algae(std::shared_ptr<AlgaeProperty> _property, std::string _name):
     m_positionMapped = false;
     m_velocityMapped = false;
     m_densityMapped = false;
-    m_massMapped = false;
     m_pressureMapped = false;
     m_illumMapped = false;
 
@@ -31,7 +30,6 @@ Algae::Algae(std::shared_ptr<AlgaeProperty> _property, Mesh _mesh, std::string _
     m_positionMapped = false;
     m_velocityMapped = false;
     m_densityMapped = false;
-    m_massMapped = false;
     m_pressureMapped = false;
     m_illumMapped = false;
 
@@ -138,7 +136,6 @@ void Algae::MapCudaGLResources()
     GetPositionPtr();
     GetVelocityPtr();
     GetDensityPtr();
-    GetMassPtr();
     GetPressurePtr();
     GetIlluminationPtr();
 }
@@ -150,7 +147,6 @@ void Algae::ReleaseCudaGLResources()
     ReleasePositionPtr();
     ReleaseVelocityPtr();
     ReleaseDensityPtr();
-    ReleaseMassPtr();
     ReleasePressurePtr();
     ReleaseIlluminationPtr();
 }
@@ -177,7 +173,6 @@ void Algae::InitCUDAMemory()
     cudaGraphicsGLRegisterBuffer(&m_posBO_CUDA, m_posBO.bufferId(),cudaGraphicsMapFlagsNone);
     cudaGraphicsGLRegisterBuffer(&m_velBO_CUDA, m_velBO.bufferId(),cudaGraphicsMapFlagsNone);
     cudaGraphicsGLRegisterBuffer(&m_denBO_CUDA, m_denBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
-    cudaGraphicsGLRegisterBuffer(&m_massBO_CUDA, m_massBO.bufferId(),cudaGraphicsMapFlagsReadOnly);
     cudaGraphicsGLRegisterBuffer(&m_pressBO_CUDA, m_pressBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
     cudaGraphicsGLRegisterBuffer(&m_illumBO_CUDA, m_illumBO.bufferId(),cudaGraphicsMapFlagsNone);//WriteDiscard);
 
@@ -224,13 +219,6 @@ void Algae::InitVAO()
     m_denBO.bind();
     m_denBO.allocate(m_property->numParticles * sizeof(float));
     m_denBO.release();
-
-
-    // Set up mass buffer object
-    m_massBO.create();
-    m_massBO.bind();
-    m_massBO.allocate(m_property->numParticles * sizeof(float));
-    m_massBO.release();
 
 
     // Set up pressure buffer object
@@ -314,10 +302,6 @@ void Algae::UpdateCUDAMemory()
     m_denBO.allocate(m_property->numParticles * sizeof(float));
     m_denBO.release();
 
-    // Set up mass buffer object
-    m_massBO.bind();
-    m_massBO.allocate(m_property->numParticles * sizeof(float));
-    m_massBO.release();
 
     // Set up pressure buffer object
     m_pressBO.bind();
@@ -340,12 +324,6 @@ float *Algae::GetPrevPressurePtr()
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void Algae::ReleasePrevPressurePtr()
-{
-
-}
-
-//--------------------------------------------------------------------------------------------------------------------
 
 float *Algae::GetIlluminationPtr()
 {
@@ -404,78 +382,5 @@ void Algae::SetBioluminescentIntensities(const std::vector<float> &_bio)
 }
 
 //--------------------------------------------------------------------------------------------------------------------
-
-void Algae::GetPositions(std::vector<glm::vec3> &_pos)
-{
-    if(!m_init || this->m_property == nullptr)
-    {
-        return;
-    }
-
-    _pos.resize(this->m_property->numParticles);
-    checkCudaErrors(cudaMemcpy(&_pos[0], GetPositionPtr(), this->m_property->numParticles * sizeof(float3), cudaMemcpyDeviceToHost));
-    ReleasePositionPtr();
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void Algae::GetVelocities(std::vector<glm::vec3> &_vel)
-{
-    if(!m_init || this->m_property == nullptr)
-    {
-        return;
-    }
-    _vel.resize(this->m_property->numParticles);
-    checkCudaErrors(cudaMemcpy(&_vel[0], GetVelocityPtr(), this->m_property->numParticles * sizeof(float3), cudaMemcpyDeviceToHost));
-    ReleaseVelocityPtr();
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void Algae::GetParticleIds(std::vector<int> &_ids)
-{
-    if(!m_init || this->m_property == nullptr)
-    {
-        return;
-    }
-    _ids.resize(this->m_property->numParticles);
-    checkCudaErrors(cudaMemcpy(&_ids[0], GetParticleIdPtr(), this->m_property->numParticles * sizeof(unsigned int), cudaMemcpyDeviceToHost));
-    ReleaseParticleIdPtr();
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void Algae::SetPositions(const std::vector<glm::vec3> &_pos)
-{
-    assert(_pos.size() == m_property->numParticles);
-
-    cudaMemcpy(GetPositionPtr(), &_pos[0], m_property->numParticles * sizeof(float3), cudaMemcpyHostToDevice);
-    ReleasePositionPtr();
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void Algae::SetVelocities(const std::vector<glm::vec3> &_vel)
-{
-    assert(_vel.size() == m_property->numParticles);
-
-    cudaMemcpy(GetVelocityPtr(), &_vel[0], m_property->numParticles * sizeof(float3), cudaMemcpyHostToDevice);
-    ReleaseVelocityPtr();
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void Algae::SetParticleIds(const std::vector<int> &_ids)
-{
-    assert(_ids.size() == m_property->numParticles);
-    checkCudaErrors(cudaMemcpy(GetParticleIdPtr(), &_ids[0], m_property->numParticles * sizeof(unsigned int), cudaMemcpyHostToDevice));
-    ReleaseParticleIdPtr();
-}
-//--------------------------------------------------------------------------------------------------------------------
-
-//--------------------------------------------------------------------------------------------------------------------
-
 
 //--------------------------------------------------------------------------------------------------------------------

@@ -19,7 +19,6 @@ void SphParticleRenderer::SetSphParticles(std::shared_ptr<BaseSphParticle> _sphP
     m_posBO = std::make_shared<QOpenGLBuffer>(m_sphParticles->GetPosBO());
     m_velBO = std::make_shared<QOpenGLBuffer>(m_sphParticles->GetVelBO());
     m_denBO = std::make_shared<QOpenGLBuffer>(m_sphParticles->GetDenBO());
-    m_massBO = std::make_shared<QOpenGLBuffer>(m_sphParticles->GetMassBO());
     m_pressBO = std::make_shared<QOpenGLBuffer>(m_sphParticles->GetPressBO());
 
     Init();
@@ -148,10 +147,6 @@ void SphParticleRenderer::InitFluidVAO()
     m_denBO->release();
 
 
-    // Set up mass buffer object
-    m_massBO->bind();
-    m_massBO->release();
-
 
     // Set up pressure buffer object
     m_pressBO->bind();
@@ -195,11 +190,6 @@ void SphParticleRenderer::UpdateFluidVAO()
     m_denBO->release();
 
 
-    // Set up mass buffer object
-    m_massBO->bind();
-    m_massBO->release();
-
-
     // Set up pressure buffer object
     m_pressBO->bind();
     m_pressBO->release();
@@ -219,8 +209,6 @@ void SphParticleRenderer::CleanUpGL()
     m_velBO = nullptr;
 
     m_denBO = nullptr;
-
-    m_massBO = nullptr;
 
     m_pressBO = nullptr;
 

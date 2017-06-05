@@ -2,7 +2,7 @@
 #define RIGID_H
 
 // sph includes
-#include "SPH/isphparticles.h"
+#include "SPH/basesphparticle.h"
 #include "SPH/rigidproperty.h"
 
 

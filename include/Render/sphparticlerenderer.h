@@ -7,7 +7,7 @@
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLBuffer>
 
-#include <SPH/isphparticles.h>
+#include <SPH/basesphparticle.h>
 
 class SphParticleRenderer
 {
@@ -43,7 +43,6 @@ protected:
     std::shared_ptr<QOpenGLBuffer> m_posBO;
     std::shared_ptr<QOpenGLBuffer> m_velBO;
     std::shared_ptr<QOpenGLBuffer> m_denBO;
-    std::shared_ptr<QOpenGLBuffer> m_massBO;
     std::shared_ptr<QOpenGLBuffer> m_pressBO;
 
     QOpenGLShaderProgram m_shaderProg;

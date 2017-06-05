@@ -21,7 +21,6 @@ void BioluminescentFluidRenderer::SetSphParticles(std::shared_ptr<BaseSphParticl
     m_posBO = std::make_shared<QOpenGLBuffer>(m_sphParticles->GetPosBO());
     m_velBO = std::make_shared<QOpenGLBuffer>(m_sphParticles->GetVelBO());
     m_denBO = std::make_shared<QOpenGLBuffer>(m_sphParticles->GetDenBO());
-    m_massBO = std::make_shared<QOpenGLBuffer>(m_sphParticles->GetMassBO());
     m_pressBO = std::make_shared<QOpenGLBuffer>(m_sphParticles->GetPressBO());
 
     m_algaeParticles = _algaeParticles;
@@ -331,7 +330,6 @@ void BioluminescentFluidRenderer::CleanUpGL()
     m_posBO = nullptr;
     m_velBO = nullptr;
     m_denBO = nullptr;
-    m_massBO = nullptr;
     m_pressBO = nullptr;
 
     m_algaePosBO = nullptr;

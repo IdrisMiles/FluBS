@@ -11,7 +11,6 @@ Fluid::Fluid(std::shared_ptr<FluidProperty> _fluidProperty, std::string _name):
     m_positionMapped = false;
     m_velocityMapped = false;
     m_densityMapped = false;
-    m_massMapped = false;
     m_pressureMapped = false;
     m_setupSolveSpecsInit = false;
 
@@ -29,7 +28,6 @@ Fluid::Fluid(std::shared_ptr<FluidProperty> _fluidProperty, Mesh _mesh, std::str
     m_positionMapped = false;
     m_velocityMapped = false;
     m_densityMapped = false;
-    m_massMapped = false;
     m_pressureMapped = false;
 
     Init();
@@ -152,7 +150,6 @@ void Fluid::InitCUDAMemory()
     checkCudaErrorsMsg(cudaGraphicsGLRegisterBuffer(&m_posBO_CUDA, m_posBO.bufferId(),cudaGraphicsMapFlagsNone),"");
     checkCudaErrorsMsg(cudaGraphicsGLRegisterBuffer(&m_velBO_CUDA, m_velBO.bufferId(),cudaGraphicsMapFlagsNone),"");
     checkCudaErrorsMsg(cudaGraphicsGLRegisterBuffer(&m_denBO_CUDA, m_denBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard),"");
-    checkCudaErrorsMsg(cudaGraphicsGLRegisterBuffer(&m_massBO_CUDA, m_massBO.bufferId(),cudaGraphicsMapFlagsReadOnly),"");
     checkCudaErrorsMsg(cudaGraphicsGLRegisterBuffer(&m_pressBO_CUDA, m_pressBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard),"");
 
     // particle forces
@@ -202,13 +199,6 @@ void Fluid::InitVAO()
     m_denBO.bind();
     m_denBO.allocate(m_property->numParticles * sizeof(float));
     m_denBO.release();
-
-
-    // Set up mass buffer object
-    m_massBO.create();
-    m_massBO.bind();
-    m_massBO.allocate(m_property->numParticles * sizeof(float));
-    m_massBO.release();
 
 
     // Set up pressure buffer object
@@ -286,11 +276,6 @@ void Fluid::UpdateCUDAMemory()
     m_denBO.allocate(m_property->numParticles * sizeof(float));
     m_denBO.release();
 
-    // Set up mass buffer object
-    m_massBO.bind();
-    m_massBO.allocate(m_property->numParticles * sizeof(float));
-    m_massBO.release();
-
     // Set up pressure buffer object
     m_pressBO.bind();
     m_pressBO.allocate(m_property->numParticles * sizeof(float));
@@ -310,7 +295,6 @@ void Fluid::MapCudaGLResources()
     GetPositionPtr();
     GetVelocityPtr();
     GetDensityPtr();
-    GetMassPtr();
     GetPressurePtr();
 }
 
@@ -321,7 +305,6 @@ void Fluid::ReleaseCudaGLResources()
     ReleasePositionPtr();
     ReleaseVelocityPtr();
     ReleaseDensityPtr();
-    ReleaseMassPtr();
     ReleasePressurePtr();
 }
 
@@ -398,7 +381,6 @@ void Fluid::GetParticleIds(std::vector<int> &_ids)
     }
     _ids.resize(this->m_property->numParticles);
     checkCudaErrors(cudaMemcpy(&_ids[0], GetParticleIdPtr(), this->m_property->numParticles * sizeof(unsigned int), cudaMemcpyDeviceToHost));
-    ReleaseParticleIdPtr();
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -430,6 +412,5 @@ void Fluid::SetParticleIds(const std::vector<int> &_ids)
 {
     assert(_ids.size() == m_property->numParticles);
     checkCudaErrors(cudaMemcpy(GetParticleIdPtr(), &_ids[0], m_property->numParticles * sizeof(unsigned int), cudaMemcpyHostToDevice));
-    ReleaseParticleIdPtr();
 }
 //--------------------------------------------------------------------------------------------------------------------

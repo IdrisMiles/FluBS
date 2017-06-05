@@ -1,7 +1,7 @@
 #ifndef SPH_H
 #define SPH_H
 
-#include "SPH/isphparticles.h"
+#include "SPH/basesphparticle.h"
 #include "SPH/fluid.h"
 #include "SPH/rigid.h"
 #include "SPH/algae.h"

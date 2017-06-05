@@ -3,7 +3,7 @@
 
 // sph includes
 #include "SPH/fluidproperty.h"
-#include "SPH/isphparticles.h"
+#include "SPH/basesphparticle.h"
 
 
 

@@ -1,4 +1,4 @@
-#include "SPH/isphparticles.h"
+#include "SPH/basesphparticle.h"
 #include <assert.h>
 
 BaseSphParticle::BaseSphParticle(std::shared_ptr<SphParticleProperty> _property, std::string _name):
@@ -134,7 +134,6 @@ void BaseSphParticle::InitCUDAMemory()
     cudaGraphicsGLRegisterBuffer(&m_posBO_CUDA, m_posBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
     cudaGraphicsGLRegisterBuffer(&m_velBO_CUDA, m_velBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
     cudaGraphicsGLRegisterBuffer(&m_denBO_CUDA, m_denBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
-    cudaGraphicsGLRegisterBuffer(&m_massBO_CUDA, m_massBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
     cudaGraphicsGLRegisterBuffer(&m_pressBO_CUDA, m_pressBO.bufferId(),cudaGraphicsMapFlagsWriteDiscard);
 
     // particle forces
@@ -174,13 +173,6 @@ void BaseSphParticle::InitVAO()
     m_denBO.bind();
     m_denBO.allocate(m_property->numParticles * sizeof(float));
     m_denBO.release();
-
-
-    // Set up mass buffer object
-    m_massBO.create();
-    m_massBO.bind();
-    m_massBO.allocate(m_property->numParticles * sizeof(float));
-    m_massBO.release();
 
 
     // Set up pressure buffer object
@@ -223,9 +215,6 @@ void BaseSphParticle::CleanUpGL()
 
     cudaGraphicsUnregisterResource(m_denBO_CUDA);
     m_denBO.destroy();
-
-    cudaGraphicsUnregisterResource(m_massBO_CUDA);
-    m_massBO.destroy();
 
     cudaGraphicsUnregisterResource(m_pressBO_CUDA);
     m_pressBO.destroy();
@@ -270,11 +259,6 @@ void BaseSphParticle::UpdateCUDAMemory()
     m_denBO.allocate(m_property->numParticles * sizeof(float));
     m_denBO.release();
 
-    // Set up mass buffer object
-    m_massBO.bind();
-    m_massBO.allocate(m_property->numParticles * sizeof(float));
-    m_massBO.release();
-
     // Set up pressure buffer object
     m_pressBO.bind();
     m_pressBO.allocate(m_property->numParticles * sizeof(float));
@@ -289,7 +273,6 @@ void BaseSphParticle::MapCudaGLResources()
     GetPositionPtr();
     GetVelocityPtr();
     GetDensityPtr();
-    GetMassPtr();
     GetPressurePtr();
 }
 
@@ -298,7 +281,6 @@ void BaseSphParticle::ReleaseCudaGLResources()
     ReleasePositionPtr();
     ReleaseVelocityPtr();
     ReleaseDensityPtr();
-    ReleaseMassPtr();
     ReleasePressurePtr();
 }
 
@@ -374,29 +356,6 @@ void BaseSphParticle::ReleaseDensityPtr()
     }
 }
 
-float *BaseSphParticle::GetMassPtr()
-{
-    if(!m_massMapped)
-    {
-        size_t numBytesMass;
-        cudaGraphicsMapResources(1, &m_massBO_CUDA, 0);
-        cudaGraphicsResourceGetMappedPointer((void **)&d_massPtr, &numBytesMass, m_massBO_CUDA);
-
-        m_massMapped = true;
-    }
-
-    return d_massPtr;
-}
-
-void BaseSphParticle::ReleaseMassPtr()
-{
-    if(m_massMapped)
-    {
-        cudaGraphicsUnmapResources(1, &m_massBO_CUDA, 0);
-        m_massMapped = false;
-    }
-}
-
 
 float *BaseSphParticle::GetPressurePtr()
 {
@@ -426,19 +385,9 @@ float3 *BaseSphParticle::GetPressureForcePtr()
     return d_pressureForcePtr;
 }
 
-void BaseSphParticle::ReleasePressureForcePtr()
-{
-
-}
-
 float3 *BaseSphParticle::GetGravityForcePtr()
 {
     return d_gravityForcePtr;
-}
-
-void BaseSphParticle::ReleaseGravityForcePtr()
-{
-
 }
 
 float3 *BaseSphParticle::GetExternalForcePtr()
@@ -446,18 +395,9 @@ float3 *BaseSphParticle::GetExternalForcePtr()
     return d_externalForcePtr;
 }
 
-void BaseSphParticle::ReleaseExternalForcePtr()
-{
-
-}
-
 float3 *BaseSphParticle::GetTotalForcePtr()
 {
     return d_totalForcePtr;
-}
-
-void BaseSphParticle::ReleaseTotalForcePtr()
-{
 }
 
 unsigned int *BaseSphParticle::GetParticleHashIdPtr()
@@ -465,19 +405,9 @@ unsigned int *BaseSphParticle::GetParticleHashIdPtr()
     return d_particleHashIdPtr;
 }
 
-void BaseSphParticle::ReleaseParticleHashIdPtr()
-{
-
-}
-
 unsigned int *BaseSphParticle::GetCellOccupancyPtr()
 {
     return d_cellOccupancyPtr;
-}
-
-void BaseSphParticle::ReleaseCellOccupancyPtr()
-{
-
 }
 
 unsigned int *BaseSphParticle::GetCellParticleIdxPtr()
@@ -485,20 +415,11 @@ unsigned int *BaseSphParticle::GetCellParticleIdxPtr()
     return d_cellParticleIdxPtr;
 }
 
-void BaseSphParticle::ReleaseCellParticleIdxPtr()
-{
-
-}
-
 unsigned int *BaseSphParticle::GetParticleIdPtr()
 {
     return d_particleIdPtr;
 }
 
-void BaseSphParticle::ReleaseParticleIdPtr()
-{
-
-}
 
 unsigned int BaseSphParticle::GetMaxCellOcc()
 {
@@ -524,11 +445,6 @@ QOpenGLBuffer &BaseSphParticle::GetVelBO()
 QOpenGLBuffer &BaseSphParticle::GetDenBO()
 {
     return m_denBO;
-}
-
-QOpenGLBuffer &BaseSphParticle::GetMassBO()
-{
-    return m_massBO;
 }
 
 QOpenGLBuffer &BaseSphParticle::GetPressBO()
@@ -574,7 +490,6 @@ void BaseSphParticle::GetParticleIds(std::vector<int> &_ids)
     }
     _ids.resize(this->m_property->numParticles);
     checkCudaErrors(cudaMemcpy(&_ids[0], GetParticleIdPtr(), this->m_property->numParticles * sizeof(unsigned int), cudaMemcpyDeviceToHost));
-    ReleaseParticleIdPtr();
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -603,7 +518,6 @@ void BaseSphParticle::SetParticleIds(const std::vector<int> &_ids)
 {
     assert(_ids.size() == m_property->numParticles);
     checkCudaErrors(cudaMemcpy(GetParticleIdPtr(), &_ids[0], m_property->numParticles * sizeof(unsigned int), cudaMemcpyHostToDevice));
-    ReleaseParticleIdPtr();
 }
 
 //--------------------------------------------------------------------------------------------------------------------
