@@ -1,8 +1,19 @@
 #ifndef GPUDATA_H
 #define GPUDATA_H
 
+//--------------------------------------------------------------------------------------------------------------
+
 #include <cuda_runtime.h>
 
+//--------------------------------------------------------------------------------------------------------------
+/// @author Idris Miles
+/// @version 1.0
+/// @date 01/06/2017
+//--------------------------------------------------------------------------------------------------------------
+
+
+/// @struct ParticleGpuData
+/// @brief structure that holds GPU data and can be used in CUDA kernels
 struct ParticleGpuData{
     float3 *pos;
     float3 *vel;
@@ -28,6 +39,8 @@ struct ParticleGpuData{
     uint maxCellOcc;
 };
 
+/// @struct FluidGpuData
+/// @brief Inherits from ParticleGpuData, structure that holds GPU data and can be used in CUDA kernels
 struct FluidGpuData : ParticleGpuData{
     float3 *viscousForce;
     float3 *surfaceTensionForce;
@@ -38,6 +51,8 @@ struct FluidGpuData : ParticleGpuData{
     float viscosity;
 };
 
+/// @struct AlgaeGpuData
+/// @brief Inherits from ParticleGpuData, structure that holds GPU data and can be used in CUDA kernels
 struct AlgaeGpuData : ParticleGpuData
 {
     float *prevPressure;
@@ -48,10 +63,14 @@ struct AlgaeGpuData : ParticleGpuData
     float deactionRate;
 };
 
+
+/// @struct RigidGpuData
+/// @brief Inherits from ParticleGpuData, structure that holds GPU data and can be used in CUDA kernels
 struct RigidGpuData : ParticleGpuData
 {
     float *volume;
 };
 
+//--------------------------------------------------------------------------------------------------------------
 
 #endif // GPUDATA_H

@@ -1,48 +1,73 @@
 #ifndef FLUID_H
 #define FLUID_H
 
+//--------------------------------------------------------------------------------------------------------------
+
 // sph includes
 #include "SPH/fluidproperty.h"
 #include "SPH/basesphparticle.h"
 
 
+//--------------------------------------------------------------------------------------------------------------
+/// @author Idris Miles
+/// @version 1.0
+/// @date 01/06/2017
+//--------------------------------------------------------------------------------------------------------------
 
+
+/// @class Fluid
+/// @brief Fluid inherits from BaseSphParticle, this class holds all data and functionality specific to fluid particles
 class Fluid : public BaseSphParticle
 {
 
 public:
+    /// @brief Constructor
     Fluid(std::shared_ptr<FluidProperty> _fluidProperty, std::string _name = "fluid");
+
+    /// @brief Constructor
     Fluid(std::shared_ptr<FluidProperty> _rigidProperty, Mesh _mesh, std::string _name = "fluid");
+
+    /// @brief Destructor
     virtual ~Fluid();
 
+    //------------------------------------------------------------------------------------------------------------
+
+    /// @brief Method to set up certain internal data dependant on the solver properties, such as the hash id, cell occupancy arrays
     virtual void SetupSolveSpecs(const FluidSolverProperty &_solverProps);
 
+    /// @brief Method to get FluidProperty associated with this instance
     virtual FluidProperty *GetProperty();
+
+    /// @brief Method to set an instances properties
     virtual void SetProperty(FluidProperty _property);
 
+    /// @brief Method to get GPU particle data that can be used directly in CUDA kernel,
+    /// this is used within the sph library
     FluidGpuData GetFluidGpuData();
 
+    /// @brief Method to map CUDA resources in one call, so we can use memory also being used by OpenGL
     void MapCudaGLResources();
+
+    /// @brief Method to Release CUDA OpenGL resources all in one call.
     void ReleaseCudaGLResources();
 
+    /// @brief Method to get pointer to CUDA memory holding viscous force data
     float3 *GetViscForcePtr();
 
+    /// @brief Method to get pointer to CUDA memory holding Surface Tension Force data
     float3 *GetSurfTenForcePtr();
 
+    //------------------------------------------------------------------------------------------------------------
+    // PCI SPH stuff
+
+    /// @brief Method to get pointer to CUDA memory holding predicted position data - for PCI SPH
     float3 *GetPredictPosPtr();
 
+    /// @brief Method to get pointer to CUDA memory holding predicted velocity data - for PCI SPH
     float3 *GetPredictVelPtr();
 
+    /// @brief Method to get pointer to CUDA memory holding density error data - for PCI SPH
     float *GetDensityErrPtr();
-
-
-    virtual void GetPositions(std::vector<glm::vec3> &_pos);
-    virtual void GetVelocities(std::vector<glm::vec3> &_vel);
-    virtual void GetParticleIds(std::vector<int> &_ids);
-
-    virtual void SetPositions(const std::vector<glm::vec3> &_pos);
-    virtual void SetVelocities(const std::vector<glm::vec3> &_vel);
-    virtual void SetParticleIds(const std::vector<int> &_ids);
 
 
 protected:
@@ -76,5 +101,7 @@ protected:
 
 
 };
+
+//--------------------------------------------------------------------------------------------------------------
 
 #endif // FLUID_H

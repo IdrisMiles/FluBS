@@ -3,10 +3,19 @@
 
 #include "SPH/sphparticlepropeprty.h"
 
+//--------------------------------------------------------------------------------------------------------------
+/// @author Idris Miles
+/// @version 1.0
+/// @date 01/06/2017
+//--------------------------------------------------------------------------------------------------------------
+
+/// @class RigidProperty
+/// @brief This class holds the properties of the Rigid sph particle
 class RigidProperty : public SphParticleProperty
 {
 
 public:
+    /// @brief constructor
     RigidProperty(int _static = true,
                   int _kinematic = false,
                   unsigned int _numParticles = 8000,
@@ -24,6 +33,7 @@ public:
         particleMass = restDensity * (dia * dia * dia);
     }
 
+    /// @brief destructor
     ~RigidProperty(){}
 
     //--------------------------------------------------------------------------------------------------------------
@@ -32,6 +42,7 @@ public:
     int kinematic;
 };
 
+//--------------------------------------------------------------------------------------------------------------
 
 void to_json(json& j, const RigidProperty& p);
 void from_json(const json& j, RigidProperty& p);

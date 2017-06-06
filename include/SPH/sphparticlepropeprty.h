@@ -3,12 +3,21 @@
 
 #include <cuda_runtime.h>
 
+//--------------------------------------------------------------------------------------------------------------
+/// @author Idris Miles
+/// @version 1.0
+/// @date 01/06/2017
+//--------------------------------------------------------------------------------------------------------------
 
+
+/// @class SphParticleProperty
+/// @brief This class holds the properties of the BaseSphParticle
 class SphParticleProperty
 {
 
 public:
 
+    /// @brief constructor
     SphParticleProperty(unsigned int _numParticles = 8000,
                         float _particleMass = 1.0f,
                         float _particleRadius = 0.2f,
@@ -27,6 +36,7 @@ public:
               particleMass = restDensity * (dia * dia * dia);
           }
 
+    /// @brief destructor
     ~SphParticleProperty(){}
 
 
@@ -38,7 +48,7 @@ public:
     float3 gravity;
 };
 
-
+//--------------------------------------------------------------------------------------------------------------
 
 #include "json/src/json.hpp"
 using json = nlohmann::json;

@@ -1,13 +1,23 @@
 #ifndef FLUIDSOLVERPROPERTY_H
 #define FLUIDSOLVERPROPERTY_H
 
+//--------------------------------------------------------------------------------------------------------------
+
 #include "json/src/json.hpp"
+
+//--------------------------------------------------------------------------------------------------------------
+/// @author Idris Miles
+/// @version 1.0
+/// @date 01/06/2017
+//--------------------------------------------------------------------------------------------------------------
+
 using json = nlohmann::json;
 
 
 class FluidSolverProperty
 {
 public:
+    /// @brief constructor
     FluidSolverProperty(float _smoothingLength = 1.2f,
                         float _deltaTime = 0.005f,
                         unsigned int _solveIterations = 1,
@@ -22,6 +32,7 @@ public:
 
     }
 
+    /// @brief copy constructor
     FluidSolverProperty(const FluidSolverProperty &_copy)
     {
         this->smoothingLength = _copy.smoothingLength;
@@ -31,6 +42,7 @@ public:
         this->gridCellWidth = _copy.gridCellWidth;
     }
 
+    /// @brief assignment operator
     FluidSolverProperty operator= (const FluidSolverProperty &_rhs)
     {
         this->smoothingLength = _rhs.smoothingLength;
@@ -40,6 +52,7 @@ public:
         this->gridCellWidth = _rhs.gridCellWidth;
     }
 
+    /// @brief destructor
     ~FluidSolverProperty(){}
 
 
@@ -52,7 +65,11 @@ public:
 
 };
 
+//--------------------------------------------------------------------------------------------------------------
+
 void to_json(json& j, const FluidSolverProperty& p);
 void from_json(const json& j, FluidSolverProperty& p);
+
+//--------------------------------------------------------------------------------------------------------------
 
 #endif // FLUIDSOLVERPROPERTY_H

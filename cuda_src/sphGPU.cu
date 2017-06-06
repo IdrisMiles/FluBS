@@ -418,5 +418,3 @@ void sphGPU::ComputeBioluminescence(AlgaeGpuData particleData, const uint gridRe
 
 
 //--------------------------------------------------------------------------------------------------------------------
-// PSCI SPH
-

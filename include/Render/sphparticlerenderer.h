@@ -1,6 +1,8 @@
 #ifndef SPHPARTICLERENDERER_H
 #define SPHPARTICLERENDERER_H
 
+//--------------------------------------------------------------------------------------------------------------
+
 // OpenGL includes
 #include <GL/glew.h>
 #include <QOpenGLShaderProgram>
@@ -9,23 +11,43 @@
 
 #include <SPH/basesphparticle.h>
 
+//--------------------------------------------------------------------------------------------------------------
+/// @author Idris Miles
+/// @version 1.0
+/// @date 01/06/2017
+//--------------------------------------------------------------------------------------------------------------
+
+
+/// @class SphParticleRenderer
+/// @brief the class handles rendering of sph particles as sprites
 class SphParticleRenderer
 {
 public:
+    /// @brief constructor
     SphParticleRenderer();
+
+    /// @brief destructor
     virtual ~SphParticleRenderer();
 
 
+    /// @brief Method to set the sph particles to be rendered
     virtual void SetSphParticles(std::shared_ptr<BaseSphParticle> _sphParticles);
+
+    /// @brief Method to get the sph particles that are being rendered
     virtual std::shared_ptr<BaseSphParticle> GetSphParticles();
 
+    /// @brief Method to draw sph particles
     virtual void Draw();
+
+    /// @brief method to set shader uniforms
     virtual void SetShaderUniforms(const glm::mat4 &_projMat,
                            const glm::mat4 &_viewMat,
                            const glm::mat4 &_modelMat,
                            const glm::mat3 &_normalMat,
                            const glm::vec3 &_lightPos,
                            const glm::vec3 &_camPos);
+
+    /// @brief Method to set particle colour
     void SetColour(const glm::vec3 &_colour);
 
 

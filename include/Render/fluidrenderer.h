@@ -7,14 +7,33 @@
 #include <QOpenGLFramebufferObject>
 #include <QOpenGLTexture>
 
+
+//--------------------------------------------------------------------------------------------------------------
+/// @author Idris Miles
+/// @version 1.0
+/// @date 01/06/2017
+//--------------------------------------------------------------------------------------------------------------
+
+
+/// @class FluidRenderer
+/// @brief Inherits from SphParticleRenderer. This class handles rendering fluid particles as fluid using screen space fluid rendering technique
 class FluidRenderer : public SphParticleRenderer
 {
 public:
+
+    /// @brief Constructor
     FluidRenderer(int _w = 1280, int _h = 720);
+
+    /// @brief destructor
     virtual ~FluidRenderer();
 
+    /// @brief Method to set sph particles to be rendered as fluid
     virtual void SetSphParticles(std::shared_ptr<BaseSphParticle> _sphParticles);
+
+    /// @brief method to draw fluid
     virtual void Draw();
+
+    /// @brief Method to set shader uniforms
     virtual void SetShaderUniforms(const glm::mat4 &_projMat,
                            const glm::mat4 &_viewMat,
                            const glm::mat4 &_modelMat,
@@ -22,7 +41,10 @@ public:
                            const glm::vec3 &_lightPos,
                            const glm::vec3 &_camPos);
 
+    /// @brief Method to set frame size, important as there are several full screen passes to utilize screen space rendering
     void SetFrameSize(int _w, int _h);
+
+    /// @brief Method to set cube map used for reflections and refractions.
     void SetCubeMap(std::shared_ptr<QOpenGLTexture> _cubemap);
 
 protected:
@@ -60,5 +82,7 @@ protected:
 
     std::shared_ptr<QOpenGLTexture> m_cubeMapTex;
 };
+
+//--------------------------------------------------------------------------------------------------------------
 
 #endif // FLUIDRENDERER_H

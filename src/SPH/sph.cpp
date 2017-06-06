@@ -5,7 +5,6 @@ void sph::ResetProperties(const FluidSolverProperty &_solverProps,
                           std::shared_ptr<BaseSphParticle> _sphParticles)
 {
     const uint numCells = _solverProps.gridResolution * _solverProps.gridResolution * _solverProps.gridResolution;
-    auto fluidProps =  _sphParticles->GetProperty();
 
     ParticleGpuData particle = _sphParticles->GetParticleGpuData();
 
@@ -85,7 +84,6 @@ void sph::ResetProperties(const FluidSolverProperty &_solverProps,
 void sph::ResetTotalForce(const FluidSolverProperty &_solverProps,
                           std::shared_ptr<BaseSphParticle> _sphParticles)
 {
-    const uint numCells = _solverProps.gridResolution * _solverProps.gridResolution * _solverProps.gridResolution;
     auto fluidProps =  _sphParticles->GetProperty();
 
     sphGPU::ResetTotalForce(_sphParticles->GetTotalForcePtr(), fluidProps->numParticles);
@@ -194,7 +192,6 @@ void sph::ComputeDensity(const FluidSolverProperty &_solverProps,
                          std::shared_ptr<BaseSphParticle> _fluid,
                          const bool accumulate)
 {
-    auto fluidProps =  _fluid->GetProperty();
     ParticleGpuData particle = _fluid->GetParticleGpuData();
 
     sphGPU::ComputeDensity(particle, _solverProps.gridResolution, accumulate);
@@ -371,7 +368,6 @@ void sph::ComputeSurfaceTensionForce(const FluidSolverProperty &_solverProps,
                                      std::shared_ptr<Fluid> _fluid)
 {
     FluidGpuData particleData = _fluid->GetFluidGpuData();
-    auto fluidProps = _fluid->GetProperty();
 
     sphGPU::ComputeSurfaceTensionForce(particleData, _solverProps.gridResolution);
 }
@@ -473,55 +469,3 @@ void sph::ComputeBioluminescence(const FluidSolverProperty &_solverProps,
     sphGPU::ComputeBioluminescence(particleData, _solverProps.gridResolution, _solverProps.deltaTime/_solverProps.solveIterations);
 }
 
-
-
-
-//--------------------------------------------------------------------------------------------------------------------
-// PCISPH functions
-
-void sph::pci::PredictIntegrate(const FluidSolverProperty &_solverProps,
-                                std::shared_ptr<Fluid> _fluid)
-{
-
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void sph::pci::PredictDensity(const FluidSolverProperty &_solverProps,
-                              std::shared_ptr<Fluid> _fluid)
-{
-
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void sph::pci::predictDensityVariation(const FluidSolverProperty &_solverProps,
-                                       std::shared_ptr<Fluid> _fluid)
-{
-
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void sph::pci::ComputeMaxDensityVariation(const FluidSolverProperty &_solverProps,
-                                          std::shared_ptr<Fluid> _fluid,
-                                          float &_maxDenVar)
-{
-
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void sph::pci::UpdatePressure(const FluidSolverProperty &_solverProps,
-                              std::shared_ptr<Fluid> _fluid)
-{
-
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void sph::pci::ComputePressureForce(const FluidSolverProperty &_solverProps,
-                                    std::shared_ptr<Fluid> _fluid)
-{
-
-}

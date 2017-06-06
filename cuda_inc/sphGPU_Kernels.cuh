@@ -1,11 +1,22 @@
 #ifndef SPHGPU_KERNELS_H
 #define SPHGPU_KERNELS_H
 
+//--------------------------------------------------------------------------------------------------------------
 
 // CUDA includes
 #include <cuda_runtime.h>
 #include "SPH/gpudata.h"
 
+
+//--------------------------------------------------------------------------------------------------------------
+/// @author Idris Miles
+/// @version 1.0
+/// @date 01/06/2017
+//--------------------------------------------------------------------------------------------------------------
+
+
+/// @namespace sphGPU_Kernels
+/// @brief This namespace provides a library of CUDA kernels for SPH operations.
 namespace sphGPU_Kernels
 {
 
@@ -104,5 +115,7 @@ namespace sphGPU_Kernels
 
 
 }
+
+//--------------------------------------------------------------------------------------------------------------
 
 #endif // SPHGPU_KERNELS_H

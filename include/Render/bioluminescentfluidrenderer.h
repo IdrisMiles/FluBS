@@ -1,18 +1,39 @@
 #ifndef BIOLUMINESCENTFLUIDRENDERER_H
 #define BIOLUMINESCENTFLUIDRENDERER_H
 
+//--------------------------------------------------------------------------------------------------------------
+
 #include "Render/fluidrenderer.h"
 #include <SPH/algae.h>
 
+
+
+//--------------------------------------------------------------------------------------------------------------
+/// @author Idris Miles
+/// @version 1.0
+/// @date 01/06/2017
+//--------------------------------------------------------------------------------------------------------------
+
+
+/// @class BioluminescentFluidRenderer
+/// @brief Inherits from FluidRenderer. This class handles rendering fluid and algae particles as bioluminescent fluid using an adapted screen space fluid rendering technique
 class BioluminescentFluidRenderer : public FluidRenderer
 {
 public:
+    /// @brief constructor
     BioluminescentFluidRenderer(int _w = 1280, int _h = 720);
+
+    /// @brief destructor
     virtual ~BioluminescentFluidRenderer();
 
+    /// @brief Method to set fluid and algae particles to be rendered
     virtual void SetSphParticles(std::shared_ptr<BaseSphParticle> _sphParticles,
                                  std::shared_ptr<Algae> _algaeParticles);
+
+    /// @brief Method to draw bioluminescent fluid
     virtual void Draw();
+
+    /// @brief Method to set shader uniforms
     virtual void SetShaderUniforms(const glm::mat4 &_projMat,
                            const glm::mat4 &_viewMat,
                            const glm::mat4 &_modelMat,
@@ -52,5 +73,7 @@ protected:
 
 
 };
+
+//--------------------------------------------------------------------------------------------------------------
 
 #endif // BIOLUMINESCENTFLUIDRENDERER_H

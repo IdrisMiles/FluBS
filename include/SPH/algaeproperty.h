@@ -4,10 +4,20 @@
 
 #include "SPH/sphparticlepropeprty.h"
 
+//--------------------------------------------------------------------------------------------------------------
+/// @author Idris Miles
+/// @version 1.0
+/// @date 01/06/2017
+//--------------------------------------------------------------------------------------------------------------
+
+
+/// @class FluidProperty
+/// @brief This class holds the properties of the Fluid sph particle
 class AlgaeProperty : public SphParticleProperty
 {
 
 public:
+    /// @brief constructor
     AlgaeProperty(float _bioluminescenceThreshold = 200.0f,
                   float _reactionRate = 1.0f,
                   float _deactionRate = 1.0f,
@@ -26,6 +36,7 @@ public:
         particleMass = restDensity * (dia * dia * dia);
     }
 
+    /// @brief destructor
     ~AlgaeProperty(){}
 
     //--------------------------------------------------------------------------------------------------------------
@@ -35,8 +46,11 @@ public:
     float deactionRate;
 };
 
+//--------------------------------------------------------------------------------------------------------------
 
 void to_json(json& j, const AlgaeProperty& p);
 void from_json(const json& j, AlgaeProperty& p);
+
+//--------------------------------------------------------------------------------------------------------------
 
 #endif // ALGAEPROPERTIES_H

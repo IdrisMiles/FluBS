@@ -1,6 +1,8 @@
 #ifndef CACHESYSTEM_H
 #define CACHESYSTEM_H
 
+//--------------------------------------------------------------------------------------------------------------
+
 #include <vector>
 #include <thread>
 #include <utility>
@@ -13,6 +15,13 @@
 #include "json/src/json.hpp"
 
 #include "FluidSystem/fluidsystem.h"
+
+
+//--------------------------------------------------------------------------------------------------------------
+/// @author Idris Miles
+/// @version 1.0
+/// @date 01/06/2017
+//--------------------------------------------------------------------------------------------------------------
 
 
 #define IS_CACHED(status) (status & CacheStatus::CACHED)
@@ -31,7 +40,12 @@ void from_json(const json& j, glm::vec3& v);
 
 }
 
-typedef uint8_t foo;
+/// @typedef CacheStatus_t
+/// @brief a uint8 renamed to be more clear to its usage
+typedef uint8_t CacheStatus_t;
+
+/// @enum CacheStatus
+/// @brief An enum declaring various cache states that a frame can be in
 enum CacheStatus
 {
     NOTCACHED = (1<<0), // 00000001
@@ -42,27 +56,40 @@ enum CacheStatus
 };
 
 
+/// @class CacheSystem
+/// @brief This class implements a cache system, saving frames as they are simulated, loading frames, writing/reading cache to/from disk
 class CacheSystem
 {
 public:
+    /// @brief constructor
     CacheSystem(const int _numFrames = 250);
+
+    /// @brief destructor
     ~CacheSystem();
 
+    /// @brief Method to cache a frame of the solver to memory
     void Cache(const int _frame, std::shared_ptr<FluidSystem> _fluidSystem);
 
+    /// @brief Method to load a cached frame from memory to the solver
     void Load(const int _frame, std::shared_ptr<FluidSystem> _fluidSystem);
 
 
-
+    /// @brief Method to write cache from memory to disk
     void CacheOutToDisk(std::string _fileName, QProgressBar *_progress);
+
+    /// @brief Method to load cache form disk to memory
     void LoadCacheFromDisk(std::vector<std::string> _fileNames, QProgressBar *_progress);
 
+    /// @brief Method to check if a frame has been cached
     bool IsFrameCached(const int _frame);
 
+    /// @brief Method to clear cache for a frame
     void ClearCache(const int frame = -1);
 
+    /// @brief Method to set the frame range to cache
     void SetFrameRange(int start, int end);
 
+    /// @brief Method to get the frame range
     int GetCachedRange();
 
 
@@ -106,7 +133,7 @@ private:
 
 
     std::vector<json> m_cachedFrames;
-    std::vector<foo> m_isFrameCached;
+    std::vector<CacheStatus_t> m_isFrameCached;
     std::vector<std::thread> m_threads;
     std::string m_cacheDir;
     std::string m_cacheFileName;
@@ -114,6 +141,6 @@ private:
 
 };
 
-
+//--------------------------------------------------------------------------------------------------------------
 
 #endif // CACHESYSTEM_H

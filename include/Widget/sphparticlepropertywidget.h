@@ -8,13 +8,12 @@
 #include "SPH/sphparticlepropeprty.h"
 
 
-//-----------------------------------------------------------------------------------------------------------
-
+//--------------------------------------------------------------------------------------------------------------
 /// @author Idris Miles
-/// @version 0.1.0
-/// @date 20/04/2017
+/// @version 1.0
+/// @date 01/06/2017
+//--------------------------------------------------------------------------------------------------------------
 
-//-----------------------------------------------------------------------------------------------------------
 
 
 namespace Ui {
@@ -35,7 +34,7 @@ public:
     /// @brief destructor
     virtual ~SphParticlePropertyWidget();
 
-    /// @brief
+    /// @brief Method to add widgets to the layout dynamically
     void AddWidgetToGridLayout(QWidget *w, int col = 0, int rowSpan = 1, int colSpan = 1);
 
     /// @brief Setter for the m_property attribute

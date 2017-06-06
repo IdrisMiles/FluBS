@@ -296,12 +296,6 @@ float *Rigid::GetVolumePtr()
 
 //------------------------------------------------------------------------
 
-void Rigid::ReleaseVolumePtr()
-{
-
-}
-
-//------------------------------------------------------------------------
 
 RigidProperty *Rigid::GetProperty()
 {
@@ -355,74 +349,3 @@ std::string Rigid::GetFileName()
     return m_fileName;
 }
 
-//--------------------------------------------------------------------------------------------------------------------
-
-void Rigid::GetPositions(std::vector<glm::vec3> &_pos)
-{
-    if(!m_init || this->m_property == nullptr)
-    {
-        return;
-    }
-
-    _pos.resize(this->m_property->numParticles);
-    checkCudaErrors(cudaMemcpy(&_pos[0], GetPositionPtr(), this->m_property->numParticles * sizeof(float3), cudaMemcpyDeviceToHost));
-    ReleasePositionPtr();
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void Rigid::GetVelocities(std::vector<glm::vec3> &_vel)
-{
-    if(!m_init || this->m_property == nullptr)
-    {
-        return;
-    }
-    _vel.resize(this->m_property->numParticles);
-    checkCudaErrors(cudaMemcpy(&_vel[0], GetVelocityPtr(), this->m_property->numParticles * sizeof(float3), cudaMemcpyDeviceToHost));
-    ReleaseVelocityPtr();
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void Rigid::GetParticleIds(std::vector<int> &_ids)
-{
-    if(!m_init || this->m_property == nullptr)
-    {
-        return;
-    }
-    _ids.resize(this->m_property->numParticles);
-    checkCudaErrors(cudaMemcpy(&_ids[0], GetParticleIdPtr(), this->m_property->numParticles * sizeof(unsigned int), cudaMemcpyDeviceToHost));
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void Rigid::SetPositions(const std::vector<glm::vec3> &_pos)
-{
-    assert(_pos.size() == m_property->numParticles);
-
-    cudaMemcpy(GetPositionPtr(), &_pos[0], m_property->numParticles * sizeof(float3), cudaMemcpyHostToDevice);
-    ReleasePositionPtr();
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void Rigid::SetVelocities(const std::vector<glm::vec3> &_vel)
-{
-    assert(_vel.size() == m_property->numParticles);
-
-    cudaMemcpy(GetVelocityPtr(), &_vel[0], m_property->numParticles * sizeof(float3), cudaMemcpyHostToDevice);
-    ReleaseVelocityPtr();
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-void Rigid::SetParticleIds(const std::vector<int> &_ids)
-{
-    assert(_ids.size() == m_property->numParticles);
-    checkCudaErrors(cudaMemcpy(GetParticleIdPtr(), &_ids[0], m_property->numParticles * sizeof(unsigned int), cudaMemcpyHostToDevice));
-}
-
-//--------------------------------------------------------------------------------------------------------------------

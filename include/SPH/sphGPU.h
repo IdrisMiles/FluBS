@@ -1,9 +1,21 @@
 #ifndef SPHGPU_H
 #define SPHGPU_H
 
+//--------------------------------------------------------------------------------------------------------------
+
 #include <cuda_runtime.h>
 #include "SPH/gpudata.h"
 
+
+//--------------------------------------------------------------------------------------------------------------
+/// @author Idris Miles
+/// @version 1.0
+/// @date 01/06/2017
+//--------------------------------------------------------------------------------------------------------------
+
+
+/// @namespace sphGPU
+/// @brief This name space provies a library of functions that link the C++ interface to the relevant CUDA kernels
 namespace sphGPU
 {
 
@@ -150,36 +162,8 @@ namespace sphGPU
     //--------------------------------------------------------------------------------------------------------------------
     void ComputeBioluminescence(AlgaeGpuData particleData, const uint gridRes, const float deltaTime);
 
-
-    //--------------------------------------------------------------------------------------------------------------------
-    namespace pci
-    {
-//        void PredictIntegrate(const uint maxCellOcc,
-//                              const uint gridRes,
-//                              float3 *force,
-//                              float3 *particles,
-//                              float3 *velocities,
-//                              const float _dt,
-//                              const uint numPoints);
-
-//        void PredictDensity(const uint maxCellOcc,
-//                   const uint gridRes,);
-
-        void predictDensityVariation(const uint maxCellOcc,
-                                     const uint gridRes);
-
-        void ComputeMaxDensityVariation(const uint maxCellOcc,
-                                        const uint gridRes,
-                                        float &_maxDenVar);
-
-        void UpdatePressure(const uint maxCellOcc,
-                            const uint gridRes);
-
-        void ComputePressureForce(const uint maxCellOcc,
-                                  const uint gridRes);
-
-
-    }
 }
+
+//--------------------------------------------------------------------------------------------------------------
 
 #endif // SPHGPU_H

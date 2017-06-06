@@ -3,10 +3,20 @@
 
 #include "SPH/sphparticlepropeprty.h"
 
+
+//--------------------------------------------------------------------------------------------------------------
+/// @author Idris Miles
+/// @version 1.0
+/// @date 01/06/2017
+//--------------------------------------------------------------------------------------------------------------
+
+/// @class FluidProperty
+/// @brief This class holds the properties of the Fluid sph particle
 class FluidProperty : public SphParticleProperty
 {
 
 public:
+    /// @brief constructor
     FluidProperty(float _surfaceTension = 0.0728f,
                   float _surfaceThreshold = 1.0f,
                   float _gasStiffness = 50.0f,
@@ -27,6 +37,7 @@ public:
         particleMass = restDensity * (dia * dia * dia);
     }
 
+    /// @brief destructor
     ~FluidProperty(){}
 
 
@@ -39,7 +50,10 @@ public:
 
 };
 
+//--------------------------------------------------------------------------------------------------------------
+
 void to_json(json& j, const FluidProperty& p);
 void from_json(const json& j, FluidProperty& p);
 
+//--------------------------------------------------------------------------------------------------------------
 #endif // FLUIDPROPERTY_H

@@ -1,6 +1,8 @@
 #ifndef SOLVERPROPERTYWIDGET_H
 #define SOLVERPROPERTYWIDGET_H
 
+//--------------------------------------------------------------------------------------------------------------
+
 #include <QWidget>
 #include <QLabel>
 #include <QDoubleSpinBox>
@@ -12,17 +14,28 @@
 #include "FluidSystem/fluidsystem.h"
 #include "FluidSystem/fluidsolverproperty.h"
 
+//--------------------------------------------------------------------------------------------------------------
+/// @author Idris Miles
+/// @version 1.0
+/// @date 01/06/2017
+//--------------------------------------------------------------------------------------------------------------
+
 
 namespace Ui {
 class SolverPropertyWidget;
 }
 
+/// @class SolverProperyWidget
+/// @brief Inherits from QWidget. Widget for manipulating FluidSolverProperty class.
 class SolverPropertyWidget : public QWidget
 {
     Q_OBJECT
 
 public:
+    /// @brief comnstructor
     explicit SolverPropertyWidget(QWidget *parent = 0, FluidSolverProperty _property = FluidSolverProperty());
+
+    /// @brief destructor
     virtual ~SolverPropertyWidget();
 
 
@@ -49,5 +62,7 @@ private:
 
 
 };
+
+//--------------------------------------------------------------------------------------------------------------
 
 #endif // SOLVERPROPERTYWIDGET_H
